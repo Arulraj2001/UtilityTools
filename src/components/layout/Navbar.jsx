@@ -99,15 +99,15 @@ export default function Navbar({ onSearchOpen }) {
             </div>
 
             {/* Right Side Buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               {/* Search */}
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onSearchOpen}
-                className="rounded-xl"
+                className="rounded-xl h-11 w-11 flex items-center justify-center"
               >
-                <Search className="w-4 h-4" />
+                <Search className="w-5 h-5" />
               </Button>
 
               {/* Theme Toggle */}
@@ -115,12 +115,12 @@ export default function Navbar({ onSearchOpen }) {
                 variant="ghost"
                 size="icon"
                 onClick={toggle}
-                className="rounded-xl"
+                className="rounded-xl h-11 w-11 flex items-center justify-center"
               >
                 {isDark ? (
-                  <Sun className="w-4 h-4" />
+                  <Sun className="w-5 h-5" />
                 ) : (
-                  <Moon className="w-4 h-4" />
+                  <Moon className="w-5 h-5" />
                 )}
               </Button>
 
@@ -128,7 +128,7 @@ export default function Navbar({ onSearchOpen }) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden rounded-xl"
+                className="md:hidden rounded-xl h-11 w-11 flex items-center justify-center"
                 onClick={() => setMobileOpen(!mobileOpen)}
               >
                 {mobileOpen ? (
