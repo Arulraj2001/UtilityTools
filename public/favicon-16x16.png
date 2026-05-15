@@ -1,0 +1,3 @@
+PLACEHOLDER: generate a 16x16 PNG from public/favicon.svg
+Use ImageMagick: convert public/favicon.svg -resize 16x16 public/favicon-16x16.png
+Replace this file with the generated PNG.

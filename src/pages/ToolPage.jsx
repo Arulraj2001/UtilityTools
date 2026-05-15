@@ -34,9 +34,14 @@ export default function ToolPage() {
   const [bookmarks, setBookmarks] = useLocalStorage('bookmarked_tools', [])
   const [recentTools, setRecentTools] = useLocalStorage('recent_tools', [])
 
-  const { data: tools = [], isLoading } = useQuery({
+  const { data: tools = [], isLoading, isFetching } = useQuery({
     queryKey: ['tools-published'],
     queryFn: () => getTools({ published: true, orderBy: 'sort_order', ascending: true, limit: 200 }),
+    // keep previous data to avoid clearing UI during background refetches
+    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    cacheTime: 10 * 60 * 1000,
   })
 
   const { data: categories = [] } = useQuery({
@@ -56,16 +61,23 @@ export default function ToolPage() {
   const isPDFTool = tool ? PDF_TOOLS.includes(tool.slug) : false
   const isGovTool = tool ? GOV_TOOLS.includes(tool.slug) : false
 
+  // Only reset inputs when the route `slug` actually changes to a new tool.
+  const prevSlugRef = useRef(slug)
   useEffect(() => {
-    const fields = tool?.input_fields || []
+    if (!tool) return
+    if (prevSlugRef.current === slug) return
+    prevSlugRef.current = slug
+
+    const fields = tool.input_fields || []
     const defaults = {}
     fields.forEach(f => {
       defaults[f.name] = f.default_value !== undefined ? f.default_value : ''
     })
+    // only reset when navigating to a new tool
+    skipAutoCalcRef.current = true
     setInputs(defaults)
     setResult(null)
-    skipAutoCalcRef.current = true
-  }, [tool?.slug])
+  }, [slug, tool])
 
   useEffect(() => {
     if (!tool) return
@@ -140,7 +152,8 @@ export default function ToolPage() {
     navigator.clipboard.writeText(window.location.href).then(() => toast.success('Link copied!'))
   }
 
-  if (isLoading) return <ToolPageSkeleton />
+  // Only show the full page skeleton when there is no cached tools data.
+  if (isLoading && (!tools || tools.length === 0)) return <ToolPageSkeleton />
   if (!tool && !isLoading) return (
     <div className="max-w-4xl mx-auto px-4 py-20 text-center">
       <p className="text-2xl font-bold mb-2">Tool not found</p>

@@ -1,0 +1,3 @@
+PLACEHOLDER: generate an .ico file containing 16x16 and 32x32 icons.
+Use ImageMagick: convert public/favicon-16x16.png public/favicon-32x32.png public/favicon.ico
+Replace this file with the generated favicon.ico.

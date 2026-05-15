@@ -1,0 +1,3 @@
+PLACEHOLDER: generate apple-touch-icon (180x180) from public/favicon.svg
+Use ImageMagick: convert public/favicon.svg -resize 180x180 public/apple-touch-icon.png
+Replace this file with the generated PNG.
