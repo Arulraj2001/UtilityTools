@@ -1,0 +1,134 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Menu, X, Moon, Sun, LayoutGrid, Wrench, BookOpen, LayoutDashboard } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useDarkMode } from '@/lib/useDarkMode';
+
+export default function Navbar({ onSearchOpen }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { isDark, toggle } = useDarkMode();
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => setMobileOpen(false), [location]);
+
+  const navLinks = [
+    { to: '/tools', label: 'Tools', icon: Wrench },
+    { to: '/categories', label: 'Categories', icon: LayoutGrid },
+    { to: '/blog', label: 'Blog', icon: BookOpen },
+  ];
+
+  return (
+    <>
+      <motion.nav
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          scrolled
+            ? 'glass shadow-lg py-2'
+            : 'bg-transparent py-4'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg group-hover:shadow-primary/30 transition-shadow">
+                <Wrench className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-bold text-xl tracking-tight">
+                <span className="gradient-text">Tool</span>
+                <span className="text-foreground">Hub</span>
+              </span>
+            </Link>
+
+            <div className="hidden md:flex items-center gap-1">
+              {navLinks.map(link => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    location.pathname.startsWith(link.to)
+                      ? 'text-primary bg-primary/10'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onSearchOpen}
+                className="rounded-xl"
+              >
+                <Search className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggle}
+                className="rounded-xl"
+              >
+                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </Button>
+              <Link to="/admin" className="hidden md:block">
+                <Button variant="ghost" size="icon" className="rounded-xl">
+                  <LayoutDashboard className="w-4 h-4" />
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden rounded-xl"
+                onClick={() => setMobileOpen(!mobileOpen)}
+              >
+                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </motion.nav>
+
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed inset-0 z-40 pt-20 bg-background/95 backdrop-blur-xl md:hidden"
+          >
+            <div className="flex flex-col p-6 gap-2">
+              {navLinks.map(link => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium hover:bg-muted transition-colors"
+                >
+                  <link.icon className="w-5 h-5 text-primary" />
+                  {link.label}
+                </Link>
+              ))}
+              <Link
+                to="/admin"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium hover:bg-muted transition-colors"
+              >
+                <LayoutDashboard className="w-5 h-5 text-primary" />
+                Dashboard
+              </Link>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
