@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Twitter, Github, Mail, ArrowRight } from 'lucide-react';
+import { Zap, Linkedin, Github, Mail, ArrowRight } from 'lucide-react';
 
 const TOOL_LINKS = [
 { to: '/tool/emi-calculator', label: 'EMI Calculator' },
@@ -32,8 +32,7 @@ export default function Footer() {
             </p>
             <div className="flex gap-2">
               {[
-              { Icon: Twitter, href: '#', label: 'Twitter' },
-              { Icon: Github, href: '#', label: 'GitHub' },
+              { Icon: Linkedin, href: 'https://www.linkedin.com/in/arulraj1506/', label: 'LinkedIn' },
               { Icon: Mail, href: '/contact', label: 'Email' }].
               map(({ Icon: SocialIcon, href, label }) =>
               <a

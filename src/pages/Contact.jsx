@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Mail, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import emailjs from '@emailjs/browser';
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
@@ -14,10 +15,32 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSending(true);
-    // Simulate sending
-    await new Promise(r => setTimeout(r, 1000));
-    toast.success('Message sent! We\'ll get back to you soon.');
-    setForm({ name: '', email: '', message: '' });
+
+    try {
+      await emailjs.send(
+        'service_8arl3p4',
+        'template_a0pchb8',
+        {
+          from_name: form.name,
+          from_email: form.email,
+          message: form.message,
+        },
+        'n3eKQHIGU5NT-VBAm'
+      );
+
+      toast.success('Message sent! We\'ll get back to you soon.');
+
+      setForm({
+        name: '',
+        email: '',
+        message: '',
+      });
+
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to send message');
+    }
+
     setSending(false);
   };
 
@@ -35,16 +58,39 @@ export default function Contact() {
         <form onSubmit={handleSubmit} className="p-6 rounded-2xl bg-card border border-border/50 space-y-4">
           <div className="space-y-2">
             <Label>Name</Label>
-            <Input value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Your name" required className="rounded-xl" />
+            <Input
+              value={form.name}
+              onChange={e => setForm({ ...form, name: e.target.value })}
+              placeholder="Your name"
+              required
+              className="rounded-xl"
+            />
           </div>
+
           <div className="space-y-2">
             <Label>Email</Label>
-            <Input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="your@email.com" required className="rounded-xl" />
+            <Input
+              type="email"
+              value={form.email}
+              onChange={e => setForm({ ...form, email: e.target.value })}
+              placeholder=".....@gmail.com"
+              required
+              className="rounded-xl"
+            />
           </div>
+
           <div className="space-y-2">
             <Label>Message</Label>
-            <Textarea value={form.message} onChange={e => setForm({...form, message: e.target.value})} placeholder="Your message..." required rows={5} className="rounded-xl" />
+            <Textarea
+              value={form.message}
+              onChange={e => setForm({ ...form, message: e.target.value })}
+              placeholder="Your message..."
+              required
+              rows={5}
+              className="rounded-xl"
+            />
           </div>
+
           <Button type="submit" disabled={sending} className="w-full rounded-xl">
             <Send className="w-4 h-4 mr-2" />
             {sending ? 'Sending...' : 'Send Message'}
