@@ -77,14 +77,31 @@ export const AuthProvider = ({ children }) => {
   }
 
   const logout = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-    setIsAuthenticated(false)
+    setIsLoadingAuth(true)
     setAuthError(null)
+
+    try {
+      const { error } = await supabase.auth.signOut({ shouldClearSession: true })
+      if (error) {
+        throw error
+      }
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      setUser(null)
+      setIsAuthenticated(false)
+      setIsLoadingAuth(false)
+      setAuthChecked(true)
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login'
+      }
+    }
   }
 
   const navigateToLogin = () => {
-    window.location.href = '/login'
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login'
+    }
   }
 
   return (

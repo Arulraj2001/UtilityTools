@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '@/lib/AuthContext';
 import { 
   LayoutDashboard, Wrench, BookOpen, FolderOpen,
   Settings, LinkIcon, Megaphone, Download,
-  ChevronLeft, ChevronRight, Menu
+  ChevronLeft, ChevronRight, Menu, LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -23,6 +24,7 @@ export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const { logout } = useAuth();
 
   const isActive = (item) => {
     if (item.exact) return location.pathname === item.to;
@@ -78,11 +80,20 @@ export default function AdminLayout() {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-border">
+        <div className="p-3 border-t border-border space-y-2">
           <Link to="/" className={`flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors ${collapsed ? 'justify-center' : ''}`}>
             <ChevronLeft className="w-4 h-4" />
             {!collapsed && 'Back to site'}
           </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={logout}
+            className={`w-full justify-start gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${collapsed ? 'justify-center' : ''}`}
+          >
+            <LogOut className="w-4 h-4" />
+            {!collapsed && 'Logout'}
+          </Button>
         </div>
       </aside>
 
