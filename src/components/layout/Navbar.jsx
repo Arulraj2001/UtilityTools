@@ -36,7 +36,7 @@ export default function Navbar({ onSearchOpen }) {
 
   useEffect(() => {
     setMobileOpen(false);
-  }, [location]);
+  }, [location.pathname]);
 
   const navLinks = [
     {
@@ -64,7 +64,7 @@ export default function Navbar({ onSearchOpen }) {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? 'glass shadow-lg py-2'
-            : 'bg-transparent py-4'
+            : 'bg-background/80 backdrop-blur-md py-4'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -98,9 +98,9 @@ export default function Navbar({ onSearchOpen }) {
               ))}
             </div>
 
-            {/* Right Actions */}
+            {/* Right Side Buttons */}
             <div className="flex items-center gap-2">
-              {/* Search Button */}
+              {/* Search */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -110,7 +110,7 @@ export default function Navbar({ onSearchOpen }) {
                 <Search className="w-4 h-4" />
               </Button>
 
-              {/* Dark Mode Toggle */}
+              {/* Theme Toggle */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -124,7 +124,7 @@ export default function Navbar({ onSearchOpen }) {
                 )}
               </Button>
 
-              {/* Mobile Menu Toggle */}
+              {/* Mobile Menu Button */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -146,19 +146,25 @@ export default function Navbar({ onSearchOpen }) {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 pt-20 bg-background/95 backdrop-blur-xl md:hidden"
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-20 left-0 right-0 z-40 px-4 md:hidden"
           >
-            <div className="flex flex-col p-6 gap-2">
+            <div className="bg-background/95 backdrop-blur-xl border rounded-2xl shadow-2xl p-4 flex flex-col gap-2">
               {navLinks.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium hover:bg-muted transition-colors"
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${
+                    location.pathname.startsWith(link.to)
+                      ? 'bg-primary/10 text-primary'
+                      : 'hover:bg-muted text-foreground'
+                  }`}
                 >
-                  <link.icon className="w-5 h-5 text-primary" />
+                  <link.icon className="w-5 h-5" />
                   {link.label}
                 </Link>
               ))}
