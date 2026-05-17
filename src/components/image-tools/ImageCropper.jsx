@@ -1,23 +1,41 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import Cropper from 'react-easy-crop';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import React, {
+  useState,
+  useRef,
+  useMemo,
+} from 'react';
+
+import ReactCrop, {
+  centerCrop,
+  makeAspectCrop,
+} from 'react-image-crop';
+
+import 'react-image-crop/dist/ReactCrop.css';
+
+import { motion } from 'framer-motion';
+
 import {
   Download,
   RefreshCw,
   RotateCw,
   FlipHorizontal,
-  ZoomIn,
   Crop,
   Image as ImageIcon,
+  Move,
 } from 'lucide-react';
 
-import ImageDropZone from './ImageDropZone';
-import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+
 import { saveAs } from 'file-saver';
 
+import ImageDropZone from './ImageDropZone';
+
+// ========================================
+// Aspect Presets
+// ========================================
+
 const ASPECT_PRESETS = [
-  { label: 'Free', value: null },
+  { label: 'Free', value: undefined },
   { label: '1:1', value: 1 },
   { label: '16:9', value: 16 / 9 },
   { label: '9:16', value: 9 / 16 },
@@ -26,180 +44,208 @@ const ASPECT_PRESETS = [
   { label: 'Circle', value: 1, circle: true },
 ];
 
-// Enhanced HD crop processor with REAL circle export
-async function getCroppedImg(
-  imageSrc,
-  pixelCrop,
-  rotation = 0,
-  flipH = false,
-  outputFormat = 'image/png',
-  quality = 1,
-  isCircle = false
+// ========================================
+// Center Aspect Crop
+// ========================================
+
+function centerAspectCrop(
+  mediaWidth,
+  mediaHeight,
+  aspect
 ) {
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.src = imageSrc;
-
-  await new Promise((resolve, reject) => {
-    img.onload = resolve;
-    img.onerror = reject;
-  });
-
-  const pixelRatio = window.devicePixelRatio || 1;
-  const radians = (rotation * Math.PI) / 180;
-
-  const sin = Math.abs(Math.sin(radians));
-  const cos = Math.abs(Math.cos(radians));
-
-  const boundW = Math.ceil(img.width * cos + img.height * sin);
-  const boundH = Math.ceil(img.width * sin + img.height * cos);
-
-  // Temp rotation canvas
-  const tempCanvas = document.createElement('canvas');
-  const tempCtx = tempCanvas.getContext('2d');
-
-  tempCanvas.width = boundW * pixelRatio;
-  tempCanvas.height = boundH * pixelRatio;
-
-  tempCtx.scale(pixelRatio, pixelRatio);
-
-  tempCtx.imageSmoothingEnabled = true;
-  tempCtx.imageSmoothingQuality = 'high';
-
-  tempCtx.translate(boundW / 2, boundH / 2);
-  tempCtx.rotate(radians);
-
-  if (flipH) {
-    tempCtx.scale(-1, 1);
-  }
-
-  tempCtx.drawImage(
-    img,
-    -img.width / 2,
-    -img.height / 2
+  return centerCrop(
+    makeAspectCrop(
+      {
+        unit: '%',
+        width: 80,
+      },
+      aspect,
+      mediaWidth,
+      mediaHeight
+    ),
+    mediaWidth,
+    mediaHeight
   );
-
-  // Final output canvas
-  const outCanvas = document.createElement('canvas');
-  const outCtx = outCanvas.getContext('2d');
-
-  outCanvas.width = pixelCrop.width * pixelRatio;
-  outCanvas.height = pixelCrop.height * pixelRatio;
-
-  outCtx.scale(pixelRatio, pixelRatio);
-
-  outCtx.imageSmoothingEnabled = true;
-  outCtx.imageSmoothingQuality = 'high';
-
-  // REAL circle export
-  if (isCircle) {
-    outCtx.beginPath();
-
-    outCtx.arc(
-      pixelCrop.width / 2,
-      pixelCrop.height / 2,
-      Math.min(pixelCrop.width, pixelCrop.height) / 2,
-      0,
-      Math.PI * 2
-    );
-
-    outCtx.closePath();
-    outCtx.clip();
-  }
-
-  outCtx.drawImage(
-    tempCanvas,
-    pixelCrop.x * pixelRatio,
-    pixelCrop.y * pixelRatio,
-    pixelCrop.width * pixelRatio,
-    pixelCrop.height * pixelRatio,
-    0,
-    0,
-    pixelCrop.width,
-    pixelCrop.height
-  );
-
-  return new Promise((resolve) => {
-    outCanvas.toBlob(
-      (blob) => resolve(blob),
-      outputFormat,
-      quality
-    );
-  });
 }
+
+// ========================================
+// Component
+// ========================================
 
 export default function ImageCropper() {
   const [imageSrc, setImageSrc] = useState(null);
+
   const [file, setFile] = useState(null);
 
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
+  const imageRef = useRef(null);
+
+  const [crop, setCrop] = useState();
+
+  const [completedCrop, setCompletedCrop] =
+    useState(null);
+
+  const [aspect, setAspect] = useState(
+    ASPECT_PRESETS[0]
+  );
+
   const [rotation, setRotation] = useState(0);
+
   const [flipH, setFlipH] = useState(false);
-
-  const [aspect, setAspect] = useState({
-    label: 'Free',
-    value: null,
-  });
-
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
 
   const [result, setResult] = useState(null);
 
-  // LIVE preview info
-  const liveInfo = useMemo(() => {
-    if (!croppedAreaPixels) return null;
-
-    return {
-      width: Math.round(croppedAreaPixels.width),
-      height: Math.round(croppedAreaPixels.height),
-    };
-  }, [croppedAreaPixels]);
+  // ========================================
+  // Upload
+  // ========================================
 
   const onFiles = ([f]) => {
     setFile(f);
+
     setResult(null);
+
+    setCrop(undefined);
+
+    setCompletedCrop(null);
+
+    setRotation(0);
+
+    setFlipH(false);
+
     setImageSrc(URL.createObjectURL(f));
   };
 
-  const onCropComplete = useCallback((_, pix) => {
-    setCroppedAreaPixels(pix);
-  }, []);
+  // ========================================
+  // Crop Action
+  // ========================================
 
   const doCrop = async () => {
-    const blob = await getCroppedImg(
-      imageSrc,
-      croppedAreaPixels,
-      rotation,
-      flipH,
-      'image/png',
-      1,
-      aspect.circle
+    if (!completedCrop || !imageRef.current)
+      return;
+
+    const image = imageRef.current;
+
+    const canvas =
+      document.createElement('canvas');
+
+    const ctx = canvas.getContext('2d');
+
+    const scaleX =
+      image.naturalWidth / image.width;
+
+    const scaleY =
+      image.naturalHeight / image.height;
+
+    canvas.width =
+      completedCrop.width * scaleX;
+
+    canvas.height =
+      completedCrop.height * scaleY;
+
+    ctx.imageSmoothingEnabled = true;
+
+    ctx.imageSmoothingQuality = 'high';
+
+    // Rotation + Flip
+    ctx.save();
+
+    ctx.translate(
+      canvas.width / 2,
+      canvas.height / 2
     );
 
-    setResult({
-      url: URL.createObjectURL(blob),
-      blob,
-      w: croppedAreaPixels.width,
-      h: croppedAreaPixels.height,
-    });
+    if (flipH) {
+      ctx.scale(-1, 1);
+    }
+
+    ctx.rotate((rotation * Math.PI) / 180);
+
+    // Circle crop
+    if (aspect.circle) {
+      ctx.beginPath();
+
+      ctx.arc(
+        0,
+        0,
+        Math.min(canvas.width, canvas.height) /
+          2,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.closePath();
+
+      ctx.clip();
+    }
+
+    ctx.drawImage(
+      image,
+      completedCrop.x * scaleX,
+      completedCrop.y * scaleY,
+      completedCrop.width * scaleX,
+      completedCrop.height * scaleY,
+      -canvas.width / 2,
+      -canvas.height / 2,
+      canvas.width,
+      canvas.height
+    );
+
+    ctx.restore();
+
+    canvas.toBlob(
+      (blob) => {
+        setResult({
+          url: URL.createObjectURL(blob),
+          blob,
+          w: canvas.width,
+          h: canvas.height,
+        });
+      },
+      'image/png',
+      1
+    );
   };
+
+  // ========================================
+  // Reset
+  // ========================================
 
   const reset = () => {
     setImageSrc(null);
+
     setFile(null);
-    setResult(null);
+
+    setCrop(undefined);
+
+    setCompletedCrop(null);
+
     setRotation(0);
+
     setFlipH(false);
-    setZoom(1);
+
+    setResult(null);
   };
+
+  // ========================================
+  // Live Crop Size
+  // ========================================
+
+  const liveInfo = useMemo(() => {
+    if (!completedCrop) return null;
+
+    return {
+      width: Math.round(completedCrop.width),
+      height: Math.round(
+        completedCrop.height
+      ),
+    };
+  }, [completedCrop]);
 
   return (
     <div className="space-y-6">
       {!imageSrc ? (
         <ImageDropZone
           onFiles={onFiles}
-          hint="Upload image for HD smart crop"
+          hint="Upload image for professional HD crop"
         />
       ) : (
         <motion.div
@@ -207,10 +253,16 @@ export default function ImageCropper() {
           animate={{ opacity: 1 }}
           className="space-y-5"
         >
-          {/* Top Info Cards */}
+          {/* ======================================== */}
+          {/* INFO CARDS */}
+          {/* ======================================== */}
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="rounded-2xl border border-border/50 bg-card p-3">
-              <p className="text-xs text-muted-foreground mb-1">Format</p>
+              <p className="text-xs text-muted-foreground mb-1">
+                Export
+              </p>
+
               <div className="flex items-center gap-2 font-semibold">
                 <ImageIcon className="w-4 h-4 text-primary" />
                 PNG HD
@@ -218,15 +270,10 @@ export default function ImageCropper() {
             </div>
 
             <div className="rounded-2xl border border-border/50 bg-card p-3">
-              <p className="text-xs text-muted-foreground mb-1">Zoom</p>
-              <div className="flex items-center gap-2 font-semibold">
-                <ZoomIn className="w-4 h-4 text-primary" />
-                {zoom.toFixed(1)}×
-              </div>
-            </div>
+              <p className="text-xs text-muted-foreground mb-1">
+                Rotation
+              </p>
 
-            <div className="rounded-2xl border border-border/50 bg-card p-3">
-              <p className="text-xs text-muted-foreground mb-1">Rotation</p>
               <div className="flex items-center gap-2 font-semibold">
                 <RotateCw className="w-4 h-4 text-primary" />
                 {rotation}°
@@ -234,17 +281,35 @@ export default function ImageCropper() {
             </div>
 
             <div className="rounded-2xl border border-border/50 bg-card p-3">
-              <p className="text-xs text-muted-foreground mb-1">Crop Size</p>
+              <p className="text-xs text-muted-foreground mb-1">
+                Crop Size
+              </p>
+
               <div className="flex items-center gap-2 font-semibold">
                 <Crop className="w-4 h-4 text-primary" />
+
                 {liveInfo
                   ? `${liveInfo.width}×${liveInfo.height}`
                   : '--'}
               </div>
             </div>
+
+            <div className="rounded-2xl border border-border/50 bg-card p-3">
+              <p className="text-xs text-muted-foreground mb-1">
+                Mode
+              </p>
+
+              <div className="flex items-center gap-2 font-semibold">
+                <Move className="w-4 h-4 text-primary" />
+                Free Resize
+              </div>
+            </div>
           </div>
 
-          {/* Aspect Ratio */}
+          {/* ======================================== */}
+          {/* ASPECT RATIO */}
+          {/* ======================================== */}
+
           <div>
             <Label className="text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-2 block">
               Aspect Ratio
@@ -254,7 +319,36 @@ export default function ImageCropper() {
               {ASPECT_PRESETS.map((p) => (
                 <button
                   key={p.label}
-                  onClick={() => setAspect(p)}
+                  onClick={() => {
+                    setAspect(p);
+
+                    if (
+                      imageRef.current &&
+                      p.value
+                    ) {
+                      const {
+                        width,
+                        height,
+                      } =
+                        imageRef.current;
+
+                      setCrop(
+                        centerAspectCrop(
+                          width,
+                          height,
+                          p.value
+                        )
+                      );
+                    } else {
+                      setCrop({
+                        unit: '%',
+                        x: 10,
+                        y: 10,
+                        width: 80,
+                        height: 80,
+                      });
+                    }
+                  }}
                   className={`text-xs px-3 py-1.5 rounded-xl border transition-all ${
                     aspect.label === p.label
                       ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20'
@@ -267,7 +361,10 @@ export default function ImageCropper() {
             </div>
           </div>
 
-          {/* Result */}
+          {/* ======================================== */}
+          {/* RESULT */}
+          {/* ======================================== */}
+
           {result ? (
             <div className="space-y-4">
               <div className="rounded-2xl border border-border/50 overflow-hidden bg-muted/20 p-4 flex items-center justify-center">
@@ -275,7 +372,9 @@ export default function ImageCropper() {
                   src={result.url}
                   alt="cropped"
                   className={`max-h-96 object-contain ${
-                    aspect.circle ? 'rounded-full' : 'rounded-xl'
+                    aspect.circle
+                      ? 'rounded-full'
+                      : 'rounded-xl'
                   }`}
                 />
               </div>
@@ -285,6 +384,7 @@ export default function ImageCropper() {
                   <p className="text-xs text-muted-foreground mb-1">
                     Resolution
                   </p>
+
                   <p className="font-semibold">
                     {result.w} × {result.h}
                   </p>
@@ -294,8 +394,11 @@ export default function ImageCropper() {
                   <p className="text-xs text-muted-foreground mb-1">
                     Export Type
                   </p>
+
                   <p className="font-semibold">
-                    {aspect.circle ? 'Circle PNG' : 'PNG HD'}
+                    {aspect.circle
+                      ? 'Circle PNG'
+                      : 'PNG HD'}
                   </p>
                 </div>
               </div>
@@ -305,7 +408,10 @@ export default function ImageCropper() {
                   onClick={() =>
                     saveAs(
                       result.url,
-                      `cropped_${file.name.replace(/\.[^.]+$/, '')}.png`
+                      `cropped_${file.name.replace(
+                        /\.[^.]+$/,
+                        ''
+                      )}.png`
                     )
                   }
                   className="flex-1 rounded-xl gap-2 bg-green-600 hover:bg-green-700"
@@ -325,66 +431,99 @@ export default function ImageCropper() {
             </div>
           ) : (
             <>
-              {/* Cropper */}
-              <div
-                className="relative rounded-2xl overflow-hidden bg-muted/30 border border-border/50"
-                style={{ height: 420 }}
-              >
-                <Cropper
-                  image={imageSrc}
+              {/* ======================================== */}
+              {/* CROPPER */}
+              {/* ======================================== */}
+
+              <div className="rounded-2xl overflow-hidden border border-border/50 bg-muted/20 p-4">
+                <ReactCrop
                   crop={crop}
-                  zoom={zoom}
-                  rotation={rotation}
-                  aspect={aspect.value || undefined}
-                  onCropChange={setCrop}
-                  onZoomChange={setZoom}
-                  onCropComplete={onCropComplete}
-                  cropShape={aspect.circle ? 'round' : 'rect'}
-                  showGrid
+                  onChange={(c) =>
+                    setCrop(c)
+                  }
+                  onComplete={(c) =>
+                    setCompletedCrop(c)
+                  }
+                  aspect={aspect.value}
+                  circularCrop={aspect.circle}
+                  keepSelection
+                  minWidth={50}
+                  minHeight={50}
+                >
+                  <img
+                    ref={imageRef}
+                    src={imageSrc}
+                    alt="crop"
+                    className={`max-h-[75vh] w-full object-contain rounded-xl transition-all ${
+                      flipH
+                        ? '-scale-x-100'
+                        : ''
+                    }`}
+                    style={{
+                      transform: `rotate(${rotation}deg) scaleX(${
+                        flipH ? -1 : 1
+                      })`,
+                    }}
+                    onLoad={(e) => {
+                      if (aspect.value) {
+                        const {
+                          width,
+                          height,
+                        } =
+                          e.currentTarget;
+
+                        setCrop(
+                          centerAspectCrop(
+                            width,
+                            height,
+                            aspect.value
+                          )
+                        );
+                      } else {
+                        setCrop({
+                          unit: '%',
+                          x: 10,
+                          y: 10,
+                          width: 80,
+                          height: 80,
+                        });
+                      }
+                    }}
+                  />
+                </ReactCrop>
+              </div>
+
+              {/* ======================================== */}
+              {/* ROTATION */}
+              {/* ======================================== */}
+
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-sm">
+                  <span>Rotation</span>
+
+                  <span className="font-bold text-primary">
+                    {rotation}°
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min={-180}
+                  max={180}
+                  value={rotation}
+                  onChange={(e) =>
+                    setRotation(
+                      Number(e.target.value)
+                    )
+                  }
+                  className="w-full accent-primary h-2 rounded-full cursor-pointer"
                 />
               </div>
 
-              {/* Controls */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-sm">
-                    <span>Zoom</span>
-                    <span className="font-bold text-primary">
-                      {zoom.toFixed(1)}×
-                    </span>
-                  </div>
+              {/* ======================================== */}
+              {/* ACTIONS */}
+              {/* ======================================== */}
 
-                  <input
-                    type="range"
-                    min={1}
-                    max={5}
-                    step={0.05}
-                    value={zoom}
-                    onChange={(e) => setZoom(Number(e.target.value))}
-                    className="w-full accent-primary h-2 rounded-full cursor-pointer"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-sm">
-                    <span>Rotation</span>
-                    <span className="font-bold text-primary">
-                      {rotation}°
-                    </span>
-                  </div>
-
-                  <input
-                    type="range"
-                    min={-180}
-                    max={180}
-                    value={rotation}
-                    onChange={(e) => setRotation(Number(e.target.value))}
-                    className="w-full accent-primary h-2 rounded-full cursor-pointer"
-                  />
-                </div>
-              </div>
-
-              {/* Actions */}
               <div className="flex flex-wrap gap-3">
                 <Button
                   onClick={doCrop}
@@ -395,7 +534,9 @@ export default function ImageCropper() {
 
                 <Button
                   variant="outline"
-                  onClick={() => setFlipH((f) => !f)}
+                  onClick={() =>
+                    setFlipH((f) => !f)
+                  }
                   className="rounded-xl gap-2"
                 >
                   <FlipHorizontal className="w-4 h-4" />
@@ -404,7 +545,11 @@ export default function ImageCropper() {
 
                 <Button
                   variant="outline"
-                  onClick={() => setRotation((r) => (r + 90) % 360)}
+                  onClick={() =>
+                    setRotation(
+                      (r) => (r + 90) % 360
+                    )
+                  }
                   className="rounded-xl gap-2"
                 >
                   <RotateCw className="w-4 h-4" />
@@ -414,7 +559,10 @@ export default function ImageCropper() {
             </>
           )}
 
-          {/* Reset */}
+          {/* ======================================== */}
+          {/* RESET */}
+          {/* ======================================== */}
+
           <Button
             variant="outline"
             onClick={reset}
