@@ -61,6 +61,11 @@ export default function ToolPage() {
   const isPDFTool = tool ? PDF_TOOLS.includes(tool.slug) : false
   const isGovTool = tool ? GOV_TOOLS.includes(tool.slug) : false
 
+  // Scroll to top when navigating to a new tool
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [slug])
+
   // Only reset inputs when the route `slug` actually changes to a new tool.
   const prevSlugRef = useRef(slug)
   useEffect(() => {

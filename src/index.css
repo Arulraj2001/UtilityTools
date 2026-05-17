@@ -142,3 +142,29 @@
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
 }
+
+@keyframes floatBlob {
+  0% {
+    transform: translateY(0px) translateX(0px);
+  }
+
+  25% {
+    transform: translateY(-18px) translateX(10px);
+  }
+
+  50% {
+    transform: translateY(-30px) translateX(-8px);
+  }
+
+  75% {
+    transform: translateY(-12px) translateX(14px);
+  }
+
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+}
+
+.animate-floatBlob {
+  animation: floatBlob 10s ease-in-out infinite;
+}

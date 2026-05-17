@@ -7,6 +7,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import SplashScreen from '@/components/SplashScreen';
 
 // Layouts
 import PublicLayout from './components/layout/PublicLayout';
@@ -102,6 +103,7 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
+        <SplashScreen duration={800} />
         <Router>
           <AuthenticatedApp />
         </Router>

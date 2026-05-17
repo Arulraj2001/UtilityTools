@@ -34,6 +34,7 @@ export default function CategoriesGrid({ categories = [], tools = [] }) {
                 
                 <Link
                   to={`/category/${cat.slug}`}
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="group block p-5 rounded-3xl bg-card border border-border/50 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1">
                   
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-md transition-all duration-300 shadow-sm">

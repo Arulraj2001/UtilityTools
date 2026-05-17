@@ -5,7 +5,7 @@ import { Search, Sparkles, ArrowRight, Shield, Zap, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-const QUICK_LINKS = ['EMI Calculator', 'Word Counter', 'JSON Formatter', 'BMI Calculator', 'Password Generator'];
+const QUICK_LINKS = ['EMI Calculator', 'Compress PDF', 'BMI Calc', 'Railway Photo', 'Bank Photo', 'SIP Calc', 'Resizer'];
 
 export default function HeroSection({ toolCount }) {
   const [search, setSearch] = useState('');
