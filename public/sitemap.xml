@@ -2,37 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
-    <loc>https://utility-tools-liart.vercel.app/</loc>
+    <loc>https://quickutils.page/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://utility-tools-liart.vercel.app/tools</loc>
+    <loc>https://quickutils.page/tools</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://utility-tools-liart.vercel.app/categories</loc>
+    <loc>https://quickutils.page/categories</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://utility-tools-liart.vercel.app/blog</loc>
+    <loc>https://quickutils.page/blog</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://utility-tools-liart.vercel.app/about</loc>
+    <loc>https://quickutils.page/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://utility-tools-liart.vercel.app/contact</loc>
+    <loc>https://quickutils.page/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
