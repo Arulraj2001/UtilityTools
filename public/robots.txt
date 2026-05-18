@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://utility-tools-liart.vercel.app/sitemap.xml
+Sitemap: https://quickutils.page/sitemap.xml
