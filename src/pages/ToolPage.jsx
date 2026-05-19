@@ -19,7 +19,7 @@ import ToolCard from '@/components/shared/ToolCard'
 import AdBanner from '@/components/shared/AdBanner'
 import ToolSEO from '@/components/seo/ToolSEO'
 import { useLocalStorage } from '@/lib/useLocalStorage'
-import { getTools, getCategories, updateToolUsage } from '@/api/supabaseApi'
+import { getTools, getCategories, updateToolUsage, getBlogPosts } from '@/api/supabaseApi'
 import ToolContentSections
 from '@/components/seo/ToolContentSections'
 
@@ -51,12 +51,55 @@ export default function ToolPage() {
     queryFn: () => getCategories({ orderBy: 'sort_order', ascending: true, limit: 200 }),
   })
 
+  const { data: posts = [] } = useQuery({
+    queryKey: ['blog-published', slug],
+    queryFn: () => getBlogPosts({ published: true, orderBy: 'created_at', ascending: false, limit: 50 }),
+    staleTime: 5 * 60 * 1000,
+    enabled: !!slug,
+  })
+
   const tool = useMemo(() => tools.find(t => t.slug === slug), [tools, slug])
   const category = useMemo(() => categories.find(c => c.id === tool?.category_id), [categories, tool])
   const relatedTools = useMemo(() => {
     if (!tool) return []
     return tools.filter(t => t.id !== tool.id && t.category_id === tool.category_id).slice(0, 4)
   }, [tools, tool])
+
+  const relatedArticles = useMemo(() => {
+    if (!tool || !posts || posts.length === 0) return []
+
+    // scoring: category match (3), tag overlap (1 per tag), seo_keywords overlap (2 per keyword), slug/title match (2)
+    const toolKeywords = (tool.seo_keywords || '').toLowerCase().split(/[,\s]+/).filter(Boolean)
+    const toolNameParts = (tool.name || '').toLowerCase().split(/\s+/).filter(Boolean)
+
+    const scored = posts.map(p => {
+      let score = 0
+      const pCategory = p.blog_categories?.id || p.category_id
+      if (pCategory && tool.category_id && pCategory === tool.category_id) score += 3
+
+      const pTags = Array.isArray(p.tags) ? p.tags.map(t => t.toLowerCase()) : []
+      const tagOverlap = pTags.filter(t => toolNameParts.includes(t)).length
+      score += tagOverlap
+
+      const pKeywords = (p.seo_keywords || '').toLowerCase().split(/[,\s]+/).filter(Boolean)
+      const kwOverlap = pKeywords.filter(k => toolKeywords.includes(k)).length
+      score += kwOverlap * 2
+
+      const slugMatch = p.slug && (p.slug.includes(tool.slug) || tool.slug.includes(p.slug))
+      if (slugMatch) score += 2
+
+      const titleOverlap = (p.title || '').toLowerCase().split(/\s+/).filter(Boolean).filter(w => toolNameParts.includes(w)).length
+      score += titleOverlap
+
+      return { post: p, score }
+    })
+
+    return scored
+      .filter(s => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6)
+      .map(s => s.post)
+  }, [tool, posts])
 
   const isBookmarked = tool ? bookmarks.includes(tool.id) : false
   const isImageTool = tool ? IMAGE_TOOLS.includes(tool.slug) : false
@@ -177,7 +220,7 @@ export default function ToolPage() {
           <Link to="/" className="hover:text-foreground flex items-center gap-1"><Home className="w-3.5 h-3.5" /> Home</Link>
           <ChevronRight className="w-3.5 h-3.5" />
           <Link to="/tools" className="hover:text-foreground">Tools</Link>
-          {category && (<><ChevronRight className="w-3.5 h-3.5" /><Link to={`/category/${category.slug}`} className="hover:text-foreground">{category.name}</Link></>)}
+          {category && (<><ChevronRight className="w-3.5 h-3.5" /><Link to={`/category/${encodeURIComponent(category.slug)}`} className="hover:text-foreground">{category.name}</Link></>)}
           <ChevronRight className="w-3.5 h-3.5" />
           <span className="text-foreground font-medium truncate max-w-[200px]">{tool?.name}</span>
         </nav>
@@ -252,6 +295,22 @@ export default function ToolPage() {
               )}
             </motion.div>
 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="rounded-2xl border border-border/50 bg-card p-5 sm:p-6"
+            >
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h2 className="text-xl font-semibold">Quick usage tips</h2>
+              </div>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li>Use {tool?.name} with the input format that best matches your task.</li>
+                <li>Start with the default settings, then adjust only the fields you need.</li>
+                <li>Smaller input files usually process faster and keep the browser responsive.</li>
+              </ul>
+            </motion.div>
+
             {tool?.long_description && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -262,16 +321,47 @@ export default function ToolPage() {
               />
             )}
 
-            {tool?.faq?.length > 0 && (
-              
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
-                <FAQAccordion items={tool.faq} />
-              </motion.div>
-            )}
             {/* NEW SEO CONTENT */}
             <ToolContentSections
               tool={tool}
             />
+
+            {/* Related Articles (SEO) */}
+            {relatedArticles.length > 0 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }} className="mt-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-1 h-6 bg-primary rounded-full"></div>
+                  <h2 className="text-xl font-semibold">Related articles</h2>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {relatedArticles.map(related => (
+                    <Link key={related.id} to={`/blog/${encodeURIComponent(related.slug)}`} className="group block rounded-xl border border-border bg-card hover:border-primary/40 hover:shadow-md transition-all duration-300 overflow-hidden">
+                      <div className="flex gap-3 p-3">
+                        {related.featured_image && (
+                          <div className="flex-shrink-0">
+                            <img src={related.featured_image} alt={related.title} loading="lazy" className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold mb-1 group-hover:text-primary transition-colors line-clamp-2">{related.title}</p>
+                          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{related.excerpt || 'Read more about this topic...'}</p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>{new Date(related.created_at).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {tool?.faq?.length > 0 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="mt-8">
+                <FAQAccordion items={tool.faq} />
+              </motion.div>
+            )}
+
           </div>
 
           <div className="space-y-5">

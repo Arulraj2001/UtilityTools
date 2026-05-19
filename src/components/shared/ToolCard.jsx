@@ -26,7 +26,7 @@ export default function ToolCard({ tool, index = 0, categoryName }) {
       transition={{ delay: index * 0.04, duration: 0.35 }}
       className="h-full"
     >
-      <Link to={`/tool/${tool.slug}`} className="group block h-full">
+      <Link to={`/tool/${encodeURIComponent(tool.slug)}`} className="group block h-full">
         <div className="relative h-full p-5 rounded-3xl bg-card border border-border/50 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden">
           {/* Hover gradient */}
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/4 to-accent/4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />

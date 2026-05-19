@@ -36,7 +36,7 @@ export default function SearchModal({ open, onClose }) {
   }, [query])
 
   const handleSelect = (tool) => {
-    navigate(`/tool/${tool.slug}`)
+    navigate(`/tool/${encodeURIComponent(tool.slug)}`)
     onClose()
   }
 

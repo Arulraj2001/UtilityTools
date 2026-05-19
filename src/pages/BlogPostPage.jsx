@@ -16,7 +16,10 @@ import { toast } from 'sonner'
 import AdBanner from '../components/shared/AdBanner'
 import BlogSidebar from '@/components/blog/BlogSidebar'
 import BlogFilterDrawer from '@/components/blog/BlogFilterDrawer'
-import { getBlogPostBySlug, getBlogPosts, getBlogCategories } from '@/api/supabaseApi'
+import { getBlogPostBySlug, getBlogPosts, getBlogCategories, getTools, getCategories } from '@/api/supabaseApi'
+import KeywordSuggestions from '@/components/seo/KeywordSuggestions'
+import { suggestLinksFromText } from '@/lib/semanticLinker'
+import BlogSEO from '@/components/seo/BlogSEO'
 
 export default function BlogPostPage() {
   const { slug } = useParams()
@@ -41,9 +44,19 @@ export default function BlogPostPage() {
     retry: false,
   })
 
+  const { data: tools = [], isLoading: isLoadingTools } = useQuery({
+    queryKey: ['tools-published'],
+    queryFn: () => getTools({ published: true, orderBy: 'sort_order', ascending: true, limit: 200 }),
+  })
+
   const { data: categories = [] } = useQuery({
     queryKey: ['blog-categories'],
     queryFn: () => getBlogCategories({ orderBy: 'sort_order', ascending: true, limit: 100 }),
+  })
+
+  const { data: toolCategories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ orderBy: 'sort_order', ascending: true, limit: 200 }),
   })
 
   // Load like status from localStorage
@@ -63,6 +76,32 @@ export default function BlogPostPage() {
     )
     return sameCategory.length > 0 ? sameCategory.slice(0, 2) : posts.filter(p => p.slug !== post.slug).slice(0, 2)
   }, [post, posts])
+
+  const relatedTools = useMemo(() => {
+    if (!post || !tools || tools.length === 0) return []
+
+    const postKeywords = (post.seo_keywords || '').toLowerCase().split(/[,\s]+/).filter(Boolean)
+    const postTitleParts = (post.title || '').toLowerCase().split(/\s+/).filter(Boolean)
+
+    const scored = tools.map(t => {
+      let score = 0
+      if (t.category_id && post.category_id && t.category_id === post.category_id) score += 3
+
+      const toolKeywords = (t.seo_keywords || '').toLowerCase().split(/[,\s]+/).filter(Boolean)
+      const kwOverlap = toolKeywords.filter(k => postKeywords.includes(k)).length
+      score += kwOverlap * 2
+
+      const slugMatch = (t.slug && post.slug) && (t.slug.includes(post.slug) || post.slug.includes(t.slug))
+      if (slugMatch) score += 2
+
+      const titleOverlap = (t.name || '').toLowerCase().split(/\s+/).filter(Boolean).filter(w => postTitleParts.includes(w)).length
+      score += titleOverlap
+
+      return { tool: t, score }
+    })
+
+    return scored.filter(s => s.score > 0).sort((a, b) => b.score - a.score).slice(0, 6).map(s => s.tool)
+  }, [post, tools])
 
   const allTags = useMemo(() => {
     const tagSet = new Set()
@@ -176,6 +215,7 @@ export default function BlogPostPage() {
 
   return (
     <div className="bg-gradient-to-b from-background to-secondary/20 min-h-screen">
+      {post && <BlogSEO post={post} />}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 lg:py-12">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
@@ -399,6 +439,40 @@ export default function BlogPostPage() {
                   ))}
                 </div>
               </div>
+            )}
+
+            {/* Related Tools */}
+            {relatedTools.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="w-1 h-6 bg-primary rounded-full"></div>
+                  <h2 className="text-xl font-semibold">Related tools</h2>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {relatedTools.map(t => (
+                    <div key={t.id} className="rounded-xl border border-border bg-card p-3 flex items-start gap-3 hover:shadow-md transition-all">
+                      <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                        <img src={t.featured_image || t.icon} alt={t.name} className="w-8 h-8 object-contain" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <Link to={`/tool/${encodeURIComponent(t.slug)}`} className="text-sm font-semibold hover:text-primary block line-clamp-2">{t.name}</Link>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{t.description}</p>
+                      </div>
+                      <div className="text-xs text-muted-foreground">{toolCategories.find(c => c.id === t.category_id)?.name}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Keyword suggestions (non-invasive) */}
+            {post && (
+              (() => {
+                const plain = `${post.title} ${post.excerpt || ''} ${post.content || ''}`.replace(/<[^>]*>/g, '')
+                const suggested = suggestLinksFromText(plain, tools, { keywordField: 'seo_keywords', titleField: 'name', maxResults: 5 })
+                const mapped = suggested.map(s => ({ ...s, title: s.name, type: 'tool' }))
+                return <KeywordSuggestions items={mapped} title="Suggested tools" />
+              })()
             )}
 
             

@@ -26,7 +26,7 @@ export default function ToolSEO({
     '';
 
   const canonical =
-    `${canonicalBase}/tool/${tool.slug}`;
+    `${canonicalBase}/tool/${encodeURIComponent(tool.slug)}`;
 
   const image =
     tool.featured_image ||
@@ -73,44 +73,29 @@ export default function ToolSEO({
       : null;
 
   /**
-   * Web App Schema
+   * SoftwareApplication Schema (upgraded from WebApplication)
    */
 
-  const webAppSchema = {
-
-    '@context':
-      'https://schema.org',
-
-    '@type':
-      'WebApplication',
-
-    name:
-      tool.name,
-
+  const softwareAppSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: tool.name,
     description,
-
-    url:
-      canonical,
-
-    applicationCategory:
-      'UtilitiesApplication',
-
-    operatingSystem:
-      'Any',
-
-    browserRequirements:
-      'Requires JavaScript',
-
+    url: canonical,
+    applicationCategory: tool.application_category || 'UtilitiesApplication',
+    operatingSystem: tool.operating_system || 'Any',
+    browserRequirements: tool.browser_requirements || 'Requires JavaScript',
     offers: {
-
-      '@type':
-        'Offer',
-
+      '@type': 'Offer',
       price: '0',
-
-      priceCurrency:
-        'USD'
-    }
+      priceCurrency: 'USD'
+    },
+    aggregateRating: tool.aggregate_rating || {
+      '@type': 'AggregateRating',
+      ratingValue: tool.aggregate_rating?.ratingValue || 0,
+      reviewCount: tool.aggregate_rating?.reviewCount || 0
+    },
+    featureList: tool.features || []
   };
 
   /**
@@ -179,100 +164,37 @@ export default function ToolSEO({
         content={description}
       />
 
-      <meta
-        name="keywords"
-        content={keywords}
-      />
+      {keywords && (
+        <meta
+          name="keywords"
+          content={keywords}
+        />
+      )}
 
       <meta
         name="robots"
-        content="
-          index, follow,
-          max-image-preview:large
-        "
+        content="index, follow, max-image-preview:large"
       />
 
-      <link
-        rel="canonical"
-        href={canonical}
-      />
+      <link rel="canonical" href={canonical} />
 
       {/* Open Graph */}
-      <meta
-        property="og:type"
-        content="website"
-      />
-
-      <meta
-        property="og:title"
-        content={title}
-      />
-
-      <meta
-        property="og:description"
-        content={description}
-      />
-
-      <meta
-        property="og:url"
-        content={canonical}
-      />
-
-      <meta
-        property="og:image"
-        content={image}
-      />
-
-      <meta
-        property="og:site_name"
-        content="QuickUtils"
-      />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:url" content={canonical} />
+      <meta property="og:image" content={image} />
+      <meta property="og:site_name" content="QuickUtils" />
 
       {/* Twitter */}
-      <meta
-        name="twitter:card"
-        content="
-          summary_large_image
-        "
-      />
-
-      <meta
-        name="twitter:title"
-        content={title}
-      />
-
-      <meta
-        name="twitter:description"
-        content={description}
-      />
-
-      <meta
-        name="twitter:image"
-        content={image}
-      />
-
-      {/* Mobile */}
-      <meta
-        name="viewport"
-        content="
-          width=device-width,
-          initial-scale=1
-        "
-      />
-
-      <meta
-        name="theme-color"
-        content="#7c3aed"
-      />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={image} />
+      <meta name="twitter:url" content={canonical} />
 
       {/* JSON-LD */}
-      <script type="
-        application/ld+json
-      ">
-        {JSON.stringify(
-          webAppSchema
-        )}
-      </script>
+      <script type="application/ld+json">{JSON.stringify(softwareAppSchema)}</script>
 
       {faqSchema && (
         <script type="

@@ -33,7 +33,7 @@ export default function CategoriesGrid({ categories = [], tools = [] }) {
                 transition={{ delay: i * 0.06 }}>
                 
                 <Link
-                  to={`/category/${cat.slug}`}
+                  to={`/category/${encodeURIComponent(cat.slug)}`}
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="group block p-5 rounded-3xl bg-card border border-border/50 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1">
                   
