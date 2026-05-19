@@ -1,82 +1,297 @@
-import { useEffect } from 'react';
+import React from 'react';
+
+import { Helmet } from 'react-helmet-async';
 
 /**
- * Injects SEO meta tags, OG tags, canonical, and JSON-LD schema for a tool page.
+ * Production-grade SEO component
+ * for tool pages.
  */
-export default function ToolSEO({ tool, canonicalBase = '' }) {
-  useEffect(() => {
-    if (!tool) return;
 
-    const title = tool.seo_title || `${tool.name} – Free Online Tool`;
-    const description = tool.seo_description || tool.description || '';
-    const canonical = `${canonicalBase}/tool/${tool.slug}`;
+export default function ToolSEO({
+  tool,
+  canonicalBase =
+    'https://quickutils.page'
+}) {
 
-    // Page title
-    document.title = title;
+  if (!tool) return null;
 
-    // Helper to upsert meta
-    const meta = (name, content, attr = 'name') => {
-      let el = document.querySelector(`meta[${attr}="${name}"]`);
-      if (!el) { el = document.createElement('meta'); el.setAttribute(attr, name); document.head.appendChild(el); }
-      el.setAttribute('content', content);
-    };
+  // SEO values
+  const title =
+    tool.seo_title ||
+    `${tool.name} – Free Online Tool`;
 
-    // Basic SEO
-    meta('description', description);
-    if (tool.seo_keywords) meta('keywords', tool.seo_keywords);
-    meta('robots', 'index, follow');
+  const description =
+    tool.seo_description ||
+    tool.description ||
+    '';
 
-    // Canonical
-    let link = document.querySelector('link[rel="canonical"]');
-    if (!link) { link = document.createElement('link'); link.rel = 'canonical'; document.head.appendChild(link); }
-    link.href = canonical;
+  const canonical =
+    `${canonicalBase}/tool/${tool.slug}`;
 
-    // Open Graph
-    meta('og:title', title, 'property');
-    meta('og:description', description, 'property');
-    meta('og:type', 'website', 'property');
-    meta('og:url', canonical, 'property');
-    if (tool.featured_image) meta('og:image', tool.featured_image, 'property');
+  const image =
+    tool.featured_image ||
+    `${canonicalBase}/og-image.jpg`;
 
-    // Twitter Card
-    meta('twitter:card', 'summary_large_image');
-    meta('twitter:title', title);
-    meta('twitter:description', description);
+  const keywords =
+    tool.seo_keywords ||
+    '';
 
-    // JSON-LD Schema
-    const faqSchema = tool.faq?.length > 0 ? {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: tool.faq.map(f => ({
-        '@type': 'Question',
-        name: f.question,
-        acceptedAnswer: { '@type': 'Answer', text: f.answer },
-      })),
-    } : null;
+  /**
+   * FAQ Schema
+   */
 
-    const webAppSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'WebApplication',
-      name: tool.name,
-      description: description,
-      url: canonical,
-      applicationCategory: 'UtilitiesApplication',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    };
+  const faqSchema =
+    tool.faq?.length > 0
+      ? {
+          '@context':
+            'https://schema.org',
 
-    const injectSchema = (id, data) => {
-      let el = document.getElementById(id);
-      if (!el) { el = document.createElement('script'); el.type = 'application/ld+json'; el.id = id; document.head.appendChild(el); }
-      el.textContent = JSON.stringify(data);
-    };
+          '@type':
+            'FAQPage',
 
-    injectSchema('schema-webapp', webAppSchema);
-    if (faqSchema) injectSchema('schema-faq', faqSchema);
+          mainEntity:
+            tool.faq.map(
+              (f) => ({
 
-    return () => {
-      document.title = 'ToolHub – Free Online Utility Tools';
-    };
-  }, [tool]);
+                '@type':
+                  'Question',
 
-  return null;
+                name:
+                  f.question,
+
+                acceptedAnswer: {
+
+                  '@type':
+                    'Answer',
+
+                  text:
+                    f.answer
+                }
+              })
+            )
+        }
+      : null;
+
+  /**
+   * Web App Schema
+   */
+
+  const webAppSchema = {
+
+    '@context':
+      'https://schema.org',
+
+    '@type':
+      'WebApplication',
+
+    name:
+      tool.name,
+
+    description,
+
+    url:
+      canonical,
+
+    applicationCategory:
+      'UtilitiesApplication',
+
+    operatingSystem:
+      'Any',
+
+    browserRequirements:
+      'Requires JavaScript',
+
+    offers: {
+
+      '@type':
+        'Offer',
+
+      price: '0',
+
+      priceCurrency:
+        'USD'
+    }
+  };
+
+  /**
+   * Breadcrumb Schema
+   */
+
+  const breadcrumbSchema = {
+
+    '@context':
+      'https://schema.org',
+
+    '@type':
+      'BreadcrumbList',
+
+    itemListElement: [
+
+      {
+        '@type':
+          'ListItem',
+
+        position: 1,
+
+        name: 'Home',
+
+        item:
+          canonicalBase
+      },
+
+      {
+        '@type':
+          'ListItem',
+
+        position: 2,
+
+        name: 'Tools',
+
+        item:
+          `${canonicalBase}/tools`
+      },
+
+      {
+        '@type':
+          'ListItem',
+
+        position: 3,
+
+        name:
+          tool.name,
+
+        item:
+          canonical
+      }
+    ]
+  };
+
+  return (
+    <Helmet>
+
+      {/* Primary SEO */}
+      <title>
+        {title}
+      </title>
+
+      <meta
+        name="description"
+        content={description}
+      />
+
+      <meta
+        name="keywords"
+        content={keywords}
+      />
+
+      <meta
+        name="robots"
+        content="
+          index, follow,
+          max-image-preview:large
+        "
+      />
+
+      <link
+        rel="canonical"
+        href={canonical}
+      />
+
+      {/* Open Graph */}
+      <meta
+        property="og:type"
+        content="website"
+      />
+
+      <meta
+        property="og:title"
+        content={title}
+      />
+
+      <meta
+        property="og:description"
+        content={description}
+      />
+
+      <meta
+        property="og:url"
+        content={canonical}
+      />
+
+      <meta
+        property="og:image"
+        content={image}
+      />
+
+      <meta
+        property="og:site_name"
+        content="QuickUtils"
+      />
+
+      {/* Twitter */}
+      <meta
+        name="twitter:card"
+        content="
+          summary_large_image
+        "
+      />
+
+      <meta
+        name="twitter:title"
+        content={title}
+      />
+
+      <meta
+        name="twitter:description"
+        content={description}
+      />
+
+      <meta
+        name="twitter:image"
+        content={image}
+      />
+
+      {/* Mobile */}
+      <meta
+        name="viewport"
+        content="
+          width=device-width,
+          initial-scale=1
+        "
+      />
+
+      <meta
+        name="theme-color"
+        content="#7c3aed"
+      />
+
+      {/* JSON-LD */}
+      <script type="
+        application/ld+json
+      ">
+        {JSON.stringify(
+          webAppSchema
+        )}
+      </script>
+
+      {faqSchema && (
+        <script type="
+          application/ld+json
+        ">
+          {JSON.stringify(
+            faqSchema
+          )}
+        </script>
+      )}
+
+      <script type="
+        application/ld+json
+      ">
+        {JSON.stringify(
+          breadcrumbSchema
+        )}
+      </script>
+
+    </Helmet>
+  );
 }

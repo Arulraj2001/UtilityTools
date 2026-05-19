@@ -20,6 +20,8 @@ import AdBanner from '@/components/shared/AdBanner'
 import ToolSEO from '@/components/seo/ToolSEO'
 import { useLocalStorage } from '@/lib/useLocalStorage'
 import { getTools, getCategories, updateToolUsage } from '@/api/supabaseApi'
+import ToolContentSections
+from '@/components/seo/ToolContentSections'
 
 const IMAGE_TOOLS = IMAGE_TOOL_SLUGS;
 const PDF_TOOLS = ['merge-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-jpg', 'jpg-to-pdf', 'protect-pdf', 'remove-pages-pdf']
@@ -261,10 +263,15 @@ export default function ToolPage() {
             )}
 
             {tool?.faq?.length > 0 && (
+              
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
                 <FAQAccordion items={tool.faq} />
               </motion.div>
             )}
+            {/* NEW SEO CONTENT */}
+            <ToolContentSections
+              tool={tool}
+            />
           </div>
 
           <div className="space-y-5">

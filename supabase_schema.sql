@@ -77,6 +77,7 @@ create table if not exists tools (
   seo_keywords text,
   featured_image text,
   faq jsonb,
+  seo_content text,
   related_tool_ids jsonb,
   sort_order int default 0,
   created_at timestamptz not null default now(),

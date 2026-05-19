@@ -29,6 +29,7 @@ export default function ToolEditor({ tool, onSave, onCancel }) {
     seo_description: tool?.seo_description || '',
     seo_keywords: tool?.seo_keywords || '',
     featured_image: tool?.featured_image || '',
+    seo_content: tool?.seo_content || '',
     input_fields: tool?.input_fields || [],
     faq: tool?.faq || [],
     sort_order: tool?.sort_order || 0,
@@ -107,6 +108,7 @@ export default function ToolEditor({ tool, onSave, onCancel }) {
           <TabsTrigger value="inputs">Input Fields</TabsTrigger>
           <TabsTrigger value="formula">Formula</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
+          <TabsTrigger value="seo-content">SEO Content</TabsTrigger>
           <TabsTrigger value="faq">FAQ</TabsTrigger>
         </TabsList>
 
@@ -281,6 +283,56 @@ export default function ToolEditor({ tool, onSave, onCancel }) {
           <div className="space-y-2">
             <Label>Featured Image URL</Label>
             <Input value={form.featured_image} onChange={e => update('featured_image', e.target.value)} className="rounded-xl" />
+          </div>
+          <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 text-xs text-muted-foreground space-y-1">
+            <p><strong>Current fields control:</strong> Meta tags, social previews, Google snippets</p>
+            <p><strong>Note:</strong> Use the SEO Content tab below for visible educational content on the tool page</p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="seo-content" className="space-y-4">
+          <div className="space-y-2">
+            <Label>SEO Content (HTML)</Label>
+            <Textarea 
+              value={form.seo_content} 
+              onChange={e => update('seo_content', e.target.value)} 
+              rows={12} 
+              className="rounded-xl font-mono text-xs" 
+              placeholder={`<h2>How to Use This Tool</h2>
+<p>Best practices and tips...</p>
+
+<h2>Common Use Cases</h2>
+<p>Real-world examples...</p>
+
+<h2>Best File Sizes & Formats</h2>
+<p>Recommended specifications...</p>`}
+            />
+            <p className="text-xs text-muted-foreground">Characters: {(form.seo_content || '').length}</p>
+          </div>
+          <div className="p-4 rounded-xl bg-muted/50 space-y-3">
+            <p className="text-xs font-semibold text-foreground">Purpose of SEO Content:</p>
+            <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-4">
+              <li><strong>Visible Content:</strong> Rendered below tool UI, FAQ, and featured image</li>
+              <li><strong>Educational:</strong> How-to guides, best practices, workflow explanations</li>
+              <li><strong>SEO Benefits:</strong> Topical authority, long-tail keywords, improved rankings</li>
+              <li><strong>User Value:</strong> Creator guidance, examples, keyword-rich content</li>
+              <li><strong>Format:</strong> Use semantic HTML (h2, h3, p, ul, li, strong, em)</li>
+            </ul>
+          </div>
+          <div className="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+            <p className="text-xs font-semibold text-amber-900 dark:text-amber-200 mb-2">Example Structure:</p>
+            <pre className="text-xs bg-white dark:bg-black p-3 rounded overflow-auto max-h-48">{`<h2>Best Practices for Using This Tool</h2>
+<p>Use medium compression for the best balance between file size and quality.</p>
+
+<h2>Common File Size Recommendations</h2>
+<ul>
+  <li>Email attachments: under 20MB</li>
+  <li>Web uploads: under 10MB</li>
+  <li>Archival: no limit</li>
+</ul>
+
+<h2>Related Workflows</h2>
+<p>This tool works great with our PDF merger...</p>`}</pre>
           </div>
         </TabsContent>
 
