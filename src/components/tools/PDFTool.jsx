@@ -935,7 +935,7 @@ function DownloadResult({ url, filename, label }) {
   return (
     <AnimatePresence>
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-        <div className="flex items-center gap-4 p-4 rounded-2xl bg-green-500/10 border border-green-500/20">
+        <div className="flex items-center gap-4 p-4 rounded-2xl bg-green-500/10 border border-green-500/20 premium-card panel-highlight glow-border">
           <div className="flex-1">
             <p className="font-semibold text-green-700 dark:text-green-400">Done! Your file is ready.</p>
             <p className="text-sm text-muted-foreground font-mono">{label}</p>
@@ -953,7 +953,7 @@ function DownloadResult({ url, filename, label }) {
 
 function StatChip({ label, value, highlight }) {
   return (
-    <div className={`rounded-xl p-3 text-center ${highlight ? 'bg-green-500/20' : 'bg-card border border-border/50'}`}>
+    <div className={`rounded-xl p-3 text-center ${highlight ? 'bg-green-500/20' : 'bg-card border border-border/50 glow-border'}`}>
       <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
       <p className={`font-bold text-sm ${highlight ? 'text-green-600' : ''}`}>{value}</p>
     </div>

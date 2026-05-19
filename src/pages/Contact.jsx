@@ -55,7 +55,7 @@ export default function Contact() {
           <p className="text-muted-foreground">Have a question or suggestion? We'd love to hear from you.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 rounded-2xl bg-card border border-border/50 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 rounded-2xl bg-card border border-border/50 space-y-4 premium-card panel-highlight">
           <div className="space-y-2">
             <Label>Name</Label>
             <Input

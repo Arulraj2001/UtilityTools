@@ -408,7 +408,7 @@ export default function BlogPostPage() {
                     <Link 
                       key={related.id} 
                       to={`/blog/${encodeURIComponent(related.slug)}`} 
-                      className="group block rounded-xl border border-border bg-card hover:border-primary/40 hover:shadow-md transition-all duration-300 overflow-hidden"
+                      className="group block rounded-xl border border-border bg-card hover:border-primary/40 hover:shadow-md transition-all duration-300 overflow-hidden premium-card panel-highlight glow-border"
                     >
                       <div className="flex gap-3 p-3">
                         {related.featured_image && (

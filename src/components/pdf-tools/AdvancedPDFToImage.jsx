@@ -261,12 +261,12 @@ export default function AdvancedPDFToImage() {
                 <AnimatePresence>
                   {pages.map(p => (
                     <motion.div key={p.page} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                      className="rounded-xl border border-border overflow-hidden group cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all"
+                      className="rounded-xl border border-border overflow-hidden group cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all premium-card panel-highlight glow-border"
                       onClick={() => downloadOne(p)}>
                       <div className="aspect-[3/4] bg-white overflow-hidden">
                         <img src={p.dataUrl} alt={`Page ${p.page}`} className="w-full h-full object-contain" loading="lazy" />
                       </div>
-                      <div className="px-2.5 py-2 flex items-center justify-between bg-card border-t border-border/50">
+                      <div className="px-2.5 py-2 flex items-center justify-between bg-card border-t border-border/50 glow-border">
                         <div>
                           <span className="text-xs font-semibold">Pg {p.page}</span>
                           <span className="text-[10px] text-muted-foreground ml-1">{p.w}×{p.h}</span>

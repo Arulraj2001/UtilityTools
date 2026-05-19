@@ -35,11 +35,13 @@ function ResultCard({ card, index }) {
       initial={{ opacity: 0, y: 16, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay: index * 0.05, type: 'spring', stiffness: 200, damping: 20 }}
-      className={`relative group rounded-2xl p-5 border transition-all ${
-        card.highlight
-          ? 'bg-gradient-to-br from-primary/15 to-accent/10 border-primary/30 shadow-lg shadow-primary/10'
-          : 'bg-card border-border/60 hover:border-border'
-      }`}
+      className={
+        `relative group rounded-2xl p-5 border transition-all premium-card panel-highlight glow-border ${
+          card.highlight
+            ? 'bg-gradient-to-br from-primary/15 to-accent/10 border-primary/30 shadow-lg shadow-primary/10'
+            : 'bg-card border-border/60 hover:border-border'
+        }`
+      }>
     >
       <p className="text-[11px] font-semibold text-muted-foreground mb-2 uppercase tracking-widest">{card.label}</p>
       <p

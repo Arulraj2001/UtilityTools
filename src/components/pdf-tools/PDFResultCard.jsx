@@ -18,7 +18,7 @@ export function PDFResultCard({ originalBytes, outputBytes, targetKB, onDownload
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-      className={cn('rounded-2xl border p-5 space-y-4', withinTarget ? 'border-green-500/30 bg-green-500/8' : 'border-orange-400/30 bg-orange-400/8')}>
+      className={cn('rounded-2xl border p-5 space-y-4 premium-card panel-highlight glow-border', withinTarget ? 'border-green-500/30 bg-green-500/8' : 'border-orange-400/30 bg-orange-400/8')}>
       <div className="flex items-center gap-2.5">
         {withinTarget
           ? <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
@@ -37,7 +37,7 @@ export function PDFResultCard({ originalBytes, outputBytes, targetKB, onDownload
           { label: 'Output', value: formatSize(outputBytes), highlight: withinTarget },
           { label: 'Saved', value: `${savedPct}%`, highlight: saved > 0 },
         ].map(chip => (
-          <div key={chip.label} className={cn('rounded-xl p-3 text-center border', chip.highlight ? 'bg-green-500/15 border-green-500/30' : 'bg-card border-border/50')}>
+          <div key={chip.label} className={cn('rounded-xl p-3 text-center border', chip.highlight ? 'bg-green-500/15 border-green-500/30' : 'bg-card border-border/50 glow-border')}>
             <p className="text-xs text-muted-foreground mb-0.5">{chip.label}</p>
             <p className={cn('font-bold text-sm', chip.highlight && 'text-green-600 dark:text-green-400')}>{chip.value}</p>
           </div>

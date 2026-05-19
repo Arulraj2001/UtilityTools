@@ -58,7 +58,7 @@ export default function HeroSection({ toolCount }) {
           <form onSubmit={handleSearch} className="max-w-xl mx-auto mb-6">
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-accent/30 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-              <div className="relative flex items-center bg-card rounded-2xl border border-border shadow-lg hover:shadow-xl transition-shadow">
+              <div className="relative flex items-center bg-card rounded-2xl border border-border shadow-lg hover:shadow-xl transition-shadow premium-card panel-highlight">
                 <Search className="w-5 h-5 text-muted-foreground ml-4 shrink-0" />
                 <Input
                   value={search}
@@ -79,10 +79,9 @@ export default function HeroSection({ toolCount }) {
             <button
               key={link}
               onClick={() => navigate(`/tools?q=${encodeURIComponent(link)}`)}
-              className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border/50 transition-colors">
-              
-                {link}
-              </button>
+              className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border/50 transition-colors motion-safe:transform-gpu motion-safe:transition-transform hover:scale-[1.02] active:scale-95">
+              {link}
+            </button>
             )}
           </div>
 

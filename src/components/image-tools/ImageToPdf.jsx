@@ -77,7 +77,7 @@ export default function ImageToPdf() {
   return (
     <div className="space-y-6">
       {/* Drop zone for adding more */}
-      <div {...getRootProps()} className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${isDragActive ? 'border-primary bg-primary/8' : 'border-border hover:border-primary/50'}`}>
+      <div {...getRootProps()} className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all premium-card panel-highlight ${isDragActive ? 'border-primary bg-primary/8' : 'border-border hover:border-primary/50'}`}>
         <input {...getInputProps()} />
         <p className="text-sm font-medium">{isDragActive ? 'Drop images here!' : '+ Add Images (drag & drop or click)'}</p>
         <p className="text-xs text-muted-foreground mt-0.5">JPG, PNG, WEBP — multiple supported</p>
@@ -126,7 +126,7 @@ export default function ImageToPdf() {
                 {images.map((img) => (
                   <Reorder.Item key={img.id} value={img}>
                     <motion.div layout initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }}
-                      className="flex items-center gap-3 bg-card border border-border/50 rounded-xl px-3 py-2">
+                      className="flex items-center gap-3 bg-card border border-border/50 rounded-xl px-3 py-2 premium-card panel-highlight glow-border">
                       <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab shrink-0" />
                       <img src={img.url} alt="" className="w-12 h-10 object-cover rounded-lg shrink-0" />
                       <div className="flex-1 min-w-0">

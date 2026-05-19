@@ -12,6 +12,8 @@ import SplashScreen from '@/components/SplashScreen';
 // Layouts
 import PublicLayout from './components/layout/PublicLayout';
 import AdminLayout from './components/admin/AdminLayout';
+import BackgroundLighting from './components/layout/BackgroundLighting';
+import ScrollToTop from './components/layout/ScrollToTop';
 
 // Public pages
 import Home from './pages/Home';
@@ -105,6 +107,8 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <SplashScreen duration={800} />
         <Router>
+          <BackgroundLighting />
+          <ScrollToTop />
           <AuthenticatedApp />
         </Router>
         <Toaster />

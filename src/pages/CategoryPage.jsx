@@ -116,7 +116,7 @@ export default function CategoryPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {featuredTools.map(t => (
-                <Link key={t.id} to={`/tool/${encodeURIComponent(t.slug)}`} className="group block rounded-xl border border-border bg-card p-4 hover:shadow-md transition-all">
+                  <Link key={t.id} to={`/tool/${encodeURIComponent(t.slug)}`} className="group block rounded-xl border border-border bg-card p-4 hover:shadow-md transition-all premium-card panel-highlight glow-border">
                   <div className="flex items-start gap-3">
                     <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0">
                       {t.featured_image ? (
@@ -170,7 +170,7 @@ export default function CategoryPage() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {featuredArticles.map(a => (
-                <Link key={a.id} to={`/blog/${encodeURIComponent(a.slug)}`} className="group block rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-all">
+                <Link key={a.id} to={`/blog/${encodeURIComponent(a.slug)}`} className="group block rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-all premium-card panel-highlight glow-border">
                   <div className="flex gap-3 p-3">
                     {a.featured_image && (
                       <img src={a.featured_image} alt={a.title} loading="lazy" className="w-24 h-20 object-cover rounded-md flex-shrink-0" />

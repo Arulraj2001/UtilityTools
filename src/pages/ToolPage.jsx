@@ -335,7 +335,7 @@ export default function ToolPage() {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {relatedArticles.map(related => (
-                    <Link key={related.id} to={`/blog/${encodeURIComponent(related.slug)}`} className="group block rounded-xl border border-border bg-card hover:border-primary/40 hover:shadow-md transition-all duration-300 overflow-hidden">
+                    <Link key={related.id} to={`/blog/${encodeURIComponent(related.slug)}`} className="group block rounded-xl border border-border bg-card hover:border-primary/40 hover:shadow-md transition-all duration-300 overflow-hidden premium-card panel-highlight glow-border">
                       <div className="flex gap-3 p-3">
                         {related.featured_image && (
                           <div className="flex-shrink-0">

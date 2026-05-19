@@ -15,7 +15,7 @@ export default function BlogCard({ post, index = 0 }) {
       transition={{ delay: index * 0.05 }}
     >
       <Link to={`/blog/${encodeURIComponent(post.slug)}`} className="group block h-full">
-        <article className="h-full p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
+        <article className="h-full p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col premium-card panel-highlight">
           {/* Featured Badge */}
           {post.is_featured && (
             <div className="mb-3 flex items-center gap-1">
