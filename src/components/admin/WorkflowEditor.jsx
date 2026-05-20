@@ -10,9 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import { toast } from 'sonner'
-import { createWorkflowPage, getBlogPosts, getToolsAll, updateWorkflowPage } from '@/api/supabaseApi'
+import { createWorkflowPage, getBlogPosts, getToolsAll, getWorkflowPageBySlug, updateWorkflowPage } from '@/api/supabaseApi'
 import { estimateReadingTime, getKeywordDensity, buildSeoScore, slugifyText } from '@/lib/seoUtils'
 
+// TODO: consider workflow category metadata and workflow conversion tracking in future releases
 const rendererStyles = `
   .workflow-preview { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.8; color: #111827; }
   .workflow-preview h1, .workflow-preview h2, .workflow-preview h3 { margin: 1.5em 0 0.5em; font-weight: 700; }
@@ -137,6 +138,13 @@ export default function WorkflowEditor({ page, onSave, onCancel }) {
     setSaving(true)
 
     try {
+      if (form.slug) {
+        const existing = await getWorkflowPageBySlug(form.slug)
+        if (existing && existing.id !== page?.id) {
+          throw new Error('A workflow page with this slug already exists. Choose a unique slug.')
+        }
+      }
+
       const payload = {
         title: form.title,
         slug: form.slug,
@@ -168,6 +176,7 @@ export default function WorkflowEditor({ page, onSave, onCancel }) {
 
       onSave()
     } catch (error) {
+      console.error('WorkflowEditor save error:', error)
       toast.error(error.message || 'Unable to save workflow page')
     } finally {
       setSaving(false)

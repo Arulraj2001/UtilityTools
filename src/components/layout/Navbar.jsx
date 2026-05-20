@@ -7,6 +7,7 @@ import {
   X,
   Moon,
   Sun,
+  Home,
   LayoutGrid,
   Wrench,
   BookOpen,
@@ -123,6 +124,17 @@ export default function Navbar({ onSearchOpen }) {
                   <Moon className="w-5 h-5" />
                 )}
               </Button>
+
+              {/* Home */}
+              <Link to="/">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-xl h-11 w-11 flex items-center justify-center"
+                >
+                  <Home className="w-5 h-5" />
+                </Button>
+              </Link>
 
               {/* Mobile Menu Button */}
               <Button

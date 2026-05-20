@@ -326,6 +326,8 @@ drop policy if exists "Allow all categories" on categories;
 drop policy if exists "Allow all admin_users" on public.admin_users;
 drop policy if exists "Allow admin select own admin record" on public.admin_users;
 drop policy if exists "Allow admin manage admin_users" on public.admin_users;
+drop policy if exists "Allow public select published workflow_pages" on workflow_pages;
+drop policy if exists "Allow admin manage workflow_pages" on workflow_pages;
 
 drop policy if exists "Allow all redirects" on redirects;
 drop policy if exists "Allow all ad_placements" on ad_placements;
@@ -377,6 +379,39 @@ create policy "Allow public select published blog_posts"
 
 create policy "Allow admin manage blog_posts"
   on blog_posts
+  for insert, update, delete
+  using (
+    exists (
+      select 1
+      from public.admin_users
+      where id = auth.uid()
+        and is_admin = true
+    )
+  )
+  with check (
+    exists (
+      select 1
+      from public.admin_users
+      where id = auth.uid()
+        and is_admin = true
+    )
+  );
+
+create policy "Allow public select published workflow_pages"
+  on workflow_pages
+  for select
+  using (
+    status = 'published'
+    or exists (
+      select 1
+      from public.admin_users
+      where id = auth.uid()
+        and is_admin = true
+    )
+  );
+
+create policy "Allow admin manage workflow_pages"
+  on workflow_pages
   for insert, update, delete
   using (
     exists (

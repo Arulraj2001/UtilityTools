@@ -2,6 +2,13 @@ import { supabase } from './supabaseClient';
 
 const handleResponse = (result) => {
   if (result.error) {
+    console.error('Supabase query error:', result.error);
+    if (result.error.details || result.error.hint) {
+      console.error('Supabase policy error details:', {
+        details: result.error.details,
+        hint: result.error.hint,
+      });
+    }
     throw result.error;
   }
   return result.data || [];

@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+// @ts-nocheck
+import React, { useState, useRef, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Pencil, Trash2, Eye, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -8,41 +9,91 @@ import { toast } from 'sonner'
 import WorkflowEditor from '@/components/admin/WorkflowEditor'
 import { getWorkflowPages, deleteWorkflowPage, updateWorkflowPage } from '@/api/supabaseApi'
 
+// TODO: add workflow categories, workflow analytics expansion, and workflow indexing queue support
+const filterOptions = [
+  { key: 'all', label: 'All' },
+  { key: 'published', label: 'Published' },
+  { key: 'draft', label: 'Draft' },
+  { key: 'featured', label: 'Featured' },
+]
+
 export default function AdminWorkflowPages() {
   const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [editingPage, setEditingPage] = useState(null)
   const [showEditor, setShowEditor] = useState(false)
+  const [highlightedPageId, setHighlightedPageId] = useState(null)
+  const scrollPosition = useRef(0)
   const queryClient = useQueryClient()
 
-  const { data: pages = [], isLoading } = useQuery({
+  const { data: pages = [], isLoading, isFetching } = useQuery({
     queryKey: ['workflow-pages'],
-    queryFn: () => getWorkflowPages({ published: false, orderBy: 'updated_at', ascending: false, limit: 200 }),
+    queryFn: async () => getWorkflowPages({ published: false, orderBy: 'updated_at', ascending: false, limit: 200 }),
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => deleteWorkflowPage(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workflow-pages'] })
+    mutationFn: async (id) => deleteWorkflowPage(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['workflow-pages'] })
       toast.success('Workflow page deleted')
     },
   })
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => updateWorkflowPage(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workflow-pages'] })
+    mutationFn: async (payload) => updateWorkflowPage(payload.id, payload.data),
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({ queryKey: ['workflow-pages'] })
+      if (variables?.id) {
+        setHighlightedPageId(variables.id)
+        window.setTimeout(() => setHighlightedPageId(null), 4000)
+      }
       toast.success('Workflow page updated')
     },
   })
 
-  const filtered = pages.filter((page) => {
-    const value = search.toLowerCase()
-    return (
-      page.title?.toLowerCase().includes(value) ||
-      page.slug?.toLowerCase().includes(value) ||
-      page.excerpt?.toLowerCase().includes(value)
-    )
-  })
+  const handleSearchChange = (value) => {
+    setSearch(value)
+  }
+
+  const handleFilterChange = (filter) => {
+    setStatusFilter(filter)
+  }
+
+  const openEditor = (page = null) => {
+    if (typeof window !== 'undefined') {
+      scrollPosition.current = window.scrollY
+    }
+    setEditingPage(page)
+    setShowEditor(true)
+  }
+
+  const closeEditor = () => {
+    setShowEditor(false)
+    setEditingPage(null)
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: scrollPosition.current, behavior: 'auto' })
+    }
+  }
+
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase()
+
+    return pages
+      .filter((page) => {
+        if (statusFilter === 'published') return page.status === 'published'
+        if (statusFilter === 'draft') return !page.status || page.status === 'draft'
+        if (statusFilter === 'featured') return page.is_featured
+        return true
+      })
+      .filter((page) => {
+        if (!query) return true
+        return (
+          page.title?.toLowerCase().includes(query) ||
+          page.slug?.toLowerCase().includes(query) ||
+          page.excerpt?.toLowerCase().includes(query)
+        )
+      })
+  }, [pages, statusFilter, search])
 
   const toggleStatus = (page) => {
     updateMutation.mutate({ id: page.id, data: { status: page.status === 'published' ? 'draft' : 'published' } })
@@ -57,17 +108,19 @@ export default function AdminWorkflowPages() {
       <WorkflowEditor
         page={editingPage}
         onSave={() => {
-          setShowEditor(false)
-          setEditingPage(null)
+          closeEditor()
           queryClient.invalidateQueries({ queryKey: ['workflow-pages'] })
         }}
-        onCancel={() => {
-          setShowEditor(false)
-          setEditingPage(null)
-        }}
+        onCancel={closeEditor}
       />
     )
   }
+
+  const emptyStateMessage = isLoading
+    ? 'Loading workflow pages...'
+    : search || statusFilter !== 'all'
+      ? 'No workflow pages match this filter. Try clearing search or selecting All.'
+      : 'No workflow pages available. Create one to get started.'
 
   return (
     <div>
@@ -75,14 +128,38 @@ export default function AdminWorkflowPages() {
         <div>
           <h1 className="text-2xl font-bold">Workflow Pages</h1>
           <p className="text-sm text-muted-foreground mt-1">Create SEO-focused landing pages for intent-driven workflow content.</p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Active filters and search remain while you edit workflows for reliable list state.
+          </p>
         </div>
-        <Button onClick={() => { setEditingPage(null); setShowEditor(true) }} className="rounded-xl">
+        <Button onClick={() => openEditor(null)} className="rounded-xl">
           <Plus className="w-4 h-4 mr-2" /> New Workflow Page
         </Button>
       </div>
 
-      <div className="relative mb-4">
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search workflow pages..." className="pl-10 rounded-xl" />
+      <div className="flex flex-col gap-3 mb-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap gap-2">
+          {filterOptions.map((option) => (
+            <Button
+              key={option.key}
+              variant={statusFilter === option.key ? 'secondary' : 'outline'}
+              size="sm"
+              className="rounded-full"
+              onClick={() => handleFilterChange(option.key)}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+
+        <div className="relative w-full md:w-80">
+          <Input
+            value={search}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Search workflow pages..."
+            className="pl-10 rounded-xl"
+          />
+        </div>
       </div>
 
       <div className="rounded-xl border border-border overflow-hidden bg-card">
@@ -98,10 +175,13 @@ export default function AdminWorkflowPages() {
           </thead>
           <tbody>
             {filtered.map((page) => (
-              <tr key={page.id} className="border-t border-border/50 hover:bg-muted/30">
+              <tr
+                key={page.id}
+                className={`border-t border-border/50 ${page.id === highlightedPageId ? 'bg-primary/10' : 'hover:bg-muted/30'}`}
+              >
                 <td className="p-3 font-medium">
-                  <div className="truncate max-w-xs">{page.title}</div>
-                  <div className="text-muted-foreground text-xs mt-1">{page.slug}</div>
+                  <div className="truncate max-w-xs">{page.title || 'Untitled workflow'}</div>
+                  <div className="text-muted-foreground text-xs mt-1">{page.slug || 'no-slug'}</div>
                 </td>
                 <td className="p-3 hidden sm:table-cell">
                   <Badge variant={page.status === 'published' ? 'default' : 'secondary'} className="text-xs">{page.status || 'draft'}</Badge>
@@ -125,7 +205,7 @@ export default function AdminWorkflowPages() {
                     <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => toggleFeatured(page)}>
                       <Sparkles className="w-3.5 h-3.5" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setEditingPage(page); setShowEditor(true) }}>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEditor(page)}>
                       <Pencil className="w-3.5 h-3.5" />
                     </Button>
                     <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => { if (confirm('Delete this workflow page?')) deleteMutation.mutate(page.id) }}>
@@ -138,13 +218,17 @@ export default function AdminWorkflowPages() {
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={5} className="p-8 text-center text-muted-foreground">
-                  {isLoading ? 'Loading workflow pages...' : 'No workflow pages found.'}
+                  {emptyStateMessage}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      {isFetching && !isLoading && (
+        <div className="mt-3 text-xs text-muted-foreground">Refreshing workflow list…</div>
+      )}
     </div>
   )
 }

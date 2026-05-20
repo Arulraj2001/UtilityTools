@@ -439,6 +439,38 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      <Card className="mt-6 overflow-hidden border border-border bg-muted">
+        <CardHeader>
+          <CardTitle className="text-base">Workflow Event Summary</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-3 p-5">
+          <div className="rounded-3xl border border-border/70 bg-background p-4 text-sm">
+            <div className="flex items-center gap-2 text-foreground">
+              <Activity className="w-4 h-4" />
+              <span className="font-medium">Workflow views</span>
+            </div>
+            <p className="mt-4 text-3xl font-semibold">{formatNumber(workflowTotalViews)}</p>
+            <p className="mt-2 text-xs text-muted-foreground">Total workflow page visits</p>
+          </div>
+          <div className="rounded-3xl border border-border/70 bg-background p-4 text-sm">
+            <div className="flex items-center gap-2 text-foreground">
+              <Clock className="w-4 h-4" />
+              <span className="font-medium">Workflow opens</span>
+            </div>
+            <p className="mt-4 text-3xl font-semibold">{formatNumber(workflowOpenCount)}</p>
+            <p className="mt-2 text-xs text-muted-foreground">Times workflows were activated</p>
+          </div>
+          <div className="rounded-3xl border border-border/70 bg-background p-4 text-sm">
+            <div className="flex items-center gap-2 text-foreground">
+              <Search className="w-4 h-4" />
+              <span className="font-medium">Workflow searches</span>
+            </div>
+            <p className="mt-4 text-3xl font-semibold">{formatNumber(searchEvents.length)}</p>
+            <p className="mt-2 text-xs text-muted-foreground">Search interactions captured</p>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {[{
           title: 'Page Views', value: formatNumber(pageViews), icon: Eye,

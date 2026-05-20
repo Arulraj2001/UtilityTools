@@ -208,6 +208,9 @@ create policy "Allow admin manage blog_posts"
     )
   );
 
+drop policy if exists "Allow public select published workflow_pages" on workflow_pages;
+drop policy if exists "Allow admin manage workflow_pages" on workflow_pages;
+
 create policy "Allow public select published workflow_pages"
   on workflow_pages
   for select
