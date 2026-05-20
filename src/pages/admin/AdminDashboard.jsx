@@ -314,13 +314,29 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {[{
-          title: 'Page Views', value: formatNumber(pageViews), icon: Eye, accent: 'from-sky-500 to-cyan-500', note: 'Last 90 days', metric: `${weeklyGrowth >= 0 ? '+' : ''}${weeklyGrowth}% weekly`, trend: weeklyGrowth >= 0,
+          title: 'Page Views', value: formatNumber(pageViews), icon: Eye,
+          wrapper: 'bg-gradient-to-br from-slate-950/65 via-sky-950 to-slate-900/78 border border-cyan-400/15 shadow-lg shadow-cyan-500/15 ring-1 ring-cyan-200/10',
+          accent: 'from-sky-400 via-cyan-400 to-cyan-500',
+          iconAccent: 'from-sky-400/25 via-cyan-300/15 to-white/10',
+          note: 'Last 90 days', metric: `${weeklyGrowth >= 0 ? '+' : ''}${weeklyGrowth}% weekly`, trend: weeklyGrowth >= 0,
         }, {
-          title: 'Unique Visitors', value: formatNumber(uniqueVisitors), icon: Users, accent: 'from-fuchsia-500 to-violet-500', note: 'Sessions tracked', metric: `${interactionRate} pages/session`, trend: interactionRate >= 1,
+          title: 'Unique Visitors', value: formatNumber(uniqueVisitors), icon: Users,
+          wrapper: 'bg-gradient-to-br from-slate-950/65 via-violet-950 to-slate-900/78 border border-violet-400/15 shadow-lg shadow-violet-500/15 ring-1 ring-violet-200/10',
+          accent: 'from-violet-400 via-fuchsia-400 to-purple-500',
+          iconAccent: 'from-violet-400/25 via-fuchsia-300/15 to-white/10',
+          note: 'Sessions tracked', metric: `${interactionRate} pages/session`, trend: interactionRate >= 1,
         }, {
-          title: 'Organic Traffic', value: formatNumber(organicTraffic), icon: Globe, accent: 'from-emerald-500 to-teal-500', note: 'Search engine visits', metric: `${Math.round((organicTraffic / Math.max(pageViews, 1)) * 100)}% of traffic`, trend: organicTraffic >= 0,
+          title: 'Organic Traffic', value: formatNumber(organicTraffic), icon: Globe,
+          wrapper: 'bg-gradient-to-br from-slate-950/65 via-emerald-950 to-slate-900/78 border border-emerald-400/15 shadow-lg shadow-emerald-500/15 ring-1 ring-emerald-200/10',
+          accent: 'from-emerald-400 via-teal-400 to-cyan-500',
+          iconAccent: 'from-emerald-400/25 via-teal-300/15 to-white/10',
+          note: 'Search engine visits', metric: `${Math.round((organicTraffic / Math.max(pageViews, 1)) * 100)}% of traffic`, trend: organicTraffic >= 0,
         }, {
-          title: 'Bounce Rate', value: `${bounceRate}%`, icon: ArrowDownRight, accent: 'from-red-500 to-orange-500', note: 'Single-page sessions', metric: `${formatDuration(avgSessionDuration)} avg duration`, trend: bounceRate < 45,
+          title: 'Bounce Rate', value: `${bounceRate}%`, icon: ArrowDownRight,
+          wrapper: 'bg-gradient-to-br from-slate-950/65 via-rose-950 to-slate-900/78 border border-rose-400/15 shadow-lg shadow-rose-500/15 ring-1 ring-rose-200/10',
+          accent: 'from-rose-400 via-orange-400 to-amber-500',
+          iconAccent: 'from-rose-400/25 via-orange-300/15 to-white/10',
+          note: 'Single-page sessions', metric: `${formatDuration(avgSessionDuration)} avg duration`, trend: bounceRate < 45,
         }].map((card, index) => (
           <motion.div
             key={card.title}
@@ -328,20 +344,20 @@ export default function AdminDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.04 }}
           >
-            <Card className="overflow-hidden border border-border/60 bg-gradient-to-br from-slate-950/40 to-slate-900/70 shadow-lg shadow-slate-900/10">
-              <CardContent className="p-5">
+            <Card className={`overflow-hidden ${card.wrapper}`}>
+              <CardContent className="p-5 text-white">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{card.title}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-white/70">{card.title}</p>
                     <p className="mt-3 text-3xl font-semibold tracking-tight">{card.value}</p>
                   </div>
-                  <div className={`rounded-2xl bg-gradient-to-br ${card.accent} bg-opacity-10 p-3`}>
+                  <div className={`rounded-2xl bg-gradient-to-br ${card.iconAccent} p-3`}>
                     <card.icon className="h-5 w-5 text-white" />
                   </div>
                 </div>
-                <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+                <div className="mt-4 flex items-center justify-between text-xs text-white/70">
                   <span>{card.note}</span>
-                  <span className={`font-semibold ${card.trend ? 'text-emerald-400' : 'text-rose-400'}`}>{card.metric}</span>
+                  <span className={`font-semibold ${card.trend ? 'text-emerald-300' : 'text-rose-300'}`}>{card.metric}</span>
                 </div>
               </CardContent>
             </Card>

@@ -80,13 +80,22 @@ export const getBlogCategories = async ({ orderBy = 'sort_order', ascending = tr
 };
 
 export const getBlogCategoryBySlug = async (slug) => {
-  const result = await supabase.from('blog_categories').select('*').eq('slug', slug).single()
-  return handleResponse(result)
+  const result = await supabase.from('blog_categories').select('*').eq('slug', slug).maybeSingle()
+  if (result.error) {
+    // Don't throw on missing categories — surface unexpected errors only
+    console.error('getBlogCategoryBySlug error:', result.error)
+    return null
+  }
+  return result.data || null
 };
 
 export const getBlogPostsByCategorySlug = async (slug, { published = true, orderBy = 'created_at', ascending = false, limit = 200 } = {}) => {
-  const categoryResult = await supabase.from('blog_categories').select('id').eq('slug', slug).single()
-  const category = handleResponse(categoryResult)
+  const categoryResult = await supabase.from('blog_categories').select('id').eq('slug', slug).maybeSingle()
+  if (categoryResult.error) {
+    console.error('getBlogPostsByCategorySlug error fetching category:', categoryResult.error)
+    return []
+  }
+  const category = categoryResult.data
   if (!category?.id) return []
 
   let query = supabase.from('blog_posts').select('*, blog_categories(id,name,slug)').eq('category_id', category.id)
@@ -234,16 +243,24 @@ export const deleteSiteSetting = async (id) => {
 };
 
 export const getToolBySlug = async (slug) => {
-  const result = await supabase.from('tools').select('*').eq('slug', slug).single();
-  return handleResponse(result);
+  const result = await supabase.from('tools').select('*').eq('slug', slug).maybeSingle();
+  if (result.error) {
+    console.error('getToolBySlug error:', result.error)
+    return null
+  }
+  return result.data || null
 };
 
 export const getBlogPostBySlug = async (slug) => {
   const result = await supabase.from('blog_posts')
     .select('*, blog_categories(id,name,slug,description,icon,color,featured_image)')
     .eq('slug', slug)
-    .single();
-  return handleResponse(result);
+    .maybeSingle();
+  if (result.error) {
+    console.error('getBlogPostBySlug error:', result.error)
+    return null
+  }
+  return result.data || null
 };
 
 export const updateToolUsage = async (id, usage_count) => {
