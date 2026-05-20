@@ -1,51 +1,64 @@
-import { Toaster } from "@/components/ui/toaster"
-import { Toaster as SonnerToaster } from "sonner"
+import React, { lazy, Suspense, useEffect } from 'react'
+import { Toaster } from '@/components/ui/toaster'
+import { Toaster as SonnerToaster } from 'sonner'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
-import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import { useSupabaseRealtime } from '@/lib/useSupabaseRealtime';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import SplashScreen from '@/components/SplashScreen';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { AuthProvider, useAuth } from '@/lib/AuthContext'
+import { useSupabaseRealtime } from '@/lib/useSupabaseRealtime'
+import UserNotRegisteredError from '@/components/UserNotRegisteredError'
+import ProtectedRoute from '@/components/ProtectedRoute'
+import SplashScreen from '@/components/SplashScreen'
+import { initializePdfWorker } from '@/lib/pdfWorkerSetup'
+
+// Initialize PDF.js worker for all PDF operations
+initializePdfWorker()
 
 // Layouts
-import PublicLayout from './components/layout/PublicLayout';
-import AdminLayout from './components/admin/AdminLayout';
-import BackgroundLighting from './components/layout/BackgroundLighting';
-import ScrollToTop from './components/layout/ScrollToTop';
+import PublicLayout from './components/layout/PublicLayout'
+import BackgroundLighting from './components/layout/BackgroundLighting'
+import ScrollToTop from './components/layout/ScrollToTop'
 
 // Public pages
-import Home from './pages/Home';
-import ToolsList from './pages/ToolsList';
-import ToolPage from './pages/ToolPage';
-import CategoriesList from './pages/CategoriesList';
-import CategoryPage from './pages/CategoryPage';
-import BlogList from './pages/BlogList';
-import BlogPostPage from './pages/BlogPostPage';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Privacy from './pages/Privacy';
-import Terms from './pages/Terms';
-import Login from './pages/Login';
+import Home from './pages/Home'
+const ToolsList = lazy(() => import('./pages/ToolsList'))
+const ToolPage = lazy(() => import('./pages/ToolPage'))
+const CategoriesList = lazy(() => import('./pages/CategoriesList'))
+const CategoryPage = lazy(() => import('./pages/CategoryPage'))
+const BlogList = lazy(() => import('./pages/BlogList'))
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'))
+const About = lazy(() => import('./pages/About'))
+const Contact = lazy(() => import('./pages/Contact'))
+const Privacy = lazy(() => import('./pages/Privacy'))
+const Terms = lazy(() => import('./pages/Terms'))
+const Login = lazy(() => import('./pages/Login'))
 
 // Admin pages
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminTools from './pages/admin/AdminTools';
-import AdminBlog from './pages/admin/AdminBlog';
-import AdminCategories from './pages/admin/AdminCategories';
-import AdminBlogCategories from './pages/admin/AdminBlogCategories';
-import AdminAds from './pages/admin/AdminAds';
-import AdminRedirects from './pages/admin/AdminRedirects';
-import AdminSettings from './pages/admin/AdminSettings';
-import AdminToolSeeder from './pages/admin/AdminToolSeeder';
-import AdminWorkflowPages from './pages/admin/AdminWorkflowPages';
-import WorkflowPage from './pages/WorkflowPage';
-import WorkflowListPage from './pages/WorkflowListPage';
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'))
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
+const AdminTools = lazy(() => import('./pages/admin/AdminTools'))
+const AdminBlog = lazy(() => import('./pages/admin/AdminBlog'))
+const AdminCategories = lazy(() => import('./pages/admin/AdminCategories'))
+const AdminBlogCategories = lazy(() => import('./pages/admin/AdminBlogCategories'))
+const AdminAds = lazy(() => import('./pages/admin/AdminAds'))
+const AdminRedirects = lazy(() => import('./pages/admin/AdminRedirects'))
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
+const AdminToolSeeder = lazy(() => import('./pages/admin/AdminToolSeeder'))
+const AdminWorkflowPages = lazy(() => import('./pages/admin/AdminWorkflowPages'))
+const WorkflowPage = lazy(() => import('./pages/WorkflowPage'))
+const WorkflowListPage = lazy(() => import('./pages/WorkflowListPage'))
+const PageNotFound = lazy(() => import('./lib/PageNotFound'))
+
+const RouteFallback = () => (
+  <div className="min-h-[55vh] flex items-center justify-center bg-background">
+    <p className="text-sm text-muted-foreground">Loading page…</p>
+  </div>
+)
 
 const AuthenticatedApp = () => {
+  const location = useLocation();
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -67,45 +80,47 @@ const AuthenticatedApp = () => {
     }
   }
 
-  useSupabaseRealtime();
+  useSupabaseRealtime(isAdminRoute);
+
+  const wrap = (element) => <Suspense fallback={<RouteFallback />}>{element}</Suspense>;
 
   return (
     <Routes>
       {/* Public routes */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/tools" element={<ToolsList />} />
-        <Route path="/tool/:slug" element={<ToolPage />} />
-        <Route path="/categories" element={<CategoriesList />} />
-        <Route path="/category/:slug" element={<CategoryPage />} />
-        <Route path="/blog" element={<BlogList />} />
-        <Route path="/blog/:slug" element={<BlogPostPage />} />
-        <Route path="/workflow" element={<WorkflowListPage />} />
-        <Route path="/workflow/:slug" element={<WorkflowPage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/tools" element={wrap(<ToolsList />)} />
+        <Route path="/tool/:slug" element={wrap(<ToolPage />)} />
+        <Route path="/categories" element={wrap(<CategoriesList />)} />
+        <Route path="/category/:slug" element={wrap(<CategoryPage />)} />
+        <Route path="/blog" element={wrap(<BlogList />)} />
+        <Route path="/blog/:slug" element={wrap(<BlogPostPage />)} />
+        <Route path="/workflow" element={wrap(<WorkflowListPage />)} />
+        <Route path="/workflow/:slug" element={wrap(<WorkflowPage />)} />
+        <Route path="/about" element={wrap(<About />)} />
+        <Route path="/contact" element={wrap(<Contact />)} />
+        <Route path="/privacy" element={wrap(<Privacy />)} />
+        <Route path="/terms" element={wrap(<Terms />)} />
+        <Route path="/login" element={wrap(<Login />)} />
       </Route>
 
       {/* Admin routes */}
       <Route path="/admin" element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        <Route element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="tools" element={<AdminTools />} />
-          <Route path="blog" element={<AdminBlog />} />
-          <Route path="blog-categories" element={<AdminBlogCategories />} />
-          <Route path="categories" element={<AdminCategories />} />
-          <Route path="workflow-pages" element={<AdminWorkflowPages />} />
-          <Route path="ads" element={<AdminAds />} />
-          <Route path="redirects" element={<AdminRedirects />} />
-          <Route path="settings" element={<AdminSettings />} />
-          <Route path="seeder" element={<AdminToolSeeder />} />
+        <Route element={wrap(<AdminLayout />)}>
+          <Route index element={wrap(<AdminDashboard />)} />
+          <Route path="tools" element={wrap(<AdminTools />)} />
+          <Route path="blog" element={wrap(<AdminBlog />)} />
+          <Route path="blog-categories" element={wrap(<AdminBlogCategories />)} />
+          <Route path="categories" element={wrap(<AdminCategories />)} />
+          <Route path="workflow-pages" element={wrap(<AdminWorkflowPages />)} />
+          <Route path="ads" element={wrap(<AdminAds />)} />
+          <Route path="redirects" element={wrap(<AdminRedirects />)} />
+          <Route path="settings" element={wrap(<AdminSettings />)} />
+          <Route path="seeder" element={wrap(<AdminToolSeeder />)} />
         </Route>
       </Route>
 
-      <Route path="*" element={<PageNotFound />} />
+      <Route path="*" element={wrap(<PageNotFound />)} />
     </Routes>
   );
 };

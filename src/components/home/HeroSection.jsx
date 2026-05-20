@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Search, Sparkles, ArrowRight, Shield, Zap, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -27,21 +26,12 @@ export default function HeroSection({ toolCount }) {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}>
-          
+        <div className="transition-opacity duration-500 ease-out">
           {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8 shadow-sm">
-            
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8 shadow-sm">
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-semibold text-primary">{toolCount}+ Free Tools — No Sign Up Required</span>
-          </motion.div>
+          </div>
 
           {/* Headline */}
           <div className="relative inline-flex items-center justify-center w-full mb-6">
@@ -104,7 +94,7 @@ export default function HeroSection({ toolCount }) {
               <span>100% free, forever</span>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>);
 

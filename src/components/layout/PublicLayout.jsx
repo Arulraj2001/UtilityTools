@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import SearchModal from '../shared/SearchModal';
 import { usePageAnalytics } from '@/lib/analytics';
+
+const SearchModal = React.lazy(() => import('../shared/SearchModal'));
 
 export default function PublicLayout() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -16,7 +17,11 @@ export default function PublicLayout() {
         <Outlet />
       </main>
       <Footer />
-      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+      {searchOpen && (
+        <Suspense fallback={null}>
+          <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+        </Suspense>
+      )}
     </div>);
 
 }

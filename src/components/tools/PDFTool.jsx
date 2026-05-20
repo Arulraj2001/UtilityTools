@@ -4,11 +4,23 @@ import { Label } from '@/components/ui/label';
 import { Upload, Download, FileText, Loader2, X, Plus, ArrowUp, ArrowDown, Scissors } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PDFDocument, rgb } from 'pdf-lib';
-import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
+import { getPdfJsLib } from '@/lib/pdfWorkerSetup';
 
-if (typeof window !== 'undefined' && pdfjsLib?.GlobalWorkerOptions) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+const pdfjsLib = getPdfJsLib();
+
+async function renderPdfPageImage(file, scale = 1.5) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const page = await pdf.getPage(1);
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement('canvas');
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const context = canvas.getContext('2d');
+  await page.render({ canvasContext: context, viewport }).promise;
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+  return { url: URL.createObjectURL(blob), pageCount: pdf.numPages };
 }
 
 export default function PDFTool({ tool }) {
@@ -370,13 +382,26 @@ function JPGtoPDF() {
 function PDFCompressor() {
   const [file, setFile] = useState(null);
   const [compressionLevel, setCompressionLevel] = useState('medium');
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [pageCount, setPageCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [previewError, setPreviewError] = useState(null);
 
-  const handleFile = (f) => {
+  const handleFile = async (f) => {
     if (!f || f.type !== 'application/pdf') return;
     setFile(f);
     setResult(null);
+    setPreviewError(null);
+    try {
+      const preview = await renderPdfPageImage(f, 1.8);
+      setPreviewUrl(preview.url);
+      setPageCount(preview.pageCount);
+    } catch (err) {
+      setPreviewError('Preview unavailable.');
+      setPreviewUrl(null);
+      setPageCount(0);
+    }
   };
 
   const compress = async () => {
@@ -389,7 +414,7 @@ function PDFCompressor() {
       const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
 
       // Apply compression based on level
-      const options = { useObjectStreams: true };
+      const options = { useObjectStreams: true, objectsPerTick: 50 };
       
       if (compressionLevel === 'high') {
         // High compression - remove more data
@@ -459,13 +484,27 @@ function PDFCompressor() {
           </div>
 
           {/* Info Box */}
-          <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+          <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 space-y-2">
             <p className="text-xs text-blue-700 dark:text-blue-400">
               <strong>File Size:</strong> {(file.size / 1024 / 1024).toFixed(2)} MB
               <br />
               <strong>Compression:</strong> Remove unused objects and optimize streams
             </p>
+            {previewUrl ? (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="text-xs text-muted-foreground">{pageCount ? `${pageCount} page${pageCount !== 1 ? 's' : ''}` : 'Page preview available'}</div>
+                <div className="text-xs text-muted-foreground font-semibold">{compressionLevel === 'high' ? 'Maximum size reduction' : compressionLevel === 'medium' ? 'Balanced size and readability' : 'Minimal compression, highest fidelity'}</div>
+              </div>
+            ) : previewError ? (
+              <div className="text-xs text-destructive">{previewError}</div>
+            ) : null}
           </div>
+
+          {previewUrl ? (
+            <div className="rounded-2xl overflow-hidden border border-border/50 bg-muted/10">
+              <img src={previewUrl} alt="PDF preview" className="w-full object-contain" />
+            </div>
+          ) : null}
 
           {/* Action Button */}
           <Button onClick={compress} disabled={loading} className="rounded-xl gap-2 w-full">
@@ -721,21 +760,26 @@ function PDFRemovePages() {
 function PDFtoJPG() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(0.9);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [pageCount, setPageCount] = useState(0);
+  const [previewError, setPreviewError] = useState(null);
 
   const handleFile = async (f) => {
     if (f && f.type === 'application/pdf') {
       setFile(f);
       setResult(null);
-      // Get page count
+      setPreviewError(null);
       try {
-        const arrayBuffer = await f.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        setPageCount(pdf.numPages);
+        const preview = await renderPdfPageImage(f, 1.3);
+        setPreviewUrl(preview.url);
+        setPageCount(preview.pageCount);
       } catch (e) {
         console.error('Error reading PDF:', e);
+        setPreviewError('Preview unavailable.');
+        setPreviewUrl(null);
+        setPageCount(0);
       }
     }
   };
@@ -827,6 +871,21 @@ function PDFtoJPG() {
 
       {file && (
         <div className="space-y-4">
+          {previewUrl ? (
+            <div className="rounded-2xl overflow-hidden border border-border/50 bg-muted/10">
+              <img src={previewUrl} alt="PDF page preview" className="w-full object-contain" />
+            </div>
+          ) : previewError ? (
+            <div className="rounded-xl p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20">{previewError}</div>
+          ) : null}
+
+          <div className="rounded-2xl border border-border/50 bg-card p-3">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{pageCount ? `${pageCount} page${pageCount !== 1 ? 's' : ''}` : 'Upload a PDF to preview'}</span>
+              <span>{quality >= 0.85 ? 'High fidelity' : quality >= 0.75 ? 'Balanced quality' : 'Smaller size'}</span>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label className="text-sm font-semibold">Image Quality</Label>
             <select

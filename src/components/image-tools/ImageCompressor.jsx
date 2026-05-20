@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import imageCompression from 'browser-image-compression';
 import { Button } from '@/components/ui/button';
 import { Download, Loader2, RefreshCw, Settings } from 'lucide-react';
@@ -17,8 +17,44 @@ export default function ImageCompressor() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedPreview, setSelectedPreview] = useState(null);
 
-  const reset = () => { setFiles([]); setResults([]); setProgress(0); };
+  useEffect(() => {
+    if (files.length === 0) {
+      setSelectedIndex(0);
+      return;
+    }
+    if (selectedIndex >= files.length) {
+      setSelectedIndex(0);
+    }
+  }, [files.length, selectedIndex]);
+
+  useEffect(() => {
+    if (!files[selectedIndex]) {
+      setSelectedPreview(null);
+      return;
+    }
+    const previewUrl = URL.createObjectURL(files[selectedIndex]);
+    setSelectedPreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [files, selectedIndex]);
+
+  const selectedFile = files[selectedIndex];
+
+  const estimatedSize = useMemo(() => {
+    if (!selectedFile) return null;
+    const ratio = Math.min(0.88, Math.max(0.18, (quality / 100) * 0.72));
+    return Math.max(1024, Math.round(selectedFile.size * ratio));
+  }, [quality, selectedFile]);
+
+  const qualityLabel = useMemo(() => {
+    if (quality >= 85) return 'High quality preserved';
+    if (quality >= 65) return 'Balanced quality and size';
+    return 'Maximum compression for small files';
+  }, [quality]);
+
+  const reset = () => { setFiles([]); setResults([]); setProgress(0); setSelectedIndex(0); };
 
   const compress = async () => {
     setLoading(true);
@@ -123,16 +159,45 @@ export default function ImageCompressor() {
 
             {/* Files list preview (pre-compress) */}
             {!results.length && !loading && (
-              <div className="rounded-2xl border border-border/50 bg-muted/20 p-4">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{files.length} file(s) selected</p>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {files.map((f, i) => (
-                    <div key={i} className="flex items-center justify-between text-sm bg-card rounded-xl px-3 py-2 border border-border/40">
-                      <span className="truncate max-w-[200px]">{f.name}</span>
-                      <span className="text-muted-foreground shrink-0">{fmt(f.size)}</span>
-                    </div>
-                  ))}
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-border/50 bg-muted/20 p-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{files.length} file(s) selected</p>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {files.map((f, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setSelectedIndex(i)}
+                        className={`w-full text-left flex items-center justify-between text-sm bg-card rounded-xl px-3 py-2 border transition-colors ${selectedIndex === i ? 'border-primary/70 bg-primary/5' : 'border-border/40 hover:border-primary/60'}`}>
+                        <span className="truncate max-w-[200px]">{f.name}</span>
+                        <span className="text-muted-foreground shrink-0">{fmt(f.size)}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                {selectedFile && selectedPreview && (
+                  <div className="rounded-2xl border border-border/50 bg-muted/20 p-4">
+                    <div className="flex flex-col gap-3 lg:flex-row">
+                      <div className="flex-1 rounded-2xl overflow-hidden bg-card border border-border/50">
+                        <img src={selectedPreview} alt={selectedFile.name} className="w-full h-72 object-contain" />
+                      </div>
+                      <div className="grid gap-3 w-full lg:w-72">
+                        <div className="rounded-2xl border border-border/50 bg-card p-3">
+                          <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground mb-1">Estimated output</p>
+                          <p className="text-xl font-semibold text-foreground">{fmt(estimatedSize)}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{qualityLabel}</p>
+                        </div>
+                        <div className="rounded-2xl border border-border/50 bg-card p-3">
+                          <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground mb-1">Current settings</p>
+                          <p className="text-sm text-foreground">Quality: {quality}%</p>
+                          <p className="text-sm text-foreground">Max dimension: {maxDim}px</p>
+                          <p className="text-sm text-muted-foreground mt-2">Tap each file to preview before compression.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

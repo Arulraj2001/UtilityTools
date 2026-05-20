@@ -12,11 +12,19 @@ const subscribers = [
   { table: 'site_settings', queries: ['settings'] },
 ];
 
-export function useSupabaseRealtime() {
+export function useSupabaseRealtime(enabled = false) {
   const queryClient = useQueryClient();
   const channelRef = useRef(null);
 
   useEffect(() => {
+    if (!enabled) {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+      return;
+    }
+
     if (channelRef.current) return;
 
     const channel = supabase
@@ -57,5 +65,5 @@ export function useSupabaseRealtime() {
         channelRef.current = null;
       }
     };
-  }, [queryClient]);
+  }, [queryClient, enabled]);
 }

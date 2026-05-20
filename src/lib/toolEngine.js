@@ -1,12 +1,10 @@
 import { evaluate, format as mathFormat } from 'mathjs';
 import { PDFDocument } from 'pdf-lib';
-import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
+import { getPdfJsLib } from './pdfWorkerSetup';
 
-// Initialize PDF.js worker
-if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-}
+// Get PDF.js with properly configured worker
+const pdfjsLib = getPdfJsLib();
 
 /**
  * Safe tool engine — no new Function(), uses mathjs for expressions.

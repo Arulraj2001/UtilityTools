@@ -4,15 +4,18 @@ import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { getIcon } from '@/lib/iconMap';
 
-export default function CategoriesGrid({ categories = [], tools = [] }) {
-  // Compute real counts from published tools
-  const countByCategory = useMemo(() => {
+export default function CategoriesGrid({ categories = [], tools = [], countByCategory = {} }) {
+  // Compute counts from any lightweight tools data if provided, and merge with incoming counts.
+  const countsFromTools = useMemo(() => {
+    if (!tools || tools.length === 0) return {};
     const map = {};
     tools.forEach(t => {
       if (t.category_id) map[t.category_id] = (map[t.category_id] || 0) + 1;
     });
     return map;
   }, [tools]);
+
+  const mergedCounts = useMemo(() => ({ ...countByCategory, ...countsFromTools }), [countByCategory, countsFromTools]);
 
   return (
     <section className="sm:py-20 opacity-100 rounded">
@@ -42,7 +45,7 @@ export default function CategoriesGrid({ categories = [], tools = [] }) {
                   </div>
                   <h3 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">{cat.name}</h3>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">{countByCategory[cat.id] ?? cat.tool_count ?? 0} tools</span>
+                    <span className="text-xs text-muted-foreground">{mergedCounts[cat.id] ?? cat.tool_count ?? 0} tools</span>
                     <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                   </div>
                 </Link>

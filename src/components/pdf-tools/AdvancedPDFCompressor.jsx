@@ -25,21 +25,11 @@ import PDFDropZone from './PDFDropZone';
 import { SingleFileCard } from './PDFFileCard';
 import { DownloadBtn, formatSize } from './PDFResultCard';
 import { cn } from '@/lib/utils';
+import { getPdfJsLib } from '@/lib/pdfWorkerSetup';
 
 // ── PDF.js loader ────────────────────────────────────────────────────────────
 function loadPdfJs() {
-  return new Promise((resolve, reject) => {
-    if (window.pdfjsLib) { resolve(window.pdfjsLib); return; }
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-    s.onload = () => {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      resolve(window.pdfjsLib);
-    };
-    s.onerror = reject;
-    document.head.appendChild(s);
-  });
+  return Promise.resolve(getPdfJsLib());
 }
 
 // ── Image processing helpers ─────────────────────────────────────────────────

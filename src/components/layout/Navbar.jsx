@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
   Menu,
@@ -59,9 +58,7 @@ export default function Navbar({ onSearchOpen }) {
 
   return (
     <>
-      <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
+      <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? 'glass shadow-lg py-2'
@@ -152,38 +149,30 @@ export default function Navbar({ onSearchOpen }) {
             </div>
           </div>
         </div>
-      </motion.nav>
+      </nav>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.2 }}
-            className="fixed top-20 left-0 right-0 z-40 px-4 md:hidden"
-          >
-            <div className="bg-background/95 backdrop-blur-xl border rounded-2xl shadow-2xl p-4 flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${
-                    location.pathname.startsWith(link.to)
-                      ? 'bg-primary/10 text-primary'
-                      : 'hover:bg-muted text-foreground'
-                  }`}
-                >
-                  <link.icon className="w-5 h-5" />
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {mobileOpen && (
+        <div className="fixed top-20 left-0 right-0 z-40 px-4 md:hidden transition-opacity duration-200 opacity-100">
+          <div className="bg-background/95 backdrop-blur-xl border rounded-2xl shadow-2xl p-4 flex flex-col gap-2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${
+                  location.pathname.startsWith(link.to)
+                    ? 'bg-primary/10 text-primary'
+                    : 'hover:bg-muted text-foreground'
+                }`}
+              >
+                <link.icon className="w-5 h-5" />
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </>
   );
 }

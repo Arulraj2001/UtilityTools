@@ -8,6 +8,8 @@ import ReactCrop, {
   centerCrop,
   makeAspectCrop,
 } from 'react-image-crop';
+import BeforeAfter from './BeforeAfter';
+import ImageStatChips from './ImageStatChips';
 
 import 'react-image-crop/dist/ReactCrop.css';
 
@@ -367,6 +369,22 @@ export default function ImageCropper() {
 
           {result ? (
             <div className="space-y-4">
+              <BeforeAfter
+                before={imageSrc}
+                after={result.url}
+                beforeLabel="Original"
+                afterLabel="Cropped"
+              />
+
+              <ImageStatChips
+                stats={[
+                  { label: 'Original', value: `${imageRef.current?.naturalWidth || '--'}×${imageRef.current?.naturalHeight || '--'}` },
+                  { label: 'Output', value: `${result.w}×${result.h}`, accent: true },
+                  { label: 'Format', value: aspect.circle ? 'PNG' : 'PNG' },
+                  { label: 'Quality', value: 'HD' },
+                ]}
+              />
+
               <div className="rounded-2xl border border-border/50 overflow-hidden bg-muted/20 p-4 flex items-center justify-center">
                 <img
                   src={result.url}
@@ -408,10 +426,7 @@ export default function ImageCropper() {
                   onClick={() =>
                     saveAs(
                       result.url,
-                      `cropped_${file.name.replace(
-                        /\.[^.]+$/,
-                        ''
-                      )}.png`
+                      `cropped_${file.name.replace(/\.[^.]+$/, '')}.png`
                     )
                   }
                   className="flex-1 rounded-xl gap-2 bg-green-600 hover:bg-green-700"

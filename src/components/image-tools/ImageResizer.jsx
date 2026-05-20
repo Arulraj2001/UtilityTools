@@ -2,6 +2,7 @@ import React, { useState, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import BeforeAfter from './BeforeAfter';
 
 import {
   Download,
@@ -215,13 +216,22 @@ export default function ImageResizer() {
           className="space-y-5"
         >
           {/* Preview */}
-          <div className="rounded-2xl overflow-hidden border border-border/50 bg-muted/20">
-            <img
-              src={result?.url || preview}
-              alt="preview"
-              className="w-full max-h-[420px] object-contain"
+          {result ? (
+            <BeforeAfter
+              before={preview}
+              after={result.url}
+              beforeLabel="Original"
+              afterLabel="Resized"
             />
-          </div>
+          ) : (
+            <div className="rounded-2xl overflow-hidden border border-border/50 bg-muted/20">
+              <img
+                src={preview}
+                alt="preview"
+                className="w-full max-h-[420px] object-contain"
+              />
+            </div>
+          )}
 
           {/* LIVE INFO */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

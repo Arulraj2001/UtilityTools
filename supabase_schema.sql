@@ -300,6 +300,23 @@ create index if not exists idx_ad_placements_created_at on ad_placements (create
 create index if not exists idx_site_settings_key on site_settings (key);
 
 -- =========================
+-- RPC: grouped counts for published tools
+-- Returns rows of (category_id, published_tool_count)
+-- Use: select * from get_published_tool_counts(NULL) OR rpc via Supabase client
+-- =========================
+create or replace function public.get_published_tool_counts(ids uuid[] DEFAULT NULL)
+  returns table(category_id uuid, published_tool_count bigint)
+as $$
+  select category_id, count(*) as published_tool_count
+  from tools
+  where status = 'published'
+    and (ids is null or category_id = any(ids))
+  group by category_id;
+$$ language sql stable security definer;
+
+grant execute on function public.get_published_tool_counts(uuid[]) to public;
+
+-- =========================
 -- ENABLE RLS
 -- =========================
 

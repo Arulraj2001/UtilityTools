@@ -27,11 +27,15 @@ const sortParams = (query, orderBy, ascending) => {
     return query;
   }
 
-  if (typeof orderBy === 'string' && orderBy.includes(',')) {
-    return orderBy.split(',').reduce((q, spec) => {
-      const [column, direction] = spec.trim().split(/\s+/);
-      return column ? q.order(column, { ascending: direction?.toLowerCase() !== 'desc' }) : q;
-    }, query);
+  if (typeof orderBy === 'string') {
+    return orderBy
+      .split(',')
+      .map((spec) => spec.trim())
+      .filter(Boolean)
+      .reduce((q, spec) => {
+        const [column, direction] = spec.split(/\s+/);
+        return column ? q.order(column, { ascending: direction ? direction.toLowerCase() !== 'desc' : ascending }) : q;
+      }, query);
   }
 
   return query.order(orderBy, { ascending });
@@ -65,6 +69,43 @@ export const getCategories = async ({ orderBy = 'sort_order', ascending = true, 
   query = sortParams(query, orderBy, ascending);
   if (limit) query = query.limit(limit);
   return handleResponse(await query);
+};
+
+// Lightweight per-category counts without fetching whole tool records.
+// Uses PostgREST head/count to request only counts per category.
+export const getCategoryCounts = async ({ categoryIds = [], published = true } = {}) => {
+  // If no category IDs provided, return empty map quickly
+  if (!Array.isArray(categoryIds) || categoryIds.length === 0) return {};
+
+  // Use a single RPC call to fetch grouped counts for published tools.
+  // The RPC `get_published_tool_counts` is defined in `supabase_schema.sql` and
+  // returns rows: { category_id, published_tool_count }.
+  try {
+    const params = { ids: categoryIds };
+    const { data, error } = await supabase.rpc('get_published_tool_counts', params);
+    if (error) {
+      console.error('getCategoryCounts RPC error:', error);
+      // fallback to per-category counting if RPC fails
+    } else if (Array.isArray(data)) {
+      const map = {};
+      data.forEach((r) => {
+        if (r && r.category_id) map[r.category_id] = Number(r.published_tool_count || 0);
+      });
+      return map;
+    }
+  } catch (err) {
+    console.error('getCategoryCounts unexpected error:', err);
+  }
+
+  // RPC unavailable or errored: fall back to per-category head count requests
+  const counts = {};
+  await Promise.all(categoryIds.map(async (id) => {
+    let q = supabase.from('tools').select('id', { count: 'exact', head: true }).eq('category_id', id);
+    if (published) q = q.eq('status', 'published');
+    const res = await q;
+    counts[id] = (res && typeof res.count === 'number') ? res.count : 0;
+  }));
+  return counts;
 };
 
 export const getBlogPosts = async ({ published = true, orderBy = 'created_at', ascending = false, limit = 200, includeCategory = true } = {}) => {

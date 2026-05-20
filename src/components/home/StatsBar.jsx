@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Zap, Shield, Users, Clock } from 'lucide-react';
 
 export default function StatsBar({ toolCount, userCount }) {
@@ -20,13 +19,7 @@ export default function StatsBar({ toolCount, userCount }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {STATS.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="flex items-center gap-3"
-            >
+            <div key={stat.label} className="flex items-center gap-3 transition-opacity duration-300" style={{ opacity: 1 }}>
               <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
                 <stat.icon className={`w-4 h-4 ${stat.color}`} />
               </div>
@@ -34,7 +27,7 @@ export default function StatsBar({ toolCount, userCount }) {
                 <p className="font-bold text-sm leading-none">{stat.value}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
