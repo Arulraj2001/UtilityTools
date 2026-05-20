@@ -104,6 +104,38 @@
   .gradient-bg {
     @apply bg-gradient-to-br from-primary/10 via-accent/5 to-background;
   }
+  .hero-visual-bg {
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(circle at 14% 20%, rgba(129, 90, 239, 0.18), transparent 24%),
+      radial-gradient(circle at 84% 16%, rgba(56, 189, 248, 0.12), transparent 18%),
+      radial-gradient(circle at 48% 64%, rgba(168, 85, 247, 0.08), transparent 25%),
+      radial-gradient(circle at 54% 50%, rgba(255, 255, 255, 0.16), transparent 22%);
+    background-blend-mode: screen, normal;
+  }
+  .hero-grid-pattern {
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 36px 36px;
+    opacity: 0.18;
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), transparent 35%);
+  }
+  .hero-search-panel {
+    background-color: hsl(var(--card) / 0.94);
+    backdrop-filter: blur(18px);
+    border: 1px solid hsl(var(--border) / 0.14);
+  }
+  .hero-search-panel::before {
+    content: '';
+    position: absolute;
+    right: 1rem;
+    top: 0.75rem;
+    width: 120px;
+    height: 110px;
+    background: radial-gradient(circle, rgba(129, 90, 239, 0.12), transparent 55%);
+    filter: blur(16px);
+    pointer-events: none;
+    opacity: 0.8;
+  }
   .hover-lift {
     @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
   }

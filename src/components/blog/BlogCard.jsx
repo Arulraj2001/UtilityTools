@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge'
 export default function BlogCard({ post, index = 0 }) {
   if (!post) return null
 
+  const imageUrl = post.featured_image || post.og_image
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -36,15 +38,35 @@ export default function BlogCard({ post, index = 0 }) {
             </div>
           )}
 
-          {/* Title */}
-          <h2 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-2">
-            {post.title}
-          </h2>
+          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_112px] items-start mb-4">
+            <div className="min-w-0">
+              {/* Title */}
+              <h2 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                {post.title}
+              </h2>
 
-          {/* Excerpt */}
-          <p className="text-muted-foreground text-sm line-clamp-2 mb-4 flex-grow">
-            {post.excerpt}
-          </p>
+              {/* Excerpt */}
+              <p className="text-muted-foreground text-sm line-clamp-2">
+                {post.excerpt}
+              </p>
+            </div>
+
+            <div className="w-full sm:w-28 h-28 rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-border/40 flex items-center justify-center">
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={post.title || 'Blog featured image'}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-[11px] text-muted-foreground px-2 text-center">
+                  No image available
+                </span>
+              )}
+            </div>
+          </div>
 
           {/* Metadata */}
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-4 py-3 border-t border-border/50">

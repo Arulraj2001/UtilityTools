@@ -19,11 +19,12 @@ export default function HeroSection({ toolCount }) {
   return (
     <section className="relative overflow-hidden py-24 sm:py-32">
       {/* Background */}
-      <div className="absolute inset-0 gradient-bg mt-5" />
+      <div className="absolute inset-0 hero-visual-bg" />
+      <div className="absolute inset-0 hero-grid-pattern pointer-events-none" />
+      <div className="hidden md:block absolute top-10 left-[8%] w-72 h-72 rounded-full bg-primary/12 blur-3xl animate-float pointer-events-none" />
+      <div className="hidden lg:block absolute top-16 right-[12%] w-80 h-80 rounded-full bg-accent/10 blur-3xl animate-floatBlob pointer-events-none" style={{ animationDelay: '1.8s' }} />
+      <div className="hidden lg:block absolute bottom-8 left-[15%] w-96 h-96 rounded-full bg-slate-200/5 blur-3xl animate-float pointer-events-none" />
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-      <div className="absolute top-20 left-[10%] w-80 h-80 bg-primary/8 rounded-full blur-3xl animate-float pointer-events-none" />
-      <div className="absolute bottom-0 right-[5%] w-96 h-96 bg-accent/8 rounded-full blur-3xl animate-float pointer-events-none" style={{ animationDelay: '3s' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
         <motion.div
@@ -43,11 +44,14 @@ export default function HeroSection({ toolCount }) {
           </motion.div>
 
           {/* Headline */}
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.05]">
-            All-in-one
-            <br />
-            <span className="gradient-text">utility platform</span>
-          </h1>
+          <div className="relative inline-flex items-center justify-center w-full mb-6">
+            <div className="absolute inset-x-0 -top-4 h-28 rounded-full bg-gradient-to-b from-primary/15 to-transparent blur-3xl opacity-90 pointer-events-none" />
+            <h1 className="relative text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05]">
+              All-in-one
+              <br />
+              <span className="gradient-text">utility platform</span>
+            </h1>
+          </div>
 
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             PDF tools, image converters, calculators, text utilities and developer tools — 
@@ -58,15 +62,15 @@ export default function HeroSection({ toolCount }) {
           <form onSubmit={handleSearch} className="max-w-xl mx-auto mb-6">
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-accent/30 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-              <div className="relative flex items-center bg-card rounded-2xl border border-border shadow-lg hover:shadow-xl transition-shadow premium-card panel-highlight">
-                <Search className="w-5 h-5 text-muted-foreground ml-4 shrink-0" />
+              <div className="relative flex items-center bg-card/95 rounded-[1.75rem] border border-white/10 shadow-2xl shadow-primary/10 transition-shadow duration-300 overflow-hidden hero-search-panel">
+                <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-primary/15 to-transparent blur-3xl opacity-80 pointer-events-none" />
+                <Search className="w-5 h-5 text-muted-foreground ml-4 shrink-0 z-10" />
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search for any tool..."
-                  className="border-0 focus-visible:ring-0 text-base h-13 bg-transparent py-3.5" />
-                
-                <Button type="submit" className="mr-1.5 rounded-xl h-9 px-5 bg-primary hover:bg-primary/90 shadow-sm">
+                  className="border-0 focus-visible:ring-0 text-base h-13 bg-transparent py-3.5 relative z-10" />
+                <Button type="submit" className="mr-1.5 rounded-xl h-9 px-5 bg-primary hover:bg-primary/90 shadow-sm z-10">
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
