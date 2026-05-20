@@ -29,6 +29,20 @@ create index if not exists idx_blog_posts_category_id on blog_posts (category_id
 create index if not exists idx_blog_posts_views_count on blog_posts (views_count desc);
 create index if not exists idx_blog_categories_sort_order on blog_categories (sort_order);
 
+-- RPC: grouped counts for published tools
+-- Returns rows of (category_id, published_tool_count)
+create or replace function public.get_published_tool_counts(ids uuid[] DEFAULT NULL)
+  returns table(category_id uuid, published_tool_count bigint)
+as $$
+  select category_id, count(*) as published_tool_count
+  from tools
+  where status = 'published'
+    and (ids is null or category_id = any(ids))
+  group by category_id;
+$$ language sql stable security definer;
+
+grant execute on function public.get_published_tool_counts(uuid[]) to public;
+
 create table if not exists workflow_pages (
   id uuid primary key default uuid_generate_v4(),
   title text not null,

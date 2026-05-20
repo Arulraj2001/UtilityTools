@@ -1,7 +1,38 @@
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getAdPlacements } from '@/api/supabaseApi'
+
+const ADSENSE_CLIENT = 'ca-pub-1603942692726452'
+const ADSENSE_SRC = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`
+let adsenseScriptLoadPromise = null
+
+const loadAdsenseScript = () => {
+  if (typeof window === 'undefined') return Promise.resolve()
+  if (window.adsbygoogle) return Promise.resolve()
+  if (adsenseScriptLoadPromise) return adsenseScriptLoadPromise
+
+  adsenseScriptLoadPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script')
+    script.src = ADSENSE_SRC
+    script.async = true
+    script.crossOrigin = 'anonymous'
+    script.onload = () => resolve()
+    script.onerror = () => reject(new Error('Failed to load AdSense script'))
+    document.head.appendChild(script)
+  })
+
+  return adsenseScriptLoadPromise
+}
+
+const scheduleIdle = (callback) => {
+  if (typeof window === 'undefined') return
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(() => callback(), { timeout: 2000 })
+  } else {
+    window.setTimeout(callback, 1500)
+  }
+}
 
 /**
  * @param {string} placement
@@ -20,13 +51,13 @@ const inferPageType = (placement, pathname) => {
 }
 
 /**
- * @param {{code:string}} props
+ * @param {{code:string,active:boolean}} props
  */
-function AdHtml({ code }) {
+function AdHtml({ code, active }) {
   const containerRef = useRef(/** @type {HTMLDivElement | null} */ (null))
 
   useEffect(() => {
-    if (!containerRef.current) return
+    if (!containerRef.current || !active) return
     containerRef.current.innerHTML = code || ''
 
     const scripts = Array.from(containerRef.current.querySelectorAll('script'))
@@ -42,7 +73,7 @@ function AdHtml({ code }) {
         oldScript.parentNode.replaceChild(script, oldScript)
       }
     })
-  }, [code])
+  }, [code, active])
 
   return <div ref={containerRef} className="w-full" />
 }
@@ -53,11 +84,18 @@ function AdHtml({ code }) {
 export default function AdBanner({ placement = 'in_content', pageType, className = '' }) {
   const location = useLocation()
   const targetPageType = useMemo(() => pageType || inferPageType(placement, location.pathname), [placement, pageType, location.pathname])
+  const containerRef = useRef(/** @type {HTMLDivElement | null} */ (null))
+  const [shouldLoadAd, setShouldLoadAd] = useState(false)
+  const [activeAdRender, setActiveAdRender] = useState(false)
 
   const { data: ads = [] } = useQuery({
     queryKey: ['ad-placements', placement, targetPageType],
     queryFn: () => getAdPlacements({ orderBy: 'created_at', ascending: false, limit: 50, isActive: true }),
     retry: false,
+    staleTime: 1000 * 60 * 5,
+    cacheTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
   })
 
   const matchingAd = useMemo(() => {
@@ -67,11 +105,56 @@ export default function AdBanner({ placement = 'in_content', pageType, className
     })
   }, [ads, placement, targetPageType])
 
+  useEffect(() => {
+    if (!matchingAd?.ad_code || shouldLoadAd) return
+    if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
+      setShouldLoadAd(true)
+      return
+    }
+
+    const node = containerRef.current
+    if (!node) {
+      setShouldLoadAd(true)
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setShouldLoadAd(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '400px' }
+    )
+
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [matchingAd?.ad_code, shouldLoadAd])
+
+  useEffect(() => {
+    if (!shouldLoadAd || !matchingAd?.ad_code) return
+    scheduleIdle(() => {
+      loadAdsenseScript()
+        .catch(() => {
+          // If AdSense fails, still render lightweight ad markup below.
+        })
+        .finally(() => setActiveAdRender(true))
+    })
+  }, [shouldLoadAd, matchingAd?.ad_code])
+
   return (
-    <div className={`w-full flex items-center justify-center ${className}`}>
+    <div ref={containerRef} className={`w-full flex items-center justify-center ${className}`}>
       <div className="w-full max-w-4xl rounded-xl p-6 border border-border/50 bg-card shadow-sm">
         {matchingAd?.ad_code ? (
-          <AdHtml code={matchingAd.ad_code} />
+          shouldLoadAd ? (
+            <AdHtml code={matchingAd.ad_code} active={activeAdRender} />
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Advertisement</p>
+              <p className="mt-3 text-sm text-muted-foreground">Ad space loading soon</p>
+            </div>
+          )
         ) : (
           <div className="text-center py-8">
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Advertisement</p>
