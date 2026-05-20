@@ -43,11 +43,15 @@ export default function SplashScreen({ duration = 800 }) {
         <div className="absolute w-48 h-48 rounded-full border-[4px] border-white/20 animate-pulse"></div>
 
         {/* Logo */}
-        <img
-          src="/favicon-192x192.png"
-          alt="Utility Tools Logo"
-          className="w-40 h-40 relative z-10 animate-bounce drop-shadow-[0_10px_30px_rgba(91,33,182,0.5)]"
-        />
+        <picture className="relative z-10">
+          <source srcSet="/logo.avif" type="image/avif" />
+          <source srcSet="/logo.webp" type="image/webp" />
+          <img
+            src="/logo.svg"
+            alt="Utility Tools Logo"
+            className="w-40 h-40 animate-bounce drop-shadow-[0_10px_30px_rgba(91,33,182,0.5)]"
+          />
+        </picture>
       </div>
 
       {/* Brand Text */}
