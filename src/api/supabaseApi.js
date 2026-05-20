@@ -256,3 +256,42 @@ export const getTotalUsageCount = async () => {
   const data = handleResponse(result);
   return data.reduce((total, tool) => total + (tool.usage_count || 0), 0);
 };
+
+export const logAnalyticsEvent = async (eventType, eventData) => {
+  if (!eventType) return [];
+
+  const result = await supabase.from('analytics_events').insert([{
+    event_type: eventType,
+    event_data: eventData,
+    page_url: eventData.page_url || eventData.path || '',
+    session_id: eventData.session_id || null,
+    user_agent: eventData.user_agent || null,
+    device_type: eventData.deviceType || eventData.device_type || null,
+    browser: eventData.browser || null,
+  }]);
+
+  if (result.error) {
+    console.warn('Analytics event insert failed:', result.error.message);
+    return [];
+  }
+
+  return result.data || [];
+};
+
+export const getAnalyticsEvents = async ({ limit = 1000, sinceDays = 90, eventType = null } = {}) => {
+  const now = new Date();
+  const fromDate = new Date(now.setDate(now.getDate() - sinceDays)).toISOString();
+  let query = supabase.from('analytics_events').select('*').gte('created_at', fromDate).order('created_at', { ascending: false });
+
+  if (eventType) query = query.eq('event_type', eventType);
+  if (limit) query = query.limit(limit);
+
+  const result = await query;
+
+  if (result.error) {
+    console.warn('Analytics query failed:', result.error.message);
+    return [];
+  }
+
+  return handleResponse(result);
+};

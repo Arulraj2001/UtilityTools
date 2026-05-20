@@ -20,6 +20,7 @@ import AdBanner from '@/components/shared/AdBanner'
 import ToolSEO from '@/components/seo/ToolSEO'
 import { useLocalStorage } from '@/lib/useLocalStorage'
 import { getTools, getCategories, updateToolUsage, getBlogPosts } from '@/api/supabaseApi'
+import { trackToolEvent } from '@/lib/analytics'
 import ToolContentSections
 from '@/components/seo/ToolContentSections'
 
@@ -138,18 +139,31 @@ export default function ToolPage() {
 
     if (tool?.id) {
       updateToolUsage(tool.id, (tool.usage_count || 0) + 1).catch(() => {})
+      trackToolEvent(tool, 'tool_open').catch(() => {})
     }
   }, [tool?.id])
 
   const calculate = useCallback(async () => {
     if (!tool) return
     setLoading(true)
+    const startTime = Date.now()
+
     try {
       const res = await runTool(tool, inputs)
       setResult(res)
+      trackToolEvent(tool, 'tool_run', {
+        success: !res?.error,
+        duration_ms: Date.now() - startTime,
+        input_count: Object.keys(inputs).length,
+      }).catch(() => {})
     } catch (error) {
       console.error('Calculation error:', error)
       setResult({ error: error.message || 'Calculation failed' })
+      trackToolEvent(tool, 'tool_run', {
+        success: false,
+        duration_ms: Date.now() - startTime,
+        error: error.message,
+      }).catch(() => {})
     } finally {
       setLoading(false)
     }

@@ -4,6 +4,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Search, Wrench, ArrowRight } from 'lucide-react'
 import { searchTools } from '@/api/supabaseApi'
+import { trackWorkflowSearch } from '@/lib/analytics'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function SearchModal({ open, onClose }) {
@@ -30,6 +31,7 @@ export default function SearchModal({ open, onClose }) {
       const tools = await searchTools(query)
       setResults(tools || [])
       setLoading(false)
+      trackWorkflowSearch({ query, resultCount: tools?.length || 0, source: 'quick_search' })
     }, 300)
 
     return () => clearTimeout(timer)

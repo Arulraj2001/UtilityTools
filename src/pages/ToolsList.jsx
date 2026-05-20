@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Search, Filter } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { getTools, getCategories } from '@/api/supabaseApi'
+import { trackWorkflowSearch } from '@/lib/analytics'
 import ToolCard from '../components/shared/ToolCard'
 import AdBanner from '../components/shared/AdBanner'
 
@@ -30,6 +31,20 @@ export default function ToolsList() {
       return matchesSearch && matchesCat
     })
   }, [tools, search, selectedCategory])
+
+  useEffect(() => {
+    if (!search.trim()) return
+
+    const timer = setTimeout(() => {
+      trackWorkflowSearch({
+        query: search.trim(),
+        resultCount: filtered.length,
+        source: selectedCategory === 'all' ? 'tools_list' : 'tools_list_category',
+      })
+    }, 800)
+
+    return () => clearTimeout(timer)
+  }, [search, filtered.length, selectedCategory])
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
