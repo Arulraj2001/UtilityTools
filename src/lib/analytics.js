@@ -19,7 +19,7 @@ const getSessionId = () => {
 const getTrafficSource = (referrer = '') => {
   const lower = (referrer || '').toLowerCase()
   if (!lower) return 'direct'
-  if (/google\.|bing\.|yahoo\.|duckduckgo\.|baidu\./.test(lower)) return 'organic'
+  if (/google\.|bing\.|yahoo\.|duckduckgo\.|baidu\./.test(lower)) return 'organic'
   if (/\bfacebook\.com|twitter\.com|linkedin\.com|pinterest\.com|instagram\.com|t\.co\b/.test(lower)) return 'social'
   if (/\/t\//.test(lower)) return 'referral'
   if (/localhost|127\.0\.0\.1/.test(lower)) return 'internal'
@@ -32,7 +32,7 @@ const getDeviceInfo = () => {
   }
 
   const ua = navigator.userAgent || ''
-  const browser = /(Edg|Edge)\//.test(ua)
+  const browser = /(Edg|Edge)\//.test(ua)
     ? 'edge'
     : /\b(OPR|Opera)\//.test(ua)
       ? 'opera'
@@ -54,6 +54,12 @@ const getDeviceInfo = () => {
 const getPageContext = (path = '') => {
   if (path.startsWith('/tool/')) {
     return { pageType: 'tool', pageSlug: path.replace('/tool/', '') }
+  }
+  if (path === '/workflow') {
+    return { pageType: 'workflow_index' }
+  }
+  if (path.startsWith('/workflow/')) {
+    return { pageType: 'workflow_page', pageSlug: path.replace('/workflow/', '') }
   }
   if (path.startsWith('/blog/')) {
     return { pageType: 'blog_post', pageSlug: path.replace('/blog/', '') }

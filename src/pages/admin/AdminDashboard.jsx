@@ -38,7 +38,7 @@ import {
   Pie,
   Cell,
 } from 'recharts'
-import { getToolsWithCategories, getBlogPosts, getCategories, getAnalyticsEvents } from '@/api/supabaseApi'
+import { getToolsWithCategories, getBlogPosts, getCategories, getAnalyticsEvents, getWorkflowPages } from '@/api/supabaseApi'
 
 const formatNumber = (value) => {
   if (typeof value !== 'number') return value
@@ -107,6 +107,16 @@ const labelFormatter = (value) => {
   return value.length > 15 ? `${value.slice(0, 15)}...` : value
 }
 
+const getWorkflowEventSlug = (event) => {
+  const slug = event.event_data?.pageSlug || ''
+  if (slug) return String(slug).replace(/^\//, '').replace(/\/$/, '')
+  const path = event.page_url || event.event_data?.page_url || ''
+  if (typeof path === 'string' && path.startsWith('/workflow/')) {
+    return path.replace('/workflow/', '').replace(/\/$/, '')
+  }
+  return ''
+}
+
 export default function AdminDashboard() {
   const { data: tools = [] } = useQuery({
     queryKey: ['all-tools'],
@@ -123,6 +133,13 @@ export default function AdminDashboard() {
     queryFn: () => getCategories({ orderBy: 'sort_order', ascending: true, limit: 200 }),
   })
 
+  const { data: workflowPages = [] } = useQuery({
+    queryKey: ['workflow-pages-admin'],
+    queryFn: () => getWorkflowPages({ published: false, orderBy: 'updated_at', ascending: false, limit: 500 }),
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  })
+
   const { data: analyticsEvents = [] } = useQuery({
     queryKey: ['analytics-events'],
     queryFn: () => getAnalyticsEvents({ limit: 1200, sinceDays: 90 }),
@@ -132,11 +149,121 @@ export default function AdminDashboard() {
 
   const trafficEvents = analyticsEvents.filter((event) => event.event_type === 'page_view')
   const searchEvents = analyticsEvents.filter((event) => event.event_type === 'workflow_search')
+  const workflowOpenEvents = analyticsEvents.filter((event) => event.event_type === 'workflow_open')
   const toolEvents = analyticsEvents.filter((event) => event.event_type === 'tool_event')
+  const pageViews = trafficEvents.length
+
+  const workflowTrafficEvents = trafficEvents.filter((event) => ['workflow_page', 'workflow_index'].includes(event.event_data?.pageType))
+  const workflowPageEvents = trafficEvents.filter((event) => event.event_data?.pageType === 'workflow_page')
+  const workflowIndexEvents = trafficEvents.filter((event) => event.event_data?.pageType === 'workflow_index')
+  const workflowTotalViews = workflowTrafficEvents.length
+  const workflowShare = pageViews ? Math.round((workflowTotalViews / pageViews) * 100) : 0
+  const workflowSourceCounts = workflowTrafficEvents.reduce((acc, event) => {
+    const source = event.event_data?.traffic_source || 'direct'
+    acc[source] = (acc[source] || 0) + 1
+    return acc
+  }, {})
+  const topWorkflowSources = Object.entries(workflowSourceCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([source, count]) => ({ source, count }))
+  const workflowSearchSeries = buildSeries(searchEvents, 21)
+  const workflowGrowthSeries = buildSeries(workflowTrafficEvents, 21)
+  const workflowLast7 = workflowGrowthSeries.slice(-7).reduce((sum, item) => sum + item.count, 0)
+  const workflowPrev7 = workflowGrowthSeries.slice(-14, -7).reduce((sum, item) => sum + item.count, 0)
+  const workflowWeeklyGrowth = getPercentChange(workflowLast7, workflowPrev7)
+
+  const workflowPageMap = workflowPages.reduce((acc, page) => {
+    if (page?.slug) acc[page.slug] = page
+    return acc
+  }, {})
+
+  const workflowPageStats = workflowPageEvents.reduce((acc, event) => {
+    const slug = getWorkflowEventSlug(event)
+    if (!slug) return acc
+
+    if (!acc[slug]) {
+      acc[slug] = {
+        slug,
+        title: workflowPageMap[slug]?.title || slug,
+        views: 0,
+        sessions: new Set(),
+        durationSum: 0,
+        durationCount: 0,
+        entrySessions: 0,
+        convertSessions: 0,
+        bounceSessions: 0,
+      }
+    }
+
+    acc[slug].views += 1
+    if (event.session_id) acc[slug].sessions.add(event.session_id)
+    return acc
+  }, {})
+
+  const sessionGroups = trafficEvents.reduce((acc, event) => {
+    const sessionId = event.session_id || `anon-${event.page_url || event.event_data?.page_url || event.created_at}`
+    acc[sessionId] = acc[sessionId] || []
+    acc[sessionId].push(event)
+    return acc
+  }, {})
+
+  Object.values(sessionGroups).forEach((events) => {
+    const sorted = [...events].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    const duration = Math.max(0, (new Date(sorted[sorted.length - 1]?.created_at).getTime() - new Date(sorted[0]?.created_at).getTime()) / 1000)
+    const firstSlug = getWorkflowEventSlug(sorted[0])
+    const slugSet = [...new Set(sorted.map(getWorkflowEventSlug).filter(Boolean))]
+    const isBounce = sorted.length === 1
+
+    slugSet.forEach((slug) => {
+      const stats = workflowPageStats[slug]
+      if (!stats) return
+
+      stats.durationSum += duration
+      stats.durationCount += 1
+      if (firstSlug === slug) {
+        stats.entrySessions += 1
+        if (sorted.length > 1) stats.convertSessions += 1
+        if (isBounce) stats.bounceSessions += 1
+      }
+    })
+  })
+
+  const topWorkflowPages = Object.values(workflowPageStats)
+    .map((stats) => {
+      const avgSessionDuration = stats.durationCount ? Math.round(stats.durationSum / stats.durationCount) : 0
+      const engagementLevel = avgSessionDuration >= 120 ? 'High' : avgSessionDuration >= 60 ? 'Medium' : 'Low'
+      const bounceRate = stats.entrySessions ? Math.round((stats.bounceSessions / stats.entrySessions) * 100) : 0
+      return {
+        ...stats,
+        uniqueVisitors: stats.sessions.size,
+        avgSessionDuration,
+        engagementLevel,
+        bounceRate,
+      }
+    })
+    .sort((a, b) => b.views - a.views)
+    .slice(0, 6)
+
+  const highestEngagementWorkflowPages = [...topWorkflowPages]
+    .filter((page) => page.avgSessionDuration > 0)
+    .sort((a, b) => b.avgSessionDuration - a.avgSessionDuration)
+    .slice(0, 4)
+
+  const lowestBounceWorkflowPages = [...topWorkflowPages]
+    .filter((page) => page.entrySessions > 0)
+    .sort((a, b) => a.bounceRate - b.bounceRate)
+    .slice(0, 4)
+
+  const topConvertingWorkflowPages = [...topWorkflowPages]
+    .filter((page) => page.convertSessions > 0)
+    .sort((a, b) => b.convertSessions - a.convertSessions)
+    .slice(0, 4)
+
+  const workflowOpenCount = workflowOpenEvents.length
 
   const totalUsage = tools.reduce((sum, tool) => sum + (tool.usage_count || 0), 0)
   const uniqueVisitors = new Set(trafficEvents.map((event) => event.session_id || 'anonymous')).size
-  const pageViews = trafficEvents.length
   const organicTraffic = trafficEvents.filter((event) => event.event_data?.traffic_source === 'organic').length
 
   const sessions = Object.values(
@@ -363,6 +490,188 @@ export default function AdminDashboard() {
             </Card>
           </motion.div>
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Link2 className="w-4 h-4 text-primary" />
+              Workflow Traffic Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-3xl border border-border/70 bg-muted p-4">
+                <p className="text-sm text-muted-foreground">Workflow views</p>
+                <p className="mt-2 text-2xl font-semibold">{formatNumber(workflowTotalViews)}</p>
+              </div>
+              <div className="rounded-3xl border border-border/70 bg-muted p-4">
+                <p className="text-sm text-muted-foreground">Traffic share</p>
+                <p className="mt-2 text-2xl font-semibold">{workflowShare}%</p>
+              </div>
+              <div className="rounded-3xl border border-border/70 bg-muted p-4">
+                <p className="text-sm text-muted-foreground">Weekly growth</p>
+                <p className={`mt-2 text-2xl font-semibold ${workflowWeeklyGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {workflowWeeklyGrowth >= 0 ? '+' : ''}{workflowWeeklyGrowth}%
+                </p>
+              </div>
+              <div className="rounded-3xl border border-border/70 bg-muted p-4">
+                <p className="text-sm text-muted-foreground">Workflow opens</p>
+                <p className="mt-2 text-2xl font-semibold">{formatNumber(workflowOpenCount)}</p>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-border/70 bg-background p-4">
+              <p className="text-sm text-muted-foreground mb-3">Top traffic sources</p>
+              <div className="space-y-3">
+                {topWorkflowSources.length > 0 ? topWorkflowSources.map((source) => (
+                  <div key={source.source} className="flex items-center justify-between text-sm text-foreground">
+                    <span>{source.source}</span>
+                    <span className="text-muted-foreground">{formatNumber(source.count)}</span>
+                  </div>
+                )) : (
+                  <p className="text-sm text-muted-foreground">No workflow traffic sources have been captured yet.</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Search className="w-4 h-4 text-primary" />
+              Workflow Search Analytics
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-3xl border border-border/70 bg-muted p-4">
+                <p className="text-sm text-muted-foreground">Failed workflow searches</p>
+                <p className="mt-2 text-2xl font-semibold">{failedSearchCount}</p>
+              </div>
+              <div className="rounded-3xl border border-border/70 bg-muted p-4">
+                <p className="text-sm text-muted-foreground">Search phrases tracked</p>
+                <p className="mt-2 text-2xl font-semibold">{formatNumber(topSearches.length)}</p>
+              </div>
+            </div>
+            <div className="rounded-3xl border border-border/70 bg-background p-4">
+              <p className="text-sm text-muted-foreground mb-3">Discovery trend</p>
+              <div className="h-52">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={workflowSearchSeries} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="workflowSearchGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#38bdf8" stopOpacity={0.4} />
+                        <stop offset="100%" stopColor="#38bdf8" stopOpacity={0.05} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                    <YAxis hide />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey="count" stroke="#38bdf8" strokeWidth={2} fill="url(#workflowSearchGradient)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-primary" />
+              Top Workflow Pages
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {topWorkflowPages.length > 0 ? (
+              topWorkflowPages.map((page) => (
+                <div key={page.slug} className="rounded-3xl border border-border/70 bg-muted p-4">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{page.title}</p>
+                      <p className="text-xs text-muted-foreground">{page.slug}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">{formatNumber(page.views)} views</p>
+                      <p className="text-xs text-muted-foreground">{page.uniqueVisitors} visitors</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-3 text-xs text-muted-foreground">
+                    <div className="rounded-2xl bg-background p-3">
+                      <p>Engagement</p>
+                      <p className="mt-1 text-foreground font-semibold">{page.engagementLevel}</p>
+                    </div>
+                    <div className="rounded-2xl bg-background p-3">
+                      <p>Avg session</p>
+                      <p className="mt-1 text-foreground font-semibold">{formatDuration(page.avgSessionDuration)}</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">Workflow page analytics will appear once workflow views are tracked.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Activity className="w-4 h-4 text-primary" />
+              Workflow Engagement Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-4">
+              <div className="rounded-3xl border border-border/70 bg-muted p-4">
+                <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">Highest engagement</p>
+                {highestEngagementWorkflowPages.length > 0 ? (
+                  highestEngagementWorkflowPages.map((page) => (
+                    <div key={page.slug} className="mt-3 flex items-center justify-between gap-3 text-sm">
+                      <span className="truncate">{page.title}</span>
+                      <span className="font-semibold">{formatDuration(page.avgSessionDuration)}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="mt-3 text-sm text-muted-foreground">No engagement data available yet.</p>
+                )}
+              </div>
+
+              <div className="rounded-3xl border border-border/70 bg-muted p-4">
+                <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">Lowest bounce workflow pages</p>
+                {lowestBounceWorkflowPages.length > 0 ? (
+                  lowestBounceWorkflowPages.map((page) => (
+                    <div key={page.slug} className="mt-3 flex items-center justify-between gap-3 text-sm">
+                      <span className="truncate">{page.title}</span>
+                      <span className="font-semibold">{page.bounceRate}%</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="mt-3 text-sm text-muted-foreground">No bounce metrics are available yet.</p>
+                )}
+              </div>
+
+              <div className="rounded-3xl border border-border/70 bg-muted p-4">
+                <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">Top converting entry pages</p>
+                {topConvertingWorkflowPages.length > 0 ? (
+                  topConvertingWorkflowPages.map((page) => (
+                    <div key={page.slug} className="mt-3 flex items-center justify-between gap-3 text-sm">
+                      <span className="truncate">{page.title}</span>
+                      <span className="font-semibold">{page.convertSessions}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="mt-3 text-sm text-muted-foreground">No conversion paths captured yet.</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
