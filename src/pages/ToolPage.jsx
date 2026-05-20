@@ -19,7 +19,7 @@ import ToolCard from '@/components/shared/ToolCard'
 import AdBanner from '@/components/shared/AdBanner'
 import ToolSEO from '@/components/seo/ToolSEO'
 import { useLocalStorage } from '@/lib/useLocalStorage'
-import { getTools, getCategories, updateToolUsage, getBlogPosts } from '@/api/supabaseApi'
+import { getTools, getCategories, updateToolUsage, getBlogPosts, getWorkflowPages } from '@/api/supabaseApi'
 import { trackToolEvent } from '@/lib/analytics'
 import ToolContentSections
 from '@/components/seo/ToolContentSections'
@@ -55,6 +55,13 @@ export default function ToolPage() {
   const { data: posts = [] } = useQuery({
     queryKey: ['blog-published', slug],
     queryFn: () => getBlogPosts({ published: true, orderBy: 'created_at', ascending: false, limit: 50 }),
+    staleTime: 5 * 60 * 1000,
+    enabled: !!slug,
+  })
+
+  const { data: workflows = [] } = useQuery({
+    queryKey: ['workflows-published', slug],
+    queryFn: () => getWorkflowPages({ published: true, orderBy: 'updated_at', ascending: false, limit: 12 }),
     staleTime: 5 * 60 * 1000,
     enabled: !!slug,
   })
@@ -362,6 +369,30 @@ export default function ToolPage() {
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>{new Date(related.created_at).toLocaleDateString()}</span>
                           </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Related Workflows */}
+            {workflows.length > 0 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="mt-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-1 h-6 bg-accent rounded-full"></div>
+                  <h2 className="text-xl font-semibold">Popular Workflows</h2>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {workflows.slice(0, 4).map(workflow => (
+                    <Link key={workflow.id} to={`/workflow/${encodeURIComponent(workflow.slug)}`} className="group block rounded-xl border border-border bg-card hover:border-accent/40 hover:shadow-md transition-all duration-300 overflow-hidden premium-card panel-highlight">
+                      <div className="p-4">
+                        <p className="text-sm font-semibold mb-2 group-hover:text-accent transition-colors line-clamp-2">{workflow.title}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{workflow.excerpt || 'Step-by-step workflow guide...'}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground group-hover:text-accent transition-colors">
+                          <span>Learn more</span>
+                          <ArrowRight className="w-3 h-3" />
                         </div>
                       </div>
                     </Link>

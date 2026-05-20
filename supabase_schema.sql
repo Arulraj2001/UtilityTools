@@ -124,6 +124,56 @@ alter table if exists blog_posts add column if not exists seo_keywords text;
 alter table if exists blog_posts add column if not exists meta_robots text default 'index,follow';
 
 -- =========================
+-- WORKFLOW PAGES
+-- =========================
+
+create table if not exists workflow_pages (
+  id uuid primary key default uuid_generate_v4(),
+  title text not null,
+  slug text not null unique,
+  excerpt text,
+  content text,
+  category text,
+  tags jsonb,
+  seo_title text,
+  seo_description text,
+  seo_keywords text,
+  featured_image text,
+  canonical_url text,
+  faq_items jsonb,
+  related_tools jsonb,
+  related_blogs jsonb,
+  status text default 'draft',
+  is_featured boolean default false,
+  view_count int default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table if exists workflow_pages add column if not exists excerpt text;
+alter table if exists workflow_pages add column if not exists content text;
+alter table if exists workflow_pages add column if not exists category text;
+alter table if exists workflow_pages add column if not exists tags jsonb;
+alter table if exists workflow_pages add column if not exists seo_title text;
+alter table if exists workflow_pages add column if not exists seo_description text;
+alter table if exists workflow_pages add column if not exists seo_keywords text;
+alter table if exists workflow_pages add column if not exists featured_image text;
+alter table if exists workflow_pages add column if not exists canonical_url text;
+alter table if exists workflow_pages add column if not exists faq_items jsonb;
+alter table if exists workflow_pages add column if not exists related_tools jsonb;
+alter table if exists workflow_pages add column if not exists related_blogs jsonb;
+alter table if exists workflow_pages add column if not exists status text default 'draft';
+alter table if exists workflow_pages add column if not exists is_featured boolean default false;
+alter table if exists workflow_pages add column if not exists view_count int default 0;
+alter table if exists workflow_pages add column if not exists created_at timestamptz not null default now();
+alter table if exists workflow_pages add column if not exists updated_at timestamptz not null default now();
+
+create index if not exists idx_workflow_pages_status on workflow_pages (status);
+create index if not exists idx_workflow_pages_updated_at on workflow_pages (updated_at desc);
+create index if not exists idx_workflow_pages_featured on workflow_pages (is_featured);
+create index if not exists idx_workflow_pages_view_count on workflow_pages (view_count desc);
+
+-- =========================
 -- REDIRECTS
 -- =========================
 
@@ -256,6 +306,7 @@ create index if not exists idx_site_settings_key on site_settings (key);
 alter table if exists tools enable row level security;
 alter table if exists categories enable row level security;
 alter table if exists blog_posts enable row level security;
+alter table if exists workflow_pages enable row level security;
 alter table if exists blog_categories enable row level security;
 alter table if exists public.admin_users enable row level security;
 alter table if exists redirects enable row level security;

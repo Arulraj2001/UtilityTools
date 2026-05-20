@@ -6,6 +6,7 @@ const subscribers = [
   { table: 'tools', queries: ['tools-published', 'tools-all', 'all-tools', 'categories', 'blog-published'] },
   { table: 'categories', queries: ['categories', 'tools-published', 'tools-all', 'all-tools'] },
   { table: 'blog_posts', queries: ['blog-published', 'all-posts'] },
+  { table: 'workflow_pages', queries: ['workflow-pages', 'workflow-pages-public'] },
   { table: 'redirects', queries: ['redirects'] },
   { table: 'ad_placements', queries: ['ads'] },
   { table: 'site_settings', queries: ['settings'] },
@@ -32,6 +33,10 @@ export function useSupabaseRealtime() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'blog_posts' }, () => {
         queryClient.invalidateQueries({ queryKey: ['blog-published'] });
         queryClient.invalidateQueries({ queryKey: ['all-posts'] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'workflow_pages' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['workflow-pages'] });
+        queryClient.invalidateQueries({ queryKey: ['workflow-pages-public'] });
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'redirects' }, () => {
         queryClient.invalidateQueries({ queryKey: ['redirects'] });

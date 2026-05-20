@@ -5,6 +5,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { useSupabaseRealtime } from '@/lib/useSupabaseRealtime';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import SplashScreen from '@/components/SplashScreen';
@@ -39,6 +40,9 @@ import AdminAds from './pages/admin/AdminAds';
 import AdminRedirects from './pages/admin/AdminRedirects';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminToolSeeder from './pages/admin/AdminToolSeeder';
+import AdminWorkflowPages from './pages/admin/AdminWorkflowPages';
+import WorkflowPage from './pages/WorkflowPage';
+import WorkflowListPage from './pages/WorkflowListPage';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -63,6 +67,8 @@ const AuthenticatedApp = () => {
     }
   }
 
+  useSupabaseRealtime();
+
   return (
     <Routes>
       {/* Public routes */}
@@ -74,6 +80,8 @@ const AuthenticatedApp = () => {
         <Route path="/category/:slug" element={<CategoryPage />} />
         <Route path="/blog" element={<BlogList />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
+        <Route path="/workflow" element={<WorkflowListPage />} />
+        <Route path="/workflow/:slug" element={<WorkflowPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
@@ -89,6 +97,7 @@ const AuthenticatedApp = () => {
           <Route path="blog" element={<AdminBlog />} />
           <Route path="blog-categories" element={<AdminBlogCategories />} />
           <Route path="categories" element={<AdminCategories />} />
+          <Route path="workflow-pages" element={<AdminWorkflowPages />} />
           <Route path="ads" element={<AdminAds />} />
           <Route path="redirects" element={<AdminRedirects />} />
           <Route path="settings" element={<AdminSettings />} />

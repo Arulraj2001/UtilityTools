@@ -124,7 +124,8 @@ async function main() {
   const workflows = await fetchTable(
     supabase,
     'workflow_pages',
-    'slug, updated_at'
+    'slug, updated_at',
+    (q) => q.eq('status', 'published')
   )
 
   console.log('Tools loaded:', tools.length)

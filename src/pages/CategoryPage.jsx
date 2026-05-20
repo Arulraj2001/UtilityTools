@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
-import { getCategories, getTools, getBlogPostsByCategorySlug } from '@/api/supabaseApi'
+import { getCategories, getTools, getBlogPostsByCategorySlug, getFeaturedWorkflows } from '@/api/supabaseApi'
 import ToolCard from '../components/shared/ToolCard'
 import CategorySEO from '@/components/seo/CategorySEO'
 
@@ -24,6 +24,12 @@ export default function CategoryPage() {
     queryKey: ['blog-by-category', slug],
     queryFn: () => getBlogPostsByCategorySlug(slug, { published: true, orderBy: 'created_at', ascending: false, limit: 50 }),
     enabled: !!slug,
+  })
+
+  const { data: featuredWorkflows = [] } = useQuery({
+    queryKey: ['workflows-featured'],
+    queryFn: () => getFeaturedWorkflows({ limit: 6 }),
+    staleTime: 10 * 60 * 1000,
   })
 
   const category = useMemo(() => categories.find(c => c.slug === slug), [categories, slug])
@@ -196,6 +202,24 @@ export default function CategoryPage() {
 
         {categoryTools.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">No tools in this category yet.</div>
+        )}
+
+        {/* Featured Workflows */}
+        {featuredWorkflows.length > 0 && (
+          <section className="mt-10">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-6 bg-accent rounded-full"></div>
+              <h2 className="text-xl font-semibold">Popular Workflows</h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredWorkflows.slice(0, 3).map(workflow => (
+                <Link key={workflow.id} to={`/workflow/${encodeURIComponent(workflow.slug)}`} className="group block rounded-xl border border-border bg-card hover:border-accent/40 hover:shadow-md transition-all premium-card panel-highlight p-4">
+                  <p className="text-sm font-semibold mb-2 group-hover:text-accent transition-colors line-clamp-2">{workflow.title}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-2">{workflow.excerpt || 'Step-by-step workflow guide'}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
 
         {/* Related categories */}

@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { 
   LayoutDashboard, Wrench, BookOpen, FolderOpen,
-  Settings, LinkIcon, Megaphone, Download,
+  Settings, LinkIcon, Megaphone, Download, Sparkles,
   ChevronLeft, ChevronRight, Menu, LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ const navItems = [
   { to: '/admin/blog', label: 'Blog Posts', icon: BookOpen },
   { to: '/admin/blog-categories', label: 'Blog Categories', icon: FolderOpen },
   { to: '/admin/categories', label: 'Categories', icon: FolderOpen },
+  { to: '/admin/workflow-pages', label: 'Workflow Pages', icon: Sparkles },
   { to: '/admin/ads', label: 'Ads', icon: Megaphone },
   { to: '/admin/redirects', label: 'Redirects', icon: LinkIcon },
   { to: '/admin/settings', label: 'Settings', icon: Settings },

@@ -105,6 +105,71 @@ export const getBlogPostsByCategorySlug = async (slug, { published = true, order
   return handleResponse(await query)
 };
 
+export const getWorkflowPages = async ({ published = true, orderBy = 'updated_at', ascending = false, limit = 200 } = {}) => {
+  let query = supabase.from('workflow_pages').select('*')
+  if (published) query = query.eq('status', 'published')
+  query = sortParams(query, orderBy, ascending)
+  if (limit) query = query.limit(limit)
+  return handleResponse(await query)
+};
+
+export const getWorkflowPageBySlug = async (slug) => {
+  const result = await supabase.from('workflow_pages').select('*').eq('slug', slug).maybeSingle();
+  if (result.error) {
+    console.error('getWorkflowPageBySlug error:', result.error)
+    return null
+  }
+  return result.data || null
+};
+
+export const createWorkflowPage = async (page) => {
+  const result = await supabase.from('workflow_pages').insert([{ ...page }])
+  return handleResponse(result)
+};
+
+export const updateWorkflowPage = async (id, page) => {
+  const result = await supabase.from('workflow_pages').update({ ...page, updated_at: new Date() }).eq('id', id)
+  return handleResponse(result)
+};
+
+export const deleteWorkflowPage = async (id) => {
+  const result = await supabase.from('workflow_pages').delete().eq('id', id)
+  return handleResponse(result)
+};
+
+export const getFeaturedWorkflows = async ({ limit = 6 } = {}) => {
+  let query = supabase.from('workflow_pages').select('*')
+    .eq('status', 'published')
+    .eq('is_featured', true)
+    .order('updated_at', { ascending: false })
+    .limit(limit)
+  return handleResponse(await query)
+};
+
+export const searchWorkflowPages = async (query) => {
+  if (!query || query.length < 2) return []
+  const searchQuery = query.toLowerCase()
+  let result = await supabase.from('workflow_pages').select('*')
+    .eq('status', 'published')
+    .or(`title.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`)
+    .limit(10)
+  return handleResponse(result)
+};
+
+export const searchAll = async (query) => {
+  if (!query || query.length < 2) return { tools: [], workflows: [] }
+  
+  const [toolsResult, workflowsResult] = await Promise.all([
+    searchTools(query),
+    searchWorkflowPages(query)
+  ])
+  
+  return {
+    tools: toolsResult || [],
+    workflows: workflowsResult || []
+  }
+};
+
 export const getRedirects = async ({ orderBy = 'created_at', ascending = false, limit = 200 } = {}) => {
   let query = supabase.from('redirects').select('*')
   query = sortParams(query, orderBy, ascending)

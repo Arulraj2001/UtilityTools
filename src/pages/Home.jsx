@@ -1,11 +1,12 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { getTools, getCategories, getTotalUsageCount } from '@/api/supabaseApi'
+import { getTools, getCategories, getTotalUsageCount, getFeaturedWorkflows } from '@/api/supabaseApi'
 import HeroSection from '../components/home/HeroSection'
 import StatsBar from '../components/home/StatsBar'
 import CategoriesGrid from '../components/home/CategoriesGrid'
 import FeaturedTools from '../components/home/FeaturedTools'
+import PopularWorkflows from '../components/home/PopularWorkflows'
 import AdBanner from '../components/shared/AdBanner'
 
 export default function Home() {
@@ -35,6 +36,15 @@ export default function Home() {
   } = useQuery({
     queryKey: ['total-usage'],
     queryFn: getTotalUsageCount,
+    retry: false,
+  })
+
+  const {
+    data: featuredWorkflows = [],
+    isLoading: isLoadingWorkflows,
+  } = useQuery({
+    queryKey: ['workflows-featured'],
+    queryFn: () => getFeaturedWorkflows({ limit: 6 }),
     retry: false,
   })
 
@@ -73,6 +83,9 @@ export default function Home() {
         subtitle="Our most popular and highly rated tools"
       />
       <AdBanner placement="in_content" pageType="home" className="py-6" />
+      {featuredWorkflows.length > 0 && (
+        <PopularWorkflows workflows={featuredWorkflows} />
+      )}
       {trendingTools.length > 0 && (
         <FeaturedTools
           tools={trendingTools}
