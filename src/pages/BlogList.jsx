@@ -1,8 +1,9 @@
-﻿import React, { useMemo, useState } from 'react'
+﻿import React, { useMemo, useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { getBlogPosts, getBlogCategories } from '@/api/supabaseApi'
+import { applyQuickFilter } from '@/lib/blogFilterUtils'
 import BlogSidebar from '@/components/blog/BlogSidebar'
 import BlogFilterDrawer from '@/components/blog/BlogFilterDrawer'
 import BlogCard from '@/components/blog/BlogCard'
@@ -37,6 +38,12 @@ export default function BlogList() {
     return Array.from(tagSet).sort()
   }, [posts])
 
+  useEffect(() => {
+    if (activeCategory || activeTags.length > 0 || activeFilter) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [activeCategory, activeTags.join(','), activeFilter])
+
   // Filter posts based on active filters
   const filteredPosts = useMemo(() => {
     let result = [...posts]
@@ -55,30 +62,9 @@ export default function BlogList() {
       )
     }
 
-    // Filter by quick filters
+    // Apply quick filter (Featured, Trending, Recent, AI Tools, Tutorials, SEO, Programming)
     if (activeFilter) {
-      switch (activeFilter) {
-        case 'featured':
-          result = result.filter(post => post.is_featured)
-          break
-        case 'trending':
-          result = result.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0)).slice(0, 20)
-          break
-        case 'recent':
-          result = result.slice(0, 10)
-          break
-        case 'ai-tools':
-        case 'tutorials':
-        case 'seo':
-        case 'programming':
-          // Filter by category name containing the filter keyword
-          result = result.filter(post =>
-            post.blog_categories?.name?.toLowerCase().includes(activeFilter.replace('-', ' '))
-          )
-          break
-        default:
-          break
-      }
+      result = applyQuickFilter(result, activeFilter)
     }
 
     return result

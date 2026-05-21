@@ -250,9 +250,20 @@ export default function BlogPostPage() {
           <div className="mb-8">
             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-4">
               {(post.blog_categories?.name || post.category) && (
-                <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-full px-3 py-1">
-                  {post.blog_categories?.name || post.category}
-                </Badge>
+                post.blog_categories?.slug ? (
+                  <Link
+                    to={`/blog?category=${encodeURIComponent(post.blog_categories.slug)}`}
+                    className="inline-block"
+                  >
+                    <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-full px-3 py-1">
+                      {post.blog_categories?.name || post.category}
+                    </Badge>
+                  </Link>
+                ) : (
+                  <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-full px-3 py-1">
+                    {post.blog_categories?.name || post.category}
+                  </Badge>
+                )
               )}
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" />

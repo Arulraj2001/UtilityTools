@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
 import { X, Search, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
+import { applyQuickFilter } from '@/lib/blogFilterUtils'
 
 const QUICK_FILTERS = [
   { id: 'featured', label: 'Featured Posts', icon: '⭐' },
@@ -35,6 +36,15 @@ export default function BlogSidebar({ categories = [], tags = [], posts = [], on
     }, {})
   }, [posts])
 
+  // Calculate quick filter counts
+  const quickFilterCounts = useMemo(() => {
+    const counts = {}
+    QUICK_FILTERS.forEach(filter => {
+      counts[filter.id] = applyQuickFilter(posts, filter.id).length
+    })
+    return counts
+  }, [posts])
+
   // Filter categories and tags
   const filteredCategories = useMemo(() => {
     return categories.filter(cat =>
@@ -49,6 +59,20 @@ export default function BlogSidebar({ categories = [], tags = [], posts = [], on
     )
   }, [tags, tagSearch])
 
+  const navigate = useNavigate()
+  const location = useLocation()
+  const isOnBlogPage = location.pathname === '/blog'
+
+  const navigateToBlog = (params) => {
+    const queryString = params.toString()
+    const path = `/blog${queryString ? `?${queryString}` : ''}`
+    if (isOnBlogPage) {
+      setSearchParams(params)
+    } else {
+      navigate(path)
+    }
+  }
+
   const handleCategorySelect = (categorySlug) => {
     const params = new URLSearchParams(searchParams)
     if (activeCategory === categorySlug) {
@@ -56,7 +80,7 @@ export default function BlogSidebar({ categories = [], tags = [], posts = [], on
     } else {
       params.set('category', categorySlug)
     }
-    setSearchParams(params)
+    navigateToBlog(params)
   }
 
   const handleTagToggle = (tag) => {
@@ -69,7 +93,7 @@ export default function BlogSidebar({ categories = [], tags = [], posts = [], on
     } else {
       params.append('tag', tag)
     }
-    setSearchParams(params)
+    navigateToBlog(params)
   }
 
   const handleFilterSelect = (filterId) => {
@@ -79,7 +103,7 @@ export default function BlogSidebar({ categories = [], tags = [], posts = [], on
     } else {
       params.set('filter', filterId)
     }
-    setSearchParams(params)
+    navigateToBlog(params)
   }
 
   const handleClearFilters = () => {
@@ -177,21 +201,31 @@ export default function BlogSidebar({ categories = [], tags = [], posts = [], on
         <div className="space-y-2">
           {QUICK_FILTERS.map((filter) => {
             const isActive = activeFilter === filter.id
+            const count = quickFilterCounts[filter.id] || 0
             return (
               <motion.button
                 key={filter.id}
                 onClick={() => handleFilterSelect(filter.id)}
                 whileHover={{ x: 4 }}
                 className={`
-                  w-full text-left px-3 py-2 rounded-lg transition-all text-sm flex items-center gap-2
+                  w-full text-left px-3 py-2 rounded-lg transition-all text-sm flex items-center justify-between gap-2
                   ${isActive
                     ? 'bg-primary/10 text-primary font-medium border border-primary/30'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   }
                 `}
               >
-                <span>{filter.icon}</span>
-                {filter.label}
+                <div className="flex items-center gap-2">
+                  <span>{filter.icon}</span>
+                  {filter.label}
+                </div>
+                <span className={`text-xs rounded-full px-2 py-0.5 ${
+                  isActive
+                    ? 'bg-primary/20 text-primary'
+                    : 'bg-muted text-muted-foreground'
+                }`}>
+                  {count}
+                </span>
               </motion.button>
             )
           })}

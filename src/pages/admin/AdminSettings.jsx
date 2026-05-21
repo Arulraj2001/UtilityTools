@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { getSiteSettings, createSiteSetting, updateSiteSetting, deleteSiteSetting } from '@/api/supabaseApi'
@@ -43,6 +44,71 @@ export default function AdminSettings() {
   })
 
   const [newSetting, setNewSetting] = useState({ key: '', value: '', type: 'text', group: 'general' })
+  const [themeControls, setThemeControls] = useState({
+    spotlight_enabled: true,
+    spotlight_color_light: '#d6283d',
+    spotlight_color_dark: '#ffffff',
+    spotlight_intensity: '1',
+    spotlight_blur: '38',
+    spotlight_opacity: '0.88',
+    spotlight_hover_strength: '1.1',
+  })
+
+  const getSettingValue = (key, fallback) => {
+    const setting = settings.find((item) => item.key === key)
+    if (!setting || setting.value === undefined || setting.value === null) {
+      return fallback
+    }
+
+    if (setting.type === 'boolean') {
+      return String(setting.value) === 'true'
+    }
+    if (setting.type === 'number') {
+      return String(Number(setting.value) || fallback)
+    }
+
+    return setting.value
+  }
+
+  React.useEffect(() => {
+    if (!settings.length) return
+    setThemeControls({
+      spotlight_enabled: getSettingValue('spotlight_enabled', true),
+      spotlight_color_light: getSettingValue('spotlight_color_light', '#d6283d'),
+      spotlight_color_dark: getSettingValue('spotlight_color_dark', '#ffffff'),
+      spotlight_intensity: getSettingValue('spotlight_intensity', '1'),
+      spotlight_blur: getSettingValue('spotlight_blur', '38'),
+      spotlight_opacity: getSettingValue('spotlight_opacity', '0.88'),
+      spotlight_hover_strength: getSettingValue('spotlight_hover_strength', '1.1'),
+    })
+  }, [settings])
+
+  const upsertSetting = async (key, value, type = 'text') => {
+    const existing = settings.find((item) => item.key === key)
+    if (existing) {
+      return await updateSiteSetting(existing.id, { value: String(value) })
+    }
+    return await createSiteSetting({ key, value: String(value), type, group: 'appearance' })
+  }
+
+  const handleSaveThemeSettings = async () => {
+    await Promise.all([
+      upsertSetting('spotlight_enabled', themeControls.spotlight_enabled ? 'true' : 'false', 'boolean'),
+      upsertSetting('spotlight_color_light', themeControls.spotlight_color_light, 'text'),
+      upsertSetting('spotlight_color_dark', themeControls.spotlight_color_dark, 'text'),
+      upsertSetting('spotlight_intensity', themeControls.spotlight_intensity || '1', 'number'),
+      upsertSetting('spotlight_blur', themeControls.spotlight_blur || '38', 'number'),
+      upsertSetting('spotlight_opacity', themeControls.spotlight_opacity || '0.88', 'number'),
+      upsertSetting('spotlight_hover_strength', themeControls.spotlight_hover_strength || '1.1', 'number'),
+    ])
+
+    queryClient.invalidateQueries({ queryKey: ['settings'] })
+    toast.success('Spotlight appearance saved')
+  }
+
+  const handleThemeControlChange = (key, value) => {
+    setThemeControls((prev) => ({ ...prev, [key]: value }))
+  }
 
   const handleCreate = async () => {
     if (!newSetting.key) {
@@ -62,7 +128,7 @@ export default function AdminSettings() {
     await deleteMutation.mutateAsync(id)
   }
 
-  const groups = ['general', 'seo', 'analytics', 'social', 'monetization']
+  const groups = ['general', 'appearance', 'seo', 'analytics', 'social', 'monetization']
   const grouped = groups.map(g => ({
     name: g,
     items: settings.filter(s => s.group === g || (!s.group && g === 'general')),
@@ -71,6 +137,131 @@ export default function AdminSettings() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Site Settings</h1>
+
+      <Card className="mb-8">
+        <CardHeader>
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <CardTitle className="text-base">Theme Appearance</CardTitle>
+              <p className="text-sm text-muted-foreground">Manage spotlight glow and theme lighting for premium card styles.</p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 lg:grid-cols-[1.55fr_1fr]">
+            <div className="grid gap-4">
+              <div className="rounded-2xl border border-border bg-card p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium">Spotlight glow</p>
+                    <p className="text-xs text-muted-foreground">Enable premium corner lighting on spotlight cards.</p>
+                  </div>
+                  <Switch
+                    checked={themeControls.spotlight_enabled}
+                    onCheckedChange={(checked) => handleThemeControlChange('spotlight_enabled', checked)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="space-y-2">
+                  <span className="text-sm font-medium">Light theme color</span>
+                  <Input
+                    type="color"
+                    value={themeControls.spotlight_color_light}
+                    onChange={(e) => handleThemeControlChange('spotlight_color_light', e.target.value)}
+                    className="h-11 w-full rounded-lg px-2"
+                  />
+                </label>
+                <label className="space-y-2">
+                  <span className="text-sm font-medium">Dark theme color</span>
+                  <Input
+                    type="color"
+                    value={themeControls.spotlight_color_dark}
+                    onChange={(e) => handleThemeControlChange('spotlight_color_dark', e.target.value)}
+                    className="h-11 w-full rounded-lg px-2"
+                  />
+                </label>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="space-y-2">
+                  <span className="text-sm font-medium">Glow intensity</span>
+                  <Input
+                    type="number"
+                    step="0.05"
+                    min="0.4"
+                    max="2"
+                    value={themeControls.spotlight_intensity}
+                    onChange={(e) => handleThemeControlChange('spotlight_intensity', e.target.value)}
+                    className="rounded-lg"
+                  />
+                </label>
+                <label className="space-y-2">
+                  <span className="text-sm font-medium">Blur amount</span>
+                  <Input
+                    type="number"
+                    step="1"
+                    min="10"
+                    max="120"
+                    value={themeControls.spotlight_blur}
+                    onChange={(e) => handleThemeControlChange('spotlight_blur', e.target.value)}
+                    className="rounded-lg"
+                  />
+                </label>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="space-y-2">
+                  <span className="text-sm font-medium">Opacity</span>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0.2"
+                    max="1"
+                    value={themeControls.spotlight_opacity}
+                    onChange={(e) => handleThemeControlChange('spotlight_opacity', e.target.value)}
+                    className="rounded-lg"
+                  />
+                </label>
+                <label className="space-y-2">
+                  <span className="text-sm font-medium">Hover glow strength</span>
+                  <Input
+                    type="number"
+                    step="0.05"
+                    min="1"
+                    max="1.5"
+                    value={themeControls.spotlight_hover_strength}
+                    onChange={(e) => handleThemeControlChange('spotlight_hover_strength', e.target.value)}
+                    className="rounded-lg"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-3xl border border-border bg-card p-4">
+                <p className="text-sm font-semibold mb-3">Live preview</p>
+                <div className="relative overflow-hidden rounded-3xl border border-border bg-background/80 p-4" style={{ minHeight: 200 }}>
+                  <div className="text-sm text-muted-foreground">Spotlight ready</div>
+                  <div className="mt-3 rounded-2xl bg-card p-3 text-sm text-foreground">Top-right glow effect adapts to theme controls in real time.</div>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-border bg-card p-4">
+                <p className="text-sm font-semibold mb-2">Spotlight info</p>
+                <p className="text-sm leading-6 text-muted-foreground">These settings affect the global spotlight styling for all cards using premium glow effects. Values are stored in site settings and persist across reloads.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <Button onClick={handleSaveThemeSettings} className="rounded-lg">
+              <Save className="w-4 h-4 mr-2" /> Save spotlight settings
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="mb-8">
         <CardHeader><CardTitle className="text-base">Add Setting</CardTitle></CardHeader>

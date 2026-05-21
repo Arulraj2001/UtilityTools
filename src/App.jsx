@@ -18,6 +18,7 @@ initializePdfWorker()
 import PublicLayout from './components/layout/PublicLayout'
 import BackgroundLighting from './components/layout/BackgroundLighting'
 import ScrollToTop from './components/layout/ScrollToTop'
+import { SiteThemeSettings } from '@/lib/useSiteThemeSettings'
 
 // Public pages
 import Home from './pages/Home'
@@ -59,6 +60,9 @@ const AuthenticatedApp = () => {
   const location = useLocation();
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const shouldEnableRealtime = !isLoadingAuth && !isLoadingPublicSettings && !authError && isAdminRoute;
+
+  useSupabaseRealtime(shouldEnableRealtime);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -79,8 +83,6 @@ const AuthenticatedApp = () => {
       return null;
     }
   }
-
-  useSupabaseRealtime(isAdminRoute);
 
   const wrap = (element) => <Suspense fallback={<RouteFallback />}>{element}</Suspense>;
 
@@ -130,6 +132,7 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <SplashScreen duration={800} />
+        <SiteThemeSettings />
         <Router>
           <BackgroundLighting />
           <ScrollToTop />

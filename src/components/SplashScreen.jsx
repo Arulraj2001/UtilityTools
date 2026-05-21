@@ -66,7 +66,7 @@ export default function SplashScreen({ duration = 800 }) {
       </div>
 
       {/* Animated Gradient */}
-      <style jsx>{`
+      <style>{`
         @keyframes gradientMove {
           0% {
             background-position: 0% 50%;

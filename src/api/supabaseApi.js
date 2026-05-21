@@ -342,6 +342,12 @@ export const deleteRedirect = async (id) => {
 
 export const createSiteSetting = async (setting) => {
   const result = await supabase.from('site_settings').insert([{ ...setting }]);
+  if (result.error && /column.*\bgroup\b.*does not exist|missing column.*\bgroup\b/i.test(result.error.message)) {
+    const fallback = { ...setting };
+    delete fallback.group;
+    const retry = await supabase.from('site_settings').insert([{ ...fallback }]);
+    return handleResponse(retry);
+  }
   return handleResponse(result);
 };
 

@@ -22,6 +22,9 @@ alter table if exists blog_posts add column if not exists views_count int defaul
 alter table if exists blog_posts add column if not exists seo_keywords text;
 alter table if exists blog_posts add column if not exists meta_robots text default 'index,follow';
 
+-- Safe site_settings additions
+alter table if exists site_settings add column if not exists "group" text default 'general';
+
 -- Safe indexes
 create index if not exists idx_blog_posts_status on blog_posts (status);
 create index if not exists idx_blog_posts_created_at on blog_posts (created_at desc);
