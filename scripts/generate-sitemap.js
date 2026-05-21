@@ -4,6 +4,9 @@
   Generate sitemap.xml using Supabase data
 */
 
+import dotenv from 'dotenv'
+dotenv.config()
+
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
