@@ -208,6 +208,7 @@ create table if not exists jobs (
   status text default 'draft',
   seo_title text,
   seo_description text,
+  seo_keywords text,
   canonical_url text,
   og_image text,
   created_at timestamptz not null default now(),
@@ -217,6 +218,7 @@ create table if not exists jobs (
 create index if not exists idx_jobs_status on jobs (status);
 create index if not exists idx_jobs_last_date on jobs (last_date desc);
 create index if not exists idx_jobs_featured on jobs (featured);
+alter table if exists jobs add column if not exists seo_keywords text;
 
 -- =========================
 -- REDIRECTS

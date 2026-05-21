@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { BriefcaseBusiness, ArrowRight } from 'lucide-react'
 
 import JobCard from './JobCard'
@@ -25,10 +26,13 @@ export default function RelatedJobs({ jobs = [] }) {
           </p>
         </div>
 
-        <button className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-card hover:border-primary/30 hover:text-primary transition-all text-xs font-medium">
+        <Link
+          to="/jobs"
+          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-card hover:border-primary/30 hover:text-primary transition-all text-xs font-medium"
+        >
           Browse More Jobs
           <ArrowRight className="w-3.5 h-3.5" />
-        </button>
+        </Link>
       </div>
 
       {/* GRID */}

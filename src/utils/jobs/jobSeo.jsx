@@ -27,6 +27,7 @@ export const JobSEO = ({ job }) => {
       <link rel="canonical" href={url} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
+      {job.seo_keywords && <meta name="keywords" content={job.seo_keywords} />}
       {job.og_image && <meta property="og:image" content={job.og_image} />}
       <script type="application/ld+json">{JSON.stringify(jobPosting)}</script>
     </Helmet>

@@ -285,6 +285,7 @@ const cleanJobPayload = (payload) => {
     'application_fee',
     'seo_title',
     'seo_description',
+    'seo_keywords',
     'og_image',
   ];
 
@@ -308,24 +309,14 @@ const cleanJobPayload = (payload) => {
   // Clean canonical_url
   cleaned.canonical_url = cleanCanonicalUrl(payload.canonical_url);
 
-  // Handle tags - ensure array or null
-  if (payload.tags) {
-    if (Array.isArray(payload.tags)) {
-      cleaned.tags = payload.tags.map((t) => String(t).trim()).filter(Boolean) || null;
-    } else if (typeof payload.tags === 'string') {
-      const parsed = validateJsonField(payload.tags, 'tags');
-      if (parsed.valid && parsed.parsed) {
-        cleaned.tags = parsed.parsed;
-      } else {
-        // Try to split by comma
-        cleaned.tags = payload.tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean) || null;
-      }
-    } else if (typeof payload.tags === 'object') {
-      cleaned.tags = payload.tags;
-    }
+  // Handle tags - accept comma-separated string or array, return null when empty
+  if (Array.isArray(payload.tags)) {
+    cleaned.tags = payload.tags.map((t) => String(t).trim()).filter(Boolean);
+  } else if (typeof payload.tags === 'string') {
+    cleaned.tags = payload.tags
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
   } else {
     cleaned.tags = null;
   }
@@ -463,6 +454,46 @@ export const getBlogCategories = async ({ orderBy = 'sort_order', ascending = tr
   if (limit) query = query.limit(limit)
   return handleResponse(await query)
 };
+
+export const getJobCategories = async ({ orderBy = 'sort_order', ascending = true, limit = 200 } = {}) => {
+  let query = supabase.from('job_categories').select('*')
+  query = sortParams(query, orderBy, ascending)
+  if (limit) query = query.limit(limit)
+  return handleResponse(await query)
+}
+
+export const getJobCategoryBySlug = async (slug) => {
+  const result = await supabase.from('job_categories').select('*').eq('slug', slug).maybeSingle()
+  if (result.error) {
+    console.error('getJobCategoryBySlug error:', result.error)
+    return null
+  }
+  return result.data || null
+}
+
+export const createJobCategory = async (category) => {
+  const result = await supabase.from('job_categories').insert([{ ...category }])
+  return handleResponse(result)
+}
+
+export const updateJobCategory = async (id, category) => {
+  const result = await supabase.from('job_categories').update({ ...category, updated_at: new Date() }).eq('id', id)
+  return handleResponse(result)
+}
+
+export const deleteJobCategory = async (id) => {
+  const result = await supabase.from('job_categories').delete().eq('id', id)
+  return handleResponse(result)
+}
+
+export const getJobsByCategorySlug = async (slug, { published = true, orderBy = 'last_date', ascending = false, limit = 50 } = {}) => {
+  // Jobs currently store `category` as a slug string. Query by that field.
+  let query = supabase.from('jobs').select('*').eq('category', slug)
+  if (published) query = query.eq('status', 'published')
+  query = sortParams(query, orderBy, ascending)
+  if (limit) query = query.limit(limit)
+  return handleResponse(await query)
+}
 
 export const getBlogCategoryBySlug = async (slug) => {
   const result = await supabase.from('blog_categories').select('*').eq('slug', slug).maybeSingle()

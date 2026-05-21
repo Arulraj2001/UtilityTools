@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useQuery } from '@tanstack/react-query'
+import { getJobCategories } from '@/api/supabaseApi'
 import { Switch } from '@/components/ui/switch'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
 
@@ -23,11 +26,12 @@ const defaultForm = {
   selection_process: {},
   important_dates: [],
   application_fee: '',
-  tags: [],
+  tags: '',
   featured: false,
   status: 'draft',
   seo_title: '',
   seo_description: '',
+  seo_keywords: '',
   canonical_url: '',
   og_image: '',
 }
@@ -89,7 +93,7 @@ const validateJsonFieldSafely = (value, fieldName) => {
  * @returns {{valid: boolean, errors: Record<string, string>}}
  */
 const validateFormJsonFields = (form) => {
-  const jsonFields = ['tags', 'eligibility', 'selection_process', 'important_dates'];
+  const jsonFields = ['eligibility', 'selection_process', 'important_dates'];
   const errors = {};
 
   jsonFields.forEach((field) => {
@@ -131,15 +135,16 @@ const getSafeForm = (jobData = {}) => ({
   selection_process: jobData.selection_process ?? defaultForm.selection_process,
   important_dates: jobData.important_dates ?? defaultForm.important_dates,
   application_fee: jobData.application_fee ?? defaultForm.application_fee,
-  tags: Array.isArray(jobData.tags)
+  tags: typeof jobData.tags === 'string'
     ? jobData.tags
-    : typeof jobData.tags === 'string'
-    ? jobData.tags.split(',').map((t) => t.trim()).filter(Boolean)
+    : Array.isArray(jobData.tags)
+    ? jobData.tags.join(', ')
     : defaultForm.tags,
   featured: jobData.featured ?? defaultForm.featured,
   status: jobData.status ?? defaultForm.status,
   seo_title: jobData.seo_title ?? defaultForm.seo_title,
   seo_description: jobData.seo_description ?? defaultForm.seo_description,
+  seo_keywords: jobData.seo_keywords ?? defaultForm.seo_keywords,
   canonical_url: jobData.canonical_url ?? defaultForm.canonical_url,
   og_image: jobData.og_image ?? defaultForm.og_image,
 })
@@ -158,6 +163,12 @@ export default function JobEditor({ job = {}, onClose, onSave, submitError, isSu
   const [tab, setTab] = useState('content')
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
   const [validationErrors, setValidationErrors] = useState(/** @type {{ [key: string]: string }} */ ({}))
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['job-categories'],
+    queryFn: () => getJobCategories({ orderBy: 'sort_order', ascending: true, limit: 500 }),
+    staleTime: 1000 * 60 * 5,
+  })
 
   useEffect(() => {
     setForm(getSafeForm(job))
@@ -240,10 +251,12 @@ export default function JobEditor({ job = {}, onClose, onSave, submitError, isSu
 
     const payload = {
       ...validated,
-      tags: Array.isArray(validated.tags)
-        ? validated.tags
-        : typeof validated.tags === 'string'
+      category: validated.category === 'none' ? null : validated.category,
+      seo_keywords: validated.seo_keywords?.trim() || null,
+      tags: typeof validated.tags === 'string'
         ? validated.tags.split(',').map((t) => t.trim()).filter(Boolean)
+        : Array.isArray(validated.tags)
+        ? validated.tags.map((t) => String(t).trim()).filter(Boolean)
         : [],
     }
     onSave(payload)
@@ -415,7 +428,16 @@ export default function JobEditor({ job = {}, onClose, onSave, submitError, isSu
                   </div>
                   <div className="grid gap-2">
                     <label className="text-sm font-medium">Category</label>
-                    <input placeholder="Government Jobs" value={form.category ?? ''} onChange={handle('category')} className={fieldBase} />
+                    <Select value={form.category || 'none'} onValueChange={(v) => setForm((s) => ({ ...s, category: v }))}>
+                      <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select category..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        {Array.isArray(categories) && categories.filter((c) => c?.slug).map((c) => (
+                          <SelectItem key={c.id} value={c.slug}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Select a reusable job category (slug stored).</p>
                   </div>
                   <div className="grid gap-2">
                     <label className="text-sm font-medium">Location</label>
@@ -524,6 +546,16 @@ export default function JobEditor({ job = {}, onClose, onSave, submitError, isSu
                   <div className="grid gap-2">
                     <label className="text-sm font-medium">SEO description</label>
                     <textarea placeholder="Apply online for SSC CGL Recruitment 2026..." value={form.seo_description ?? ''} onChange={handle('seo_description')} className={fieldArea} />
+                  </div>
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium">SEO keywords</label>
+                    <input
+                      placeholder="ssc, exam, government jobs, online apply, 2026"
+                      value={form.seo_keywords ?? ''}
+                      onChange={handle('seo_keywords')}
+                      className={fieldBase}
+                    />
+                    <p className="text-xs text-muted-foreground">Comma-separated keywords for metadata and future content matching.</p>
                   </div>
                 </div>
               </section>
