@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
-import { getCategories, getTools, getBlogPostsByCategorySlug, getFeaturedWorkflows } from '@/api/supabaseApi'
+import { getCategories, getTools, getBlogPostsByCategorySlug, getFeaturedWorkflows, getJobs } from '@/api/supabaseApi'
 import ToolCard from '../components/shared/ToolCard'
 import CategorySEO from '@/components/seo/CategorySEO'
 
@@ -61,6 +61,13 @@ export default function CategoryPage() {
     })
     return list.slice(0, 6)
   }, [postsForCategory])
+
+    const { data: jobsForCategory = [] } = useQuery({
+      queryKey: ['jobs-by-category', category?.name],
+      queryFn: () => getJobs({ published: true, category: category?.name, limit: 6 }),
+      enabled: !!category,
+      staleTime: 1000 * 60 * 5,
+    })
 
   // Related categories: simple name-token overlap (excluding current)
   const relatedCategories = useMemo(() => {
@@ -187,6 +194,24 @@ export default function CategoryPage() {
                       <div className="text-xs text-muted-foreground mt-2">{a.reading_time || 3} min read</div>
                     </div>
                   </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Featured Jobs for this category */}
+        {jobsForCategory.length > 0 && (
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-6 bg-primary rounded-full"></div>
+              <h2 className="text-xl font-semibold">Jobs in {category.name}</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {jobsForCategory.map(j => (
+                <Link key={j.id} to={`/jobs/${encodeURIComponent(j.slug)}`} className="group block rounded-xl border border-border bg-card p-4 hover:shadow-md transition-all">
+                  <h3 className="font-semibold">{j.title}</h3>
+                  <p className="text-sm text-muted-foreground">{j.organization} • {j.location}</p>
                 </Link>
               ))}
             </div>

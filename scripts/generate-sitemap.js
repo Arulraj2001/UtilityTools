@@ -84,7 +84,7 @@ async function main() {
       'Supabase credentials not found in env. Set SUPABASE_URL and SUPABASE_ANON_KEY (or VITE_ equivalents).'
     )
 
-    process.exitCode = 1
+    console.warn('Skipping sitemap generation — credentials not provided.')
     return
   }
 
@@ -128,10 +128,19 @@ async function main() {
     (q) => q.eq('status', 'published')
   )
 
+  // Jobs (published only)
+  const jobs = await fetchTable(
+    supabase,
+    'jobs',
+    'slug, updated_at, status, last_date',
+    (q) => q.eq('status', 'published')
+  )
+
   console.log('Tools loaded:', tools.length)
   console.log('Categories loaded:', categories.length)
   console.log('Blog posts loaded:', posts.length)
   console.log('Workflow pages loaded:', workflows.length)
+  console.log('Jobs loaded:', jobs.length)
 
   const urls = new Map()
 
@@ -154,6 +163,11 @@ async function main() {
   urls.set('/blog', {
     changefreq: 'weekly',
     priority: '0.7',
+  })
+
+  urls.set('/jobs', {
+    changefreq: 'weekly',
+    priority: '0.8',
   })
 
   // Tools
@@ -205,6 +219,50 @@ async function main() {
       changefreq: 'weekly',
       priority: '0.75',
       lastmod: w.updated_at || null,
+    })
+  }
+
+  // Jobs (with enhanced priority logic)
+  for (const j of jobs) {
+    if (!j?.slug) continue
+
+    const loc = `/jobs/${encodeURIComponent(j.slug)}`
+
+    // Dynamic priority based on job attributes:
+    // - Featured jobs: 0.85
+    // - Recently updated (< 7 days): 0.75
+    // - Standard jobs: 0.65
+    let priority = '0.65'
+    const lastMod = j.updated_at || j.last_date
+    
+    if (j.featured) {
+      priority = '0.85'
+    } else if (lastMod) {
+      const daysSinceUpdate = Math.floor((Date.now() - new Date(lastMod).getTime()) / (1000 * 60 * 60 * 24))
+      if (daysSinceUpdate < 7) {
+        priority = '0.75'
+      } else if (daysSinceUpdate < 14) {
+        priority = '0.70'
+      }
+    }
+
+    // Change frequency: more frequent for recently updated/featured
+    let changefreq = 'weekly'
+    if (j.featured) {
+      changefreq = 'daily'
+    } else if (lastMod) {
+      const daysSinceUpdate = Math.floor((Date.now() - new Date(lastMod).getTime()) / (1000 * 60 * 60 * 24))
+      if (daysSinceUpdate < 3) {
+        changefreq = 'daily'
+      } else if (daysSinceUpdate < 14) {
+        changefreq = 'weekly'
+      }
+    }
+
+    urls.set(loc, {
+      changefreq,
+      priority,
+      lastmod: lastMod,
     })
   }
 

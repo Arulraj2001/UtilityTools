@@ -48,11 +48,16 @@ export default function Navbar({ onSearchOpen }) {
       to: '/categories',
       label: 'Categories',
       icon: LayoutGrid,
-    },
+    },    
     {
       to: '/blog',
       label: 'Blog',
       icon: BookOpen,
+    },
+    {
+      to: '/jobs',
+      label: 'Jobs',
+      icon: LayoutGrid,
     },
   ];
 

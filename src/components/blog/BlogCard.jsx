@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Clock, Calendar, ArrowRight, Star, ZoomIn } from 'lucide-react'
@@ -6,7 +6,7 @@ import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 
-export default function BlogCard({ post, index = 0 }) {
+function BlogCard({ post, index = 0 }) {
   const [previewOpen, setPreviewOpen] = useState(false)
 
   if (!post) return null
@@ -143,3 +143,5 @@ export default function BlogCard({ post, index = 0 }) {
     </Dialog>
   )
 }
+
+export default memo(BlogCard)

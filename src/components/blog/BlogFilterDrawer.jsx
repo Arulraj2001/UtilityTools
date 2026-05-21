@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import BlogSidebar from './BlogSidebar'
 
-export default function BlogFilterDrawer({ categories = [], tags = [], posts = [], isOpen, setIsOpen }) {
+function BlogFilterDrawer({ categories = [], tags = [], posts = [], isOpen, setIsOpen }) {
   return (
     <>
       {/* Floating Filter Button */}
@@ -58,3 +58,5 @@ export default function BlogFilterDrawer({ categories = [], tags = [], posts = [
     </>
   )
 }
+
+export default memo(BlogFilterDrawer)

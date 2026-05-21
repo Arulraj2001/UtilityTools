@@ -1,6 +1,6 @@
-import React, { lazy, Suspense, useMemo } from 'react'
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { getTools, getCategories, getTotalUsageCount, getFeaturedWorkflows, getCategoryCounts } from '@/api/supabaseApi'
+import { getTools, getCategories, getTotalUsageCount, getFeaturedWorkflows, getCategoryCounts, getFeaturedJobs } from '@/api/supabaseApi'
 import HeroSection from '../components/home/HeroSection'
 import StatsBar from '../components/home/StatsBar'
 const CategoriesGrid = lazy(() => import('../components/home/CategoriesGrid'))
@@ -75,6 +75,12 @@ function WorkflowsSectionSkeleton() {
 }
 
 export default function Home() {
+  const [deferHomepageQueries, setDeferHomepageQueries] = useState(false)
+
+  useEffect(() => {
+    setDeferHomepageQueries(true)
+  }, [])
+
   const {
     data: categories = [],
     isLoading: isLoadingCategories,
@@ -98,63 +104,88 @@ export default function Home() {
   const {
     data: featuredTools = [],
     isLoading: isLoadingFeaturedTools,
+    isFetching: isFetchingFeaturedTools,
     error: featuredToolsError,
   } = useQuery({
     queryKey: ['featured-tools'],
     queryFn: () => getTools({ published: true, orderBy: 'is_featured desc, created_at desc', ascending: false, limit: 6 }),
+    enabled: deferHomepageQueries,
+    refetchOnWindowFocus: false,
     retry: false,
   })
 
   const {
     data: trendingTools = [],
     isLoading: isLoadingTrendingTools,
+    isFetching: isFetchingTrendingTools,
     error: trendingToolsError,
   } = useQuery({
     queryKey: ['trending-tools'],
     queryFn: () => getTools({ published: true, orderBy: 'is_trending desc, created_at desc', ascending: false, limit: 6 }),
+    enabled: deferHomepageQueries,
+    refetchOnWindowFocus: false,
     retry: false,
   })
 
   const {
     data: recentTools = [],
     isLoading: isLoadingRecentTools,
+    isFetching: isFetchingRecentTools,
     error: recentToolsError,
   } = useQuery({
     queryKey: ['recent-tools'],
     queryFn: () => getTools({ published: true, orderBy: 'created_at', ascending: false, limit: 6 }),
+    enabled: deferHomepageQueries,
+    refetchOnWindowFocus: false,
     retry: false,
   })
 
   const {
     data: totalUsage = 0,
     isLoading: isLoadingUsage,
+    isFetching: isFetchingUsage,
   } = useQuery({
     queryKey: ['total-usage'],
     queryFn: getTotalUsageCount,
+    enabled: deferHomepageQueries,
+    refetchOnWindowFocus: false,
     retry: false,
   })
 
   const {
     data: featuredWorkflows = [],
     isLoading: isLoadingWorkflows,
+    isFetching: isFetchingWorkflows,
   } = useQuery({
     queryKey: ['workflows-featured'],
     queryFn: () => getFeaturedWorkflows({ limit: 6 }),
+    enabled: deferHomepageQueries,
+    refetchOnWindowFocus: false,
+    retry: false,
+  })
+
+  const {
+    data: featuredJobs = [],
+    isLoading: isLoadingFeaturedJobs
+  } = useQuery({
+    queryKey: ['featured-jobs'],
+    queryFn: () => getFeaturedJobs({ limit: 6 }),
+    enabled: deferHomepageQueries,
+    refetchOnWindowFocus: false,
     retry: false,
   })
 
   const toolCount = useMemo(() => {
     const categoryTotal = categories.reduce((sum, category) => sum + (category.tool_count || categoryCounts[category.id] || 0), 0)
-    if (categoryTotal > 0) return categoryTotal
-    return Math.max(featuredTools.length + trendingTools.length + recentTools.length, 50)
-  }, [categories, categoryCounts, featuredTools.length, trendingTools.length, recentTools.length])
+    return categoryTotal > 0 ? categoryTotal : 50
+  }, [categories, categoryCounts])
 
-  const hasError = categoriesError || featuredToolsError || trendingToolsError || recentToolsError
+  const hasError = categoriesError
   const showCategoriesSectionSkeleton = isLoadingCategories || isLoadingCategoryCounts
-  const showFeaturedSectionSkeleton = isLoadingFeaturedTools || isLoadingRecentTools
-  const showTrendingSectionSkeleton = isLoadingTrendingTools
-  const showRecentSectionSkeleton = isLoadingRecentTools
-  const showWorkflowsSectionSkeleton = isLoadingWorkflows
+  const showFeaturedSectionSkeleton = !deferHomepageQueries || isLoadingFeaturedTools || isFetchingFeaturedTools || isLoadingRecentTools || isFetchingRecentTools
+  const showTrendingSectionSkeleton = !deferHomepageQueries || isLoadingTrendingTools || isFetchingTrendingTools
+  const showRecentSectionSkeleton = !deferHomepageQueries || isLoadingRecentTools || isFetchingRecentTools
+  const showWorkflowsSectionSkeleton = !deferHomepageQueries || isLoadingWorkflows || isFetchingWorkflows
 
   if (hasError) {
     return (
@@ -203,6 +234,26 @@ export default function Home() {
             <PopularWorkflows workflows={featuredWorkflows} />
           </Suspense>
         )
+      )}
+
+      {/* Featured Jobs (deferred) */}
+      {deferHomepageQueries && featuredJobs && featuredJobs.length > 0 && (
+        <section className="py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <h2 className="text-xl font-semibold mb-4">Latest Government Jobs</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {featuredJobs.map((j) => (
+                <div key={j.id} className="p-4 rounded-lg border bg-card hover:shadow-md transition">
+                  <a href={`/jobs/${encodeURIComponent(j.slug)}`} className="no-underline">
+                    <h3 className="font-semibold">{j.title}</h3>
+                    <p className="text-sm text-muted-foreground">{j.organization} • {j.location}</p>
+                    <p className="text-sm mt-2 line-clamp-2">{j.short_description}</p>
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       )}
 
       {showTrendingSectionSkeleton ? (

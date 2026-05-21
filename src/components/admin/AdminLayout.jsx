@@ -13,6 +13,7 @@ const navItems = [
   { to: '/admin/tools', label: 'Tools', icon: Wrench },
   { to: '/admin/seeder', label: 'Tool Seeder', icon: Download },
   { to: '/admin/blog', label: 'Blog Posts', icon: BookOpen },
+  { to: '/admin/jobs', label: 'Jobs', icon: FolderOpen },
   { to: '/admin/blog-categories', label: 'Blog Categories', icon: FolderOpen },
   { to: '/admin/categories', label: 'Categories', icon: FolderOpen },
   { to: '/admin/workflow-pages', label: 'Workflow Pages', icon: Sparkles },

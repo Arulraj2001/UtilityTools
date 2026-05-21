@@ -52,6 +52,10 @@ create table if not exists public.admin_users (
   created_at timestamptz not null default now()
 );
 
+-- Register every authenticated admin user here so RLS policies can grant admin access.
+-- Example: insert into public.admin_users (id, is_admin) values ('<YOUR_SUPABASE_USER_ID>', true)
+--   on conflict (id) do update set is_admin = true, updated_at = now();
+
 -- =========================
 -- TOOLS
 -- =========================
@@ -172,6 +176,47 @@ create index if not exists idx_workflow_pages_status on workflow_pages (status);
 create index if not exists idx_workflow_pages_updated_at on workflow_pages (updated_at desc);
 create index if not exists idx_workflow_pages_featured on workflow_pages (is_featured);
 create index if not exists idx_workflow_pages_view_count on workflow_pages (view_count desc);
+
+-- =========================
+-- JOBS
+-- =========================
+
+create table if not exists jobs (
+  id uuid primary key default uuid_generate_v4(),
+  title text not null,
+  slug text not null unique,
+  organization text,
+  category text,
+  job_type text,
+  location text,
+  qualification text,
+  experience text,
+  salary text,
+  application_start_date date,
+  last_date date,
+  official_website text,
+  apply_link text,
+  notification_pdf text,
+  short_description text,
+  full_description text,
+  eligibility jsonb,
+  selection_process jsonb,
+  important_dates jsonb,
+  application_fee text,
+  tags jsonb,
+  featured boolean default false,
+  status text default 'draft',
+  seo_title text,
+  seo_description text,
+  canonical_url text,
+  og_image text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_jobs_status on jobs (status);
+create index if not exists idx_jobs_last_date on jobs (last_date desc);
+create index if not exists idx_jobs_featured on jobs (featured);
 
 -- =========================
 -- REDIRECTS
@@ -329,6 +374,7 @@ alter table if exists public.admin_users enable row level security;
 alter table if exists redirects enable row level security;
 alter table if exists ad_placements enable row level security;
 alter table if exists site_settings enable row level security;
+alter table if exists jobs enable row level security;
 
 -- =========================
 -- CLEANUP & ROLE-BASED POLICIES
@@ -345,6 +391,10 @@ drop policy if exists "Allow admin select own admin record" on public.admin_user
 drop policy if exists "Allow admin manage admin_users" on public.admin_users;
 drop policy if exists "Allow public select published workflow_pages" on workflow_pages;
 drop policy if exists "Allow admin manage workflow_pages" on workflow_pages;
+
+-- Jobs policies (cleanup)
+drop policy if exists "Allow public select published jobs" on jobs;
+drop policy if exists "Allow admin manage jobs" on jobs;
 
 drop policy if exists "Allow all redirects" on redirects;
 drop policy if exists "Allow all ad_placements" on ad_placements;
@@ -429,6 +479,39 @@ create policy "Allow public select published workflow_pages"
 
 create policy "Allow admin manage workflow_pages"
   on workflow_pages
+  for insert, update, delete
+  using (
+    exists (
+      select 1
+      from public.admin_users
+      where id = auth.uid()
+        and is_admin = true
+    )
+  )
+  with check (
+    exists (
+      select 1
+      from public.admin_users
+      where id = auth.uid()
+        and is_admin = true
+    )
+  );
+
+create policy "Allow public select published jobs"
+  on jobs
+  for select
+  using (
+    status = 'published'
+    or exists (
+      select 1
+      from public.admin_users
+      where id = auth.uid()
+        and is_admin = true
+    )
+  );
+
+create policy "Allow admin manage jobs"
+  on jobs
   for insert, update, delete
   using (
     exists (

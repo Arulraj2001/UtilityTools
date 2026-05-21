@@ -25,6 +25,74 @@ alter table if exists blog_posts add column if not exists meta_robots text defau
 -- Safe site_settings additions
 alter table if exists site_settings add column if not exists "group" text default 'general';
 
+-- Safe jobs table and columns
+create table if not exists jobs (
+  id uuid primary key default uuid_generate_v4(),
+  title text not null,
+  slug text not null unique,
+  organization text,
+  category text,
+  job_type text,
+  location text,
+  qualification text,
+  experience text,
+  salary text,
+  application_start_date date,
+  last_date date,
+  official_website text,
+  apply_link text,
+  notification_pdf text,
+  short_description text,
+  full_description text,
+  eligibility jsonb,
+  selection_process jsonb,
+  important_dates jsonb,
+  application_fee text,
+  tags jsonb,
+  featured boolean default false,
+  status text default 'draft',
+  seo_title text,
+  seo_description text,
+  canonical_url text,
+  og_image text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table if exists jobs add column if not exists title text;
+alter table if exists jobs add column if not exists slug text;
+alter table if exists jobs add column if not exists organization text;
+alter table if exists jobs add column if not exists category text;
+alter table if exists jobs add column if not exists job_type text;
+alter table if exists jobs add column if not exists location text;
+alter table if exists jobs add column if not exists qualification text;
+alter table if exists jobs add column if not exists experience text;
+alter table if exists jobs add column if not exists salary text;
+alter table if exists jobs add column if not exists application_start_date date;
+alter table if exists jobs add column if not exists last_date date;
+alter table if exists jobs add column if not exists official_website text;
+alter table if exists jobs add column if not exists apply_link text;
+alter table if exists jobs add column if not exists notification_pdf text;
+alter table if exists jobs add column if not exists short_description text;
+alter table if exists jobs add column if not exists full_description text;
+alter table if exists jobs add column if not exists eligibility jsonb;
+alter table if exists jobs add column if not exists selection_process jsonb;
+alter table if exists jobs add column if not exists important_dates jsonb;
+alter table if exists jobs add column if not exists application_fee text;
+alter table if exists jobs add column if not exists tags jsonb;
+alter table if exists jobs add column if not exists featured boolean default false;
+alter table if exists jobs add column if not exists status text default 'draft';
+alter table if exists jobs add column if not exists seo_title text;
+alter table if exists jobs add column if not exists seo_description text;
+alter table if exists jobs add column if not exists canonical_url text;
+alter table if exists jobs add column if not exists og_image text;
+alter table if exists jobs add column if not exists created_at timestamptz not null default now();
+alter table if exists jobs add column if not exists updated_at timestamptz not null default now();
+
+create index if not exists idx_jobs_status on jobs (status);
+create index if not exists idx_jobs_last_date on jobs (last_date desc);
+create index if not exists idx_jobs_featured on jobs (featured);
+
 -- Safe indexes
 create index if not exists idx_blog_posts_status on blog_posts (status);
 create index if not exists idx_blog_posts_created_at on blog_posts (created_at desc);
@@ -97,6 +165,7 @@ alter table if exists blog_posts enable row level security;
 alter table if exists workflow_pages enable row level security;
 alter table if exists blog_categories enable row level security;
 alter table if exists public.admin_users enable row level security;
+alter table if exists jobs enable row level security;
 
 create table if not exists analytics_events (
   id uuid primary key default uuid_generate_v4(),
@@ -243,6 +312,39 @@ create policy "Allow public select published workflow_pages"
 
 create policy "Allow admin manage workflow_pages"
   on workflow_pages
+  for insert, update, delete
+  using (
+    exists (
+      select 1
+      from public.admin_users
+      where id = auth.uid()
+        and is_admin = true
+    )
+  )
+  with check (
+    exists (
+      select 1
+      from public.admin_users
+      where id = auth.uid()
+        and is_admin = true
+    )
+  );
+
+create policy "Allow public select published jobs"
+  on jobs
+  for select
+  using (
+    status = 'published'
+    or exists (
+      select 1
+      from public.admin_users
+      where id = auth.uid()
+        and is_admin = true
+    )
+  );
+
+create policy "Allow admin manage jobs"
+  on jobs
   for insert, update, delete
   using (
     exists (

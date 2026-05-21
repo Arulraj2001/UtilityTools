@@ -28,6 +28,8 @@ const CategoriesList = lazy(() => import('./pages/CategoriesList'))
 const CategoryPage = lazy(() => import('./pages/CategoryPage'))
 const BlogList = lazy(() => import('./pages/BlogList'))
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'))
+const JobsListPage = lazy(() => import('./pages/jobs/JobsListPage'))
+const JobDetailPage = lazy(() => import('./pages/jobs/JobDetailPage'))
 const About = lazy(() => import('./pages/About'))
 const Contact = lazy(() => import('./pages/Contact'))
 const Privacy = lazy(() => import('./pages/Privacy'))
@@ -46,6 +48,7 @@ const AdminRedirects = lazy(() => import('./pages/admin/AdminRedirects'))
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
 const AdminToolSeeder = lazy(() => import('./pages/admin/AdminToolSeeder'))
 const AdminWorkflowPages = lazy(() => import('./pages/admin/AdminWorkflowPages'))
+const AdminJobs = lazy(() => import('./pages/admin/jobs/AdminJobs'))
 const WorkflowPage = lazy(() => import('./pages/WorkflowPage'))
 const WorkflowListPage = lazy(() => import('./pages/WorkflowListPage'))
 const PageNotFound = lazy(() => import('./lib/PageNotFound'))
@@ -97,6 +100,8 @@ const AuthenticatedApp = () => {
         <Route path="/category/:slug" element={wrap(<CategoryPage />)} />
         <Route path="/blog" element={wrap(<BlogList />)} />
         <Route path="/blog/:slug" element={wrap(<BlogPostPage />)} />
+        <Route path="/jobs" element={wrap(<JobsListPage />)} />
+        <Route path="/jobs/:slug" element={wrap(<JobDetailPage />)} />
         <Route path="/workflow" element={wrap(<WorkflowListPage />)} />
         <Route path="/workflow/:slug" element={wrap(<WorkflowPage />)} />
         <Route path="/about" element={wrap(<About />)} />
@@ -111,6 +116,7 @@ const AuthenticatedApp = () => {
         <Route element={wrap(<AdminLayout />)}>
           <Route index element={wrap(<AdminDashboard />)} />
           <Route path="tools" element={wrap(<AdminTools />)} />
+          <Route path="jobs" element={wrap(<AdminJobs />)} />
           <Route path="blog" element={wrap(<AdminBlog />)} />
           <Route path="blog-categories" element={wrap(<AdminBlogCategories />)} />
           <Route path="categories" element={wrap(<AdminCategories />)} />

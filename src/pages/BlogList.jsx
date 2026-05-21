@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { getBlogPosts, getBlogCategories } from '@/api/supabaseApi'
-import { applyQuickFilter } from '@/lib/blogFilterUtils'
+import { filterPosts } from '@/lib/blogFilterUtils'
 import BlogSidebar from '@/components/blog/BlogSidebar'
 import BlogFilterDrawer from '@/components/blog/BlogFilterDrawer'
 import BlogCard from '@/components/blog/BlogCard'
@@ -13,9 +13,9 @@ export default function BlogList() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   // Get filter parameters from URL
-  const activeCategory = searchParams.get('category') || ''
-  const activeTags = searchParams.getAll('tag') || []
-  const activeFilter = searchParams.get('filter') || ''
+  const activeCategory = useMemo(() => searchParams.get('category') || '', [searchParams.toString()])
+  const activeTags = useMemo(() => searchParams.getAll('tag') || [], [searchParams.toString()])
+  const activeTagsKey = useMemo(() => activeTags.join(','), [activeTags])
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['blog-published'],
@@ -39,36 +39,18 @@ export default function BlogList() {
   }, [posts])
 
   useEffect(() => {
-    if (activeCategory || activeTags.length > 0 || activeFilter) {
+    if (activeCategory || activeTags.length > 0) {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
-  }, [activeCategory, activeTags.join(','), activeFilter])
+  }, [activeCategory, activeTagsKey])
 
-  // Filter posts based on active filters
+  // Filter posts using a stable derived pipeline
   const filteredPosts = useMemo(() => {
-    let result = [...posts]
-
-    // Filter by category
-    if (activeCategory) {
-      result = result.filter(post =>
-        post.blog_categories?.slug === activeCategory
-      )
-    }
-
-    // Filter by tags (AND operation - post must have all selected tags)
-    if (activeTags.length > 0) {
-      result = result.filter(post =>
-        post.tags && activeTags.every(tag => post.tags.includes(tag))
-      )
-    }
-
-    // Apply quick filter (Featured, Trending, Recent, AI Tools, Tutorials, SEO, Programming)
-    if (activeFilter) {
-      result = applyQuickFilter(result, activeFilter)
-    }
-
-    return result
-  }, [posts, activeCategory, activeTags, activeFilter])
+    return filterPosts(posts, {
+      category: activeCategory,
+      tags: activeTags,
+    })
+  }, [posts, activeCategory, activeTagsKey])
 
   return (
     <div className="min-h-screen bg-background">

@@ -1,30 +1,21 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
 import { X, Search, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
-import { applyQuickFilter } from '@/lib/blogFilterUtils'
 
-const QUICK_FILTERS = [
-  { id: 'featured', label: 'Featured Posts', icon: '⭐' },
-  { id: 'trending', label: 'Trending', icon: '🔥' },
-  { id: 'recent', label: 'Recent', icon: '📅' },
-  { id: 'ai-tools', label: 'AI Tools', icon: '🤖' },
-  { id: 'tutorials', label: 'Tutorials', icon: '📚' },
-  { id: 'seo', label: 'SEO', icon: '🔍' },
-  { id: 'programming', label: 'Programming', icon: '💻' },
-]
-
-export default function BlogSidebar({ categories = [], tags = [], posts = [], onClose = null, isMobile = false }) {
+function BlogSidebar({ categories = [], tags = [], posts = [], onClose = null, isMobile = false }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [categorySearch, setCategorySearch] = useState('')
   const [tagSearch, setTagSearch] = useState('')
 
-  // Get active filters from URL
-  const activeCategory = searchParams.get('category') || ''
-  const activeTags = searchParams.getAll('tag') || []
-  const activeFilter = searchParams.get('filter') || ''
+  const searchParamsString = useMemo(() => searchParams.toString(), [searchParams.toString()])
+
+  // Get active filters from URL using stable memoization
+  const activeCategory = useMemo(() => searchParams.get('category') || '', [searchParamsString])
+  const activeTags = useMemo(() => searchParams.getAll('tag') || [], [searchParamsString])
+  const activeTagsKey = useMemo(() => activeTags.join(','), [activeTags])
 
   const categoryCounts = useMemo(() => {
     return posts.reduce((counts, post) => {
@@ -34,15 +25,6 @@ export default function BlogSidebar({ categories = [], tags = [], posts = [], on
       counts[postCategoryId] = (counts[postCategoryId] || 0) + 1
       return counts
     }, {})
-  }, [posts])
-
-  // Calculate quick filter counts
-  const quickFilterCounts = useMemo(() => {
-    const counts = {}
-    QUICK_FILTERS.forEach(filter => {
-      counts[filter.id] = applyQuickFilter(posts, filter.id).length
-    })
-    return counts
   }, [posts])
 
   // Filter categories and tags
@@ -63,7 +45,9 @@ export default function BlogSidebar({ categories = [], tags = [], posts = [], on
   const location = useLocation()
   const isOnBlogPage = location.pathname === '/blog'
 
-  const navigateToBlog = (params) => {
+  const currentSearchParams = useMemo(() => new URLSearchParams(searchParams), [searchParamsString])
+
+  const navigateToBlog = useCallback((params) => {
     const queryString = params.toString()
     const path = `/blog${queryString ? `?${queryString}` : ''}`
     if (isOnBlogPage) {
@@ -71,22 +55,22 @@ export default function BlogSidebar({ categories = [], tags = [], posts = [], on
     } else {
       navigate(path)
     }
-  }
+  }, [isOnBlogPage, navigate, setSearchParams])
 
-  const handleCategorySelect = (categorySlug) => {
-    const params = new URLSearchParams(searchParams)
+  const handleCategorySelect = useCallback((categorySlug) => {
+    const params = new URLSearchParams(currentSearchParams)
     if (activeCategory === categorySlug) {
       params.delete('category')
     } else {
       params.set('category', categorySlug)
     }
     navigateToBlog(params)
-  }
+  }, [activeCategory, currentSearchParams, navigateToBlog])
 
-  const handleTagToggle = (tag) => {
-    const params = new URLSearchParams(searchParams)
+  const handleTagToggle = useCallback((tag) => {
+    const params = new URLSearchParams(currentSearchParams)
     const currentTags = params.getAll('tag')
-    
+
     if (currentTags.includes(tag)) {
       params.delete('tag')
       currentTags.filter(t => t !== tag).forEach(t => params.append('tag', t))
@@ -94,25 +78,15 @@ export default function BlogSidebar({ categories = [], tags = [], posts = [], on
       params.append('tag', tag)
     }
     navigateToBlog(params)
-  }
+  }, [currentSearchParams, navigateToBlog])
 
-  const handleFilterSelect = (filterId) => {
-    const params = new URLSearchParams(searchParams)
-    if (activeFilter === filterId) {
-      params.delete('filter')
-    } else {
-      params.set('filter', filterId)
-    }
-    navigateToBlog(params)
-  }
-
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setSearchParams({})
     setCategorySearch('')
     setTagSearch('')
-  }
+  }, [setSearchParams])
 
-  const hasActiveFilters = activeCategory || activeTags.length > 0 || activeFilter
+  const hasActiveFilters = activeCategory || activeTags.length > 0
 
   const sidebarContent = (
     <div className="space-y-6">
@@ -195,43 +169,6 @@ export default function BlogSidebar({ categories = [], tags = [], posts = [], on
         </div>
       )}
 
-      {/* Quick Filters Section */}
-      <div className="space-y-3">
-        <h4 className="font-semibold text-sm text-foreground">Quick Filters</h4>
-        <div className="space-y-2">
-          {QUICK_FILTERS.map((filter) => {
-            const isActive = activeFilter === filter.id
-            const count = quickFilterCounts[filter.id] || 0
-            return (
-              <motion.button
-                key={filter.id}
-                onClick={() => handleFilterSelect(filter.id)}
-                whileHover={{ x: 4 }}
-                className={`
-                  w-full text-left px-3 py-2 rounded-lg transition-all text-sm flex items-center justify-between gap-2
-                  ${isActive
-                    ? 'bg-primary/10 text-primary font-medium border border-primary/30'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                  }
-                `}
-              >
-                <div className="flex items-center gap-2">
-                  <span>{filter.icon}</span>
-                  {filter.label}
-                </div>
-                <span className={`text-xs rounded-full px-2 py-0.5 ${
-                  isActive
-                    ? 'bg-primary/20 text-primary'
-                    : 'bg-muted text-muted-foreground'
-                }`}>
-                  {count}
-                </span>
-              </motion.button>
-            )
-          })}
-        </div>
-      </div>
-
       {/* Tags Section */}
       {tags && tags.length > 0 && (
         <div className="space-y-3">
@@ -277,3 +214,5 @@ export default function BlogSidebar({ categories = [], tags = [], posts = [], on
 
   return sidebarContent
 }
+
+export default React.memo(BlogSidebar)
