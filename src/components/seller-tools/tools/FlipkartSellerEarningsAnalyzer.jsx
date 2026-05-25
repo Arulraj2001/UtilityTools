@@ -18,14 +18,16 @@ const INPUT_FIELDS = [
 ]
 
 const FlipkartSellerEarningsAnalyzer = memo(() => {
-  const [inputs, setInputs] = useState({ gstRate: '18', fixedFee: '35' })
+  const [inputs, setInputs] = useState(/** @type {Record<string, string>} */ ({}))
   const [hasRun, setHasRun] = useState(false)
   const result = useFlipkartAnalysis(inputs)
   const activeResult = hasRun && result ? result : null
 
-  const handleChange = useCallback((name, value) => { setHasRun(false); setInputs(prev => ({ ...prev, [name]: value })) }, [])
+  const handleChange = useCallback(
+    /** @param {string} name @param {string} value */
+    (name, value) => { setHasRun(false); setInputs(prev => ({ ...prev, [name]: value })) }, [])
   const handleCalculate = useCallback(() => setHasRun(true), [])
-  const handleReset = useCallback(() => { setInputs({ gstRate: '18', fixedFee: '35' }); setHasRun(false) }, [])
+  const handleReset = useCallback(() => { setInputs({}); setHasRun(false) }, [])
 
   const suggestions = useMemo(() => {
     if (!activeResult) return []
@@ -43,9 +45,10 @@ const FlipkartSellerEarningsAnalyzer = memo(() => {
           {INPUT_FIELDS.map(field => field.type === 'select' ? (
             <div key={field.name} className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">{field.label}</label>
-              <select value={inputs[field.name] || field.default} onChange={e => handleChange(field.name, e.target.value)}
+              <select value={inputs[field.name] || ''} onChange={e => handleChange(field.name, e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl bg-muted/50 border border-border/50 focus:border-primary/50 outline-none transition-all text-sm">
-                {field.options.map(o => <option key={o} value={o}>{o}</option>)}
+                <option value="" disabled hidden>Select</option>
+                {field.options?.map(o => <option key={o} value={o}>{o}</option>)}
               </select>
             </div>
           ) : (

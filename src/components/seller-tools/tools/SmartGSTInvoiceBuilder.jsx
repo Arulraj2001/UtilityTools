@@ -10,13 +10,13 @@ import { KpiCard, Section, CopyButton } from '../PremiumSellerCharts'
 
 const SmartGSTInvoiceBuilder = memo(() => {
   const [inputs, setInputs] = useState({
-    companyName: 'Your Business', companyAddress: '123 Business St, City - 600001', gstin: '33ABCDE1234F1Z5',
-    invoiceNo: `INV-${Date.now().toString(36).toUpperCase()}`, customerName: '', customerGstin: '',
-    placeOfSupply: 'Tamil Nadu', date: new Date().toISOString().split('T')[0],
-    items: [{ name: 'Product 1', hsn: '1234', qty: 1, rate: 1000, gstRate: 18 }],
+    companyName: '', companyAddress: '', gstin: '',
+    invoiceNo: '', customerName: '', customerGstin: '',
+    placeOfSupply: '', date: '',
+    items: [],
   })
   // user-friendly multiline items input (one item per line)
-  const [itemsText, setItemsText] = useState('Product 1,1234,1,1000,18')
+  const [itemsText, setItemsText] = useState('')
   const [hasRun, setHasRun] = useState(false)
   const result = useGSTInvoice(inputs)
   const activeResult = hasRun && result ? result : null
@@ -42,12 +42,12 @@ const SmartGSTInvoiceBuilder = memo(() => {
   }, [itemsText, parseItemsText])
   const handleReset = useCallback(() => {
     setInputs({
-      companyName: 'Your Business', companyAddress: '123 Business St, City - 600001', gstin: '33ABCDE1234F1Z5',
-      invoiceNo: `INV-${Date.now().toString(36).toUpperCase()}`, customerName: '', customerGstin: '',
-      placeOfSupply: 'Tamil Nadu', date: new Date().toISOString().split('T')[0],
-      items: [{ name: 'Product 1', hsn: '1234', qty: 1, rate: 1000, gstRate: 18 }],
+      companyName: '', companyAddress: '', gstin: '',
+      invoiceNo: '', customerName: '', customerGstin: '',
+      placeOfSupply: '', date: '',
+      items: [],
     })
-    setItemsText('Product 1,1234,1,1000,18')
+    setItemsText('')
     setHasRun(false)
   }, [])
 
@@ -98,7 +98,7 @@ QR: ${activeResult.qrData}`
             {['companyName', 'companyAddress', 'gstin'].map(f => (
               <div key={f} className="space-y-1">
                 <label className="text-xs text-muted-foreground capitalize">{f.replace('company', '').replace('gstin', 'GSTIN')}</label>
-                <input value={inputs[f]} onChange={e => handleChange(f, e.target.value)}
+                <input value={inputs[f]} onChange={e => handleChange(f, e.target.value)} placeholder={f === 'gstin' ? '33ABCDE1234F1Z5' : `Enter ${f.replace('company', '').trim()}`}
                   className="w-full px-3 py-2 rounded-xl bg-muted/50 border border-border/50 focus:border-primary/50 outline-none text-sm" />
               </div>
             ))}
@@ -108,7 +108,13 @@ QR: ${activeResult.qrData}`
             {['customerName', 'customerGstin', 'placeOfSupply', 'date', 'invoiceNo'].map(f => (
               <div key={f} className="space-y-1">
                 <label className="text-xs text-muted-foreground capitalize">{f.replace('customer', '').replace('Gstin', ' GSTIN').replace('invoiceNo', 'Invoice No')}</label>
-                <input value={inputs[f]} onChange={e => handleChange(f, e.target.value)}
+                <input value={inputs[f]} onChange={e => handleChange(f, e.target.value)} placeholder={
+                  f === 'customerGstin' ? '33ABCDE1234F1Z5' :
+                  f === 'placeOfSupply' ? 'Tamil Nadu' :
+                  f === 'date' ? 'YYYY-MM-DD' :
+                  f === 'invoiceNo' ? 'INV-1234' :
+                  `Enter ${f.replace('customer', '').replace('Gstin', ' GSTIN').replace('invoiceNo', 'Invoice No')}`
+                }
                   className="w-full px-3 py-2 rounded-xl bg-muted/50 border border-border/50 focus:border-primary/50 outline-none text-sm" />
               </div>
             ))}

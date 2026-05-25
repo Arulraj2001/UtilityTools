@@ -17,13 +17,13 @@ const FIELDS = [
 ]
 
 const SellerBusinessPerformanceDashboard = memo(() => {
-  const [inputs, setInputs] = useState({ returns: '5', taxRate: '18' })
+  const [inputs, setInputs] = useState(/** @type {Record<string, string>} */ ({}))
   const [hasRun, setHasRun] = useState(false)
   const result = useSellerPerformance(inputs)
   const activeResult = hasRun && result ? result : null
   const handleChange = useCallback((n, v) => { setHasRun(false); setInputs(p => ({ ...p, [n]: v })) }, [])
   const handleCalc = useCallback(() => setHasRun(true), [])
-  const handleReset = useCallback(() => { setInputs({ returns: '5', taxRate: '18' }); setHasRun(false) }, [])
+  const handleReset = useCallback(() => { setInputs({}); setHasRun(false) }, [])
 
   return (
     <div className="space-y-5">

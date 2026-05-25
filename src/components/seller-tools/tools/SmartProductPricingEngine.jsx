@@ -16,13 +16,15 @@ const FIELDS = [
 ]
 
 const SmartProductPricingEngine = memo(() => {
-  const [inputs, setInputs] = useState({ targetMargin: '20', marketplaceFees: '15' })
+  const [inputs, setInputs] = useState(/** @type {Record<string, string>} */ ({}))
   const [hasRun, setHasRun] = useState(false)
   const result = usePricingEngine(inputs)
   const activeResult = hasRun && result ? result : null
-  const handleChange = useCallback((n, v) => { setHasRun(false); setInputs(p => ({ ...p, [n]: v })) }, [])
+  const handleChange = useCallback(
+    /** @param {string} n @param {string} v */
+    (n, v) => { setHasRun(false); setInputs(p => ({ ...p, [n]: v })) }, [])
   const handleCalc = useCallback(() => setHasRun(true), [])
-  const handleReset = useCallback(() => { setInputs({ targetMargin: '20', marketplaceFees: '15' }); setHasRun(false) }, [])
+  const handleReset = useCallback(() => { setInputs({}); setHasRun(false) }, [])
 
   return (
     <div className="space-y-5">

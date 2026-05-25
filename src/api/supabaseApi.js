@@ -369,9 +369,13 @@ const sortParams = (query, orderBy, ascending) => {
   return query.order(orderBy, { ascending });
 };
 
-export const getTools = async ({ published = true, orderBy = 'sort_order', ascending = true, limit = 200 } = {}) => {
+export const getTools = async ({ published = true, orderBy = 'sort_order', ascending = true, limit = 200, filters = {} } = {}) => {
   let query = supabase.from('tools').select('*');
   if (published) query = query.eq('status', 'published');
+  if (filters?.is_featured !== undefined) query = query.eq('is_featured', filters.is_featured);
+  if (filters?.is_trending !== undefined) query = query.eq('is_trending', filters.is_trending);
+  if (filters?.category_id) query = query.eq('category_id', filters.category_id);
+  if (Array.isArray(filters?.categoryIds) && filters.categoryIds.length > 0) query = query.in('category_id', filters.categoryIds);
   query = sortParams(query, orderBy, ascending);
   if (limit) query = query.limit(limit);
   return handleResponse(await query);
@@ -384,9 +388,13 @@ export const getToolsAll = async ({ orderBy = 'created_at', ascending = false, l
   return handleResponse(await query);
 };
 
-export const getToolsWithCategories = async ({ published = true, orderBy = 'sort_order', ascending = true, limit = 200 } = {}) => {
+export const getToolsWithCategories = async ({ published = true, orderBy = 'sort_order', ascending = true, limit = 200, filters = {} } = {}) => {
   let query = supabase.from('tools').select('*, categories(id,name,slug)');
   if (published) query = query.eq('status', 'published');
+  if (filters?.is_featured !== undefined) query = query.eq('is_featured', filters.is_featured);
+  if (filters?.is_trending !== undefined) query = query.eq('is_trending', filters.is_trending);
+  if (filters?.category_id) query = query.eq('category_id', filters.category_id);
+  if (Array.isArray(filters?.categoryIds) && filters.categoryIds.length > 0) query = query.in('category_id', filters.categoryIds);
   query = sortParams(query, orderBy, ascending);
   if (limit) query = query.limit(limit);
   return handleResponse(await query);
@@ -402,14 +410,14 @@ export const getCategories = async ({ orderBy = 'sort_order', ascending = true, 
 // Lightweight per-category counts without fetching whole tool records.
 // Uses PostgREST head/count to request only counts per category.
 export const getCategoryCounts = async ({ categoryIds = [], published = true } = {}) => {
-  // If no category IDs provided, return empty map quickly
-  if (!Array.isArray(categoryIds) || categoryIds.length === 0) return {};
+  const sanitizedCategoryIds = Array.isArray(categoryIds) ? categoryIds.filter(Boolean) : [];
+  if (sanitizedCategoryIds.length === 0) return {};
 
   // Use a single RPC call to fetch grouped counts for published tools.
   // The RPC `get_published_tool_counts` is defined in `supabase_schema.sql` and
   // returns rows: { category_id, published_tool_count }.
   try {
-    const params = { ids: categoryIds };
+    const params = { ids: sanitizedCategoryIds };
     const { data, error } = await supabase.rpc('get_published_tool_counts', params);
     if (error) {
       console.error('getCategoryCounts RPC error:', error);
@@ -427,7 +435,7 @@ export const getCategoryCounts = async ({ categoryIds = [], published = true } =
 
   // RPC unavailable or errored: fall back to per-category head count requests
   const counts = {};
-  await Promise.all(categoryIds.map(async (id) => {
+  await Promise.all(sanitizedCategoryIds.map(async (id) => {
     let q = supabase.from('tools').select('id', { count: 'exact', head: true }).eq('category_id', id);
     if (published) q = q.eq('status', 'published');
     const res = await q;
@@ -751,6 +759,7 @@ export const getBlogPostBySlug = async (slug) => {
 };
 
 export const updateToolUsage = async (id, usage_count) => {
+  if (!id) return null;
   const result = await supabase.from('tools').update({ usage_count, updated_at: new Date() }).eq('id', id);
   return handleResponse(result);
 };

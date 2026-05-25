@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 import { Zap, Linkedin, Github, Mail, ArrowRight } from 'lucide-react';
 
 const TOOL_LINKS = [
-{ to: '/tool/emi-calculator', label: 'EMI Calculator' },
-{ to: '/tool/bmi-calculator', label: 'BMI Calculator' },
-{ to: '/tool/word-counter', label: 'Word Counter' },
-{ to: '/tool/json-formatter', label: 'JSON Formatter' },
-{ to: '/tool/password-generator', label: 'Password Generator' },
-{ to: '/tool/sip-calculator', label: 'SIP Calculator' }];
+{ to: '/tool/photo-kb-reducer', label: 'Photo KB Reducer' },
+{ to: '/tool/exam-photo-cropper', label: 'Exam Photo Cropper' },
+{ to: '/tool/exam-document-pdf-compressor', label: 'Exam Document PDF Compressor' },
+{ to: '/tool/image-compressor', label: 'Image Compressor' },
+{ to: '/tool/volumetric-weight-calculator', label: 'Volumetric Weight Calculator' },
+{ to: '/tool/amazon-fee-calculator', label: 'Amazon Fee Calculator' }];
 
 
 export default function Footer() {

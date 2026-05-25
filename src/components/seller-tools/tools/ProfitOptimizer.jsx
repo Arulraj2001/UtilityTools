@@ -18,14 +18,16 @@ const INPUT_FIELDS = [
 ]
 
 const ProfitOptimizer = memo(() => {
-  const [inputs, setInputs] = useState({ targetMargin: '20', quantity: '1' })
+  const [inputs, setInputs] = useState(/** @type {Record<string, string>} */ ({}))
   const [hasRun, setHasRun] = useState(false)
   const result = useProfitOptimization(inputs)
   const activeResult = hasRun && result ? result : null
 
-  const handleChange = useCallback((name, value) => { setHasRun(false); setInputs(prev => ({ ...prev, [name]: value })) }, [])
+  const handleChange = useCallback(
+    /** @param {string} name @param {string} value */
+    (name, value) => { setHasRun(false); setInputs(prev => ({ ...prev, [name]: value })) }, [])
   const handleCalculate = useCallback(() => setHasRun(true), [])
-  const handleReset = useCallback(() => { setInputs({ targetMargin: '20', quantity: '1' }); setHasRun(false) }, [])
+  const handleReset = useCallback(() => { setInputs({}); setHasRun(false) }, [])
 
   return (
     <div className="space-y-5">

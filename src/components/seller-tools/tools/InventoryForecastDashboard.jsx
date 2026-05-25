@@ -18,13 +18,13 @@ const FIELDS = [
 ]
 
 const InventoryForecastDashboard = memo(() => {
-  const [inputs, setInputs] = useState({ leadTime: '15', reorderPoint: '50', safetyStock: '20' })
+  const [inputs, setInputs] = useState(/** @type {Record<string, string>} */ ({}))
   const [hasRun, setHasRun] = useState(false)
   const result = useInventoryForecast(inputs)
   const activeResult = hasRun && result ? result : null
   const handleChange = useCallback((n, v) => { setHasRun(false); setInputs(p => ({ ...p, [n]: v })) }, [])
   const handleCalc = useCallback(() => setHasRun(true), [])
-  const handleReset = useCallback(() => { setInputs({ leadTime: '15', reorderPoint: '50', safetyStock: '20' }); setHasRun(false) }, [])
+  const handleReset = useCallback(() => { setInputs({}); setHasRun(false) }, [])
 
   return (
     <div className="space-y-5">

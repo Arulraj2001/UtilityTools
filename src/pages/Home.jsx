@@ -108,7 +108,7 @@ export default function Home() {
     error: featuredToolsError,
   } = useQuery({
     queryKey: ['featured-tools'],
-    queryFn: () => getTools({ published: true, orderBy: 'is_featured desc, created_at desc', ascending: false, limit: 6 }),
+    queryFn: () => getTools({ published: true, filters: { is_featured: true }, orderBy: 'created_at desc', ascending: false, limit: 6 }),
     enabled: deferHomepageQueries,
     refetchOnWindowFocus: false,
     retry: false,
@@ -121,7 +121,7 @@ export default function Home() {
     error: trendingToolsError,
   } = useQuery({
     queryKey: ['trending-tools'],
-    queryFn: () => getTools({ published: true, orderBy: 'is_trending desc, created_at desc', ascending: false, limit: 6 }),
+    queryFn: () => getTools({ published: true, filters: { is_trending: true }, orderBy: 'created_at desc', ascending: false, limit: 6 }),
     enabled: deferHomepageQueries,
     refetchOnWindowFocus: false,
     retry: false,
@@ -214,14 +214,16 @@ export default function Home() {
       {showFeaturedSectionSkeleton ? (
         <ToolsSectionSkeleton title="Featured Tools" subtitle="Our most popular and highly rated tools" />
       ) : (
-        <Suspense fallback={<ToolsSectionSkeleton title="Featured Tools" subtitle="Our most popular and highly rated tools" />}>
-          <FeaturedTools
-            tools={featuredTools.length > 0 ? featuredTools : recentTools.slice(0, 4)}
-            categories={categories}
-            title="Featured Tools"
-            subtitle="Our most popular and highly rated tools"
-          />
-        </Suspense>
+        featuredTools.length > 0 && (
+          <Suspense fallback={<ToolsSectionSkeleton title="Featured Tools" subtitle="Our most popular and highly rated tools" />}>
+            <FeaturedTools
+              tools={featuredTools}
+              categories={categories}
+              title="Featured Tools"
+              subtitle="Our most popular and highly rated tools"
+            />
+          </Suspense>
+        )
       )}
 
       <AdBanner placement="in_content" pageType="home" className="py-6" />

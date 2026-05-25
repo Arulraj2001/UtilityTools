@@ -8,9 +8,9 @@ import { Section } from '../PremiumSellerCharts'
 
 const ShippingLabelStudio = memo(() => {
   const [inputs, setInputs] = useState({
-    senderName: 'Your Business', senderAddress: '123 Business St, City', senderPhone: '9876543210',
+    senderName: '', senderAddress: '', senderPhone: '',
     receiverName: '', receiverAddress: '', receiverPhone: '',
-    weight: '0.5', courier: 'Delhivery', orderId: `ORD${Date.now().toString(36).toUpperCase()}`,
+    weight: '', courier: '', orderId: '',
   })
   const [generated, setGenerated] = useState(false)
   const labelRef = useRef(null)
@@ -19,9 +19,9 @@ const ShippingLabelStudio = memo(() => {
   const handleGenerate = useCallback(() => setGenerated(true), [])
   const handleReset = useCallback(() => {
     setInputs({
-      senderName: 'Your Business', senderAddress: '123 Business St, City', senderPhone: '9876543210',
+      senderName: '', senderAddress: '', senderPhone: '',
       receiverName: '', receiverAddress: '', receiverPhone: '',
-      weight: '0.5', courier: 'Delhivery', orderId: `ORD${Date.now().toString(36).toUpperCase()}`,
+      weight: '', courier: '', orderId: '',
     })
     setGenerated(false)
   }, [])
@@ -84,7 +84,7 @@ Barcode: |||${inputs.orderId.slice(-6)}|||
             {['senderName', 'senderAddress', 'senderPhone'].map(f => (
               <div key={f} className="space-y-1">
                 <label className="text-xs text-muted-foreground capitalize">{f.replace('sender', '')}</label>
-                <input value={inputs[f]} onChange={e => handleChange(f, e.target.value)}
+                <input value={inputs[f]} onChange={e => handleChange(f, e.target.value)} placeholder={f === 'senderPhone' ? '9876543210' : `Enter ${f.replace('sender', '').trim()}`}
                   className="w-full px-3 py-2 rounded-xl bg-muted/50 border border-border/50 focus:border-primary/50 outline-none text-sm" />
               </div>
             ))}
@@ -94,7 +94,7 @@ Barcode: |||${inputs.orderId.slice(-6)}|||
             {['receiverName', 'receiverAddress', 'receiverPhone'].map(f => (
               <div key={f} className="space-y-1">
                 <label className="text-xs text-muted-foreground capitalize">{f.replace('receiver', '')}</label>
-                <input value={inputs[f]} onChange={e => handleChange(f, e.target.value)}
+                <input value={inputs[f]} onChange={e => handleChange(f, e.target.value)} placeholder={f === 'receiverPhone' ? '9876543210' : `Enter ${f.replace('receiver', '').trim()}`}
                   className="w-full px-3 py-2 rounded-xl bg-muted/50 border border-border/50 focus:border-primary/50 outline-none text-sm" />
               </div>
             ))}
@@ -103,19 +103,20 @@ Barcode: |||${inputs.orderId.slice(-6)}|||
         <div className="grid grid-cols-3 gap-3 mt-3">
           <div className="space-y-1">
             <label className="text-xs text-muted-foreground">Weight (kg)</label>
-            <input value={inputs.weight} onChange={e => handleChange('weight', e.target.value)}
+            <input value={inputs.weight} onChange={e => handleChange('weight', e.target.value)} placeholder="0.5"
               className="w-full px-3 py-2 rounded-xl bg-muted/50 border border-border/50 focus:border-primary/50 outline-none text-sm" />
           </div>
           <div className="space-y-1">
             <label className="text-xs text-muted-foreground">Courier</label>
             <select value={inputs.courier} onChange={e => handleChange('courier', e.target.value)}
               className="w-full px-3 py-2 rounded-xl bg-muted/50 border border-border/50 outline-none text-sm">
-              {['Delhivery', 'Blue Dart', 'DTDC', 'Ekart', 'XpressBees', 'Amazon Shipping'].map(c => <option key={c}>{c}</option>)}
+              <option value="" disabled hidden>Select courier</option>
+              {['Delhivery', 'Blue Dart', 'DTDC', 'Ekart', 'XpressBees', 'Amazon Shipping'].map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div className="space-y-1">
             <label className="text-xs text-muted-foreground">Order ID</label>
-            <input value={inputs.orderId} onChange={e => handleChange('orderId', e.target.value)}
+            <input value={inputs.orderId} onChange={e => handleChange('orderId', e.target.value)} placeholder="ORD12345"
               className="w-full px-3 py-2 rounded-xl bg-muted/50 border border-border/50 focus:border-primary/50 outline-none text-sm" />
           </div>
         </div>

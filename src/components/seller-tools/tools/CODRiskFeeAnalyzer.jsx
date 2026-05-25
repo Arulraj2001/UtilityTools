@@ -16,13 +16,13 @@ const FIELDS = [
 ]
 
 const CODRiskFeeAnalyzer = memo(() => {
-  const [inputs, setInputs] = useState({ averageOrderValue: '500', returnRate: '10', courierCodFee: '30', prepaidRatio: '40' })
+  const [inputs, setInputs] = useState(/** @type {Record<string, string>} */ ({}))
   const [hasRun, setHasRun] = useState(false)
   const result = useCODAnalysis(inputs)
   const activeResult = hasRun && result ? result : null
   const handleChange = useCallback((n, v) => { setHasRun(false); setInputs(p => ({ ...p, [n]: v })) }, [])
   const handleCalc = useCallback(() => setHasRun(true), [])
-  const handleReset = useCallback(() => { setInputs({ averageOrderValue: '500', returnRate: '10', courierCodFee: '30', prepaidRatio: '40' }); setHasRun(false) }, [])
+  const handleReset = useCallback(() => { setInputs({}); setHasRun(false) }, [])
 
   return (
     <div className="space-y-5">

@@ -11,26 +11,28 @@ import { SHIPPING_MODES } from '@/lib/logistics/premiumLogisticsMath'
 import { toast } from 'sonner'
 
 const AdvancedShippingEstimator = memo(() => {
-  const [inputs, setInputs] = useState({ packages: [], distance: '', mode: 'ground', insurance: false, cod: false, gst: true, fuelAdjustment: false, peakPricing: false })
-  const { packages, setPackages, addPackage, removePackage, updatePackage } = useShippingState([{ length: 50, width: 40, height: 30, weight: 5, quantity: 1, unit: 'cm' }])
+  const [inputs, setInputs] = useState({ packages: [], distance: '', mode: '', insurance: false, cod: false, gst: false, fuelAdjustment: false, peakPricing: false })
+  const { packages, setPackages, addPackage, removePackage, updatePackage } = useShippingState([{ length: '', width: '', height: '', weight: '', quantity: '', unit: 'cm' }])
   const [selectedCourier, setSelectedCourier] = useState(null)
   const [hasRun, setHasRun] = useState(false)
   const computedResult = useShippingEstimator({ ...inputs, packages })
   const result = hasRun ? computedResult : null
   const { exportJSON, exportArrayCSV, copyResult } = useExportTools('shipping-estimator')
 
-  const handleChange = useCallback((name, value) => {
-    setHasRun(false)
-    setInputs(prev => ({ ...prev, [name]: value }))
-  }, [])
+  const handleChange = useCallback(
+    /** @param {string} name @param {string|boolean} value */
+    (name, value) => {
+      setHasRun(false)
+      setInputs(prev => ({ ...prev, [name]: value }))
+    }, [])
 
   const handleCalculate = useCallback(() => {
     setHasRun(true)
   }, [])
 
   const handleReset = useCallback(() => {
-    setInputs({ packages: [], distance: '', mode: 'ground', insurance: false, cod: false, gst: true, fuelAdjustment: false, peakPricing: false })
-    setPackages([{ length: 50, width: 40, height: 30, weight: 5, quantity: 1, unit: 'cm' }])
+    setInputs({ packages: [], distance: '', mode: '', insurance: false, cod: false, gst: false, fuelAdjustment: false, peakPricing: false })
+    setPackages([{ length: '', width: '', height: '', weight: '', quantity: '', unit: 'cm' }])
     setSelectedCourier(null)
     setHasRun(false)
   }, [setPackages])
@@ -60,6 +62,7 @@ const AdvancedShippingEstimator = memo(() => {
           <label className="text-xs text-muted-foreground">Mode:</label>
           <select value={inputs.mode} onChange={e => handleChange('mode', e.target.value)}
             className="px-2 py-1.5 rounded-lg bg-muted/50 border border-border/50 text-xs outline-none">
+            <option value="" disabled hidden>Select mode</option>
             {Object.entries(SHIPPING_MODES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
           </select>
         </div>
@@ -74,7 +77,7 @@ const AdvancedShippingEstimator = memo(() => {
       <div className="flex flex-wrap items-end gap-3 justify-between">
         <div className="flex-1 max-w-[200px] space-y-1">
           <label className="text-[10px] text-muted-foreground">Distance (km) *</label>
-          <input type="number" value={inputs.distance || ''} onChange={e => handleChange('distance', e.target.value)}
+          <input type="number" value={inputs.distance || ''} onChange={e => handleChange('distance', e.target.value)} placeholder="e.g. 120"
             className="w-full px-2 py-1.5 rounded-lg bg-muted/50 border border-border/50 text-xs outline-none" />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -92,13 +95,13 @@ const AdvancedShippingEstimator = memo(() => {
             {['length', 'width', 'height', 'weight'].map(f => (
               <div key={f} className="flex-1 min-w-[60px]">
                 <label className="text-[10px] text-muted-foreground uppercase">{f === 'weight' ? 'Wt (kg)' : f[0].toUpperCase() + f.slice(1)}</label>
-                <input type="number" value={pkg[f] || ''} onChange={e => updatePackage(i, f, e.target.value)}
+                <input type="number" value={pkg[f] || ''} onChange={e => updatePackage(i, f, e.target.value)} placeholder={f === 'weight' ? 'kg' : 'cm'}
                   className="w-full px-2 py-1.5 rounded-lg bg-muted/50 border border-border/50 text-xs outline-none" />
               </div>
             ))}
             <div className="w-14">
               <label className="text-[10px] text-muted-foreground uppercase">Qty</label>
-              <input type="number" value={pkg.quantity || 1} onChange={e => updatePackage(i, 'quantity', e.target.value)}
+              <input type="number" value={pkg.quantity || ''} onChange={e => updatePackage(i, 'quantity', e.target.value)} placeholder="1"
                 className="w-full px-2 py-1.5 rounded-lg bg-muted/50 border border-border/50 text-xs outline-none" />
             </div>
             {packages.length > 1 && <button onClick={() => removePackage(i)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>}
