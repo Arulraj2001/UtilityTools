@@ -293,7 +293,7 @@ export default function ToolPage() {
               {tool?.usage_count > 0 && (
                 <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
                   <Clock className="w-3.5 h-3.5" />
-                  Used {tool.usage_count.toLocaleString()} times & Always Free
+                  Used {tool.usage_count.toLocaleString()} times • ✅ Free Forever
                 </div>
               )}
             </motion.div>
