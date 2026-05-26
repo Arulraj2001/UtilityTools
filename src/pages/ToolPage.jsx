@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useMemo, useEffect, useCallback, useRef, Suspense, lazy } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
@@ -10,14 +10,6 @@ import { toast } from 'sonner'
 import { runTool } from '@/lib/toolEngine'
 import useToolMemo from '@/hooks/useToolMemo'
 import { buildLogisticsMetrics } from '@/lib/engines/logisticsMetricsEngine'
-import ToolInputForm from '@/components/tools/ToolInputForm'
-import ToolResult from '@/components/tools/ToolResult'
-import ImageTool from '@/components/tools/ImageTool'
-import PDFTool from '@/components/tools/PDFTool'
-import ImageToolRouter, { IMAGE_TOOL_SLUGS } from '@/components/image-tools/ImageToolRouter';
-import GovToolRouter, { GOV_TOOL_SLUGS } from '@/components/gov-tools/GovToolRouter'
-import LogisticsToolRouter, { LOGISTICS_TOOL_SLUGS } from '@/components/logistics-tools/LogisticsToolRouter'
-import SellerToolRouter, { SELLER_TOOL_SLUGS } from '@/components/seller-tools/SellerToolRouter'
 import FAQAccordion from '@/components/shared/FAQAccordion'
 import ToolCard from '@/components/shared/ToolCard'
 import AdBanner from '@/components/shared/AdBanner'
@@ -25,14 +17,96 @@ import ToolSEO from '@/components/seo/ToolSEO'
 import { useLocalStorage } from '@/lib/useLocalStorage'
 import { getTools, getCategories, updateToolUsage, getBlogPosts, getWorkflowPages } from '@/api/supabaseApi'
 import { trackToolEvent } from '@/lib/analytics'
-import ToolContentSections
-from '@/components/seo/ToolContentSections'
 
-const IMAGE_TOOLS = IMAGE_TOOL_SLUGS;
+const ToolInputForm = lazy(() => import('@/components/tools/ToolInputForm'))
+const ToolResult = lazy(() => import('@/components/tools/ToolResult'))
+const ImageToolRouter = lazy(() => import('@/components/image-tools/ImageToolRouter'))
+const PDFTool = lazy(() => import('@/components/tools/PDFTool'))
+const GovToolRouter = lazy(() => import('@/components/gov-tools/GovToolRouter'))
+const LogisticsToolRouter = lazy(() => import('@/components/logistics-tools/LogisticsToolRouter'))
+const SellerToolRouter = lazy(() => import('@/components/seller-tools/SellerToolRouter'))
+const ToolContentSections = lazy(() => import('@/components/seo/ToolContentSections'))
+
+const IMAGE_TOOLS = [
+  'image-compressor',
+  'image-resizer',
+  'image-converter',
+  'image-cropper',
+  'image-to-pdf',
+  'image-watermark',
+  'image-color-picker',
+  'image-metadata-viewer',
+  'background-remover',
+  'image-rotator',
+  'jpg-to-png',
+  'png-to-jpg',
+]
+
 const PDF_TOOLS = ['merge-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-jpg', 'jpg-to-pdf', 'protect-pdf', 'remove-pages-pdf']
-const GOV_TOOLS = GOV_TOOL_SLUGS
-const LOGISTICS_TOOLS = LOGISTICS_TOOL_SLUGS
-const SELLER_TOOLS = SELLER_TOOL_SLUGS
+
+const GOV_TOOLS = [
+  'ssc-photo-resizer',
+  'ssc-signature-resizer',
+  'railway-photo-resizer',
+  'bank-exam-photo-tool',
+  'passport-size-photo-maker',
+  'photo-kb-reducer',
+  'signature-maker',
+  'exam-photo-cropper',
+  'pdf-size-reducer',
+  'exam-document-pdf-compressor',
+  'image-to-exam-pdf',
+  'pdf-page-extractor',
+  'pdf-merger',
+  'pdf-to-image',
+  'document-scanner',
+]
+
+const LOGISTICS_TOOLS = [
+  'smart-courier-analyzer',
+  'shipment-transit-intelligence',
+  'cargo-volume-planner',
+  'freight-billing-optimizer',
+  'packaging-profit-analyzer',
+  'air-cargo-pricing-simulator',
+  'container-optimization-system',
+  'parcel-dimension-intelligence',
+  'volumetric-freight-analyzer',
+  'advanced-shipping-estimator',
+  'courier-charges-calculator',
+  'delivery-time-estimator',
+  'cbm-calculator',
+  'chargeable-weight-calculator',
+  'packaging-cost-calculator',
+  'air-freight-calculator',
+  'container-load-calculator',
+  'parcel-dimension-calculator',
+  'volumetric-weight-calculator',
+  'shipping-cost-calculator',
+]
+
+const SELLER_TOOLS = [
+  'amazon-seller-profit-intelligence',
+  'flipkart-seller-earnings-analyzer',
+  'ecommerce-profit-optimizer',
+  'cod-risk-fee-analyzer',
+  'advanced-shipping-label-studio',
+  'inventory-forecast-dashboard',
+  'smart-gst-invoice-builder',
+  'smart-product-pricing-engine',
+  'business-roi-intelligence',
+  'seller-business-performance-dashboard',
+  'amazon-fee-calculator',
+  'flipkart-fee-calculator',
+  'profit-margin-calculator',
+  'cod-charge-calculator',
+  'shipping-label-generator',
+  'inventory-calculator',
+  'gst-invoice-generator',
+  'product-pricing-calculator',
+  'roi-calculator',
+  'seller-profit-estimator',
+]
 
 export default function ToolPage() {
   const { slug } = useParams()
@@ -305,35 +379,47 @@ export default function ToolPage() {
               className="rounded-2xl border border-border/50 bg-card p-5 sm:p-6"
             >
               {isImageTool ? (
-                <ImageToolRouter tool={tool} />
+                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading image tool…</div>}>
+                  <ImageToolRouter tool={tool} />
+                </Suspense>
               ) : isPDFTool ? (
-                <PDFTool tool={tool} />
+                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading PDF tool…</div>}>
+                  <PDFTool tool={tool} />
+                </Suspense>
               ) : isGovTool ? (
-                <GovToolRouter tool={tool} />
+                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading government tool…</div>}>
+                  <GovToolRouter tool={tool} />
+                </Suspense>
               ) : isLogisticsTool ? (
-                <LogisticsToolRouter tool={tool} />
+                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading logistics tool…</div>}>
+                  <LogisticsToolRouter tool={tool} />
+                </Suspense>
               ) : isSellerTool ? (
-                <SellerToolRouter tool={tool} />
+                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading seller tool…</div>}>
+                  <SellerToolRouter tool={tool} />
+                </Suspense>
               ) : (
-                <div className="space-y-6">
-                  <ToolInputForm
-                    tool={tool}
-                    inputs={inputs}
-                    onChange={setInputs}
-                    onCalculate={calculate}
-                    onReset={reset}
-                    loading={loading}
-                  />
+                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading tool form…</div>}>
+                  <div className="space-y-6">
+                    <ToolInputForm
+                      tool={tool}
+                      inputs={inputs}
+                      onChange={setInputs}
+                      onCalculate={calculate}
+                      onReset={reset}
+                      loading={loading}
+                    />
 
-                  {result && (
-                    <div>
-                      <div className="border-t border-border/50 mb-5 pt-5">
-                        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">Results</h2>
-                        <ToolResult result={result} />
+                    {result && (
+                      <div>
+                        <div className="border-t border-border/50 mb-5 pt-5">
+                          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">Results</h2>
+                          <ToolResult result={result} />
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                </Suspense>
               )}
             </motion.div>
 
@@ -364,9 +450,9 @@ export default function ToolPage() {
             )}
 
             {/* NEW SEO CONTENT */}
-            <ToolContentSections
-              tool={tool}
-            />
+            <Suspense fallback={null}>
+              <ToolContentSections tool={tool} />
+            </Suspense>
 
             {/* Related Articles (SEO) */}
             {relatedArticles.length > 0 && (

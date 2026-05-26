@@ -1,251 +1,160 @@
-﻿import React from 'react';
-import { motion } from 'framer-motion';
-import {
-  ShieldCheck,
-  Lock,
-  Eye,
-  Database,
-  Cookie,
-  FileText,
-  Sparkles,
-} from 'lucide-react';
+import React from 'react'
+import { Link } from 'react-router-dom'
+import StaticPageSEO, { SITE_URL, buildBreadcrumbSchema } from '@/components/seo/StaticPageSEO'
+
+const privacyDescription =
+  'Read the QuickUtils Privacy Policy covering data collection, cookies, analytics, advertising, file handling, and contact information.'
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', url: `${SITE_URL}/` },
+  { name: 'Privacy Policy', url: `${SITE_URL}/privacy` },
+])
+
+const updatedDate = 'May 26, 2026'
+const contactEmail = 'support@quickutils.page'
 
 export default function Privacy() {
-  const sections = [
-    {
-      icon: Lock,
-      title: 'Files and Browser-Side Processing',
-      content: (
-        <>
-          <p>
-            Many tools on QuickUtils work directly inside your browser. 
-            When browser-side processing is supported, your files stay on your device 
-            and are not permanently uploaded or stored by us.
-          </p>
-
-          <p>
-            This is especially useful for image tools, PDF utilities, compression tools,
-            and document workflows where privacy and speed matter.
-          </p>
-
-          <p>
-            Some features may temporarily use server-side processing depending on the tool functionality,
-            but files are only handled as needed and are not stored longer than necessary.
-          </p>
-        </>
-      ),
-    },
-
-    {
-      icon: Eye,
-      title: 'Information We May Collect',
-      content: (
-        <>
-          <p>
-            To improve the platform and maintain reliability, we may collect limited non-personal information such as:
-          </p>
-
-          <ul className="list-disc pl-5 space-y-1">
-            <li>Browser and device information</li>
-            <li>Pages visited and tools used</li>
-            <li>Anonymous analytics and usage data</li>
-            <li>Error and performance logs</li>
-          </ul>
-
-          <p>
-            This data helps us improve tool quality, performance, and user experience.
-          </p>
-        </>
-      ),
-    },
-
-    {
-      icon: Cookie,
-      title: 'Cookies and Similar Technologies',
-      content: (
-        <>
-          <p>
-            QuickUtils may use cookies and similar technologies to improve website functionality,
-            remember preferences, analyze traffic, and support advertising services.
-          </p>
-
-          <p>
-            You can manage or disable cookies through your browser settings if you prefer.
-          </p>
-        </>
-      ),
-    },
-
-    {
-      icon: Database,
-      title: 'Ads and Third-Party Services',
-      content: (
-        <>
-          <p>
-            Some parts of the website may use third-party services such as:
-          </p>
-
-          <ul className="list-disc pl-5 space-y-1">
-            <li>Google AdSense</li>
-            <li>Google Analytics</li>
-            <li>Supabase</li>
-            <li>Cloud infrastructure providers</li>
-          </ul>
-
-          <p>
-            These services may use their own cookies or data practices based on their individual privacy policies.
-          </p>
-        </>
-      ),
-    },
-
-    {
-      icon: ShieldCheck,
-      title: 'Data Security',
-      content: (
-        <>
-          <p>
-            We use reasonable technical measures to help protect the website and improve security.
-            Connections to QuickUtils are encrypted using HTTPS.
-          </p>
-
-          <p>
-            While we work to keep the platform secure, no online system can guarantee complete security,
-            so please avoid uploading highly sensitive information unless necessary.
-          </p>
-        </>
-      ),
-    },
-
-    {
-      icon: FileText,
-      title: 'Policy Updates',
-      content: (
-        <>
-          <p>
-            This Privacy Policy may be updated occasionally as the platform evolves,
-            new tools are added, or legal requirements change.
-          </p>
-
-          <p>
-            When updates happen, the latest revision date will appear at the top of this page.
-          </p>
-        </>
-      ),
-    },
-  ];
-
   return (
-    <div className="relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 left-1/2 w-[500px] h-[500px] bg-primary/10 blur-3xl rounded-full -translate-x-1/2" />
-        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-violet-500/10 blur-3xl rounded-full" />
-      </div>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14">
+      <StaticPageSEO
+        title="Privacy Policy - QuickUtils"
+        description={privacyDescription}
+        path="/privacy"
+        ogTitle="QuickUtils Privacy Policy"
+        ogDescription="Learn how QuickUtils handles analytics, cookies, advertising, files, and user information."
+        jsonLd={breadcrumbSchema}
+      />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14">
-        <motion.div
-          initial={{ opacity: 0, y: 25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          {/* Hero */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/10 text-primary text-sm font-medium mb-5">
-              <Sparkles className="w-4 h-4" />
-              Privacy & Transparency
-            </div>
+      <header className="mb-10">
+        <p className="text-sm font-semibold text-primary mb-3">Privacy Policy</p>
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-5">
+          Privacy Policy
+        </h1>
+        <p className="text-lg text-muted-foreground leading-relaxed">
+          This Privacy Policy explains what information QuickUtils may collect, how cookies and
+          third-party services may be used, and how file-based tools are generally handled.
+        </p>
+        <p className="text-sm text-muted-foreground mt-4">Last updated: {updatedDate}</p>
+      </header>
 
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-violet-500/20 flex items-center justify-center mx-auto mb-6 shadow-lg border border-border/40">
-              <ShieldCheck className="w-10 h-10 text-primary" />
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
-              Privacy Policy
-            </h1>
-
-            <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto">
-              We believe utility tools should be simple, fast, and respectful of your privacy.
-              This page explains how QuickUtils handles files, analytics, and data in a clear and transparent way.
+      <div className="space-y-6">
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold mb-4">Information we may collect</h2>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p>
+              QuickUtils may collect limited information needed to operate, secure, and improve
+              the website. This may include browser type, device information, pages visited,
+              tools used, approximate usage activity, error logs, performance information, and
+              information you submit through a contact form.
             </p>
-
-            <p className="text-sm text-muted-foreground mt-5">
-              Last updated: {new Date().toLocaleDateString()}
+            <p>
+              If you contact us, we may receive your name, email address, message, and any details
+              you choose to include. Please avoid sending private documents, passwords, financial
+              records, government ID numbers, or other sensitive information in contact messages.
             </p>
           </div>
+        </section>
 
-          {/* Highlight Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="mb-10 rounded-3xl border border-border/50 bg-card/80 backdrop-blur-xl p-6 shadow-xl"
-          >
-            <div className="flex gap-4 items-start">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-                <Lock className="w-6 h-6 text-emerald-500" />
-              </div>
-
-              <div>
-                <h2 className="text-xl font-semibold mb-2">
-                  Privacy-first browser tools
-                </h2>
-
-                <p className="text-muted-foreground leading-relaxed">
-                  Many QuickUtils tools process files directly inside your browser whenever possible.
-                  This helps improve privacy, speed, and responsiveness while reducing unnecessary uploads.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Sections */}
-          <div className="space-y-6">
-            {sections.map((section, index) => {
-              const Icon = section.icon;
-
-              return (
-                <motion.div
-                  key={section.title}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="rounded-3xl border border-border/50 bg-card/80 backdrop-blur-xl p-6 sm:p-7 shadow-xl"
-                >
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <Icon className="w-5 h-5 text-primary" />
-                    </div>
-
-                    <div>
-                      <h2 className="text-xl font-semibold">
-                        {section.title}
-                      </h2>
-                    </div>
-                  </div>
-
-                  <div className="text-muted-foreground leading-relaxed space-y-4">
-                    {section.content}
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* Footer Note */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mt-10 text-center"
-          >
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              If you have questions about this Privacy Policy or how QuickUtils handles data,
-              please use the contact page to get in touch.
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold mb-4">Cookies, analytics, and similar technologies</h2>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p>
+              QuickUtils may use cookies, local storage, analytics scripts, or similar
+              technologies to remember preferences, understand page usage, measure performance,
+              detect errors, and improve the site.
             </p>
-          </motion.div>
-        </motion.div>
+            <p>
+              Third-party analytics providers may process information according to their own
+              privacy policies. You can manage or block cookies through your browser settings,
+              although some site features may work differently if cookies or local storage are
+              disabled.
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold mb-4">Advertising disclosure</h2>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p>
+              QuickUtils may display advertising or use advertising services such as Google
+              AdSense. Advertising partners may use cookies or similar technologies to show,
+              measure, and improve ads.
+            </p>
+            <p>
+              Ad providers may collect or receive information from your browser and use that
+              information according to their own policies. QuickUtils does not control every data
+              practice of third-party advertising networks.
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold mb-4">File and tool privacy</h2>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p>
+              Many QuickUtils tools are designed to process files in your browser when the task
+              and browser support it. Browser-side processing can help keep simple file work on
+              your device and reduce unnecessary uploads.
+            </p>
+            <p>
+              Some tools or future features may require temporary server-side processing,
+              external libraries, or third-party services to complete a task. File handling can
+              vary by tool, file type, browser, and feature.
+            </p>
+            <p>
+              If server-side handling is unclear for a specific tool, avoid uploading sensitive
+              files such as identity documents, passwords, private financial records, medical
+              files, confidential business documents, or anything you would not want processed by
+              an online service.
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold mb-4">Third-party services</h2>
+          <p className="text-muted-foreground leading-relaxed mb-4">
+            QuickUtils may use third-party services for hosting, analytics, contact forms,
+            databases, advertising, performance monitoring, or tool functionality. These services
+            may collect information according to their own terms and privacy policies.
+          </p>
+          <ul className="space-y-2 text-muted-foreground leading-relaxed">
+            <li>Hosting and infrastructure providers.</li>
+            <li>Analytics and performance measurement tools.</li>
+            <li>Advertising providers such as Google AdSense.</li>
+            <li>Database, storage, or application services used to run website features.</li>
+            <li>Contact form delivery services used when you send a message.</li>
+          </ul>
+        </section>
+
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold mb-4">Data security and retention</h2>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p>
+              We use reasonable technical measures to operate the website securely, including
+              HTTPS for encrypted connections. No online service can guarantee complete security.
+            </p>
+            <p>
+              Contact messages, logs, and analytics data may be kept for as long as needed to
+              respond to users, troubleshoot issues, improve tools, meet legal requirements, or
+              protect the website from abuse.
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold mb-4">Contact</h2>
+          <p className="text-muted-foreground leading-relaxed mb-4">
+            For privacy questions or requests, contact QuickUtils at{' '}
+            <a href={`mailto:${contactEmail}`} className="text-primary hover:text-primary/80">
+              {contactEmail}
+            </a>
+            {' '}or use the contact page.
+          </p>
+          <Link to="/contact" className="text-sm font-medium text-primary hover:text-primary/80">
+            Go to Contact
+          </Link>
+        </section>
       </div>
     </div>
-  );
+  )
 }

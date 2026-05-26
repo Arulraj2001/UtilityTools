@@ -35,6 +35,8 @@ const About = lazy(() => import('./pages/About'))
 const Contact = lazy(() => import('./pages/Contact'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const Terms = lazy(() => import('./pages/Terms'))
+const Disclaimer = lazy(() => import('./pages/Disclaimer'))
+const EditorialPolicy = lazy(() => import('./pages/EditorialPolicy'))
 const Login = lazy(() => import('./pages/Login'))
 
 // Admin pages
@@ -111,6 +113,8 @@ const AuthenticatedApp = () => {
         <Route path="/contact" element={wrap(<Contact />)} />
         <Route path="/privacy" element={wrap(<Privacy />)} />
         <Route path="/terms" element={wrap(<Terms />)} />
+        <Route path="/disclaimer" element={wrap(<Disclaimer />)} />
+        <Route path="/editorial-policy" element={wrap(<EditorialPolicy />)} />
         <Route path="/login" element={wrap(<Login />)} />
       </Route>
 

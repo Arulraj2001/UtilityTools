@@ -1,4 +1,5 @@
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getTools, getCategories, getTotalUsageCount, getFeaturedWorkflows, getCategoryCounts, getFeaturedJobs } from '@/api/supabaseApi'
 import HeroSection from '../components/home/HeroSection'
@@ -7,6 +8,369 @@ const CategoriesGrid = lazy(() => import('../components/home/CategoriesGrid'))
 const FeaturedTools = lazy(() => import('../components/home/FeaturedTools'))
 const PopularWorkflows = lazy(() => import('../components/home/PopularWorkflows'))
 import AdBanner from '../components/shared/AdBanner'
+import StaticPageSEO, { SITE_URL } from '@/components/seo/StaticPageSEO'
+
+const homepageDescription =
+  'QuickUtils is a free online tools website for everyday PDF, image, calculator, text, developer, SEO, student, and business tasks.'
+
+const categoryHighlights = [
+  {
+    title: 'PDF tools',
+    description: 'Compress, merge, split, convert, and prepare PDF files for sharing, forms, and uploads.',
+    to: '/category/pdf-tools',
+  },
+  {
+    title: 'Image tools',
+    description: 'Resize, compress, crop, convert, watermark, and inspect images from your browser.',
+    to: '/category/image-tools',
+  },
+  {
+    title: 'Calculators',
+    description: 'Use finance, health, study, date, math, shipping, and everyday calculators for quick estimates.',
+    to: '/tools?q=calculator',
+  },
+  {
+    title: 'Government exam tools',
+    description: 'Prepare photos, signatures, documents, and PDFs for common exam and application requirements.',
+    to: '/category/government-exam-tools',
+  },
+  {
+    title: 'Developer and SEO tools',
+    description: 'Format JSON, encode URLs, generate meta tags, create sitemaps, and handle common web tasks.',
+    to: '/category/developer-tools',
+  },
+  {
+    title: 'Seller and logistics tools',
+    description: 'Estimate fees, shipping costs, product pricing, parcel dimensions, and business margins.',
+    to: '/category/ecommerce-seller-tools',
+  },
+]
+
+const popularToolLinks = [
+  {
+    name: 'Compress PDF',
+    description: 'Reduce PDF file size for forms, email, and document uploads.',
+    to: '/tool/compress-pdf',
+  },
+  {
+    name: 'Image Compressor',
+    description: 'Make image files smaller while keeping them useful for web and upload needs.',
+    to: '/tool/image-compressor',
+  },
+  {
+    name: 'Photo KB Reducer',
+    description: 'Adjust photo file size for exam portals and application forms.',
+    to: '/tool/photo-kb-reducer',
+  },
+  {
+    name: 'EMI Calculator',
+    description: 'Estimate monthly loan payments from principal, interest rate, and tenure.',
+    to: '/tool/emi-calculator',
+  },
+  {
+    name: 'JSON Formatter',
+    description: 'Format and read JSON data more easily while debugging or reviewing API responses.',
+    to: '/tool/json-formatter',
+  },
+  {
+    name: 'Volumetric Weight Calculator',
+    description: 'Estimate chargeable shipment weight from parcel dimensions and carrier divisor.',
+    to: '/tool/volumetric-weight-calculator',
+  },
+]
+
+const whyUseQuickUtils = [
+  'Tools are organized by practical task, so you can find the right utility without digging through unrelated pages.',
+  'Many file-based tools are designed to run in the browser when supported, which can reduce unnecessary uploads.',
+  'Tool pages and workflows are written for real use cases such as exam forms, document cleanup, selling online, and everyday calculations.',
+  'The site avoids sign-up walls for common utility tasks and keeps the interface focused on getting the job done.',
+]
+
+const howItWorks = [
+  {
+    title: 'Choose a tool',
+    text: 'Start from a category, search bar, popular tool link, or workflow page.',
+  },
+  {
+    title: 'Enter details or add a file',
+    text: 'Use the fields shown on the tool page. For file tools, check the visible instructions before processing anything sensitive.',
+  },
+  {
+    title: 'Review the result',
+    text: 'Download, copy, or compare the output where the tool provides those actions.',
+  },
+  {
+    title: 'Verify important work',
+    text: 'For forms, finances, health, or official documents, review the final result before submitting or relying on it.',
+  },
+]
+
+const homepageFaq = [
+  {
+    question: 'What is QuickUtils?',
+    answer:
+      'QuickUtils is a free online tools website for common file, image, PDF, calculator, text, SEO, developer, exam, and business tasks.',
+  },
+  {
+    question: 'Who is QuickUtils for?',
+    answer:
+      'It is built for students, job applicants, creators, developers, freelancers, sellers, office workers, and anyone who needs a quick utility without installing a separate app.',
+  },
+  {
+    question: 'Are QuickUtils tools free to use?',
+    answer:
+      'The public tools are designed to be free for everyday use. Some future features may change, but core utility access should remain simple and easy to reach.',
+  },
+  {
+    question: 'Do files stay private?',
+    answer:
+      'Many tools process files in your browser when supported. Some features may need temporary server-side or third-party handling, so avoid uploading highly sensitive files unless you are comfortable with the tool flow.',
+  },
+  {
+    question: 'Can I report a mistake or request a tool?',
+    answer:
+      'Yes. Use the Contact page to report errors, broken tools, unclear instructions, or ideas for new utilities.',
+  },
+]
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'QuickUtils',
+  url: SITE_URL,
+  description: homepageDescription,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `${SITE_URL}/tools?q={search_term_string}`,
+    'query-input': 'required name=search_term_string',
+  },
+}
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'QuickUtils',
+  url: SITE_URL,
+  logo: `${SITE_URL}/logo.png`,
+  description: homepageDescription,
+}
+
+function HomeIntroSection() {
+  return (
+    <section className="py-12 sm:py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-12 items-start">
+        <div>
+          <p className="text-sm font-semibold text-primary mb-3">What QuickUtils does</p>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">
+            Useful browser tools for everyday digital work
+          </h2>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p>
+              QuickUtils brings common utility tools into one place: PDF helpers, image tools,
+              calculators, text utilities, SEO tools, developer helpers, exam document tools,
+              seller calculators, and shipping estimators.
+            </p>
+            <p>
+              The goal is simple. Pick a task, use the tool, check the result, and move on with
+              your work. Pages are written to explain what each tool does, when it is useful,
+              and what you should verify before using the output for something important.
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-border/60 bg-card/80 p-6">
+          <h2 className="text-xl font-semibold mb-4">Who it helps</h2>
+          <ul className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+            <li>Students preparing assignments, marks, PDFs, images, and study calculations.</li>
+            <li>Job and exam applicants resizing photos, signatures, and documents for uploads.</li>
+            <li>Creators and small teams compressing images, checking metadata, and preparing content.</li>
+            <li>Developers and SEO users formatting data, testing web snippets, and generating tags.</li>
+            <li>Sellers and operations teams estimating pricing, shipping, fees, and parcel dimensions.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function CategoryHighlightsSection() {
+  return (
+    <section className="py-12 sm:py-16 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="max-w-3xl mb-8">
+          <p className="text-sm font-semibold text-primary mb-3">Main tool categories</p>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+            Find tools by the kind of task you need to finish
+          </h2>
+          <p className="text-muted-foreground leading-relaxed">
+            These category links point to the most important parts of QuickUtils and help users
+            move from the homepage to a useful tool quickly.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {categoryHighlights.map((category) => (
+            <Link
+              key={category.to}
+              to={category.to}
+              className="block rounded-lg border border-border/60 bg-background p-5 transition-colors hover:border-primary/40"
+            >
+              <h3 className="font-semibold mb-2">{category.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{category.description}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function PopularToolsFoundationSection() {
+  return (
+    <section className="py-12 sm:py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+          <div>
+            <p className="text-sm font-semibold text-primary mb-3">Popular tools</p>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+              Start with common QuickUtils tasks
+            </h2>
+            <p className="text-muted-foreground leading-relaxed max-w-2xl">
+              These links cover frequent tasks across files, images, calculators, development,
+              and logistics.
+            </p>
+          </div>
+          <Link to="/tools" className="text-sm font-medium text-primary hover:text-primary/80">
+            View all tools
+          </Link>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {popularToolLinks.map((tool) => (
+            <Link
+              key={tool.to}
+              to={tool.to}
+              className="block rounded-lg border border-border/60 bg-card/80 p-5 transition-colors hover:border-primary/40"
+            >
+              <h3 className="font-semibold mb-2">{tool.name}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{tool.description}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function WhyQuickUtilsSection() {
+  return (
+    <section className="py-12 sm:py-16 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[0.85fr_1.15fr] gap-8 lg:gap-12 items-start">
+        <div>
+          <p className="text-sm font-semibold text-primary mb-3">Why use QuickUtils?</p>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">
+            Built for clear, practical utility work
+          </h2>
+          <p className="text-muted-foreground leading-relaxed">
+            QuickUtils focuses on everyday tasks where speed, clarity, and simple instructions
+            matter more than complicated software.
+          </p>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {whyUseQuickUtils.map((item, index) => (
+            <div key={index} className="rounded-lg border border-border/60 bg-background p-5">
+              <p className="text-sm text-muted-foreground leading-relaxed">{item}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function PrivacyFocusSection() {
+  return (
+    <section className="py-12 sm:py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
+          <p className="text-sm font-semibold text-primary mb-3">Privacy-focused by design</p>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">
+            Use file tools with a careful privacy mindset
+          </h2>
+          <div className="space-y-4 text-muted-foreground leading-relaxed max-w-4xl">
+            <p>
+              Many QuickUtils tools are built to process files inside your browser when the
+              browser can support the task. That can help reduce unnecessary uploads and keep
+              simple work fast.
+            </p>
+            <p>
+              Some features may still need temporary server-side or third-party processing
+              depending on the tool. For sensitive documents, private IDs, financial records,
+              medical files, or confidential business data, review the tool behavior first and
+              avoid uploading anything you are not comfortable processing online.
+            </p>
+          </div>
+          <div className="mt-5">
+            <Link to="/privacy" className="text-sm font-medium text-primary hover:text-primary/80">
+              Read the Privacy Policy
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function HowItWorksSection() {
+  return (
+    <section className="py-12 sm:py-16 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="max-w-3xl mb-8">
+          <p className="text-sm font-semibold text-primary mb-3">How it works</p>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+            A simple flow for most tools
+          </h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Different tools have different inputs, but the basic pattern is easy to follow.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {howItWorks.map((step, index) => (
+            <div key={step.title} className="rounded-lg border border-border/60 bg-background p-5">
+              <div className="text-sm font-semibold text-primary mb-3">Step {index + 1}</div>
+              <h3 className="font-semibold mb-2">{step.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{step.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function HomeFAQSection() {
+  return (
+    <section className="py-12 sm:py-16">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-8">
+          <p className="text-sm font-semibold text-primary mb-3">FAQ</p>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            Common questions about QuickUtils
+          </h2>
+        </div>
+        <div className="space-y-4">
+          {homepageFaq.map((item) => (
+            <div key={item.question} className="rounded-lg border border-border/60 bg-card/80 p-5">
+              <h3 className="font-semibold mb-2">{item.question}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{item.answer}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function SectionHeaderSkeleton({ titleWidth = 'w-48', subtitleWidth = 'w-64' }) {
   return (
@@ -200,8 +564,19 @@ export default function Home() {
 
   return (
     <div>
+      <StaticPageSEO
+        title="QuickUtils - Free Online Tools for PDFs, Images, Calculators and More"
+        description={homepageDescription}
+        path="/"
+        ogTitle="QuickUtils - Free Online Utility Tools"
+        ogDescription="Use practical online tools for PDFs, images, calculators, text, developer, SEO, student, seller, and shipping tasks."
+        jsonLd={[websiteSchema, organizationSchema]}
+      />
       <HeroSection toolCount={toolCount} />
       <StatsBar toolCount={toolCount} userCount={totalUsage} />
+      <HomeIntroSection />
+      <CategoryHighlightsSection />
+      <PopularToolsFoundationSection />
 
       {showCategoriesSectionSkeleton ? (
         <CategoriesSectionSkeleton />
@@ -227,6 +602,9 @@ export default function Home() {
       )}
 
       <AdBanner placement="in_content" pageType="home" className="py-6" />
+      <WhyQuickUtilsSection />
+      <PrivacyFocusSection />
+      <HowItWorksSection />
 
       {showWorkflowsSectionSkeleton ? (
         <WorkflowsSectionSkeleton />
@@ -285,6 +663,8 @@ export default function Home() {
           />
         </Suspense>
       )}
+
+      <HomeFAQSection />
     </div>
   )
 }

@@ -10,9 +10,9 @@ export default function StatsBar({ toolCount, userCount }) {
 
   const STATS = [
     { icon: Zap, label: 'Tools Available', value: toolCount ? `${toolCount}+` : '50+', color: 'text-yellow-500' },
-    { icon: Users, label: 'Monthly Users', value: userCount ? `${formatCount(userCount)}+` : '100K+', color: 'text-blue-500' },
-    { icon: Shield, label: '100% Free', value: 'Always', color: 'text-green-500' },
-    { icon: Clock, label: 'Processing', value: 'Instant', color: 'text-purple-500' },
+    { icon: Users, label: userCount ? 'Tool Uses' : 'Public Tools', value: userCount ? `${formatCount(userCount)}+` : 'No Sign-Up', color: 'text-blue-500' },
+    { icon: Shield, label: 'Privacy Approach', value: 'Browser-First', color: 'text-green-500' },
+    { icon: Clock, label: 'Task Flow', value: 'Quick', color: 'text-purple-500' },
   ];
   return (
     <div className="border-y border-border/50 bg-card/50 backdrop-blur-sm">

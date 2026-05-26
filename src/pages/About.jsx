@@ -1,244 +1,137 @@
-﻿import React from 'react';
-import { motion } from 'framer-motion';
-import {
-  Wrench,
-  Zap,
-  Shield,
-  Heart,
-  Rocket,
-  Sparkles,
-  Globe,
-  Code2,
-  Lightbulb,
-} from 'lucide-react';
+import React from 'react'
+import { Link } from 'react-router-dom'
+import StaticPageSEO, { SITE_URL, buildBreadcrumbSchema } from '@/components/seo/StaticPageSEO'
+
+const aboutDescription =
+  'Learn what QuickUtils is, who it helps, what tools are available, and how users can report errors or suggest improvements.'
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', url: `${SITE_URL}/` },
+  { name: 'About', url: `${SITE_URL}/about` },
+])
+
+const toolGroups = [
+  'PDF tools for compression, merging, splitting, conversion, and document cleanup.',
+  'Image tools for resizing, compression, cropping, conversion, metadata checks, and upload preparation.',
+  'Calculators for finance, health, study, dates, percentages, logistics, and everyday estimates.',
+  'Developer and SEO tools for formatting data, generating metadata, encoding URLs, and checking website details.',
+  'Government exam and job application tools for photos, signatures, PDFs, and document requirements.',
+  'Seller and shipping tools for pricing, fees, parcel dimensions, labels, and chargeable weight estimates.',
+]
 
 export default function About() {
-  const features = [
-    {
-      icon: Wrench,
-      title: 'Practical Utility Tools',
-      desc: 'Built to solve real everyday problems like PDF compression, image resizing, file conversion, and exam document preparation.',
-    },
-
-    {
-      icon: Zap,
-      title: 'Fast Browser Experience',
-      desc: 'Many tools work directly inside the browser for faster processing and a smoother mobile-friendly experience.',
-    },
-
-    {
-      icon: Shield,
-      title: 'Privacy-Focused',
-      desc: 'Whenever possible, files stay on your device instead of being permanently stored on external servers.',
-    },
-
-    {
-      icon: Heart,
-      title: 'Made for Real Users',
-      desc: 'Designed for students, creators, freelancers, job seekers, and anyone who needs simple digital tools quickly.',
-    },
-  ];
-
-  const timeline = [
-    {
-      year: 'Started',
-      title: 'Exploring Web Development',
-      desc: 'Started learning frontend development, UI building, and browser-based utility tools with a strong focus on practical problem solving.',
-      icon: Code2,
-    },
-
-    {
-      year: 'Growth',
-      title: 'Building Productivity Tools',
-      desc: 'Created tools focused on image editing, PDF workflows, calculators, and utilities that simplify everyday digital tasks.',
-      icon: Lightbulb,
-    },
-
-    {
-      year: 'Now',
-      title: 'Building QuickUtils',
-      desc: 'QuickUtils continues to grow as a fast, privacy-friendly utility platform designed for students, creators, exam applicants, and professionals.',
-      icon: Rocket,
-    },
-  ];
-
   return (
-    <div className="relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 left-1/2 w-[500px] h-[500px] bg-primary/10 blur-3xl rounded-full -translate-x-1/2" />
-        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-violet-500/10 blur-3xl rounded-full" />
-      </div>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14">
+      <StaticPageSEO
+        title="About QuickUtils - Free Online Utility Tools"
+        description={aboutDescription}
+        path="/about"
+        ogTitle="About QuickUtils"
+        ogDescription="QuickUtils provides practical online tools for PDFs, images, calculators, text, developer tasks, exam documents, sellers, and shipping work."
+        jsonLd={breadcrumbSchema}
+      />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14">
-        <motion.div
-          initial={{ opacity: 0, y: 25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          {/* Hero */}
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/10 text-primary text-sm font-medium mb-5">
-              <Sparkles className="w-4 h-4" />
-              About QuickUtils
-            </div>
+      <header className="mb-10">
+        <p className="text-sm font-semibold text-primary mb-3">About QuickUtils</p>
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-5">
+          Practical online tools for everyday work
+        </h1>
+        <p className="text-lg text-muted-foreground leading-relaxed">
+          QuickUtils is a free online tools website built to help people finish common digital
+          tasks without installing separate software. The site brings together utility tools for
+          files, images, documents, calculations, text, SEO, development, exam uploads, seller
+          work, and logistics.
+        </p>
+      </header>
 
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-violet-500/20 flex items-center justify-center mx-auto mb-6 shadow-lg border border-border/40">
-              <Globe className="w-10 h-10 text-primary" />
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-5">
-              Built to make everyday digital tasks easier
-            </h1>
-
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-              QuickUtils is a growing collection of fast, practical, browser-based tools
-              designed to help people solve common digital problems without complicated software.
-              From PDF compression and image resizing to exam photo tools and productivity utilities,
-              the goal is simple — useful tools that just work.
+      <div className="space-y-8">
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold mb-4">What QuickUtils is</h2>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p>
+              QuickUtils is designed as a simple utility hub. Each tool focuses on a specific
+              task, such as compressing a PDF, resizing an image, formatting JSON, estimating a
+              loan payment, preparing an exam photo, or calculating shipping weight.
+            </p>
+            <p>
+              The goal is to make common tasks easier to complete from a browser while keeping
+              instructions clear enough for users who may not be technical.
             </p>
           </div>
+        </section>
 
-          {/* Intro Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-14">
-            {features.map((f, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-                className="relative overflow-hidden p-6 rounded-3xl border border-border/50 bg-card/80 backdrop-blur-xl shadow-xl premium-card panel-highlight"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-violet-500/[0.04] pointer-events-none" />
-
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                  <f.icon className="w-6 h-6 text-primary" />
-                </div>
-
-                <h3 className="font-semibold text-lg mb-2">
-                  {f.title}
-                </h3>
-
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {f.desc}
-                </p>
-              </motion.div>
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold mb-4">Who QuickUtils helps</h2>
+          <p className="text-muted-foreground leading-relaxed mb-4">
+            The tools are useful for students, job applicants, creators, office workers,
+            developers, freelancers, small business owners, online sellers, logistics teams, and
+            anyone who needs a quick browser-based utility.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[
+              'Students preparing assignments, marks, study plans, and file uploads.',
+              'Exam applicants resizing photos, signatures, and PDFs for portals.',
+              'Creators optimizing images, checking files, and preparing web assets.',
+              'Developers and SEO users working with data, URLs, metadata, and snippets.',
+              'Sellers estimating pricing, margins, fees, invoices, and shipping costs.',
+              'Everyday users converting, cleaning, counting, calculating, and comparing information.',
+            ].map((item) => (
+              <div key={item} className="rounded-lg border border-border/60 bg-background p-4 text-sm text-muted-foreground leading-relaxed">
+                {item}
+              </div>
             ))}
           </div>
+        </section>
 
-          {/* Main Story */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="rounded-3xl border border-border/50 bg-card/80 backdrop-blur-xl p-7 sm:p-8 shadow-xl mb-14"
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                <Heart className="w-6 h-6 text-primary" />
-              </div>
-
-              <div>
-                <h2 className="text-2xl font-semibold mb-3">
-                  Why QuickUtils exists
-                </h2>
-
-                <div className="space-y-4 text-muted-foreground leading-relaxed">
-                  <p>
-                    Many utility websites today feel overloaded, confusing, or filled with unnecessary distractions.
-                    QuickUtils was created with a different approach — clean tools, practical workflows,
-                    and a faster experience focused on getting things done quickly.
-                  </p>
-
-                  <p>
-                    The platform especially focuses on real-world needs like:
-                    PDF editing, image compression, passport photo preparation,
-                    government exam uploads, calculators, productivity workflows,
-                    and simple browser-based utilities that save time.
-                  </p>
-
-                  <p>
-                    A strong focus is also placed on mobile usability, lightweight performance,
-                    and privacy-friendly browser-side processing whenever possible.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Timeline */}
-          <div className="mb-14">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold mb-3">
-                Journey & Growth
-              </h2>
-
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                QuickUtils continues evolving step by step with better tools,
-                cleaner workflows, and more practical features focused on real users.
-              </p>
-            </div>
-
-            <div className="relative">
-              <div className="absolute left-6 top-0 bottom-0 w-px bg-border hidden sm:block" />
-
-              <div className="space-y-8">
-                {timeline.map((item, index) => {
-                  const Icon = item.icon;
-
-                  return (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="relative flex gap-5"
-                    >
-                      <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center border border-border/50 shrink-0 z-10">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
-
-                      <div className="flex-1 rounded-3xl border border-border/50 bg-card/80 backdrop-blur-xl p-6 shadow-xl">
-                        <div className="text-sm text-primary font-medium mb-2">
-                          {item.year}
-                        </div>
-
-                        <h3 className="text-xl font-semibold mb-2">
-                          {item.title}
-                        </h3>
-
-                        <p className="text-muted-foreground leading-relaxed">
-                          {item.desc}
-                        </p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold mb-4">Types of tools available</h2>
+          <ul className="space-y-3 text-muted-foreground leading-relaxed">
+            {toolGroups.map((group) => (
+              <li key={group}>{group}</li>
+            ))}
+          </ul>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link to="/tools" className="text-sm font-medium text-primary hover:text-primary/80">
+              Browse all tools
+            </Link>
+            <Link to="/categories" className="text-sm font-medium text-primary hover:text-primary/80">
+              View categories
+            </Link>
           </div>
+        </section>
 
-          {/* Footer */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-center"
-          >
-            <div className="rounded-3xl border border-border/50 bg-gradient-to-br from-primary/10 via-transparent to-violet-500/10 p-8 shadow-xl">
-              <h2 className="text-2xl font-semibold mb-3">
-                Still growing, improving, and building
-              </h2>
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold mb-4">Mission and maintenance</h2>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p>
+              The mission of QuickUtils is to make practical web tools easier to access, easier
+              to understand, and easier to use on both desktop and mobile devices.
+            </p>
+            <p>
+              Tool explanations are maintained alongside the tools themselves. When a tool
+              changes, its instructions, examples, limitations, and FAQ content should be
+              reviewed so users understand what the tool does and how to check the output.
+            </p>
+            <p>
+              QuickUtils does not claim that every calculator or file output is perfect for every
+              situation. Important results should be reviewed before they are submitted, shared,
+              or used for decisions.
+            </p>
+          </div>
+        </section>
 
-              <p className="text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                QuickUtils continues to expand with better tools, workflows, SEO guides,
-                exam utilities, and productivity features designed to help people save time
-                and simplify everyday digital work.
-              </p>
-            </div>
-          </motion.div>
-        </motion.div>
+        <section className="rounded-lg border border-border/60 bg-muted/40 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold mb-4">Report errors or suggest improvements</h2>
+          <p className="text-muted-foreground leading-relaxed mb-5">
+            If a tool gives an unexpected result, a page has unclear instructions, or you want to
+            suggest a new utility, please contact the QuickUtils team with the tool name, page URL,
+            device or browser details, and a short description of the issue.
+          </p>
+          <Link to="/contact" className="inline-flex text-sm font-medium text-primary hover:text-primary/80">
+            Contact QuickUtils
+          </Link>
+        </section>
       </div>
     </div>
-  );
+  )
 }

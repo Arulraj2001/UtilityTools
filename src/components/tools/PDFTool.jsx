@@ -3,14 +3,17 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Upload, Download, FileText, Loader2, X, Plus, ArrowUp, ArrowDown, Scissors } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PDFDocument, rgb } from 'pdf-lib';
-import JSZip from 'jszip';
 import { getPdfJsLib } from '@/lib/pdfWorkerSetup';
 
-const pdfjsLib = getPdfJsLib();
+let pdfLibLoadPromise = null;
+let jsZipLoadPromise = null;
+
+const loadPdfLib = () => pdfLibLoadPromise || (pdfLibLoadPromise = import('pdf-lib'))
+const loadJSZip = () => jsZipLoadPromise || (jsZipLoadPromise = import('jszip'))
 
 async function renderPdfPageImage(file, scale = 1.5) {
   const arrayBuffer = await file.arrayBuffer();
+  const pdfjsLib = await getPdfJsLib();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   const page = await pdf.getPage(1);
   const viewport = page.getViewport({ scale });
@@ -57,6 +60,7 @@ function PDFMerge() {
     if (files.length < 2) return;
     setLoading(true);
     const startTime = Date.now();
+    const { PDFDocument } = await loadPdfLib();
     const merged = await PDFDocument.create();
     let totalPages = 0;
     const totalInputSize = files.reduce((sum, { file }) => sum + file.size, 0);
@@ -154,6 +158,7 @@ function PDFSplit() {
     if (!f || f.type !== 'application/pdf') return;
     setFile(f);
     setResult(null);
+    const { PDFDocument } = await loadPdfLib();
     const bytes = await f.arrayBuffer();
     const doc = await PDFDocument.load(bytes);
     setPageCount(doc.getPageCount());
@@ -163,6 +168,7 @@ function PDFSplit() {
     if (!file) return;
     setLoading(true);
     const startTime = Date.now();
+    const { PDFDocument } = await loadPdfLib();
     const bytes = await file.arrayBuffer();
     const doc = await PDFDocument.load(bytes);
     const parts = [];
@@ -289,6 +295,7 @@ function JPGtoPDF() {
     if (images.length === 0) return;
     setLoading(true);
     const startTime = Date.now();
+    const { PDFDocument } = await loadPdfLib();
     const pdf = await PDFDocument.create();
     const totalInputSize = images.reduce((sum, { file }) => sum + file.size, 0);
 
@@ -410,6 +417,7 @@ function PDFCompressor() {
     const startTime = Date.now();
     
     try {
+      const { PDFDocument } = await loadPdfLib();
       const bytes = await file.arrayBuffer();
       const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
 
@@ -586,6 +594,7 @@ function PDFProtect() {
     const startTime = Date.now();
     
     try {
+      const { PDFDocument } = await loadPdfLib();
       const bytes = await file.arrayBuffer();
       const doc = await PDFDocument.load(bytes);
       const pdfBytes = await doc.save({ userPassword: password });
@@ -718,6 +727,7 @@ function PDFRemovePages() {
   const removePages = async () => {
     if (!file || !pages) return;
     setLoading(true);
+    const { PDFDocument } = await loadPdfLib();
     const bytes = await file.arrayBuffer();
     const doc = await PDFDocument.load(bytes);
     const totalPages = doc.getPageCount();
@@ -789,6 +799,7 @@ function PDFtoJPG() {
     setLoading(true);
     try {
       const startTime = Date.now();
+      const pdfjsLib = await getPdfJsLib();
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const numPages = pdf.numPages;
@@ -821,6 +832,7 @@ function PDFtoJPG() {
         });
       } else {
         // Multiple pages - create ZIP
+        const { default: JSZip } = await loadJSZip();
         const zip = new JSZip();
         let totalSize = 0;
 

@@ -9,40 +9,43 @@
  * development and production environments.
  */
 
-import * as pdfjsLib from 'pdfjs-dist';
+let pdfjsLib = null
+let workerInitialized = false
+let pdfWorkerSetupPromise = null
 
-let workerInitialized = false;
+async function loadPdfJsLib() {
+  if (pdfjsLib) return pdfjsLib
+  const module = await import('pdfjs-dist')
+  pdfjsLib = module
+  return pdfjsLib
+}
 
 /**
  * Initialize PDF.js worker globally
  * Call this once at app startup to configure worker for all PDF operations
  */
-export function initializePdfWorker() {
-  if (workerInitialized || typeof window === 'undefined' || !pdfjsLib) {
-    return;
+export async function initializePdfWorker() {
+  if (workerInitialized || typeof window === 'undefined') {
+    return
   }
-  
+
   try {
-    // Use the worker from the public directory
-    // This path is served by Vite dev server and included in production builds
-    const workerUrl = '/pdf.worker.min.mjs';
-    
-    pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
-    workerInitialized = true;
-    
-    console.log('[PDF.js] Worker initialized from:', workerUrl);
+    const pdfjs = await loadPdfJsLib()
+    const workerUrl = '/pdf.worker.min.mjs'
+    pdfjs.GlobalWorkerOptions.workerSrc = workerUrl
+    workerInitialized = true
+    console.log('[PDF.js] Worker initialized from:', workerUrl)
   } catch (error) {
-    console.error('[PDF.js] Failed to initialize worker:', error);
-    
-    // Fallback to CDN if public worker is not available
+    console.error('[PDF.js] Failed to initialize worker:', error)
     try {
-      if (pdfjsLib && pdfjsLib.version) {
-        const cdnUrl = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-        pdfjsLib.GlobalWorkerOptions.workerSrc = cdnUrl;
-        console.log('[PDF.js] Using CDN fallback worker:', cdnUrl);
+      const pdfjs = await loadPdfJsLib()
+      if (pdfjs && pdfjs.version) {
+        const cdnUrl = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
+        pdfjs.GlobalWorkerOptions.workerSrc = cdnUrl
+        console.log('[PDF.js] Using CDN fallback worker:', cdnUrl)
       }
     } catch (cdnError) {
-      console.error('[PDF.js] Failed to set CDN fallback:', cdnError);
+      console.error('[PDF.js] Failed to set CDN fallback:', cdnError)
     }
   }
 }
@@ -51,9 +54,9 @@ export function initializePdfWorker() {
  * Get PDF.js library with worker pre-configured
  * Use this if you need a fresh reference to the library
  */
-export function getPdfJsLib() {
-  initializePdfWorker();
-  return pdfjsLib;
+export async function getPdfJsLib() {
+  await initializePdfWorker()
+  return pdfjsLib
 }
 
 export default {

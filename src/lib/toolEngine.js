@@ -1,7 +1,4 @@
 import { evaluate, format as mathFormat } from 'mathjs';
-import { PDFDocument } from 'pdf-lib';
-import JSZip from 'jszip';
-import { getPdfJsLib } from './pdfWorkerSetup';
 import { calculateCBM, calculateChargeableWeight, calculateParcelDimensions, calculateVolumetricWeight } from './logisticsUtils';
 import { calculateShippingCost, calculateCourierCharges, calculateAirFreight, calculatePackagingCost } from './logistics/pricing';
 import { calculateContainerLoad } from './logistics/container';
@@ -18,9 +15,6 @@ import {
   calculateROI,
   calculateSellerProfit,
 } from './ecommerce';
-
-// Get PDF.js with properly configured worker
-const pdfjsLib = getPdfJsLib();
 
 /**
  * Safe tool engine — no new Function(), uses mathjs for expressions.
@@ -2473,12 +2467,43 @@ function safeParseJSON(str) {
   try { return JSON.parse(str); } catch { return null; }
 }
 
+let pdfLibLoadPromise = null;
+let jsZipLoadPromise = null;
+let pdfWorkerSetupLoadPromise = null;
+
+function loadPdfLib() {
+  if (!pdfLibLoadPromise) {
+    pdfLibLoadPromise = import('pdf-lib');
+  }
+  return pdfLibLoadPromise;
+}
+
+function loadJSZip() {
+  if (!jsZipLoadPromise) {
+    jsZipLoadPromise = import('jszip');
+  }
+  return jsZipLoadPromise;
+}
+
+function loadPdfWorkerSetup() {
+  if (!pdfWorkerSetupLoadPromise) {
+    pdfWorkerSetupLoadPromise = import('./pdfWorkerSetup');
+  }
+  return pdfWorkerSetupLoadPromise;
+}
+
+async function getPdfJsLibInstance() {
+  const module = await loadPdfWorkerSetup();
+  return module.getPdfJsLib();
+}
+
 // ─── PDF Tools ────────────────────────────────────────────────────────────────
 async function mergePDF(inputs) {
   try {
     const files = inputs.files || [];
     if (files.length < 2) return { error: 'At least 2 PDF files required' };
 
+    const { PDFDocument } = await loadPdfLib();
     const mergedPdf = await PDFDocument.create();
 
     for (const file of files) {
@@ -2505,6 +2530,7 @@ async function splitPDF(inputs) {
     const pages = inputs.pages || '1'; // e.g., "1,3-5"
     if (!file) return { error: 'PDF file required' };
 
+    const { PDFDocument } = await loadPdfLib();
     const pdf = await PDFDocument.load(file);
     const totalPages = pdf.getPageCount();
 
@@ -2532,6 +2558,7 @@ async function compressPDF(inputs) {
     const file = inputs.file;
     if (!file) return { error: 'PDF file required' };
 
+    const { PDFDocument } = await loadPdfLib();
     const pdf = await PDFDocument.load(file);
     const pdfBytes = await pdf.save({ useObjectStreams: false });
     return {
@@ -2551,6 +2578,7 @@ async function pdfToJPG(inputs) {
     const quality = Number(inputs.quality) || 0.9;
     if (!file) return { error: 'PDF file required' };
 
+    const pdfjsLib = await getPdfJsLibInstance();
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     const numPages = pdf.numPages;
@@ -2580,6 +2608,7 @@ async function pdfToJPG(inputs) {
       };
     } else {
       // Multiple pages - create ZIP
+      const { default: JSZip } = await loadJSZip();
       const zip = new JSZip();
       const images = [];
 
@@ -2621,6 +2650,7 @@ async function jpgToPDF(inputs) {
     const files = inputs.files || [];
     if (files.length === 0) return { error: 'Image files required' };
 
+    const { PDFDocument } = await loadPdfLib();
     const pdf = await PDFDocument.create();
 
     for (const file of files) {
@@ -2652,6 +2682,7 @@ async function protectPDF(inputs) {
     const password = inputs.password;
     if (!file || !password) return { error: 'PDF file and password required' };
 
+    const { PDFDocument } = await loadPdfLib();
     const pdf = await PDFDocument.load(file);
     const pdfBytes = await pdf.save({ userPassword: password });
     return {
@@ -2671,6 +2702,7 @@ async function removePagesPDF(inputs) {
     const pages = inputs.pages || ''; // e.g., "1,3-5"
     if (!file) return { error: 'PDF file required' };
 
+    const { PDFDocument } = await loadPdfLib();
     const pdf = await PDFDocument.load(file);
     const totalPages = pdf.getPageCount();
 

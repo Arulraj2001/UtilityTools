@@ -10,6 +10,7 @@ import {
   LayoutGrid,
   Wrench,
   BookOpen,
+  Info,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,11 @@ export default function Navbar({ onSearchOpen }) {
       icon: BookOpen,
     },
     {
+      to: '/about',
+      label: 'About',
+      icon: Info,
+    },
+    {
       to: '/jobs',
       label: 'Jobs',
       icon: LayoutGrid,
@@ -79,8 +85,8 @@ export default function Navbar({ onSearchOpen }) {
               </div>
 
               <span className="font-bold text-xl tracking-tight">
-                <span className="gradient-text">Tool</span>
-                <span className="text-foreground">Hub</span>
+                <span className="gradient-text">Quick</span>
+                <span className="text-foreground">Utils</span>
               </span>
             </Link>
 

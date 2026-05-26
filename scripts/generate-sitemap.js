@@ -173,6 +173,36 @@ async function main() {
     priority: '0.8',
   })
 
+  urls.set('/about', {
+    changefreq: 'monthly',
+    priority: '0.6',
+  })
+
+  urls.set('/contact', {
+    changefreq: 'monthly',
+    priority: '0.6',
+  })
+
+  urls.set('/privacy', {
+    changefreq: 'monthly',
+    priority: '0.5',
+  })
+
+  urls.set('/terms', {
+    changefreq: 'monthly',
+    priority: '0.5',
+  })
+
+  urls.set('/disclaimer', {
+    changefreq: 'monthly',
+    priority: '0.5',
+  })
+
+  urls.set('/editorial-policy', {
+    changefreq: 'monthly',
+    priority: '0.5',
+  })
+
   // Tools
   for (const t of tools) {
     if (!t?.slug) continue

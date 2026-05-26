@@ -13,4 +13,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+      // Remove manualChunks to let Vite/rollup handle vendor splitting automatically.
+      // Custom manualChunks previously caused module initialization ordering issues
+      // that led to runtime ReferenceError and hook import failures in production.
+  },
 });
