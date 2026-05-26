@@ -7,7 +7,7 @@ export default function BlogSEO({ post, canonicalBase = 'https://quickutils.page
   const title = post.seo_title || post.title
   const description = post.seo_description || post.excerpt || ''
   const canonical = `${canonicalBase}/blog/${encodeURIComponent(post.slug)}`
-  const image = post.featured_image || `${canonicalBase}/og-image.jpg`
+  const image = post.featured_image || `${canonicalBase}/preview.png`
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',

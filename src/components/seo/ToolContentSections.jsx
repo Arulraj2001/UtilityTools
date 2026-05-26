@@ -1,9 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { getToolContentProfile } from './toolContentProfiles';
 
 export default function ToolContentSections({ tool }) {
 
   if (!tool) return null;
+
+  const profile = getToolContentProfile(tool.slug);
+
+  if (profile) {
+    return <PhaseToolContent profile={profile} />;
+  }
 
   // If custom seo_content exists, render it
   if (tool.seo_content) {
@@ -271,6 +279,162 @@ export default function ToolContentSections({ tool }) {
         </motion.section>
       )}
 
+    </div>
+  );
+}
+
+function PhaseToolContent({ profile }) {
+  return (
+    <div className="space-y-6 mt-8">
+      <ToolSection>
+        <p className="text-base leading-7 text-muted-foreground">{profile.intro}</p>
+      </ToolSection>
+
+      <ToolSection title="How to use this tool">
+        <ol className="space-y-3">
+          {profile.howTo.map((step, index) => (
+            <li key={step} className="flex gap-3 text-sm leading-6 text-muted-foreground">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                {index + 1}
+              </span>
+              <span>{step}</span>
+            </li>
+          ))}
+        </ol>
+      </ToolSection>
+
+      <ToolSection title={profile.explanation.heading}>
+        <div className="space-y-4 text-sm leading-7 text-muted-foreground">
+          {profile.explanation.paragraphs.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+          {profile.explanation.formula && (
+            <div className="rounded-xl border border-border/50 bg-muted/30 p-4 font-mono text-sm text-foreground">
+              {profile.explanation.formula}
+            </div>
+          )}
+        </div>
+      </ToolSection>
+
+      <ToolSection title="Real examples">
+        <div className="space-y-5">
+          {profile.examples.map((example) => (
+            <ExampleBlock key={example.title} example={example} />
+          ))}
+        </div>
+      </ToolSection>
+
+      <ToolSection title="Tips and common mistakes">
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {profile.tips.map((tip) => (
+            <li key={tip} className="rounded-xl border border-border/50 bg-muted/20 p-3 text-sm leading-6 text-muted-foreground">
+              {tip}
+            </li>
+          ))}
+        </ul>
+      </ToolSection>
+
+      <ToolSection title="Limitations and disclaimer">
+        <ul className="space-y-3 text-sm leading-6 text-muted-foreground">
+          {profile.disclaimer.map((item) => (
+            <li key={item} className="flex gap-2">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/70" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </ToolSection>
+
+      <ToolSection title="Frequently asked questions">
+        <div className="space-y-4">
+          {profile.faqs.map((faq) => (
+            <div key={faq.question} className="rounded-xl border border-border/50 bg-muted/20 p-4">
+              <h3 className="text-base font-semibold text-foreground">{faq.question}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{faq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </ToolSection>
+
+      <ToolSection title="Related tools">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {profile.relatedTools.map((related) => (
+            <Link
+              key={related.slug}
+              to={`/tool/${related.slug}`}
+              className="rounded-xl border border-border/50 bg-muted/20 p-4 transition-colors hover:border-primary/50 hover:bg-primary/5"
+            >
+              <span className="text-sm font-semibold text-foreground">{related.label}</span>
+              <span className="mt-2 block text-sm leading-6 text-muted-foreground">{related.description}</span>
+            </Link>
+          ))}
+        </div>
+      </ToolSection>
+
+      <p className="text-sm text-muted-foreground">Last updated: May 2026</p>
+    </div>
+  );
+}
+
+function ToolSection({ title, children }) {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-2xl border border-border/50 bg-card p-5 sm:p-6"
+    >
+      {title && <h2 className="text-2xl font-bold mb-4">{title}</h2>}
+      {children}
+    </motion.section>
+  );
+}
+
+function ExampleBlock({ example }) {
+  return (
+    <div className="rounded-xl border border-border/50 bg-muted/20 p-4">
+      <h3 className="text-base font-semibold text-foreground">{example.title}</h3>
+      {example.body && <p className="mt-2 text-sm leading-6 text-muted-foreground">{example.body}</p>}
+      {example.table && (
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[520px] border-collapse text-sm">
+            <thead>
+              <tr>
+                {example.table.headers.map((header) => (
+                  <th key={header} className="border border-border/60 bg-background px-3 py-2 text-left font-semibold text-foreground">
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {example.table.rows.map((row) => (
+                <tr key={row.join('-')}>
+                  {row.map((cell) => (
+                    <td key={cell} className="border border-border/60 px-3 py-2 text-muted-foreground">
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {example.items && (
+        <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
+          {example.items.map((item) => (
+            <li key={item} className="flex gap-2">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/70" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {example.result && (
+        <p className="mt-4 rounded-lg bg-background px-3 py-2 text-sm font-medium text-foreground">
+          {example.result}
+        </p>
+      )}
     </div>
   );
 }

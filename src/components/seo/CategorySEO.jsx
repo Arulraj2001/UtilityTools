@@ -7,7 +7,7 @@ export default function CategorySEO({ category, canonicalBase = 'https://quickut
   const title = category.seo_title || category.name
   const description = category.seo_description || category.description || ''
   const canonical = category.canonical_url || `${canonicalBase}/category/${encodeURIComponent(category.slug)}`
-  const image = category.featured_image || `${canonicalBase}/og-image.jpg`
+  const image = category.featured_image || `${canonicalBase}/preview.png`
   const keywords = category.seo_keywords || ''
 
   const breadcrumbSchema = {

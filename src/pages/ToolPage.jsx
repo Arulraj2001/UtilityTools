@@ -14,6 +14,7 @@ import FAQAccordion from '@/components/shared/FAQAccordion'
 import ToolCard from '@/components/shared/ToolCard'
 import AdBanner from '@/components/shared/AdBanner'
 import ToolSEO from '@/components/seo/ToolSEO'
+import { getToolContentProfile, hasToolContentProfile } from '@/components/seo/toolContentProfiles'
 import { useLocalStorage } from '@/lib/useLocalStorage'
 import { getTools, getCategories, updateToolUsage, getBlogPosts, getWorkflowPages } from '@/api/supabaseApi'
 import { trackToolEvent } from '@/lib/analytics'
@@ -147,6 +148,7 @@ export default function ToolPage() {
   })
 
   const tool = useMemo(() => tools.find(t => t.slug === slug), [tools, slug])
+  const toolContentProfile = useMemo(() => getToolContentProfile(tool?.slug), [tool?.slug])
   const category = useMemo(() => categories.find(c => c.id === tool?.category_id), [categories, tool])
   const relatedTools = useMemo(() => {
     if (!tool) return []
@@ -351,7 +353,7 @@ export default function ToolPage() {
                       {tool?.is_trending && <Badge className="bg-accent/10 text-accent border-0 text-xs">?? Trending</Badge>}
                       {category && <Badge variant="secondary" className="text-xs">{category.name}</Badge>}
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold mb-2">{tool?.name}</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold mb-2">{toolContentProfile?.h1 || tool?.name}</h1>
                     <p className="text-muted-foreground">{tool?.description}</p>
                   </div>
                 </div>
@@ -508,7 +510,7 @@ export default function ToolPage() {
               </motion.div>
             )}
 
-            {tool?.faq?.length > 0 && (
+            {tool?.faq?.length > 0 && !hasToolContentProfile(tool?.slug) && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="mt-8">
                 <FAQAccordion items={tool.faq} />
               </motion.div>

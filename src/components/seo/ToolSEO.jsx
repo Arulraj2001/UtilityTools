@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Helmet } from 'react-helmet-async';
+import { getToolContentProfile } from './toolContentProfiles';
 
 /**
  * Production-grade SEO component
@@ -15,33 +16,59 @@ export default function ToolSEO({
 
   if (!tool) return null;
 
+  const profile = getToolContentProfile(tool.slug);
+  const profileSeo = profile?.seo || {};
+
   // SEO values
   const title =
+    profileSeo.title ||
     tool.seo_title ||
     `${tool.name} – Free Online Tool`;
 
   const description =
+    profileSeo.description ||
     tool.seo_description ||
     tool.description ||
     '';
+
+  const ogTitle =
+    profileSeo.ogTitle ||
+    title;
+
+  const ogDescription =
+    profileSeo.ogDescription ||
+    description;
+
+  const twitterTitle =
+    profileSeo.twitterTitle ||
+    ogTitle;
+
+  const twitterDescription =
+    profileSeo.twitterDescription ||
+    ogDescription;
 
   const canonical =
     `${canonicalBase}/tool/${encodeURIComponent(tool.slug)}`;
 
   const image =
     tool.featured_image ||
-    `${canonicalBase}/og-image.jpg`;
+    `${canonicalBase}/preview.png`;
 
   const keywords =
     tool.seo_keywords ||
     '';
+
+  const faqItems =
+    profile?.faqs ||
+    tool.faq ||
+    [];
 
   /**
    * FAQ Schema
    */
 
   const faqSchema =
-    tool.faq?.length > 0
+    faqItems?.length > 0
       ? {
           '@context':
             'https://schema.org',
@@ -50,7 +77,7 @@ export default function ToolSEO({
             'FAQPage',
 
           mainEntity:
-            tool.faq.map(
+            faqItems.map(
               (f) => ({
 
                 '@type':
@@ -90,12 +117,8 @@ export default function ToolSEO({
       price: '0',
       priceCurrency: 'USD'
     },
-    aggregateRating: tool.aggregate_rating || {
-      '@type': 'AggregateRating',
-      ratingValue: tool.aggregate_rating?.ratingValue || 0,
-      reviewCount: tool.aggregate_rating?.reviewCount || 0
-    },
-    featureList: tool.features || []
+    ...(tool.aggregate_rating && { aggregateRating: tool.aggregate_rating }),
+    ...(tool.features?.length > 0 && { featureList: tool.features })
   };
 
   /**
@@ -180,16 +203,16 @@ export default function ToolSEO({
 
       {/* Open Graph */}
       <meta property="og:type" content="website" />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
+      <meta property="og:title" content={ogTitle} />
+      <meta property="og:description" content={ogDescription} />
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={image} />
       <meta property="og:site_name" content="QuickUtils" />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
+      <meta name="twitter:title" content={twitterTitle} />
+      <meta name="twitter:description" content={twitterDescription} />
       <meta name="twitter:image" content={image} />
       <meta name="twitter:url" content={canonical} />
 
@@ -197,18 +220,14 @@ export default function ToolSEO({
       <script type="application/ld+json">{JSON.stringify(softwareAppSchema)}</script>
 
       {faqSchema && (
-        <script type="
-          application/ld+json
-        ">
+        <script type="application/ld+json">
           {JSON.stringify(
             faqSchema
           )}
         </script>
       )}
 
-      <script type="
-        application/ld+json
-      ">
+      <script type="application/ld+json">
         {JSON.stringify(
           breadcrumbSchema
         )}

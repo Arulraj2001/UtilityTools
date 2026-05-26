@@ -27,7 +27,6 @@ const SUPABASE_KEY =
 
 const SITE_URL = (
   process.env.SITE_URL ||
-  process.env.VERCEL_URL ||
   process.env.PUBLIC_SITE_URL ||
   'https://quickutils.page'
 ).replace(/\/$/, '')

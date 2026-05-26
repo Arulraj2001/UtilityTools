@@ -17,6 +17,7 @@
 
 const OG_IMAGE_WIDTH = 1200
 const OG_IMAGE_HEIGHT = 630
+const SITE_URL = 'https://quickutils.page'
 
 /**
  * Build OG image metadata for a job
@@ -28,7 +29,7 @@ export const buildJobOGMeta = (job) => {
     title: job.title,
     description: job.short_description || `${job.organization} is hiring`,
     image: generateOGImageUrl(job),
-    url: `/jobs/${encodeURIComponent(job.slug)}`,
+    url: `${SITE_URL}/jobs/${encodeURIComponent(job.slug)}`,
     type: 'article',
     siteName: 'QuickUtils',
     publishedTime: job.created_at,
@@ -41,7 +42,7 @@ export const buildJobOGMeta = (job) => {
  * Template: /api/og/jobs/[jobId]?title=...&org=...&salary=...
  */
 export const generateOGImageUrl = (job) => {
-  if (!job || !job.id) return '/og-default.png'
+  if (!job || !job.id) return `${SITE_URL}/og-default.png`
 
   const params = new URLSearchParams({
     title: job.title || 'Job Opportunity',
@@ -51,7 +52,7 @@ export const generateOGImageUrl = (job) => {
     location: job.location || '',
   })
 
-  return `/api/og/jobs/${encodeURIComponent(job.slug || job.id)}?${params.toString()}`
+  return `${SITE_URL}/api/og/jobs/${encodeURIComponent(job.slug || job.id)}?${params.toString()}`
 }
 
 /**

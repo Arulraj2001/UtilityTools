@@ -8,6 +8,7 @@ import { getWorkflowPages, getCategories } from '@/api/supabaseApi'
 import { trackWorkflowSearch } from '@/lib/analytics'
 import AdBanner from '../components/shared/AdBanner'
 import { Link } from 'react-router-dom'
+import { SITE_URL } from '@/components/seo/StaticPageSEO'
 
 export default function WorkflowListPage() {
   const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get('q') || '')
@@ -103,7 +104,7 @@ export default function WorkflowListPage() {
 
   const seoTitle = 'Workflow Solutions for PDFs, Images, and Online Tools | UtilityTools'
   const seoDescription = 'Discover guided workflow solutions for PDFs, images, exam forms, and online utilities. Step-by-step guides for common tasks.'
-  const canonicalUrl = `${window.location.origin}/workflow`
+  const canonicalUrl = `${SITE_URL}/workflow`
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -113,7 +114,7 @@ export default function WorkflowListPage() {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: window.location.origin,
+        item: SITE_URL,
       },
       {
         '@type': 'ListItem',
@@ -141,7 +142,7 @@ export default function WorkflowListPage() {
         position: i + 1,
         name: w.title,
         description: w.excerpt,
-        url: `${window.location.origin}/workflow/${encodeURIComponent(w.slug)}`,
+        url: `${SITE_URL}/workflow/${encodeURIComponent(w.slug)}`,
       })),
     },
   }

@@ -7,7 +7,7 @@ export default function WorkflowSEO({ page, canonicalBase = 'https://quickutils.
   const title = page.seo_title || page.title
   const description = page.seo_description || page.excerpt || ''
   const canonical = page.canonical_url || `${canonicalBase}/workflow/${encodeURIComponent(page.slug)}`
-  const image = page.featured_image || `${canonicalBase}/og-image.jpg`
+  const image = page.featured_image || `${canonicalBase}/preview.png`
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
