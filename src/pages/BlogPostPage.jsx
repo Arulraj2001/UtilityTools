@@ -21,25 +21,30 @@ import { getBlogPostBySlug, getBlogPosts, getBlogCategories, getTools, getCatego
 import KeywordSuggestions from '@/components/seo/KeywordSuggestions'
 import { suggestLinksFromText } from '@/lib/semanticLinker'
 import BlogSEO from '@/components/seo/BlogSEO'
+import { getStaticBlogPostBySlug, mergeBlogCategories, mergeBlogPosts } from '@/lib/staticBlogPosts'
 
 export default function BlogPostPage() {
   const { slug } = useParams()
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const staticPost = useMemo(() => getStaticBlogPostBySlug(slug), [slug])
 
   const {
-    data: post,
+    data: remotePost,
     isLoading: isLoadingPost,
-    isError: isPostError,
+    isError: isRemotePostError,
   } = useQuery({
     queryKey: ['blog-post', slug],
     queryFn: () => getBlogPostBySlug(slug),
-    enabled: !!slug,
+    enabled: !!slug && !staticPost,
     retry: false,
   })
 
-  const { data: posts = [], isLoading: isLoadingPosts } = useQuery({
+  const post = staticPost || remotePost
+  const isPostError = !staticPost && isRemotePostError
+
+  const { data: remotePosts = [], isLoading: isLoadingPosts } = useQuery({
     queryKey: ['blog-published'],
     queryFn: () => getBlogPosts({ published: true, orderBy: 'created_at', ascending: false, limit: 100 }),
     retry: false,
@@ -50,15 +55,19 @@ export default function BlogPostPage() {
     queryFn: () => getTools({ published: true, orderBy: 'sort_order', ascending: true, limit: 200 }),
   })
 
-  const { data: categories = [] } = useQuery({
+  const { data: remoteCategories = [] } = useQuery({
     queryKey: ['blog-categories'],
     queryFn: () => getBlogCategories({ orderBy: 'sort_order', ascending: true, limit: 100 }),
+    retry: false,
   })
 
   const { data: toolCategories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ orderBy: 'sort_order', ascending: true, limit: 200 }),
   })
+
+  const posts = useMemo(() => mergeBlogPosts(remotePosts), [remotePosts])
+  const categories = useMemo(() => mergeBlogCategories(remoteCategories), [remoteCategories])
 
   // Load like status from localStorage
   useEffect(() => {
@@ -280,6 +289,12 @@ export default function BlogPostPage() {
                 <span className="flex items-center gap-1.5">
                   <User className="w-3.5 h-3.5" />
                   {post.author_name}
+                </span>
+              )}
+              {post.last_updated_label && (
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  Last updated: {post.last_updated_label}
                 </span>
               )}
             </div>

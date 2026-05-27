@@ -131,6 +131,10 @@ export default function BlogEditor({ post, onSave, onCancel }) {
     seo_title: post?.seo_title || '',
     seo_description: post?.seo_description || '',
     seo_keywords: post?.seo_keywords || '',
+    og_title: post?.og_title || '',
+    og_description: post?.og_description || '',
+    twitter_title: post?.twitter_title || '',
+    twitter_description: post?.twitter_description || '',
     faq_items: post?.faq_items || [],
   })
 
@@ -228,6 +232,10 @@ export default function BlogEditor({ post, onSave, onCancel }) {
         content: cleanContent(form.content),
         reading_time: estimateReadingTime(form.content),
         faq_items: form.faq_items,
+        og_title: form.og_title,
+        og_description: form.og_description,
+        twitter_title: form.twitter_title,
+        twitter_description: form.twitter_description,
       }
 
       if (post?.id) {
@@ -624,6 +632,60 @@ export default function BlogEditor({ post, onSave, onCancel }) {
                   className="rounded-lg resize-none"
                 />
                 <p className="text-xs text-gray-500">Recommended: 150-160 characters</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Open Graph Title</Label>
+                <Input
+                  value={form.og_title}
+                  onChange={e =>
+                    update('og_title', e.target.value)
+                  }
+                  placeholder="Title for social media sharing"
+                  className="rounded-lg"
+                />
+                <p className="text-xs text-gray-500">Used for Facebook, LinkedIn, and other platforms</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Open Graph Description</Label>
+                <Textarea
+                  rows={2}
+                  value={form.og_description}
+                  onChange={e =>
+                    update('og_description', e.target.value)
+                  }
+                  placeholder="Summary for social media preview"
+                  className="rounded-lg resize-none"
+                />
+                <p className="text-xs text-gray-500">Shown when post is shared on social media</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Twitter Title</Label>
+                <Input
+                  value={form.twitter_title}
+                  onChange={e =>
+                    update('twitter_title', e.target.value)
+                  }
+                  placeholder="Title for Twitter/X Card"
+                  className="rounded-lg"
+                />
+                <p className="text-xs text-gray-500">Optimized for Twitter/X sharing</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Twitter Description</Label>
+                <Textarea
+                  rows={2}
+                  value={form.twitter_description}
+                  onChange={e =>
+                    update('twitter_description', e.target.value)
+                  }
+                  placeholder="Summary for Twitter/X Card"
+                  className="rounded-lg resize-none"
+                />
+                <p className="text-xs text-gray-500">Appears on Twitter/X when post is shared</p>
               </div>
             </div>
           </div>

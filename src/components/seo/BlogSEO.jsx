@@ -6,8 +6,14 @@ export default function BlogSEO({ post, canonicalBase = 'https://quickutils.page
 
   const title = post.seo_title || post.title
   const description = post.seo_description || post.excerpt || ''
+  const ogTitle = post.og_title || post.ogTitle || title
+  const ogDescription = post.og_description || post.ogDescription || description
+  const twitterTitle = post.twitter_title || post.twitterTitle || ogTitle
+  const twitterDescription = post.twitter_description || post.twitterDescription || ogDescription
   const canonical = `${canonicalBase}/blog/${encodeURIComponent(post.slug)}`
-  const image = post.featured_image || `${canonicalBase}/preview.png`
+  const image = post.featured_image || post.og_image || `${canonicalBase}/preview.png`
+  const authorName = post.author_name || post.author || 'QuickUtils Editorial Team'
+  const categoryName = post.blog_categories?.name || post.category
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -22,12 +28,24 @@ export default function BlogSEO({ post, canonicalBase = 'https://quickutils.page
   const blogPosting = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
-    headline: title,
+    headline: post.title,
     description,
     image: [image],
-    author: post.author_name || post.author || 'QuickUtils',
+    author: {
+      '@type': 'Organization',
+      name: authorName,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'QuickUtils',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${canonicalBase}/logo.png`,
+      },
+    },
     datePublished: post.created_at,
     dateModified: post.updated_at || post.created_at,
+    articleSection: categoryName,
     mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
     url: canonical
   }
@@ -54,15 +72,15 @@ export default function BlogSEO({ post, canonicalBase = 'https://quickutils.page
       <link rel="canonical" href={canonical} />
 
       <meta property="og:type" content="article" />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
+      <meta property="og:title" content={ogTitle} />
+      <meta property="og:description" content={ogDescription} />
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={image} />
       <meta property="og:site_name" content="QuickUtils" />
 
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
+      <meta name="twitter:title" content={twitterTitle} />
+      <meta name="twitter:description" content={twitterDescription} />
       <meta name="twitter:image" content={image} />
       <meta name="twitter:url" content={canonical} />
 

@@ -9,6 +9,7 @@ const FeaturedTools = lazy(() => import('../components/home/FeaturedTools'))
 const PopularWorkflows = lazy(() => import('../components/home/PopularWorkflows'))
 import AdBanner from '../components/shared/AdBanner'
 import StaticPageSEO, { SITE_URL } from '@/components/seo/StaticPageSEO'
+import { FEATURED_STATIC_BLOG_POSTS } from '@/lib/staticBlogPosts'
 
 const homepageDescription =
   'QuickUtils is a free online tools website for everyday PDF, image, calculator, text, developer, SEO, student, and business tasks.'
@@ -349,6 +350,44 @@ function HowItWorksSection() {
   )
 }
 
+function HelpfulGuidesSection() {
+  return (
+    <section className="py-12 sm:py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+          <div>
+            <p className="text-sm font-semibold text-primary mb-3">Helpful guides</p>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+              Learn the basics before using a tool
+            </h2>
+            <p className="text-muted-foreground leading-relaxed max-w-2xl">
+              Short practical articles explain common calculator, image, PDF, writing, and
+              developer tasks with examples and mistakes to avoid.
+            </p>
+          </div>
+          <Link to="/blog" className="text-sm font-medium text-primary hover:text-primary/80">
+            View all guides
+          </Link>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {FEATURED_STATIC_BLOG_POSTS.map((post) => (
+            <Link
+              key={post.slug}
+              to={`/blog/${post.slug}`}
+              className="block rounded-lg border border-border/60 bg-card/80 p-5 transition-colors hover:border-primary/40"
+            >
+              <p className="text-xs font-medium text-primary mb-2">{post.blog_categories?.name}</p>
+              <h3 className="font-semibold mb-2 leading-snug">{post.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{post.excerpt}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function HomeFAQSection() {
   return (
     <section className="py-12 sm:py-16">
@@ -605,6 +644,7 @@ export default function Home() {
       <WhyQuickUtilsSection />
       <PrivacyFocusSection />
       <HowItWorksSection />
+      <HelpfulGuidesSection />
 
       {showWorkflowsSectionSkeleton ? (
         <WorkflowsSectionSkeleton />

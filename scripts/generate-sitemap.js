@@ -12,6 +12,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { createClient } from '@supabase/supabase-js'
 import ws from 'ws'
+import { STATIC_BLOG_POSTS } from '../src/lib/staticBlogPosts.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -229,6 +230,18 @@ async function main() {
   }
 
   // Blog posts
+  for (const p of STATIC_BLOG_POSTS) {
+    if (!p?.slug) continue
+
+    const loc = `/blog/${encodeURIComponent(p.slug)}`
+
+    urls.set(loc, {
+      changefreq: 'monthly',
+      priority: '0.75',
+      lastmod: p.updated_at || null,
+    })
+  }
+
   for (const p of posts) {
     if (!p?.slug) continue
 
