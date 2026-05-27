@@ -12,6 +12,8 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",
+    "conversion:server": "node server/conversion/server.js",
+    "test:conversion": "node --test server/conversion/tests/validation.test.js",
     "inspect:jobs-constraints": "node scripts/inspect-jobs-constraints.js"
   },
   "dependencies": {

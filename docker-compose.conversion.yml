@@ -1,0 +1,22 @@
+services:
+  quickutils-conversion:
+    build:
+      context: .
+      dockerfile: Dockerfile.conversion
+    ports:
+      - "8787:8787"
+    environment:
+      CONVERSION_PORT: "8787"
+      CONVERSION_PUBLIC_BASE_URL: "https://quickutils.page"
+      CONVERSION_TEMP_DIR: "/tmp/quickutils-conversions"
+      CONVERSION_MAX_UPLOAD_MB: "100"
+      CONVERSION_MAX_PAGES: "300"
+      CONVERSION_FILE_TTL_MINUTES: "60"
+      CONVERSION_CLEANUP_INTERVAL_MINUTES: "10"
+      CONVERSION_TIMEOUT_SECONDS: "120"
+      CONVERSION_WORKER_CONCURRENCY: "1"
+      CONVERSION_OCR_ENABLED: "true"
+      CONVERSION_VALIDATE_WITH_LIBREOFFICE: "true"
+      CONVERSION_CORS_ORIGIN: "https://quickutils.page"
+    tmpfs:
+      - /tmp/quickutils-conversions:size=2g,mode=700

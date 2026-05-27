@@ -3300,6 +3300,233 @@ export const TOOL_CONTENT_PROFILES = {
       },
     ],
   },
+  'pdf-to-word': {
+    h1: 'PDF to Word Converter',
+    seo: {
+      title: 'PDF to Word Converter - Convert PDF to Editable DOCX Online',
+      description:
+        'Convert PDF files to editable Word documents online. Preserve text, images, tables, spacing and layout where possible. Secure, fast and easy to use.',
+      ogTitle: 'PDF to Word Converter - Convert PDF to Editable DOCX Online',
+      ogDescription:
+        'Upload a PDF, convert it with a backend PDF-to-DOCX engine, and download an editable Word document where possible.',
+      twitterTitle: 'PDF to Word Converter - Editable DOCX Online',
+      twitterDescription:
+        'Convert text-based PDFs to editable DOCX files, with scanned PDF OCR handling explained clearly.',
+    },
+    intro:
+      'Convert PDF files into editable Word documents for quick editing, reuse and formatting updates. Upload your PDF, let QuickUtils process it through the conversion service, and download a DOCX file that works in Microsoft Word, Google Docs, LibreOffice and other document editors.',
+    howTo: [
+      'Upload a PDF file from your device.',
+      'Choose Editable Word for text-based PDFs. Choose OCR only if the OCR backend is enabled for scanned PDFs.',
+      'Start the conversion and wait while the service validates, inspects, converts and checks the output.',
+      'Download the DOCX file from the temporary download link when the conversion is complete.',
+      'Open the Word file and review text, tables, images and page breaks before using it for important work.',
+    ],
+    explanation: {
+      heading: 'How editable PDF to Word conversion works',
+      paragraphs: [
+        'PDF and Word store documents in very different ways. A PDF is often a fixed-layout file, while Word expects editable paragraphs, tables, runs, images and page structure.',
+        'The QuickUtils backend first inspects the PDF to check whether it contains selectable text. Text-based PDFs are converted with a server-side PDF-to-DOCX engine so the output can contain editable text instead of full-page screenshots.',
+        'If a PDF is scanned or image-only, editable conversion requires OCR. When OCR is not enabled, the tool shows a clear scanned-PDF message instead of pretending the result is editable.',
+      ],
+      formula:
+        'Text-based PDF -> inspect text and pages -> convert with pdf2docx -> validate DOCX package -> temporary DOCX download',
+    },
+    examples: [
+      {
+        title: 'Editing a PDF report',
+        items: [
+          'Upload a text-based report PDF.',
+          'Convert it to DOCX using Editable Word mode.',
+          'Edit paragraphs, update headings, replace images or revise tables in Word.',
+          'Export back to PDF after reviewing the layout.',
+        ],
+      },
+      {
+        title: 'Scanned document example',
+        items: [
+          'A photographed certificate or scanned form usually has no selectable text.',
+          'The tool detects that editable conversion requires OCR.',
+          'If OCR is enabled, the backend can attempt text recognition; otherwise it asks for OCR instead of returning a fake editable DOCX.',
+        ],
+      },
+    ],
+    tips: [
+      'Use original digital PDFs when possible; scanned PDFs need OCR and can be less accurate.',
+      'Check tables after conversion because PDF table lines and Word table cells do not always map perfectly.',
+      'Review fonts and spacing if the PDF uses custom or embedded fonts.',
+      'Do not treat an image-only Word file as editable unless the text can actually be selected and changed.',
+      'Keep the original PDF until you have reviewed the converted DOCX.',
+      'Use smaller files for faster conversion and fewer timeout risks.',
+    ],
+    disclaimer: [
+      'PDF to Word conversion is an approximation because PDF and DOCX formats represent layout differently.',
+      'Scanned PDFs require OCR for editable text, and OCR quality depends on scan clarity, language support and page rotation.',
+      'Temporary processing and cleanup are implemented in the conversion service, but users should avoid uploading documents they are not allowed to process online.',
+    ],
+    faqs: [
+      {
+        question: 'Can I edit the converted Word file?',
+        answer:
+          'For text-based PDFs, the converter creates a real DOCX with editable text where the backend can reconstruct it. Scanned PDFs need OCR before text can become editable.',
+      },
+      {
+        question: 'Will images and tables be preserved?',
+        answer:
+          'Images, tables, spacing and layout are preserved where possible, but complex PDFs may still need manual cleanup after conversion.',
+      },
+      {
+        question: 'What happens with scanned PDFs?',
+        answer:
+          'The backend checks whether the PDF has selectable text. If it appears scanned and OCR is not enabled, the tool explains that editable Word conversion requires OCR.',
+      },
+      {
+        question: 'Are my files stored permanently?',
+        answer:
+          'No. The conversion service stores uploads and outputs as temporary files and removes them after the configured expiry window.',
+      },
+      {
+        question: 'Does it work on mobile?',
+        answer:
+          'Yes. The upload, status and download flow works on modern mobile browsers, but large document conversions are usually easier on desktop.',
+      },
+      {
+        question: 'Why does some formatting change after conversion?',
+        answer:
+          'PDFs are fixed-layout documents, while Word uses editable document structure. Fonts, columns, tables, page breaks and scanned text can shift during reconstruction.',
+      },
+    ],
+    relatedTools: [
+      {
+        slug: 'word-to-pdf',
+        label: 'Word to PDF Converter',
+        description: 'Convert the edited DOCX back into a shareable PDF.',
+      },
+      {
+        slug: 'merge-pdf',
+        label: 'Merge PDF',
+        description: 'Combine PDF files before or after document conversion.',
+      },
+      {
+        slug: 'pdf-size-reducer',
+        label: 'PDF Size Reducer',
+        description: 'Reduce PDF file size for upload and sharing workflows.',
+      },
+    ],
+  },
+  'word-to-pdf': {
+    h1: 'Word to PDF Converter',
+    seo: {
+      title: 'Word to PDF Converter - Convert DOCX to PDF Online',
+      description:
+        'Convert Word documents to clean, high-quality PDF files online. Preserve layout, images, fonts, tables and page formatting.',
+      ogTitle: 'Word to PDF Converter - Convert DOCX to PDF Online',
+      ogDescription:
+        'Upload a DOC or DOCX file and convert it to a PDF through a backend LibreOffice conversion pipeline.',
+      twitterTitle: 'Word to PDF Converter - DOCX to PDF Online',
+      twitterDescription:
+        'Convert Word documents to PDF while preserving images, tables, margins, lists and page layout where possible.',
+    },
+    intro:
+      'Turn Word documents into professional PDF files that are easy to share, print and submit. QuickUtils uses a backend conversion service to preserve document structure, images, tables and page layout while creating a reliable PDF output.',
+    howTo: [
+      'Upload a DOC or DOCX file.',
+      'Start the conversion.',
+      'Wait while the backend validates the file and converts it with LibreOffice headless.',
+      'Download the validated PDF from the temporary download link.',
+      'Open the PDF and review page layout, images, hyperlinks and tables before sharing.',
+    ],
+    explanation: {
+      heading: 'How Word to PDF conversion works',
+      paragraphs: [
+        'Word documents can contain editable text, images, headers, footers, tables, page breaks, lists, embedded fonts and page settings. A browser-only text extraction approach cannot reliably preserve that layout.',
+        'QuickUtils sends the file to a backend conversion worker that uses LibreOffice headless to render the document into PDF. This is a closer match to how desktop office software exports PDF files.',
+        'The output is checked before download so the tool does not silently return an empty or corrupted PDF.',
+      ],
+      formula:
+        'DOC or DOCX -> validate upload -> LibreOffice headless export -> PDF validation -> temporary PDF download',
+    },
+    examples: [
+      {
+        title: 'Resume submission example',
+        items: [
+          'Upload a DOCX resume with headings, bullet lists and contact links.',
+          'Convert it to PDF so the layout is easier to share and print.',
+          'Open the PDF and confirm page breaks, links and spacing before sending it.',
+        ],
+      },
+      {
+        title: 'Report with images and tables',
+        items: [
+          'Upload a Word report that includes charts, tables and page breaks.',
+          'The backend exports a PDF with the original page layout where possible.',
+          'Review the output if the document uses custom fonts or complex table formatting.',
+        ],
+      },
+    ],
+    tips: [
+      'Use DOCX when possible because it is more predictable than older DOC files.',
+      'Embed or use common fonts if exact typography matters.',
+      'Check headers, footers, page breaks and table widths after conversion.',
+      'Keep image resolution reasonable so the final PDF is not unnecessarily large.',
+      'Review the PDF in a standard viewer before submitting important documents.',
+      'Avoid password-protected or corrupted Word files unless support is added for them.',
+    ],
+    disclaimer: [
+      'Word to PDF output depends on the source document, fonts, embedded media and page settings.',
+      'LibreOffice provides strong document conversion, but some Microsoft Word-specific features can render differently.',
+      'Temporary processing and cleanup are implemented in the conversion service, but users should avoid uploading documents they are not allowed to process online.',
+    ],
+    faqs: [
+      {
+        question: 'Will my Word formatting be preserved?',
+        answer:
+          'The backend uses LibreOffice headless to preserve layout, images, fonts, tables, lists, margins and page settings as closely as possible.',
+      },
+      {
+        question: 'Can I convert DOC and DOCX files?',
+        answer:
+          'Yes. The tool accepts both DOC and DOCX files. DOCX usually produces the most predictable result.',
+      },
+      {
+        question: 'Are images included in the PDF?',
+        answer:
+          'Embedded images are included where the document engine can read them from the source Word file.',
+      },
+      {
+        question: 'Is this tool secure?',
+        answer:
+          'Files are uploaded to the conversion service, processed as temporary files, and removed automatically after expiry.',
+      },
+      {
+        question: 'Can I use it on phone?',
+        answer:
+          'Yes. Modern mobile browsers can upload and download files, but large Word documents may be easier to handle from desktop.',
+      },
+      {
+        question: 'Why does the PDF look different from Word?',
+        answer:
+          'Missing fonts, unusual page settings, unsupported Word features or complex layouts can cause small differences after conversion.',
+      },
+    ],
+    relatedTools: [
+      {
+        slug: 'pdf-to-word',
+        label: 'PDF to Word Converter',
+        description: 'Convert PDFs back into editable DOCX files where possible.',
+      },
+      {
+        slug: 'merge-pdf',
+        label: 'Merge PDF',
+        description: 'Combine exported PDFs into one document.',
+      },
+      {
+        slug: 'pdf-size-reducer',
+        label: 'PDF Size Reducer',
+        description: 'Compress large PDFs after export when upload limits are strict.',
+      },
+    ],
+  },
 }
 
 export function getToolContentProfile(slug) {

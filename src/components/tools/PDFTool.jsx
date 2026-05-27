@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getPdfJsLib } from '@/lib/pdfWorkerSetup';
 import { canvasToBlob, clonePdfData, revokeObjectUrl } from '@/lib/fileProcessing';
 import { recompressPdfFile } from '@/lib/pdfCompression';
+import PDFToWordComponent from '@/components/pdf-tools/PDFToWord';
+import WordToPDFComponent from '@/components/pdf-tools/WordToPDF';
 
 let pdfLibLoadPromise = null;
 let jsZipLoadPromise = null;
@@ -46,6 +48,8 @@ export default function PDFTool({ tool }) {
   if (slug === 'jpg-to-pdf') return <JPGtoPDF />;
   if (slug === 'protect-pdf') return <PDFProtect />;
   if (slug === 'remove-pages-pdf') return <PDFRemovePages />;
+  if (slug === 'pdf-to-word') return <PDFToWordComponent />;
+  if (slug === 'word-to-pdf') return <WordToPDFComponent />;
   return <div className="text-muted-foreground text-sm">PDF tool not configured.</div>;
 }
 

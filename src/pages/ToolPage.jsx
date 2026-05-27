@@ -43,7 +43,7 @@ const IMAGE_TOOLS = [
   'png-to-jpg',
 ]
 
-const PDF_TOOLS = ['merge-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-jpg', 'jpg-to-pdf', 'protect-pdf', 'remove-pages-pdf']
+const PDF_TOOLS = ['merge-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-jpg', 'jpg-to-pdf', 'protect-pdf', 'remove-pages-pdf', 'pdf-to-word', 'word-to-pdf']
 
 const GOV_TOOLS = [
   'ssc-photo-resizer',

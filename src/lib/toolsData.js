@@ -1154,6 +1154,132 @@ export const PREBUILT_TOOLS = [
     seo_title: 'Remove PDF Pages – Delete Pages from PDF Online',
     seo_description: 'Remove specific pages from PDF documents online. Delete unwanted pages.',
   },
+  {
+    name: 'PDF to Word Converter',
+    slug: 'pdf-to-word',
+    h1: 'PDF to Word Converter',
+    description: 'Convert PDF files to editable Word documents online.',
+    primary_cta: 'Convert PDF to Word',
+    output: 'DOCX',
+    trust_points: [
+      'Editable Word output',
+      'Preserves text, tables and images where possible',
+      'Secure temporary processing',
+      'Files auto deleted',
+    ],
+    category_slug: 'pdf-tools',
+    icon: 'FileText',
+    status: 'published',
+    is_featured: true,
+    is_trending: true,
+    formula_type: 'builtin',
+    output_type: 'file',
+    input_fields: [
+      { name: 'file', label: 'PDF File', type: 'file', accept: '.pdf', required: true },
+    ],
+    seo_title: 'PDF to Word Converter - Convert PDF to Editable DOCX Online',
+    seo_description: 'Convert PDF files to editable Word documents online. Preserve text, images, tables, spacing and layout where possible. Secure, fast and easy to use.',
+    seo_keywords: 'pdf to word, convert pdf to docx, pdf to word converter, editable docx, pdf to docx online',
+    seo_content: `<h2>How to Convert PDF to Word Online</h2>
+<p>Convert PDF files into editable Word documents for quick editing, reuse and formatting updates. QuickUtils processes the file through a backend conversion service, validates the DOCX package, and provides a temporary download link.</p>
+
+<h2>When You Need PDF to Word Conversion</h2>
+<ul>
+<li><strong>Editing locked content:</strong> Convert PDFs that were created for viewing into editable Word documents so you can modify text, fix typos, or update information</li>
+<li><strong>Resume and CV updates:</strong> Transform PDF resumes back into Word format for quick edits before applying to new roles</li>
+<li><strong>Academic papers:</strong> Convert research papers, thesis documents, and assignments from PDF to Word for revision and formatting updates</li>
+<li><strong>Contract and proposal edits:</strong> Turn signed or received PDF contracts and proposals into editable Word files</li>
+<li><strong>Content repurposing:</strong> Extract content from PDF brochures, manuals, and reports for reuse in presentations and marketing materials</li>
+</ul>
+
+<h2>What Makes Our Converter Different</h2>
+<ul>
+<li><strong>Editable output:</strong> Text-based PDFs are converted to DOCX with editable text where the conversion engine can reconstruct it</li>
+<li><strong>Backend conversion:</strong> Heavy document processing runs on a dedicated conversion service instead of the browser main thread</li>
+<li><strong>Temporary files:</strong> Uploads and outputs are stored only for the configured conversion window and then cleaned up</li>
+<li><strong>Validated DOCX:</strong> The generated Word package is checked before it is offered for download</li>
+</ul>
+
+<h2>Common Questions About PDF to Word Conversion</h2>
+<h3>Will my formatting be preserved?</h3>
+<p>The converter preserves text, tables, images, spacing, and layout where possible. Complex PDFs may still need manual cleanup because PDF and Word store layout differently.</p>
+
+<h3>Is this really free?</h3>
+<p>Yes, completely free. No hidden charges, no premium tier, no limited conversions per day. Convert as many PDFs as you need.</p>
+
+<h3>Can I convert scanned PDFs?</h3>
+<p>Scanned PDFs require OCR to become editable. If OCR is not enabled on the backend, the tool shows a clear OCR-required message instead of returning a fake editable file.</p>`,
+    faq: [
+      { question: 'How do I convert a PDF to Word?', answer: 'Upload your PDF file by dragging and dropping it into the upload area or clicking to browse. Click "Convert to Word" and download your editable .docx file when the conversion completes.' },
+      { question: 'Is this PDF to Word converter free?', answer: 'Yes, it is completely free with no hidden charges, no registration, and no limits on the number of conversions.' },
+      { question: 'Are my files secure?', answer: 'Files are uploaded to the conversion service, processed as temporary files, and automatically removed after the configured expiry period.' },
+      { question: 'What format will I get?', answer: 'You get a standard .docx (Office Open XML) Word document that opens in Microsoft Word, Google Docs, LibreOffice, and most word processors.' },
+      { question: 'Does it preserve formatting?', answer: 'The backend preserves text, images, tables, spacing, and layout where possible, but complex PDFs can still require manual cleanup.' },
+      { question: 'Is there a file size limit?', answer: 'Yes. The deployment can enforce a maximum file size and page count so conversions do not overload the worker.' },
+    ],
+  },
+  {
+    name: 'Word to PDF Converter',
+    slug: 'word-to-pdf',
+    h1: 'Word to PDF Converter',
+    description: 'Convert Word documents to high-quality PDF files online.',
+    primary_cta: 'Convert Word to PDF',
+    output: 'PDF',
+    trust_points: [
+      'High-fidelity PDF output',
+      'Preserves formatting and images',
+      'Secure temporary processing',
+      'Files auto deleted',
+    ],
+    category_slug: 'pdf-tools',
+    icon: 'FileText',
+    status: 'published',
+    is_featured: true,
+    is_trending: true,
+    formula_type: 'builtin',
+    output_type: 'file',
+    input_fields: [
+      { name: 'file', label: 'Word File', type: 'file', accept: '.doc,.docx', required: true },
+    ],
+    seo_title: 'Word to PDF Converter - Convert DOCX to PDF Online',
+    seo_description: 'Convert Word documents to clean, high-quality PDF files online. Preserve layout, images, fonts, tables and page formatting.',
+    seo_keywords: 'word to pdf, convert docx to pdf, word to pdf converter, doc to pdf online, docx to pdf',
+    seo_content: `<h2>How to Convert Word to PDF Online</h2>
+<p>Turn Word documents into professional PDF files that are easy to share, print and submit. QuickUtils uses a backend LibreOffice conversion pipeline to preserve document structure, images, tables, and page layout as closely as possible.</p>
+
+<h2>When You Need Word to PDF Conversion</h2>
+<ul>
+<li><strong>Professional submissions:</strong> Convert resumes, proposals, and reports to PDF for a polished, professional appearance that looks the same on every device</li>
+<li><strong>Document sharing:</strong> PDFs maintain consistent formatting across all platforms and devices, unlike Word documents which can reflow differently</li>
+<li><strong>Academic submissions:</strong> Most universities and journals require PDF format for thesis, dissertation, and paper submissions</li>
+<li><strong>Legal documents:</strong> Convert contracts and agreements to PDF for secure, unalterable document sharing with tamper-evident format</li>
+<li><strong>Print-ready files:</strong> PDF is the standard format for professional printing services, ensuring your document prints exactly as designed</li>
+</ul>
+
+<h2>What Makes Our Converter Different</h2>
+<ul>
+<li><strong>LibreOffice backend:</strong> Conversion uses a real document rendering engine rather than browser-only text extraction</li>
+<li><strong>Layout preservation:</strong> Tables, images, page breaks, headers, footers, lists, margins, and orientation are preserved where possible</li>
+<li><strong>Temporary processing:</strong> Uploaded and converted files are stored only for the configured conversion window</li>
+<li><strong>Validated output:</strong> The generated PDF is checked before a download link is shown</li>
+<li><strong>No registration:</strong> Use the tool immediately without creating an account or signing in</li>
+</ul>
+
+<h2>Tips for Best Results</h2>
+<ul>
+<li>Use standard fonts in your Word document for the most reliable text rendering</li>
+<li>For documents with complex formatting, review the output PDF to ensure everything appears as expected</li>
+<li>Converting a .docx file yields better results than older .doc formats due to better text extraction</li>
+</ul>`,
+    faq: [
+      { question: 'How do I convert a Word document to PDF?', answer: 'Upload your .doc or .docx file by dragging it to the upload area or clicking to browse. Click "Convert to PDF" and download your converted file when ready.' },
+      { question: 'Is this Word to PDF converter free?', answer: 'Yes, completely free with no limits, no registration, and no hidden charges. Convert unlimited documents.' },
+      { question: 'What file formats are supported?', answer: 'Both .doc (older Word format) and .docx (modern format) are supported. .docx files generally produce better results.' },
+      { question: 'Are my documents secure?', answer: 'Files are uploaded to the conversion service, processed as temporary files, and removed automatically after expiry.' },
+      { question: 'Will the PDF look like my Word document?', answer: 'The backend uses LibreOffice headless to preserve layout, images, tables, lists, margins and page settings as closely as possible.' },
+      { question: 'Do I need to install anything?', answer: 'No browser plugin is needed. The conversion service runs the required document engine on the backend.' },
+    ],
+  },
 
   // ── Government Exam Tools ─────────────────────────────────────────────
   {
