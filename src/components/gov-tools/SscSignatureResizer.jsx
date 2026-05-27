@@ -6,6 +6,7 @@ import { SizeComparison, DownloadButton, StatChip } from './shared/FileStats';
 import ProcessingOverlay from './shared/ProcessingOverlay';
 import { EXAM_PRESETS } from './shared/ExamPresets';
 import { loadImageFile, useImageProcessor } from './shared/useImageProcessor';
+import { blobToDataUrl, canvasToBlob } from '@/lib/fileProcessing';
 
 async function processSignature({ file, targetWidth, targetHeight, targetMaxKB, enhance = true }) {
   return new Promise((resolve, reject) => {
@@ -17,6 +18,8 @@ async function processSignature({ file, targetWidth, targetHeight, targetMaxKB, 
       canvas.width = targetWidth;
       canvas.height = targetHeight;
       const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
       // White background
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, targetWidth, targetHeight);
@@ -38,15 +41,16 @@ async function processSignature({ file, targetWidth, targetHeight, targetMaxKB, 
       let lo = 0.01, hi = 0.99, best = null;
       for (let iter = 0; iter < 14; iter++) {
         const mid = (lo + hi) / 2;
-        const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', mid));
+        const blob = await canvasToBlob(canvas, 'image/jpeg', mid);
         if (blob.size <= targetBytes) { if (!best || blob.size > best.size) best = blob; lo = mid; }
         else hi = mid;
         if (hi - lo < 0.005) break;
       }
-      if (!best) best = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.5));
-      const reader = new FileReader();
-      reader.onload = (e) => resolve({ blob: best, dataUrl: e.target.result, width: targetWidth, height: targetHeight, sizeBytes: best.size });
-      reader.readAsDataURL(best);
+      if (!best) best = await canvasToBlob(canvas, 'image/jpeg', 0.5);
+      const dataUrl = await blobToDataUrl(best);
+      canvas.width = 0;
+      canvas.height = 0;
+      resolve({ blob: best, dataUrl, width: targetWidth, height: targetHeight, sizeBytes: best.size });
     };
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Failed to load image')); };
     img.src = url;

@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Download, RefreshCw, Loader2, Package } from 'lucide-react';
 import ImageDropZone from './ImageDropZone';
-import ImageStatChips from './ImageStatChips';
 import { motion } from 'framer-motion';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
+import { canvasToBlob, revokeObjectUrl } from '@/lib/fileProcessing';
 
 const FORMATS = ['JPEG', 'PNG', 'WEBP'];
 const MIME = { JPEG: 'image/jpeg', PNG: 'image/png', WEBP: 'image/webp' };
@@ -25,19 +25,34 @@ async function loadHeic(file) {
 async function convertFile(file, targetFormat, quality) {
   const src = await loadHeic(file);
   const url = URL.createObjectURL(src);
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => {
+    img.onload = async () => {
       const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
       const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
       if (MIME[targetFormat] === 'image/jpeg') {
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
       ctx.drawImage(img, 0, 0);
-      canvas.toBlob((blob) => resolve(blob), MIME[targetFormat], quality / 100);
+      try {
+        const blob = await canvasToBlob(canvas, MIME[targetFormat], quality / 100);
+        resolve(blob);
+      } catch (e) {
+        reject(e);
+      } finally {
+        URL.revokeObjectURL(url);
+        canvas.width = 0;
+        canvas.height = 0;
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error(`Failed to load ${file.name}`));
     };
     img.src = url;
   });
@@ -52,6 +67,12 @@ export default function ImageConverter() {
   const [progress, setProgress] = useState(0);
 
   const reset = () => { setFiles([]); setResults([]); setProgress(0); };
+
+  useEffect(() => {
+    return () => {
+      results.forEach(r => revokeObjectUrl(r.url));
+    };
+  }, [results]);
 
   const convert = async () => {
     setLoading(true);

@@ -7,6 +7,7 @@ import BeforeAfter from './BeforeAfter';
 import ImageStatChips from './ImageStatChips';
 import { motion, AnimatePresence } from 'framer-motion';
 import { saveAs } from 'file-saver';
+import { revokeObjectUrl } from '@/lib/fileProcessing';
 
 const fmt = (bytes) => bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
@@ -39,6 +40,15 @@ export default function ImageCompressor() {
     setSelectedPreview(previewUrl);
     return () => URL.revokeObjectURL(previewUrl);
   }, [files, selectedIndex]);
+
+  useEffect(() => {
+    return () => {
+      results.forEach(r => {
+        revokeObjectUrl(r.originalUrl);
+        revokeObjectUrl(r.compressedUrl);
+      });
+    };
+  }, [results]);
 
   const selectedFile = files[selectedIndex];
 

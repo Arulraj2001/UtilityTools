@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DropZone from './shared/DropZone';
 import ProcessingOverlay from './shared/ProcessingOverlay';
 import { formatFileSize } from './shared/ExamPresets';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download } from 'lucide-react';
 import { getPdfJsLib } from '@/lib/pdfWorkerSetup';
+import { canvasToBlob, clonePdfData, revokeObjectUrl } from '@/lib/fileProcessing';
 
 // Load PDF.js with proper worker configuration
 function loadPdfJs() {
@@ -23,6 +24,12 @@ export default function PdfToImage() {
 
   const handleFile = (f) => { setFile(f); setPages([]); setError(null); };
 
+  useEffect(() => {
+    return () => {
+      pages.forEach(p => revokeObjectUrl(p.dataUrl));
+    };
+  }, [pages]);
+
   const handleConvert = async () => {
     setProcessing(true); setError(null); setPages([]);
     try {
@@ -30,22 +37,29 @@ export default function PdfToImage() {
       const pdfjsLib = await loadPdfJs();
       const ab = await file.arrayBuffer();
       setProgress('Parsing PDF...');
-      const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: clonePdfData(ab) }).promise;
       const total = pdf.numPages;
       const results = [];
       for (let i = 1; i <= total; i++) {
         setProgress(`Rendering page ${i}/${total}...`);
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale });
+        let viewport = page.getViewport({ scale });
+        const pixels = viewport.width * viewport.height;
+        if (pixels > 80_000_000) {
+          viewport = page.getViewport({ scale: scale * Math.sqrt(80_000_000 / pixels) });
+        }
         const canvas = document.createElement('canvas');
-        canvas.width = viewport.width; canvas.height = viewport.height;
+        canvas.width = Math.round(viewport.width); canvas.height = Math.round(viewport.height);
         const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         await page.render({ canvasContext: ctx, viewport }).promise;
         const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
-        const dataUrl = canvas.toDataURL(mimeType, quality / 100);
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
+        const blob = await canvasToBlob(canvas, mimeType, format === 'png' ? undefined : quality / 100);
+        const dataUrl = URL.createObjectURL(blob);
         results.push({ dataUrl, blob, page: i, size: blob.size });
+        canvas.width = 0;
+        canvas.height = 0;
       }
       setPages(results);
     } catch (e) {

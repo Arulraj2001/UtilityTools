@@ -2,6 +2,7 @@ import React, {
   useState,
   useRef,
   useMemo,
+  useEffect,
 } from 'react';
 
 import ReactCrop, {
@@ -31,6 +32,7 @@ import { Label } from '@/components/ui/label';
 import { saveAs } from 'file-saver';
 
 import ImageDropZone from './ImageDropZone';
+import { revokeObjectUrl } from '@/lib/fileProcessing';
 
 // ========================================
 // Aspect Presets
@@ -138,10 +140,10 @@ export default function ImageCropper() {
       image.naturalHeight / image.height;
 
     canvas.width =
-      completedCrop.width * scaleX;
+      Math.round(completedCrop.width * scaleX);
 
     canvas.height =
-      completedCrop.height * scaleY;
+      Math.round(completedCrop.height * scaleY);
 
     ctx.imageSmoothingEnabled = true;
 
@@ -226,6 +228,9 @@ export default function ImageCropper() {
 
     setResult(null);
   };
+
+  useEffect(() => () => revokeObjectUrl(imageSrc), [imageSrc]);
+  useEffect(() => () => revokeObjectUrl(result?.url), [result]);
 
   // ========================================
   // Live Crop Size

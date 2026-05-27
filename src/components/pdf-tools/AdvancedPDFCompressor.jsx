@@ -13,19 +13,20 @@
  *
  * Achieves 50–95% size reduction with readable output.
  */
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Minimize2, Settings, CheckCircle2, AlertTriangle, Zap,
-  ScanLine, Image, FileText, ChevronDown, ChevronUp,
-  RotateCcw, Download, Info, Shield, Eye
+  ScanLine, FileText, ChevronDown, ChevronUp,
+  RotateCcw, Shield, Eye
 } from 'lucide-react';
 import PDFDropZone from './PDFDropZone';
 import { SingleFileCard } from './PDFFileCard';
 import { DownloadBtn, formatSize } from './PDFResultCard';
 import { cn } from '@/lib/utils';
 import { getPdfJsLib } from '@/lib/pdfWorkerSetup';
+import { canvasToBlob, clonePdfData } from '@/lib/fileProcessing';
 
 // ── PDF.js loader ────────────────────────────────────────────────────────────
 function loadPdfJs() {
@@ -46,6 +47,22 @@ function detectScanned(imageData, sampleSize = 2000) {
   }
   const avgVariance = varSum / count;
   return avgVariance > 18; // scanned docs have more noise/variance
+}
+
+function detectScannedFromCanvas(canvas) {
+  const sampleMax = 120;
+  const ratio = Math.min(sampleMax / canvas.width, sampleMax / canvas.height, 1);
+  const sampleW = Math.max(1, Math.round(canvas.width * ratio));
+  const sampleH = Math.max(1, Math.round(canvas.height * ratio));
+  const sample = document.createElement('canvas');
+  sample.width = sampleW;
+  sample.height = sampleH;
+  const sampleCtx = sample.getContext('2d', { willReadFrequently: true });
+  sampleCtx.drawImage(canvas, 0, 0, sampleW, sampleH);
+  const imageData = sampleCtx.getImageData(0, 0, sampleW, sampleH);
+  sample.width = 0;
+  sample.height = 0;
+  return detectScanned(imageData, Math.min(2000, sampleW * sampleH));
 }
 
 /** Unsharp mask for text sharpening (scanned docs) */
@@ -102,7 +119,11 @@ function boostContrast(data, factor = 1.3) {
 
 // ── Core page renderer ───────────────────────────────────────────────────────
 async function renderPage(page, scale, settings) {
-  const viewport = page.getViewport({ scale });
+  let viewport = page.getViewport({ scale });
+  const pixels = viewport.width * viewport.height;
+  if (pixels > 80_000_000) {
+    viewport = page.getViewport({ scale: scale * Math.sqrt(80_000_000 / pixels) });
+  }
   const canvas = document.createElement('canvas');
   canvas.width  = Math.round(viewport.width);
   canvas.height = Math.round(viewport.height);
@@ -111,42 +132,42 @@ async function renderPage(page, scale, settings) {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   await page.render({ canvasContext: ctx, viewport, background: 'white' }).promise;
 
-  // Pixel-level processing
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const d = imageData.data;
-  const isScanned = settings.scannedMode === 'auto' ? detectScanned(imageData) : settings.scannedMode === 'on';
+  const isScanned = settings.scannedMode === 'auto'
+    ? detectScannedFromCanvas(canvas)
+    : settings.scannedMode === 'on';
 
-  if (isScanned && settings.optimizeScanned) {
-    whitenBackground(d, 205);
-    boostContrast(d, 1.25);
-    applyUnsharpMask(d, canvas.width, canvas.height, 0.55);
-  }
+  const needsPixelProcessing =
+    settings.colorMode !== 'color' ||
+    (isScanned && settings.optimizeScanned);
 
-  if (settings.colorMode === 'grayscale') toGrayscale(d);
-  else if (settings.colorMode === 'bw') {
-    toGrayscale(d);
-    for (let i = 0; i < d.length; i += 4) {
-      const v = d[i] > 128 ? 255 : 0;
-      d[i] = d[i+1] = d[i+2] = v;
+  if (needsPixelProcessing) {
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imageData.data;
+
+    if (isScanned && settings.optimizeScanned) {
+      whitenBackground(d, 205);
+      boostContrast(d, 1.25);
+      applyUnsharpMask(d, canvas.width, canvas.height, 0.55);
     }
+
+    if (settings.colorMode === 'grayscale') toGrayscale(d);
+    else if (settings.colorMode === 'bw') {
+      toGrayscale(d);
+      for (let i = 0; i < d.length; i += 4) {
+        const v = d[i] > 128 ? 255 : 0;
+        d[i] = d[i+1] = d[i+2] = v;
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
   }
 
-  ctx.putImageData(imageData, 0, 0);
-
-  return new Promise(resolve => {
-    const mime = settings.colorMode === 'bw' ? 'image/png' : 'image/jpeg';
-    canvas.toBlob(blob => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        const bytes = new Uint8Array(e.target.result);
-        const w = canvas.width, h = canvas.height;
-        // Free memory
-        canvas.width = 0; canvas.height = 0;
-        resolve({ bytes, w, h, mime, isScanned });
-      };
-      reader.readAsArrayBuffer(blob);
-    }, mime, settings.quality);
-  });
+  const mime = settings.colorMode === 'bw' ? 'image/png' : 'image/jpeg';
+  const blob = await canvasToBlob(canvas, mime, settings.quality);
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  const w = canvas.width, h = canvas.height;
+  canvas.width = 0; canvas.height = 0;
+  return { bytes, w, h, mime, isScanned };
 }
 
 // ── Build compressed PDF ─────────────────────────────────────────────────────
@@ -159,6 +180,7 @@ async function buildPDF(pdfJsDoc, settings, onProgress, onPageDone) {
     onProgress(`Processing page ${i} of ${totalPages}…`, Math.round((i / totalPages) * 90));
     const page = await pdfJsDoc.getPage(i);
     const { bytes, w, h, mime, isScanned } = await renderPage(page, settings.scale, settings);
+    page.cleanup?.();
     if (isScanned) scannedCount++;
 
     let img;
@@ -294,7 +316,7 @@ export default function AdvancedPDFCompressor() {
       const data = new Uint8Array(ab);
       setPdfData(data);
       const pdfjsLib = await loadPdfJs();
-      const pdf = await pdfjsLib.getDocument({ data }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: clonePdfData(data) }).promise;
       setTotalPages(pdf.numPages);
     } catch { /* total pages optional */ }
   };
@@ -329,7 +351,7 @@ export default function AdvancedPDFCompressor() {
       setPhase('parsing');
       setProgress('Loading PDF…');
       const pdfjsLib = await loadPdfJs();
-      const pdfJsDoc = await pdfjsLib.getDocument({ data: pdfData }).promise;
+      const pdfJsDoc = await pdfjsLib.getDocument({ data: clonePdfData(pdfData) }).promise;
 
       const onProgress = (msg, pct) => { setProgress(msg); setProgressPct(pct); };
       const onPageDone = (pg) => setCurrentPage(pg);

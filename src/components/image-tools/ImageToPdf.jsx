@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Download, RefreshCw, Loader2, GripVertical, X } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { saveAs } from 'file-saver';
 import { jsPDF } from 'jspdf';
+import { revokeObjectUrl } from '@/lib/fileProcessing';
 
 const PAGE_SIZES = {
   A4: [595.28, 841.89],
@@ -30,6 +30,7 @@ export default function ImageToPdf() {
   const [orientation, setOrientation] = useState('portrait');
   const [margin, setMargin] = useState(20);
   const [loading, setLoading] = useState(false);
+  const imagesRef = useRef([]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { 'image/*': [] },
@@ -40,7 +41,14 @@ export default function ImageToPdf() {
     },
   });
 
-  const remove = (id) => setImages(prev => prev.filter(i => i.id !== id));
+  const remove = (id) => setImages(prev => {
+    const removed = prev.find(i => i.id === id);
+    revokeObjectUrl(removed?.url);
+    return prev.filter(i => i.id !== id);
+  });
+
+  useEffect(() => { imagesRef.current = images; }, [images]);
+  useEffect(() => () => imagesRef.current.forEach(img => revokeObjectUrl(img.url)), []);
 
   const generate = async () => {
     if (!images.length) return;
@@ -72,7 +80,10 @@ export default function ImageToPdf() {
     setLoading(false);
   };
 
-  const reset = () => setImages([]);
+  const reset = () => {
+    images.forEach(img => revokeObjectUrl(img.url));
+    setImages([]);
+  };
 
   return (
     <div className="space-y-6">

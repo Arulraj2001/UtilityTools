@@ -2,13 +2,14 @@
  * Image to PDF — Professional multi-image PDF builder
  * Supports drag/drop reorder, A4/Letter/A3, fit modes, margins, quality, grayscale
  */
-import React, { useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Image, ArrowUp, ArrowDown, X, FileText, Settings, CheckCircle2 } from 'lucide-react';
 import { DownloadBtn, formatSize } from './PDFResultCard';
 import { cn } from '@/lib/utils';
+import { canvasToBlob, revokeObjectUrl } from '@/lib/fileProcessing';
 
 const PAGE_SIZES = {
   'A4':           [595.28, 841.89],
@@ -49,14 +50,16 @@ async function loadImageToCanvas(file, quality, grayscale) {
         ctx.putImageData(id, 0, 0);
       }
 
-      canvas.toBlob(blob => {
-        const reader = new FileReader();
-        reader.onload = e => resolve({
-          bytes: new Uint8Array(e.target.result),
-          w: canvas.width, h: canvas.height,
-        });
-        reader.readAsArrayBuffer(blob);
-      }, 'image/jpeg', quality / 100);
+      canvasToBlob(canvas, 'image/jpeg', quality / 100)
+        .then(async blob => {
+          resolve({
+            bytes: new Uint8Array(await blob.arrayBuffer()),
+            w: canvas.width, h: canvas.height,
+          });
+          canvas.width = 0;
+          canvas.height = 0;
+        })
+        .catch(reject);
     };
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(`Failed to load ${file.name}`)); };
     img.src = url;
@@ -91,6 +94,7 @@ export default function AdvancedJPGtoPDF() {
   const [progress, setProgress] = useState('');
   const [outputBlob, setOutputBlob] = useState(null);
   const [error, setError] = useState(null);
+  const imagesRef = useRef([]);
 
   const onDrop = useCallback((accepted) => {
     const imgs = accepted.filter(f => f.type.startsWith('image/'));
@@ -102,7 +106,19 @@ export default function AdvancedJPGtoPDF() {
     onDrop, accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.webp', '.bmp', '.gif'] }, multiple: true,
   });
 
-  const remove = (id) => setImages(p => p.filter(i => i.id !== id));
+  const remove = (id) => setImages(p => {
+    const removed = p.find(i => i.id === id);
+    revokeObjectUrl(removed?.preview);
+    return p.filter(i => i.id !== id);
+  });
+
+  useEffect(() => { imagesRef.current = images; }, [images]);
+  useEffect(() => () => imagesRef.current.forEach(img => revokeObjectUrl(img.preview)), []);
+
+  const clearImages = () => {
+    images.forEach(img => revokeObjectUrl(img.preview));
+    setImages([]);
+  };
   const move = (id, dir) => {
     setImages(prev => {
       const idx = prev.findIndex(x => x.id === id);
@@ -183,7 +199,7 @@ export default function AdvancedJPGtoPDF() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{images.length} Image{images.length > 1 ? 's' : ''} · {formatSize(totalInputSize)}</label>
-              <button onClick={() => setImages([])} className="text-xs text-muted-foreground hover:text-destructive transition-colors">Clear all</button>
+              <button onClick={clearImages} className="text-xs text-muted-foreground hover:text-destructive transition-colors">Clear all</button>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               <AnimatePresence>

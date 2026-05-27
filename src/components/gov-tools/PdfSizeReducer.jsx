@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { PDFDocument, rgb } from 'pdf-lib';
 import DropZone from './shared/DropZone';
 import ProcessingOverlay from './shared/ProcessingOverlay';
 import { DownloadButton } from './shared/FileStats';
 import { formatFileSize } from './shared/ExamPresets';
 import { motion } from 'framer-motion';
-import { CheckCircle2, AlertTriangle } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
+import { recompressPdfData } from '@/lib/pdfCompression';
 
 const COMPRESSION_MODES = [
   { id: 'light', label: 'Light', desc: 'Minor reduction, best quality', jpegQ: 0.85, scale: 1.0 },
@@ -15,29 +15,15 @@ const COMPRESSION_MODES = [
 ];
 
 async function compressPDF(arrayBuffer, mode, targetKB, onProgress) {
-  const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-  const pages = pdfDoc.getPages();
   onProgress?.('Analyzing pages...');
-
-  const outDoc = await PDFDocument.create();
-  
-  for (let i = 0; i < pages.length; i++) {
-    onProgress?.(`Processing page ${i + 1}/${pages.length}...`);
-    const page = pages[i];
-    const [copiedPage] = await outDoc.copyPages(pdfDoc, [i]);
-    outDoc.addPage(copiedPage);
-  }
-
-  // Remove metadata to save space
-  outDoc.setTitle('');
-  outDoc.setAuthor('');
-  outDoc.setSubject('');
-  outDoc.setKeywords([]);
-  outDoc.setCreator('');
-  outDoc.setProducer('');
-
-  const bytes = await outDoc.save({ useObjectStreams: true, addDefaultPage: false });
-  return bytes;
+  const { blob } = await recompressPdfData(arrayBuffer, {
+    quality: mode.jpegQ,
+    scale: mode.scale,
+    grayscale: Boolean(mode.grayscale),
+    targetKB,
+    onProgress,
+  });
+  return blob;
 }
 
 export default function PdfSizeReducer() {
@@ -59,8 +45,7 @@ export default function PdfSizeReducer() {
     try {
       const arrayBuffer = await file.arrayBuffer();
       setProgress('Loading PDF...');
-      const bytes = await compressPDF(arrayBuffer, mode, targetKB ? parseFloat(targetKB) : null, setProgress);
-      const blob = new Blob([bytes], { type: 'application/pdf' });
+      const blob = await compressPDF(arrayBuffer, mode, targetKB ? parseFloat(targetKB) : null, setProgress);
       setOutputBlob(blob);
       setOutputSize(blob.size);
       setProgress('');

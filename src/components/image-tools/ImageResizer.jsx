@@ -20,6 +20,7 @@ import ImageStatChips from './ImageStatChips';
 
 import { motion } from 'framer-motion';
 import { saveAs } from 'file-saver';
+import { canvasToBlob, revokeObjectUrl } from '@/lib/fileProcessing';
 
 const PRESETS = [
   { label: 'Instagram Post', w: 1080, h: 1080 },
@@ -144,15 +145,10 @@ export default function ImageResizer() {
     img.onload = () => {
       const canvas = document.createElement('canvas');
 
-      // HD rendering
-      const pixelRatio = window.devicePixelRatio || 1;
-
-      canvas.width = w * pixelRatio;
-      canvas.height = h * pixelRatio;
+      canvas.width = w;
+      canvas.height = h;
 
       const ctx = canvas.getContext('2d');
-
-      ctx.scale(pixelRatio, pixelRatio);
 
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
@@ -174,8 +170,14 @@ export default function ImageResizer() {
         mime = 'image/webp';
       }
 
-      canvas.toBlob(
-        (blob) => {
+      if (mime === 'image/jpeg') {
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      canvasToBlob(canvas, mime || 'image/jpeg', quality / 100)
+        .then((blob) => {
           setResult({
             url: URL.createObjectURL(blob),
             blob,
@@ -184,10 +186,9 @@ export default function ImageResizer() {
             size: blob.size,
             mime,
           });
-        },
-        mime,
-        quality / 100
-      );
+          canvas.width = 0;
+          canvas.height = 0;
+        });
     };
   };
 
@@ -196,6 +197,9 @@ export default function ImageResizer() {
     setPreview(null);
     setResult(null);
   };
+
+  React.useEffect(() => () => revokeObjectUrl(preview), [preview]);
+  React.useEffect(() => () => revokeObjectUrl(result?.url), [result]);
 
   const fmt = (b) =>
     b < 1024 * 1024

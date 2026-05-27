@@ -16,13 +16,14 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Download, RefreshCw, Loader2, Sparkles,
-  Sliders, Image as ImageIcon, Palette, Eye, ChevronDown, ChevronUp
+  Sliders, Eye, ChevronDown, ChevronUp
 } from 'lucide-react';
 import ImageDropZone from './ImageDropZone';
 import BeforeAfter from './BeforeAfter';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { saveAs } from 'file-saver';
 import { cn } from '@/lib/utils';
+import { revokeObjectUrl } from '@/lib/fileProcessing';
 
 // ── MediaPipe loader ─────────────────────────────────────────────────────────
 let mpSegmenterPromise = null;
@@ -276,6 +277,10 @@ export default function BackgroundRemover() {
 
   const bgInputRef = useRef(null);
 
+  useEffect(() => () => revokeObjectUrl(preview), [preview]);
+  useEffect(() => () => revokeObjectUrl(result?.url), [result]);
+  useEffect(() => () => revokeObjectUrl(bgImageData), [bgImageData]);
+
   const onFiles = ([f]) => {
     setFile(f);
     setResult(null);
@@ -286,10 +291,9 @@ export default function BackgroundRemover() {
   const loadBgImage = async (f) => {
     setBgImageFile(f);
     const url = URL.createObjectURL(f);
-    const img = await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.src = url; });
+    await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.src = url; });
     // We'll resize bg image to match at runtime — store as blob URL
     setBgImageData(url);
-    URL.revokeObjectURL(url);
   };
 
   const getBgImgDataArray = useCallback(async (W, H) => {

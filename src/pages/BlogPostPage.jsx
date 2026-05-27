@@ -6,6 +6,7 @@ import { ChevronRight, Clock, Calendar, User, Tag, BookOpen, Share2, Heart, Copy
 import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -344,6 +345,31 @@ export default function BlogPostPage() {
             />
           </div>
 
+          {(post.author_name || post.author_title || post.author_image || post.author_bio) && (
+            <div className="mt-12 rounded-3xl border border-border/50 bg-card/80 p-6 shadow-sm">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                {post.author_image ? (
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={post.author_image} alt={post.author_name || 'Author image'} />
+                    <AvatarFallback>{(post.author_name || 'A').charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <Avatar className="h-20 w-20">
+                    <AvatarFallback>{(post.author_name || 'A').charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                )}
+
+                <div className="space-y-2">
+                  {post.author_name && <p className="text-lg font-semibold text-foreground">{post.author_name}</p>}
+                  {post.author_title && <p className="text-sm text-primary">{post.author_title}</p>}
+                  {post.author_bio && (
+                    <p className="text-sm text-muted-foreground max-w-3xl">{post.author_bio}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {post.faq_items?.length > 0 && (
             <div className="mt-10">
               <FAQAccordion items={post.faq_items} />
@@ -475,6 +501,27 @@ export default function BlogPostPage() {
             )}
 
             {/* Related Tools */}
+            {(post.author_name || post.author_image || post.author_title || post.author_bio) && (
+              <div className="mb-6">
+                <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-card p-3 shadow-sm">
+                  {post.author_image ? (
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={post.author_image} alt={post.author_name || 'Author'} />
+                    </Avatar>
+                  ) : (
+                    <Avatar className="h-12 w-12">
+                      <AvatarFallback>{(post.author_name || 'A').charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  )}
+
+                  <div className="flex-1 min-w-0">
+                    {post.author_name && <div className="text-sm font-semibold">{post.author_name}</div>}
+                    {post.author_title && <div className="text-xs text-muted-foreground">{post.author_title}</div>}
+                    {post.author_bio && <div className="text-xs text-muted-foreground mt-1 line-clamp-3">{post.author_bio}</div>}
+                  </div>
+                </div>
+              </div>
+            )}
             {relatedTools.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-5">

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import DropZone from './shared/DropZone';
 import PresetSelector from './shared/PresetSelector';
 import ImagePreviewPanel from './shared/ImagePreviewPanel';

@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import DropZone from './shared/DropZone';
 import ImagePreviewPanel from './shared/ImagePreviewPanel';
-import { DownloadButton, StatChip } from './shared/FileStats';
+import { DownloadButton } from './shared/FileStats';
 import ProcessingOverlay from './shared/ProcessingOverlay';
 import { loadImageFile, useImageProcessor } from './shared/useImageProcessor';
 import { cn } from '@/lib/utils';
+import { blobToDataUrl, canvasToBlob } from '@/lib/fileProcessing';
 
 const SCAN_MODES = [
   { id: 'document', label: 'Document', desc: 'High contrast, sharp text', contrast: 1.6, brightness: 1.1, saturate: 0 },
@@ -29,6 +30,8 @@ async function applyScannedEffect(file, mode, targetKB) {
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
 
       // Apply CSS-like filters via canvas (manual implementation)
       ctx.filter = `contrast(${mode.contrast}) brightness(${mode.brightness}) saturate(${mode.saturate})`;
@@ -52,14 +55,15 @@ async function applyScannedEffect(file, mode, targetKB) {
       let lo = 0.1, hi = 0.95, best = null;
       for (let iter = 0; iter < 12; iter++) {
         const mid = (lo + hi) / 2;
-        const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', mid));
+        const blob = await canvasToBlob(canvas, 'image/jpeg', mid);
         if (blob.size <= targetBytes) { if (!best || blob.size > best.size) best = blob; lo = mid; } else hi = mid;
         if (hi - lo < 0.005) break;
       }
-      if (!best) best = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.7));
-      const reader = new FileReader();
-      reader.onload = e => resolve({ blob: best, dataUrl: e.target.result, sizeBytes: best.size, width: w, height: h });
-      reader.readAsDataURL(best);
+      if (!best) best = await canvasToBlob(canvas, 'image/jpeg', 0.7);
+      const dataUrl = await blobToDataUrl(best);
+      canvas.width = 0;
+      canvas.height = 0;
+      resolve({ blob: best, dataUrl, sizeBytes: best.size, width: w, height: h });
     };
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Failed to load image')); };
     img.src = url;

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, RefreshCw, AlertTriangle, MapPin, Camera, Info } from 'lucide-react';
 import ImageDropZone from './ImageDropZone';
 import { motion } from 'framer-motion';
 import { saveAs } from 'file-saver';
+import { canvasToBlob, revokeObjectUrl } from '@/lib/fileProcessing';
 
 const fmt = (b) => b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(2)} MB`;
 
@@ -40,9 +41,11 @@ export default function ImageMetadata() {
     setMeta(null);
     setPreview(URL.createObjectURL(f));
     setLoading(true);
+    const objectUrl = URL.createObjectURL(f);
     const img = new Image();
-    img.src = URL.createObjectURL(f);
+    img.src = objectUrl;
     await new Promise(r => { img.onload = r; });
+    URL.revokeObjectURL(objectUrl);
 
     let exifData = {};
     try {
@@ -55,9 +58,9 @@ export default function ImageMetadata() {
         'File Name': f.name,
         'File Size': fmt(f.size),
         'File Type': f.type || 'Unknown',
-        'Dimensions': `${img.width} × ${img.height} px`,
+        'Dimensions': `${img.naturalWidth} × ${img.naturalHeight} px`,
         'Last Modified': new Date(f.lastModified).toLocaleString(),
-        'Megapixels': ((img.width * img.height) / 1000000).toFixed(2) + ' MP',
+        'Megapixels': ((img.naturalWidth * img.naturalHeight) / 1000000).toFixed(2) + ' MP',
       },
       camera: {
         'Camera Make': exifData.Make,
@@ -85,19 +88,21 @@ export default function ImageMetadata() {
   const removeMetadata = () => {
     if (!file || !preview) return;
     const img = new Image();
-    img.onload = () => {
+    img.onload = async () => {
       const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
       canvas.getContext('2d').drawImage(img, 0, 0);
-      canvas.toBlob((blob) => {
-        saveAs(blob, `clean_${file.name.replace(/\.[^.]+$/, '.jpg')}`);
-      }, 'image/jpeg', 0.95);
+      const blob = await canvasToBlob(canvas, 'image/jpeg', 0.95);
+      saveAs(blob, `clean_${file.name.replace(/\.[^.]+$/, '.jpg')}`);
+      canvas.width = 0;
+      canvas.height = 0;
     };
     img.src = preview;
   };
 
   const reset = () => { setFile(null); setPreview(null); setMeta(null); };
+  useEffect(() => () => revokeObjectUrl(preview), [preview]);
 
   const hasGps = meta?.gps;
   const hasCameraData = meta?.camera && Object.values(meta.camera).some(Boolean);

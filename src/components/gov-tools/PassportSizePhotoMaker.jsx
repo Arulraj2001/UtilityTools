@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import DropZone from './shared/DropZone';
 import ImagePreviewPanel from './shared/ImagePreviewPanel';
 import { DownloadButton, StatChip } from './shared/FileStats';
 import ProcessingOverlay from './shared/ProcessingOverlay';
 import { processImageToTarget, loadImageFile, useImageProcessor } from './shared/useImageProcessor';
 import { cn } from '@/lib/utils';
+import { blobToDataUrl, canvasToBlob } from '@/lib/fileProcessing';
 
 const PASSPORT_SIZES = [
   { id: 'india-passport', label: 'India Passport', w: 354, h: 472, note: '35×45mm @240dpi' },
@@ -43,11 +44,12 @@ async function generatePassportSheet(dataUrl, pw, ph, bgColor) {
           ctx.strokeRect(x - 1, y - 1, pw + 2, ph + 2);
         }
       }
-      canvas.toBlob((blob) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve({ blob, dataUrl: e.target.result, count: rows * cols });
-        reader.readAsDataURL(blob);
-      }, 'image/jpeg', 0.92);
+      canvasToBlob(canvas, 'image/jpeg', 0.92).then(async (blob) => {
+        const dataUrl = await blobToDataUrl(blob);
+        canvas.width = 0;
+        canvas.height = 0;
+        resolve({ blob, dataUrl, count: rows * cols });
+      });
     };
     img.src = dataUrl;
   });

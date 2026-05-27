@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { PDFDocument } from 'pdf-lib';
 import DropZone from './shared/DropZone';
 import ProcessingOverlay from './shared/ProcessingOverlay';
 import { DownloadButton } from './shared/FileStats';
 import { formatFileSize } from './shared/ExamPresets';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Info } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { recompressPdfData } from '@/lib/pdfCompression';
 
 const DOC_TYPES = [
   { id: 'certificate', label: 'Certificate', targetKB: 200, note: 'Educational/professional certificates' },
@@ -16,6 +16,15 @@ const DOC_TYPES = [
   { id: 'photo-id', label: 'Photo ID', targetKB: 150, note: 'Voter ID, Driving license' },
   { id: 'custom', label: 'Custom', targetKB: null, note: 'Set your own target' },
 ];
+
+const DOC_COMPRESSION = {
+  certificate: { scale: 1.45, quality: 0.72 },
+  marksheet: { scale: 1.55, quality: 0.74 },
+  aadhaar: { scale: 1.25, quality: 0.62 },
+  pan: { scale: 1.2, quality: 0.6 },
+  'photo-id': { scale: 1.35, quality: 0.66 },
+  custom: { scale: 1.35, quality: 0.66 },
+};
 
 export default function ExamDocumentPdfCompressor() {
   const [file, setFile] = useState(null);
@@ -31,16 +40,13 @@ export default function ExamDocumentPdfCompressor() {
   const handleCompress = async () => {
     setProcessing(true); setError(null);
     try {
+      if (!targetKB || Number.isNaN(targetKB)) throw new Error('Please select or enter a valid target size.');
       const ab = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(ab, { ignoreEncryption: true });
-      const outDoc = await PDFDocument.create();
-      const pages = await outDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
-      pages.forEach(p => outDoc.addPage(p));
-      // Strip all metadata
-      outDoc.setTitle(''); outDoc.setAuthor(''); outDoc.setSubject('');
-      outDoc.setKeywords([]); outDoc.setCreator(''); outDoc.setProducer('');
-      const bytes = await outDoc.save({ useObjectStreams: true });
-      const blob = new Blob([bytes], { type: 'application/pdf' });
+      const settings = DOC_COMPRESSION[docType.id] || DOC_COMPRESSION.custom;
+      const { blob } = await recompressPdfData(ab, {
+        ...settings,
+        targetKB,
+      });
       setOutputBlob(blob); setOutputSize(blob.size);
     } catch (e) {
       setError(e.message || 'Compression failed');

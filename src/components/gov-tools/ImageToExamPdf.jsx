@@ -1,12 +1,13 @@
-import React, { useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, GripVertical, FileImage, ArrowUp, ArrowDown } from 'lucide-react';
+import { X, FileImage, ArrowUp, ArrowDown } from 'lucide-react';
 import ProcessingOverlay from './shared/ProcessingOverlay';
 import { DownloadButton } from './shared/FileStats';
 import { formatFileSize } from './shared/ExamPresets';
 import { cn } from '@/lib/utils';
+import { canvasToBlob, revokeObjectUrl } from '@/lib/fileProcessing';
 
 const PAGE_SIZES = {
   A4: [595.28, 841.89],
@@ -21,42 +22,40 @@ async function imagesToPdf(files, pageSize, grayscale, compress) {
 
   for (const file of files) {
     // Process image with canvas for compression/grayscale
-    const dataUrl = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-
-    const processedDataUrl = await new Promise((resolve) => {
+    const imgBytes = await new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         const canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth;
         canvas.height = img.naturalHeight;
         const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         if (grayscale) {
           ctx.filter = 'grayscale(100%)';
         }
         ctx.drawImage(img, 0, 0);
-        canvas.toBlob((blob) => {
-          const r = new FileReader();
-          r.onload = e => resolve(e.target.result);
-          r.readAsDataURL(blob);
-        }, 'image/jpeg', compress ? 0.6 : 0.9);
+        try {
+          const blob = await canvasToBlob(canvas, 'image/jpeg', compress ? 0.6 : 0.9);
+          resolve(new Uint8Array(await blob.arrayBuffer()));
+        } catch (e) {
+          reject(e);
+        } finally {
+          URL.revokeObjectURL(url);
+          canvas.width = 0;
+          canvas.height = 0;
+        }
       };
-      img.src = dataUrl;
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error(`Failed to load ${file.name}`));
+      };
+      img.src = url;
     });
 
-    const base64 = processedDataUrl.split(',')[1];
-    const imgBytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-
     let embeddedImg;
-    try {
-      embeddedImg = await pdfDoc.embedJpg(imgBytes);
-    } catch {
-      embeddedImg = await pdfDoc.embedPng(imgBytes);
-    }
+    embeddedImg = await pdfDoc.embedJpg(imgBytes);
 
     const page = pdfDoc.addPage([pw, ph]);
     const maxW = pw - margin * 2;
@@ -83,6 +82,7 @@ export default function ImageToExamPdf() {
   const [processing, setProcessing] = useState(false);
   const [outputBlob, setOutputBlob] = useState(null);
   const [error, setError] = useState(null);
+  const filesRef = useRef([]);
 
   const onDrop = useCallback((accepted) => {
     const newFiles = accepted.map(f => ({ file: f, id: Math.random().toString(36).slice(2), preview: URL.createObjectURL(f) }));
@@ -94,7 +94,14 @@ export default function ImageToExamPdf() {
     onDrop, accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.webp'] }, multiple: true,
   });
 
-  const removeFile = (id) => setFiles(prev => prev.filter(f => f.id !== id));
+  const removeFile = (id) => setFiles(prev => {
+    const removed = prev.find(f => f.id === id);
+    revokeObjectUrl(removed?.preview);
+    return prev.filter(f => f.id !== id);
+  });
+
+  useEffect(() => { filesRef.current = files; }, [files]);
+  useEffect(() => () => filesRef.current.forEach(f => revokeObjectUrl(f.preview)), []);
   const moveFile = (id, dir) => {
     setFiles(prev => {
       const idx = prev.findIndex(f => f.id === id);

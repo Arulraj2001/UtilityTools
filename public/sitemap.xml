@@ -92,12 +92,6 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/json-formatter</loc>
-    <lastmod>2026-05-26T10:53:11.092Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://quickutils.page/tool/eb-bill-calculator-tamilnadu</loc>
     <lastmod>2026-05-26T10:58:19.102Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -112,6 +106,12 @@
   <url>
     <loc>https://quickutils.page/tool/fuel-expense-calculator-india</loc>
     <lastmod>2026-05-26T10:58:53.095Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://quickutils.page/tool/json-formatter</loc>
+    <lastmod>2026-05-27T01:35:28.787Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -530,12 +530,6 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/ssc-photo-resizer</loc>
-    <lastmod>2026-05-26T10:53:53.092Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://quickutils.page/tool/emi-calculator</loc>
     <lastmod>2026-05-26T10:54:19.092Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -560,6 +554,12 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://quickutils.page/tool/ssc-photo-resizer</loc>
+    <lastmod>2026-05-27T11:01:45.801Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://quickutils.page/tool/photo-kb-reducer</loc>
     <lastmod>2026-05-26T10:55:59.092Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -574,6 +574,12 @@
   <url>
     <loc>https://quickutils.page/tool/document-scanner</loc>
     <lastmod>2026-05-26T10:37:02.824Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://quickutils.page/tool/protect-pdf</loc>
+    <lastmod>2026-05-27T11:05:53.652Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -1071,63 +1077,63 @@
   </url>
   <url>
     <loc>https://quickutils.page/blog/how-to-calculate-sgpa</loc>
-    <lastmod>2026-05-27T00:00:00.000Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <lastmod>2026-05-27T07:06:20.293Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://quickutils.page/blog/sgpa-vs-cgpa-vs-gpa</loc>
-    <lastmod>2026-05-27T00:00:00.000Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <lastmod>2026-05-27T07:18:33.008Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://quickutils.page/blog/how-to-calculate-percentage-of-marks</loc>
     <lastmod>2026-05-27T00:00:00.000Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://quickutils.page/blog/how-to-use-fraction-calculator</loc>
     <lastmod>2026-05-27T00:00:00.000Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://quickutils.page/blog/how-to-compress-images</loc>
     <lastmod>2026-05-27T00:00:00.000Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://quickutils.page/blog/how-to-resize-images</loc>
     <lastmod>2026-05-27T00:00:00.000Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://quickutils.page/blog/pdf-merge-vs-pdf-compress</loc>
     <lastmod>2026-05-27T00:00:00.000Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://quickutils.page/blog/word-counter-guide</loc>
-    <lastmod>2026-05-27T00:00:00.000Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <lastmod>2026-05-27T07:04:38.482Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://quickutils.page/blog/json-formatter-guide</loc>
-    <lastmod>2026-05-27T00:00:00.000Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <lastmod>2026-05-27T07:08:00.162Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://quickutils.page/blog/base64-encoding-explained</loc>
     <lastmod>2026-05-27T00:00:00.000Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://quickutils.page/blog/merge-multiple-pdfs-in-correct-order</loc>
@@ -1214,27 +1220,9 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/jobs/sales-marketing-internship-zenxlab-thane</loc>
-    <lastmod>2026-05-21T17:29:34.044Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
     <loc>https://quickutils.page/jobs/ssc-cgl-recruitment-2026</loc>
-    <lastmod>2026-05-21T15:27:53.777Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://quickutils.page/jobs/coal-india-mt-recruitment-2026</loc>
-    <lastmod>2026-05-22T02:41:15.631Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://quickutils.page/jobs/sales-associate-job-jhex-consulting-ahmedabad</loc>
-    <lastmod>2026-05-23T05:55:27.251Z</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-05-27T06:27:11.724Z</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.75</priority>
   </url>
 </urlset>

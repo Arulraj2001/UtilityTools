@@ -2,15 +2,16 @@
  * PDF Page Extractor — Visual thumbnail-based page selection
  * Uses pdfjs-dist to render page thumbnails, pdf-lib to extract
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Scissors, Download, CheckSquare, Square, Package, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Scissors, CheckSquare } from 'lucide-react';
 import PDFDropZone from './PDFDropZone';
 import { SingleFileCard } from './PDFFileCard';
 import { DownloadBtn, formatSize } from './PDFResultCard';
 import { cn } from '@/lib/utils';
 import { getPdfJsLib } from '@/lib/pdfWorkerSetup';
+import { canvasToBlob, clonePdfData, revokeObjectUrl } from '@/lib/fileProcessing';
 
 function loadPdfJs() {
   return Promise.resolve(getPdfJsLib());
@@ -44,16 +45,19 @@ export default function PDFPageExtractor() {
   const [error, setError] = useState(null);
   const [mode, setMode] = useState('visual'); // 'visual' | 'range'
   const [pdfBytes, setPdfBytes] = useState(null);
+  const thumbnailsRef = useRef([]);
 
   const handleFile = async (files) => {
     const f = files[0];
+    thumbnails.forEach(t => revokeObjectUrl(t.dataUrl));
     setFile(f); setThumbnails([]); setSelected(new Set()); setOutputBlob(null); setError(null);
     setLoadingThumbs(true); setThumbProgress(0);
     try {
       const ab = await f.arrayBuffer();
-      setPdfBytes(new Uint8Array(ab));
+      const data = new Uint8Array(ab);
+      setPdfBytes(clonePdfData(data));
       const pdfjsLib = await loadPdfJs();
-      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(ab) }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: clonePdfData(data) }).promise;
       setPageCount(pdf.numPages);
       const thumbs = [];
       // Render up to 30 thumbnails (for large docs, just show first 30)
@@ -69,12 +73,23 @@ export default function PDFPageExtractor() {
         ctx.fillStyle = '#fff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         await page.render({ canvasContext: ctx, viewport }).promise;
-        thumbs.push({ page: i, dataUrl: canvas.toDataURL('image/jpeg', 0.7) });
+        const blob = await canvasToBlob(canvas, 'image/jpeg', 0.7);
+        thumbs.push({ page: i, dataUrl: URL.createObjectURL(blob) });
+        canvas.width = 0;
+        canvas.height = 0;
         if (i % 5 === 0) setThumbnails([...thumbs]); // progressive render
       }
       setThumbnails(thumbs);
     } catch (e) { setError(e.message); }
     finally { setLoadingThumbs(false); setThumbProgress(0); }
+  };
+
+  useEffect(() => { thumbnailsRef.current = thumbnails; }, [thumbnails]);
+  useEffect(() => () => thumbnailsRef.current.forEach(t => revokeObjectUrl(t.dataUrl)), []);
+
+  const resetFile = () => {
+    thumbnails.forEach(t => revokeObjectUrl(t.dataUrl));
+    setFile(null); setThumbnails([]); setSelected(new Set()); setOutputBlob(null); setPdfBytes(null);
   };
 
   const toggle = (n) => {
@@ -131,7 +146,7 @@ export default function PDFPageExtractor() {
         <PDFDropZone onFiles={handleFile} label="Drop PDF to extract pages" sublabel="PDF files up to 200MB" />
       ) : (
         <div className="space-y-4">
-          <SingleFileCard file={file} pageCount={pageCount} onRemove={() => { setFile(null); setThumbnails([]); setSelected(new Set()); setOutputBlob(null); setPdfBytes(null); }} />
+          <SingleFileCard file={file} pageCount={pageCount} onRemove={resetFile} />
 
           {/* Mode toggle */}
           <div className="flex gap-2">

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import DropZone from './shared/DropZone';
 import ImagePreviewPanel from './shared/ImagePreviewPanel';
 import { SizeComparison, DownloadButton } from './shared/FileStats';
@@ -24,7 +23,7 @@ export default function PhotoKbReducer() {
       targetWidth: originalData?.width,
       targetHeight: originalData?.height,
       targetMaxKB: targetKB,
-      format: file.type === 'image/png' ? 'image/png' : 'image/jpeg',
+      format: 'image/jpeg',
     }));
     if (result) setOutput(result);
   };

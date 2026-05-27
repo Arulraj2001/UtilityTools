@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Download, RefreshCw, RotateCw, RotateCcw, FlipHorizontal, FlipVertical } from 'lucide-react';
 import ImageDropZone from './ImageDropZone';
 import { motion } from 'framer-motion';
 import { saveAs } from 'file-saver';
+import { canvasToBlob, revokeObjectUrl } from '@/lib/fileProcessing';
 
 export default function ImageRotator() {
   const [file, setFile] = useState(null);
@@ -29,29 +30,36 @@ export default function ImageRotator() {
   const apply = () => {
     if (!file || !preview) return;
     const img = new Image();
-    img.onload = () => {
+    img.onload = async () => {
       const rad = (rotation * Math.PI) / 180;
       const sin = Math.abs(Math.sin(rad));
       const cos = Math.abs(Math.cos(rad));
-      const w = Math.round(img.width * cos + img.height * sin);
-      const h = Math.round(img.width * sin + img.height * cos);
+      const w = Math.round(img.naturalWidth * cos + img.naturalHeight * sin);
+      const h = Math.round(img.naturalWidth * sin + img.naturalHeight * cos);
       const canvas = document.createElement('canvas');
       canvas.width = w;
       canvas.height = h;
       const ctx = canvas.getContext('2d');
+      const mime = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+      if (mime === 'image/jpeg') {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, w, h);
+      }
       ctx.translate(w / 2, h / 2);
       ctx.rotate(rad);
       ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
-      ctx.drawImage(img, -img.width / 2, -img.height / 2);
-      const mime = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-      canvas.toBlob(blob => {
-        setResult({ url: URL.createObjectURL(blob), blob, w, h, size: blob.size });
-      }, mime, quality / 100);
+      ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+      const blob = await canvasToBlob(canvas, mime, quality / 100);
+      setResult({ url: URL.createObjectURL(blob), blob, w, h, size: blob.size });
+      canvas.width = 0;
+      canvas.height = 0;
     };
     img.src = preview;
   };
 
   const reset = () => { setFile(null); setPreview(null); setResult(null); setRotation(0); setFlipH(false); setFlipV(false); };
+  useEffect(() => () => revokeObjectUrl(preview), [preview]);
+  useEffect(() => () => revokeObjectUrl(result?.url), [result]);
   const fmt = (b) => b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(2)} MB`;
 
   return (

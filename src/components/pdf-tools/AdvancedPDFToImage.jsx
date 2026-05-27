@@ -3,7 +3,7 @@
  * Renders each page on canvas with white background, exports JPEG/PNG
  * ZIP download via JSZip for batch export
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ImageIcon, Download, Package, CheckCircle2 } from 'lucide-react';
 import PDFDropZone from './PDFDropZone';
@@ -11,6 +11,7 @@ import { SingleFileCard } from './PDFFileCard';
 import { formatSize } from './PDFResultCard';
 import { cn } from '@/lib/utils';
 import { getPdfJsLib } from '@/lib/pdfWorkerSetup';
+import { canvasToBlob, clonePdfData, revokeObjectUrl } from '@/lib/fileProcessing';
 
 function loadPdfJs() {
   return Promise.resolve(getPdfJsLib());
@@ -61,10 +62,16 @@ export default function AdvancedPDFToImage() {
       const data = new Uint8Array(ab);
       setPdfData(data);
       const pdfjsLib = await loadPdfJs();
-      const pdf = await pdfjsLib.getDocument({ data }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: clonePdfData(data) }).promise;
       setTotalPages(pdf.numPages);
     } catch (e) { setError(e.message); setTotalPages(0); }
   };
+
+  useEffect(() => {
+    return () => {
+      pages.forEach(p => revokeObjectUrl(p.dataUrl));
+    };
+  }, [pages]);
 
   const getIndices = () => {
     if (selectedPages === 'all') return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -77,7 +84,7 @@ export default function AdvancedPDFToImage() {
     try {
       const pdfjsLib = await loadPdfJs();
       setProgress('Loading PDF...');
-      const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: clonePdfData(pdfData) }).promise;
       const indices = getIndices();
       const results = [];
 
@@ -87,7 +94,11 @@ export default function AdvancedPDFToImage() {
         setProgressPct(Math.round(((i + 1) / indices.length) * 95));
         const page = await pdf.getPage(pageNum);
         const scale = dpiOption.scale;
-        const viewport = page.getViewport({ scale });
+        let viewport = page.getViewport({ scale });
+        const pixels = viewport.width * viewport.height;
+        if (pixels > 80_000_000) {
+          viewport = page.getViewport({ scale: scale * Math.sqrt(80_000_000 / pixels) });
+        }
 
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(viewport.width);
@@ -105,8 +116,8 @@ export default function AdvancedPDFToImage() {
         const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
         const q = format === 'png' ? undefined : quality / 100;
 
-        const blob = await new Promise(r => canvas.toBlob(r, mimeType, q));
-        const dataUrl = canvas.toDataURL(mimeType, q);
+        const blob = await canvasToBlob(canvas, mimeType, q);
+        const dataUrl = URL.createObjectURL(blob);
 
         results.push({
           dataUrl, blob, page: pageNum,
@@ -131,14 +142,15 @@ export default function AdvancedPDFToImage() {
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
       pages.forEach(p => {
-        const data = p.dataUrl.split(',')[1];
-        zip.file(`page_${p.page}.${format}`, data, { base64: true });
+        zip.file(`page_${p.page}.${format}`, p.blob);
       });
       const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
+      a.href = url;
       a.download = `${file.name.replace('.pdf', '')}_images.zip`;
       a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch { pages.forEach((p, i) => setTimeout(() => downloadOne(p), i * 250)); }
   };
 

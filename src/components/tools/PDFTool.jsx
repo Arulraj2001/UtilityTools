@@ -1,9 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Upload, Download, FileText, Loader2, X, Plus, ArrowUp, ArrowDown, Scissors } from 'lucide-react';
+import { Upload, Download, FileText, Loader2, X, Plus, ArrowUp, ArrowDown, Scissors, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPdfJsLib } from '@/lib/pdfWorkerSetup';
+import { canvasToBlob, clonePdfData, revokeObjectUrl } from '@/lib/fileProcessing';
+import { recompressPdfFile } from '@/lib/pdfCompression';
 
 let pdfLibLoadPromise = null;
 let jsZipLoadPromise = null;
@@ -14,15 +16,23 @@ const loadJSZip = () => jsZipLoadPromise || (jsZipLoadPromise = import('jszip'))
 async function renderPdfPageImage(file, scale = 1.5) {
   const arrayBuffer = await file.arrayBuffer();
   const pdfjsLib = await getPdfJsLib();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pdf = await pdfjsLib.getDocument({ data: clonePdfData(arrayBuffer) }).promise;
   const page = await pdf.getPage(1);
-  const viewport = page.getViewport({ scale });
+  let viewport = page.getViewport({ scale });
+  const pixels = viewport.width * viewport.height;
+  if (pixels > 40_000_000) {
+    viewport = page.getViewport({ scale: scale * Math.sqrt(40_000_000 / pixels) });
+  }
   const canvas = document.createElement('canvas');
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
+  canvas.width = Math.round(viewport.width);
+  canvas.height = Math.round(viewport.height);
   const context = canvas.getContext('2d');
+  context.fillStyle = '#FFFFFF';
+  context.fillRect(0, 0, canvas.width, canvas.height);
   await page.render({ canvasContext: context, viewport }).promise;
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+  const blob = await canvasToBlob(canvas, 'image/jpeg', 0.8);
+  canvas.width = 0;
+  canvas.height = 0;
   return { url: URL.createObjectURL(blob), pageCount: pdf.numPages };
 }
 
@@ -279,11 +289,45 @@ function PDFSplit() {
 }
 
 // ── JPG to PDF ────────────────────────────────────────────────────
+async function imageFileToJpegBytes(file, quality = 0.92) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = async () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      try {
+        const blob = await canvasToBlob(canvas, 'image/jpeg', quality);
+        resolve({ bytes: new Uint8Array(await blob.arrayBuffer()), width: canvas.width, height: canvas.height });
+      } catch (e) {
+        reject(e);
+      } finally {
+        URL.revokeObjectURL(url);
+        canvas.width = 0;
+        canvas.height = 0;
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error(`Failed to load ${file.name}`));
+    };
+    img.src = url;
+  });
+}
+
 function JPGtoPDF() {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const inputRef = useRef();
+  const imagesRef = useRef([]);
 
   const addImages = (files) => {
     const imgs = Array.from(files).filter(f => f.type.startsWith('image/'));
@@ -300,15 +344,10 @@ function JPGtoPDF() {
     const totalInputSize = images.reduce((sum, { file }) => sum + file.size, 0);
 
     for (const { file } of images) {
-      const bytes = await file.arrayBuffer();
-      let img;
-      if (file.type === 'image/png' || file.type === 'image/webp') {
-        img = await pdf.embedPng(bytes);
-      } else {
-        img = await pdf.embedJpg(bytes);
-      }
-      const page = pdf.addPage([img.width, img.height]);
-      page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+      const { bytes, width, height } = await imageFileToJpegBytes(file);
+      const img = await pdf.embedJpg(bytes);
+      const page = pdf.addPage([width, height]);
+      page.drawImage(img, { x: 0, y: 0, width, height });
     }
 
     const pdfBytes = await pdf.save();
@@ -331,6 +370,18 @@ function JPGtoPDF() {
     setLoading(false);
   };
 
+  useEffect(() => { imagesRef.current = images; }, [images]);
+  useEffect(() => () => imagesRef.current.forEach(img => revokeObjectUrl(img.preview)), []);
+  useEffect(() => () => revokeObjectUrl(result?.url), [result]);
+
+  const removeImage = (id) => {
+    setImages(prev => {
+      const removed = prev.find(i => i.id === id);
+      revokeObjectUrl(removed?.preview);
+      return prev.filter(i => i.id !== id);
+    });
+  };
+
   return (
     <div className="space-y-5">
       <DropZone onFiles={addImages} inputRef={inputRef} accept="image/*" label="Drop images here or click to upload" sub="Supports JPG, PNG, WEBP" />
@@ -342,7 +393,7 @@ function JPGtoPDF() {
             {images.map(({ id, file, preview }) => (
               <div key={id} className="relative rounded-xl overflow-hidden border border-border/50 group aspect-square">
                 <img src={preview} alt={file.name} className="w-full h-full object-cover" />
-                <button onClick={() => setImages(prev => prev.filter(i => i.id !== id))}
+                <button onClick={() => removeImage(id)}
                   className="absolute top-1 right-1 p-1 rounded-lg bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity">
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -395,6 +446,9 @@ function PDFCompressor() {
   const [result, setResult] = useState(null);
   const [previewError, setPreviewError] = useState(null);
 
+  useEffect(() => () => revokeObjectUrl(previewUrl), [previewUrl]);
+  useEffect(() => () => revokeObjectUrl(result?.url), [result]);
+
   const handleFile = async (f) => {
     if (!f || f.type !== 'application/pdf') return;
     setFile(f);
@@ -417,22 +471,28 @@ function PDFCompressor() {
     const startTime = Date.now();
     
     try {
+      const preset = {
+        low: { scale: 2, quality: 0.85 },
+        medium: { scale: 1.5, quality: 0.68 },
+        high: { scale: 1.1, quality: 0.48 },
+      }[compressionLevel] || { scale: 1.5, quality: 0.68 };
+
       const { PDFDocument } = await loadPdfLib();
       const bytes = await file.arrayBuffer();
       const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      const optimizedBytes = await doc.save({ useObjectStreams: true, objectsPerTick: 50 });
+      const optimizedBlob = new Blob([optimizedBytes], { type: 'application/pdf' });
 
-      // Apply compression based on level
-      const options = { useObjectStreams: true, objectsPerTick: 50 };
-      
-      if (compressionLevel === 'high') {
-        // High compression - remove more data
-        options.removeIdObjects = true;
-        options.removeRedundantStreams = true;
+      let rasterBlob = null;
+      try {
+        const recompressed = await recompressPdfFile(file, preset);
+        rasterBlob = recompressed.blob;
+      } catch {
+        rasterBlob = null;
       }
 
-      const newBytes = await doc.save(options);
-      const savings = (((bytes.byteLength - newBytes.byteLength) / bytes.byteLength) * 100).toFixed(1);
-      const blob = new Blob([newBytes], { type: 'application/pdf' });
+      const blob = rasterBlob && rasterBlob.size < optimizedBlob.size ? rasterBlob : optimizedBlob;
+      const savings = (((bytes.byteLength - blob.size) / bytes.byteLength) * 100).toFixed(1);
       const processingTime = Date.now() - startTime;
 
       setResult({
@@ -447,7 +507,7 @@ function PDFCompressor() {
           level: compressionLevel,
           format: 'PDF',
           processingTime,
-          reduction: Math.round((bytes.byteLength - blob.size) / 1024 / 1024 * 100) / 100
+          reduction: Math.max(0, Math.round((bytes.byteLength - blob.size) / 1024 / 1024 * 100) / 100)
         }
       });
     } catch (e) {
@@ -776,6 +836,9 @@ function PDFtoJPG() {
   const [pageCount, setPageCount] = useState(0);
   const [previewError, setPreviewError] = useState(null);
 
+  useEffect(() => () => revokeObjectUrl(previewUrl), [previewUrl]);
+  useEffect(() => () => revokeObjectUrl(result?.url), [result]);
+
   const handleFile = async (f) => {
     if (f && f.type === 'application/pdf') {
       setFile(f);
@@ -801,21 +864,28 @@ function PDFtoJPG() {
       const startTime = Date.now();
       const pdfjsLib = await getPdfJsLib();
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: clonePdfData(arrayBuffer) }).promise;
       const numPages = pdf.numPages;
 
       if (numPages === 1) {
         // Single page - return JPG directly
         const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 2 });
+        let viewport = page.getViewport({ scale: 2 });
+        const pixels = viewport.width * viewport.height;
+        if (pixels > 80_000_000) {
+          viewport = page.getViewport({ scale: 2 * Math.sqrt(80_000_000 / pixels) });
+        }
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+        canvas.height = Math.round(viewport.height);
+        canvas.width = Math.round(viewport.width);
+        context.fillStyle = '#FFFFFF';
+        context.fillRect(0, 0, canvas.width, canvas.height);
 
         await page.render({ canvasContext: context, viewport }).promise;
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
-        if (!blob) throw new Error('Failed to generate JPG image from PDF page.');
+        const blob = await canvasToBlob(canvas, 'image/jpeg', quality);
+        canvas.width = 0;
+        canvas.height = 0;
 
         const processingTime = Date.now() - startTime;
         setResult({
@@ -838,17 +908,24 @@ function PDFtoJPG() {
 
         for (let i = 1; i <= numPages; i++) {
           const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 2 });
+          let viewport = page.getViewport({ scale: 2 });
+          const pixels = viewport.width * viewport.height;
+          if (pixels > 80_000_000) {
+            viewport = page.getViewport({ scale: 2 * Math.sqrt(80_000_000 / pixels) });
+          }
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
+          canvas.height = Math.round(viewport.height);
+          canvas.width = Math.round(viewport.width);
+          context.fillStyle = '#FFFFFF';
+          context.fillRect(0, 0, canvas.width, canvas.height);
 
           await page.render({ canvasContext: context, viewport }).promise;
-          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
-          if (!blob) throw new Error('Failed to generate JPG image from PDF page.');
+          const blob = await canvasToBlob(canvas, 'image/jpeg', quality);
           zip.file(`page${i}.jpg`, blob);
           totalSize += blob.size;
+          canvas.width = 0;
+          canvas.height = 0;
         }
 
         const zipBlob = await zip.generateAsync({ type: 'blob' });

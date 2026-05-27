@@ -1,10 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
 import DropZone from './shared/DropZone';
-import { DownloadButton, StatChip } from './shared/FileStats';
+import { DownloadButton } from './shared/FileStats';
 import ProcessingOverlay from './shared/ProcessingOverlay';
 import { loadImageFile, useImageProcessor } from './shared/useImageProcessor';
 import { cn } from '@/lib/utils';
+import { blobToDataUrl, canvasToBlob } from '@/lib/fileProcessing';
 
 const CROP_PRESETS = [
   { id: 'ssc', label: 'SSC', aspect: 100 / 120, note: '100×120 px' },
@@ -21,6 +22,8 @@ async function getCroppedImg(imageSrc, pixelCrop, targetMaxKB = 50) {
   const canvas = document.createElement('canvas');
   canvas.width = pixelCrop.width; canvas.height = pixelCrop.height;
   const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(0, 0, pixelCrop.width, pixelCrop.height);
   ctx.drawImage(img, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, 0, 0, pixelCrop.width, pixelCrop.height);
@@ -29,12 +32,14 @@ async function getCroppedImg(imageSrc, pixelCrop, targetMaxKB = 50) {
   let lo = 0.01, hi = 0.99, best = null;
   for (let i = 0; i < 14; i++) {
     const mid = (lo + hi) / 2;
-    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', mid));
+    const blob = await canvasToBlob(canvas, 'image/jpeg', mid);
     if (blob.size <= targetBytes) { if (!best || blob.size > best.size) best = blob; lo = mid; } else hi = mid;
     if (hi - lo < 0.005) break;
   }
-  if (!best) best = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.7));
-  const dataUrl = await new Promise(r => { const reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(best); });
+  if (!best) best = await canvasToBlob(canvas, 'image/jpeg', 0.7);
+  const dataUrl = await blobToDataUrl(best);
+  canvas.width = 0;
+  canvas.height = 0;
   return { blob: best, dataUrl, sizeBytes: best.size, width: pixelCrop.width, height: pixelCrop.height };
 }
 

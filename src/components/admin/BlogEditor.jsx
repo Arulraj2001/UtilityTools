@@ -135,6 +135,9 @@ export default function BlogEditor({ post, onSave, onCancel }) {
     og_description: post?.og_description || '',
     twitter_title: post?.twitter_title || '',
     twitter_description: post?.twitter_description || '',
+    author_image: post?.author_image || '',
+    author_title: post?.author_title || '',
+    author_bio: post?.author_bio || '',
     faq_items: post?.faq_items || [],
   })
 
@@ -373,7 +376,7 @@ export default function BlogEditor({ post, onSave, onCancel }) {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-700">Title *</Label>
                 <Input
@@ -399,6 +402,17 @@ export default function BlogEditor({ post, onSave, onCancel }) {
                 />
                 <p className="text-xs text-gray-500">URL-friendly version of the title</p>
               </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Author</Label>
+                <Input
+                  value={form.author_name}
+                  onChange={e => update('author_name', e.target.value)}
+                  placeholder="Author name"
+                  className="rounded-lg"
+                />
+                <p className="text-xs text-gray-500">Display name shown on the blog post page.</p>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -415,6 +429,53 @@ export default function BlogEditor({ post, onSave, onCancel }) {
               <p className="text-xs text-gray-500">
                 {form.excerpt.length} / 300 characters
               </p>
+            </div>
+
+            <div className="space-y-4 pt-4 border-t">
+              <h3 className="text-lg font-semibold text-gray-900">Author Details</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Author Name</Label>
+                  <Input
+                    value={form.author_name}
+                    onChange={e => update('author_name', e.target.value)}
+                    placeholder="Author name"
+                    className="rounded-lg"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Author Title</Label>
+                  <Input
+                    value={form.author_title}
+                    onChange={e => update('author_title', e.target.value)}
+                    placeholder="e.g. Senior Editor, Content Strategist"
+                    className="rounded-lg"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Author Image URL</Label>
+                  <Input
+                    value={form.author_image}
+                    onChange={e => update('author_image', e.target.value)}
+                    placeholder="https://example.com/author.jpg"
+                    className="rounded-lg font-mono text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Author Bio / Experience</Label>
+                <Textarea
+                  rows={3}
+                  value={form.author_bio}
+                  onChange={e => update('author_bio', e.target.value)}
+                  placeholder="Short author bio and experience details."
+                  className="rounded-lg resize-none"
+                />
+                <p className="text-xs text-gray-500">This appears in the author block below the article.</p>
+              </div>
             </div>
           </div>
 

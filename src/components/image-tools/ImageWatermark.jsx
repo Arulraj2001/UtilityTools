@@ -6,6 +6,7 @@ import { Download, RefreshCw, Type } from 'lucide-react';
 import ImageDropZone from './ImageDropZone';
 import { motion } from 'framer-motion';
 import { saveAs } from 'file-saver';
+import { canvasToBlob, revokeObjectUrl } from '@/lib/fileProcessing';
 
 const POSITIONS = ['top-left', 'top-right', 'center', 'bottom-left', 'bottom-right', 'tiled'];
 
@@ -30,10 +31,10 @@ export default function ImageWatermark() {
   const apply = () => {
     if (!file || !preview) return;
     const img = new Image();
-    img.onload = () => {
+    img.onload = async () => {
       const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0);
       ctx.globalAlpha = opacity / 100;
@@ -74,14 +75,18 @@ export default function ImageWatermark() {
       }
 
       ctx.globalAlpha = 1;
-      canvas.toBlob((blob) => {
+      const blob = await canvasToBlob(canvas, file.type || 'image/jpeg', 0.95);
+      canvas.width = 0;
+      canvas.height = 0;
         setResult({ url: URL.createObjectURL(blob), blob });
-      }, file.type || 'image/jpeg', 0.95);
     };
     img.src = preview;
   };
 
   const reset = () => { setFile(null); setPreview(null); setResult(null); };
+
+  useEffect(() => () => revokeObjectUrl(preview), [preview]);
+  useEffect(() => () => revokeObjectUrl(result?.url), [result]);
 
   return (
     <div className="space-y-6">

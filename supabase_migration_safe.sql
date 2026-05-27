@@ -21,6 +21,9 @@ alter table if exists blog_posts add column if not exists schema_type text defau
 alter table if exists blog_posts add column if not exists featured boolean default false;
 alter table if exists blog_posts add column if not exists views_count int default 0;
 alter table if exists blog_posts add column if not exists seo_keywords text;
+alter table if exists blog_posts add column if not exists author_title text;
+alter table if exists blog_posts add column if not exists author_image text;
+alter table if exists blog_posts add column if not exists author_bio text;
 alter table if exists blog_posts add column if not exists meta_robots text default 'index,follow';
 
 -- Safe site_settings additions

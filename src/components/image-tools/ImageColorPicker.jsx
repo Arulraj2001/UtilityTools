@@ -4,6 +4,7 @@ import { Copy, RefreshCw, Check, Pipette, Palette } from 'lucide-react';
 import ImageDropZone from './ImageDropZone';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { revokeObjectUrl } from '@/lib/fileProcessing';
 
 function hexToRgb(hex) {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -32,10 +33,12 @@ function rgbToHsl(r, g, b) {
 
 function extractPalette(ctx, w, h, count = 8) {
   const step = Math.max(1, Math.floor(Math.sqrt((w * h) / 2000)));
+  const imageData = ctx.getImageData(0, 0, w, h).data;
   const buckets = {};
   for (let y = 0; y < h; y += step) {
     for (let x = 0; x < w; x += step) {
-      const px = ctx.getImageData(x, y, 1, 1).data;
+      const idx = (y * w + x) * 4;
+      const px = [imageData[idx], imageData[idx + 1], imageData[idx + 2]];
       const key = `${Math.round(px[0] / 32) * 32},${Math.round(px[1] / 32) * 32},${Math.round(px[2] / 32) * 32}`;
       buckets[key] = (buckets[key] || 0) + 1;
     }
@@ -94,6 +97,8 @@ export default function ImageColorPicker() {
     };
     img.src = imgSrc;
   }, [imgSrc]);
+
+  useEffect(() => () => revokeObjectUrl(imgSrc), [imgSrc]);
 
   const pick = useCallback((e) => {
     const canvas = canvasRef.current;

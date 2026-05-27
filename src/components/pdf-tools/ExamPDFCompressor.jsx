@@ -4,18 +4,13 @@
  * Uses the same render-and-recompress strategy with exam-specific presets.
  */
 import React, { useState } from 'react';
-import { PDFDocument } from 'pdf-lib';
 import { motion } from 'framer-motion';
-import { FileCheck, CheckCircle2, AlertTriangle, Settings } from 'lucide-react';
+import { FileCheck, CheckCircle2, AlertTriangle } from 'lucide-react';
 import PDFDropZone from './PDFDropZone';
 import { SingleFileCard } from './PDFFileCard';
 import { DownloadBtn, formatSize } from './PDFResultCard';
 import { cn } from '@/lib/utils';
-import { getPdfJsLib } from '@/lib/pdfWorkerSetup';
-
-function loadPdfJs() {
-  return Promise.resolve(getPdfJsLib());
-}
+import { recompressPdfFile } from '@/lib/pdfCompression';
 
 const EXAM_PRESETS = [
   { id: 'certificate', label: 'Certificate', targetKB: 200, desc: 'Degree, Diploma, Birth cert', dpi: 1.5, q: 0.70 },
@@ -34,79 +29,16 @@ const EXAM_PORTALS = [
   { id: 'tnpsc', label: 'TNPSC', desc: 'Tamil Nadu PSC', limits: { photo: 50, signature: 30, docs: 250 } },
 ];
 
-async function compressToTarget(file, targetKB, scale, onProgress) {
-  const pdfjsLib = await loadPdfJs();
-  const ab = await file.arrayBuffer();
+async function compressToTarget(file, targetKB, scale, quality, onProgress) {
   onProgress('Parsing document...');
-  const pdfJs = await pdfjsLib.getDocument({ data: new Uint8Array(ab) }).promise;
-  const totalPages = pdfJs.numPages;
-
-  let lo = 0.2, hi = 0.88, best = null;
-  const target = targetKB * 1024;
-
-  for (let iter = 0; iter < 10; iter++) {
-    const mid = (lo + hi) / 2;
-    onProgress(`Optimizing quality ${Math.round(mid * 100)}% (pass ${iter + 1}/10)...`);
-
-    const outDoc = await PDFDocument.create();
-    for (let pg = 1; pg <= totalPages; pg++) {
-      const page = await pdfJs.getPage(pg);
-      const viewport = page.getViewport({ scale });
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(viewport.width);
-      canvas.height = Math.round(viewport.height);
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      await page.render({ canvasContext: ctx, viewport, background: 'white' }).promise;
-
-      const jpgBytes = await new Promise(resolve => {
-        canvas.toBlob(async blob => {
-          const ab = await blob.arrayBuffer();
-          resolve(new Uint8Array(ab));
-        }, 'image/jpeg', mid);
-      });
-      const img = await outDoc.embedJpg(jpgBytes);
-      const pdfPage = outDoc.addPage([canvas.width, canvas.height]);
-      pdfPage.drawImage(img, { x: 0, y: 0, width: canvas.width, height: canvas.height });
-    }
-    outDoc.setTitle(''); outDoc.setAuthor(''); outDoc.setSubject('');
-    outDoc.setKeywords([]); outDoc.setCreator('ExamDocs'); outDoc.setProducer('PDF Tools');
-    const saved = await outDoc.save({ useObjectStreams: true });
-    const blob = new Blob([saved], { type: 'application/pdf' });
-
-    if (blob.size <= target) {
-      best = { blob, quality: mid };
-      lo = mid; // try better quality
-    } else {
-      hi = mid; // need more compression
-    }
-    if (hi - lo < 0.02) break;
-  }
-
-  if (!best) {
-    // Last resort at minimum quality
-    onProgress('Applying maximum compression...');
-    const outDoc = await PDFDocument.create();
-    for (let pg = 1; pg <= totalPages; pg++) {
-      const page = await pdfJs.getPage(pg);
-      const viewport = page.getViewport({ scale: Math.min(scale, 0.8) });
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(viewport.width);
-      canvas.height = Math.round(viewport.height);
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      await page.render({ canvasContext: ctx, viewport }).promise;
-      const jpgBytes = await new Promise(r => canvas.toBlob(async b => r(new Uint8Array(await b.arrayBuffer())), 'image/jpeg', 0.2));
-      const img = await outDoc.embedJpg(jpgBytes);
-      const pdfPage = outDoc.addPage([canvas.width, canvas.height]);
-      pdfPage.drawImage(img, { x: 0, y: 0, width: canvas.width, height: canvas.height });
-    }
-    const bytes = await outDoc.save({ useObjectStreams: true });
-    best = { blob: new Blob([bytes], { type: 'application/pdf' }), quality: 0.2 };
-  }
-  return best;
+  return recompressPdfFile(file, {
+    targetKB,
+    scale,
+    quality,
+    minQuality: 0.2,
+    maxIterations: 10,
+    onProgress,
+  });
 }
 
 export default function ExamPDFCompressor() {
@@ -127,7 +59,7 @@ export default function ExamPDFCompressor() {
     if (!file || !effectiveTarget) return;
     setProcessing(true); setError(null); setResult(null);
     try {
-      const { blob, quality } = await compressToTarget(file, effectiveTarget, docPreset.dpi, (msg) => setProgress(msg));
+      const { blob, quality } = await compressToTarget(file, effectiveTarget, docPreset.dpi, docPreset.q, (msg) => setProgress(msg));
       setResult({ blob, quality });
     } catch (e) { setError(e.message || 'Compression failed'); }
     finally { setProcessing(false); setProgress(''); }

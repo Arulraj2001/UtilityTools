@@ -32,8 +32,11 @@ export default function BlogSEO({ post, canonicalBase = 'https://quickutils.page
     description,
     image: [image],
     author: {
-      '@type': 'Organization',
+      '@type': 'Person',
       name: authorName,
+      ...(post.author_image ? { image: post.author_image } : {}),
+      ...(post.author_bio ? { description: post.author_bio } : {}),
+      ...(post.author_title ? { jobTitle: post.author_title } : {}),
     },
     publisher: {
       '@type': 'Organization',
