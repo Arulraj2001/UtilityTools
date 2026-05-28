@@ -32,6 +32,8 @@ const SITE_URL = (
   'https://quickutils.page'
 ).replace(/\/$/, '')
 
+const RETIRED_TOOL_SLUGS = new Set(['pdf-to-word'])
+
 async function fetchTable(supabase, table, cols = '*', filter = null) {
   try {
     let q = supabase.from(table).select(cols)
@@ -206,6 +208,7 @@ async function main() {
   // Tools
   for (const t of tools) {
     if (!t?.slug) continue
+    if (RETIRED_TOOL_SLUGS.has(t.slug)) continue
 
     const loc = `/tool/${encodeURIComponent(t.slug)}`
 

@@ -22,12 +22,8 @@ import {
 const stageLabels = {
   queued: 'Queued',
   validating: 'Validating file',
-  inspecting: 'Inspecting document',
   uploading: 'Uploading',
   converting: 'Converting',
-  repairing: 'Repairing source file',
-  ocr: 'Running OCR',
-  optimizing: 'Optimizing output',
   validatingOutput: 'Optimizing output',
   completed: 'Ready to download',
   failed: 'Failed',
@@ -48,7 +44,7 @@ export default function BackendDocumentConverter({
   const inputRef = useRef(null);
   const pollTimerRef = useRef(null);
   const [file, setFile] = useState(null);
-  const [selectedMode, setSelectedMode] = useState(modes[0]?.value || 'editable');
+  const [selectedMode, setSelectedMode] = useState(modes[0]?.value || '');
   const [state, setState] = useState('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [job, setJob] = useState(null);
@@ -305,7 +301,7 @@ export default function BackendDocumentConverter({
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <Stat label="Output" value={outputLabel} />
-              <Stat label="Engine" value={job.outputMeta?.engine || 'Backend'} />
+              <Stat label="Pages" value={job.outputMeta?.pages ?? '-'} />
               <Stat label="Expires" value={formatExpiry(job.expiresAt)} />
             </div>
 

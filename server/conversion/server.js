@@ -1,5 +1,6 @@
 import http from 'node:http';
 import path from 'node:path';
+
 import { config } from './config.js';
 import { logger } from './logger.js';
 import { parseMultipartRequest } from './multipart.js';
@@ -22,11 +23,6 @@ const server = http.createServer(async (req, res) => {
     }
 
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
-
-    if (req.method === 'POST' && url.pathname === '/api/convert/pdf-to-word') {
-      await handleCreateJob(req, res, 'pdf-to-word', 'docx');
-      return;
-    }
 
     if (req.method === 'POST' && url.pathname === '/api/convert/word-to-pdf') {
       await handleCreateJob(req, res, 'word-to-pdf', 'pdf');
@@ -51,10 +47,7 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 200, {
         ok: true,
         engines: {
-          pdfToWord: 'local_pdf2docx',
           wordToPdf: 'local_libreoffice',
-          ocr: config.ocrEnabled,
-          imageFallback: config.allowImageBasedFallback,
         },
       });
       return;
@@ -94,7 +87,7 @@ async function handleCreateJob(req, res, conversionType, outputExtension) {
   const job = {
     id: jobPaths.jobId,
     conversionType,
-    mode: fields.mode || 'editable',
+    mode: fields.mode || 'standard',
     status: 'queued',
     stage: 'queued',
     progress: 5,
@@ -125,12 +118,8 @@ async function handleDownload(req, res, jobId, token) {
   const stat = await statFile(job.outputPath);
   if (!stat) throw publicError('Converted file has expired.', 'OUTPUT_EXPIRED', 404);
 
-  const contentType = job.conversionType === 'pdf-to-word'
-    ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    : 'application/pdf';
-
   res.writeHead(200, {
-    'Content-Type': contentType,
+    'Content-Type': 'application/pdf',
     'Content-Length': stat.size,
     'Content-Disposition': `attachment; filename="${path.basename(job.outputName).replace(/"/g, '')}"`,
     'Cache-Control': 'private, no-store',
@@ -147,9 +136,19 @@ function sendJson(res, status, payload) {
 }
 
 function setCors(res) {
-  res.setHeader('Access-Control-Allow-Origin', config.corsOrigin);
+  const origins = config.corsOrigin.split(',').map((o) => o.trim()).filter(Boolean);
+  // If wildcard or single origin, use directly
+  if (origins.length === 1) {
+    res.setHeader('Access-Control-Allow-Origin', origins[0]);
+  } else {
+    // Multiple origins: reflect the request origin if it's allowed, otherwise fallback to first
+    const reqOrigin = res.req?.headers?.origin || '';
+    const allowed = origins.find((o) => o === reqOrigin || o === '*' || (o.includes('*') && reqOrigin.match(new RegExp('^' + o.replace(/\*/g, '.*') + '$'))));
+    res.setHeader('Access-Control-Allow-Origin', allowed || origins[0]);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 }
 
 function getRequestBase(req) {

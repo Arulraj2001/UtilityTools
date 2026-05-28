@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/convert/:path*",
+      "destination": "https://quickutils-conversion.onrender.com/api/convert/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

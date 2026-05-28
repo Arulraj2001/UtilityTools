@@ -1,4 +1,25 @@
-const API_BASE = (import.meta.env.VITE_CONVERSION_API_BASE || '').replace(/\/$/, '');
+function getApiBase() {
+  const raw = (import.meta.env.VITE_CONVERSION_API_BASE || '').replace(/\/$/, '');
+
+  if (!raw || raw === '') {
+    return '';
+  }
+
+  try {
+    const parsed = new URL(raw);
+    if (!parsed.protocol.startsWith('http')) {
+      throw new Error(`Invalid protocol in VITE_CONVERSION_API_BASE: "${raw}". Must be http:// or https://`);
+    }
+  } catch (err) {
+    throw new Error(
+      `VITE_CONVERSION_API_BASE is invalid: "${raw}". Expected a valid URL like http://localhost:8787. (${err.message})`
+    );
+  }
+
+  return raw;
+}
+
+const API_BASE = getApiBase();
 
 export function startDocumentConversion({
   endpoint,
@@ -65,7 +86,8 @@ export async function getDocumentConversionStatus(jobId) {
 }
 
 function buildUrl(path) {
-  return `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return API_BASE ? `${API_BASE}${normalizedPath}` : normalizedPath;
 }
 
 function normalizeJsonResponse(xhr) {

@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Upload, Download, FileText, Loader2, X, Plus, ArrowUp, ArrowDown, Scissors, Lock } from 'lucide-react';
+import { Upload, Download, FileText, Image, Loader2, X, Plus, ArrowUp, ArrowDown, Scissors, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPdfJsLib } from '@/lib/pdfWorkerSetup';
 import { canvasToBlob, clonePdfData, revokeObjectUrl } from '@/lib/fileProcessing';
 import { recompressPdfFile } from '@/lib/pdfCompression';
-import PDFToWordComponent from '@/components/pdf-tools/PDFToWord';
 import WordToPDFComponent from '@/components/pdf-tools/WordToPDF';
 
 let pdfLibLoadPromise = null;
@@ -48,7 +47,6 @@ export default function PDFTool({ tool }) {
   if (slug === 'jpg-to-pdf') return <JPGtoPDF />;
   if (slug === 'protect-pdf') return <PDFProtect />;
   if (slug === 'remove-pages-pdf') return <PDFRemovePages />;
-  if (slug === 'pdf-to-word') return <PDFToWordComponent />;
   if (slug === 'word-to-pdf') return <WordToPDFComponent />;
   return <div className="text-muted-foreground text-sm">PDF tool not configured.</div>;
 }
@@ -956,6 +954,21 @@ function PDFtoJPG() {
 
   return (
     <div className="space-y-5">
+      {/* Non-editable warning banner */}
+      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
+        <div className="flex items-start gap-2 text-sm">
+          <Image className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+          <div>
+            <p className="font-medium text-amber-800 dark:text-amber-300">
+              Output is image-based — text is NOT editable
+            </p>
+            <p className="mt-1 text-amber-700 dark:text-amber-400">
+              This tool converts PDF pages to JPG images. Text in the output images cannot be selected, copied, or edited.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {!file ? (
         <DropZone onFiles={fs => handleFile(fs[0])} accept=".pdf,application/pdf" label="Drop a PDF file here" sub="Convert all pages to high-quality JPG images" />
       ) : (

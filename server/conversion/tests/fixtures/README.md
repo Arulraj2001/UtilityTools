@@ -4,17 +4,6 @@ Automated unit tests generate tiny synthetic DOCX/PDF files in the OS temp direc
 
 For full production QA, keep these real fixture files outside git or in a private QA storage bucket:
 
-PDF to Word:
-
-- `text-only.pdf`
-- `with-images.pdf`
-- `with-tables.pdf`
-- `multi-page.pdf`
-- `hindi-unicode.pdf`
-- `scanned.pdf`
-- `with-hyperlinks.pdf`
-- `mixed-portrait-landscape.pdf`
-
 Word to PDF:
 
 - `docx-with-images.docx`
@@ -26,4 +15,4 @@ Word to PDF:
 - `docx-bullets-numbering.docx`
 - `docx-with-hyperlinks.docx`
 
-Run real fixture conversion against the Docker service before public launch and manually open outputs in Microsoft Word, Google Docs, LibreOffice, WPS Office, Chrome PDF viewer, Adobe Acrobat, macOS Preview and mobile PDF viewers.
+Run real fixture conversion against the Docker service before public launch and manually open outputs in Chrome PDF viewer, Adobe Acrobat, macOS Preview and mobile PDF viewers.

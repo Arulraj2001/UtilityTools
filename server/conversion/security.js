@@ -3,15 +3,10 @@ import { config } from './config.js';
 import { runCommand } from './command.js';
 
 const signatures = {
-  pdf: Buffer.from('%PDF-'),
   doc: Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]),
 };
 
 const allowed = {
-  'pdf-to-word': {
-    extensions: ['.pdf'],
-    mimeTypes: ['application/pdf', 'application/octet-stream'],
-  },
   'word-to-pdf': {
     extensions: ['.docx', '.doc'],
     mimeTypes: [
@@ -49,10 +44,6 @@ export function assertSafeUpload({ conversionType, file }) {
   const mime = String(file.contentType || '').toLowerCase();
   if (mime && !rules.mimeTypes.includes(mime)) {
     throw publicError('The uploaded file type does not match this converter.', 'UNSUPPORTED_MIME');
-  }
-
-  if (conversionType === 'pdf-to-word' && !file.buffer.subarray(0, signatures.pdf.length).equals(signatures.pdf)) {
-    throw publicError('This file does not look like a valid PDF.', 'BAD_SIGNATURE');
   }
 
   if (conversionType === 'word-to-pdf') {

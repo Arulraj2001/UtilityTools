@@ -1,5 +1,13 @@
 import { supabase } from './supabaseClient';
 
+const RETIRED_TOOL_SLUGS = ['pdf-to-word'];
+
+const excludeRetiredTools = (query) => (
+  RETIRED_TOOL_SLUGS.reduce((nextQuery, slug) => nextQuery.neq('slug', slug), query)
+);
+
+const isRetiredToolSlug = (slug) => RETIRED_TOOL_SLUGS.includes(slug);
+
 const slugify = (value = '') => {
   return value
     .toString()
@@ -370,7 +378,7 @@ const sortParams = (query, orderBy, ascending) => {
 };
 
 export const getTools = async ({ published = true, orderBy = 'sort_order', ascending = true, limit = 200, filters = {} } = {}) => {
-  let query = supabase.from('tools').select('*');
+  let query = excludeRetiredTools(supabase.from('tools').select('*'));
   if (published) query = query.eq('status', 'published');
   if (filters?.is_featured !== undefined) query = query.eq('is_featured', filters.is_featured);
   if (filters?.is_trending !== undefined) query = query.eq('is_trending', filters.is_trending);
@@ -382,14 +390,14 @@ export const getTools = async ({ published = true, orderBy = 'sort_order', ascen
 };
 
 export const getToolsAll = async ({ orderBy = 'created_at', ascending = false, limit = 200 } = {}) => {
-  let query = supabase.from('tools').select('*');
+  let query = excludeRetiredTools(supabase.from('tools').select('*'));
   query = sortParams(query, orderBy, ascending);
   if (limit) query = query.limit(limit);
   return handleResponse(await query);
 };
 
 export const getToolsWithCategories = async ({ published = true, orderBy = 'sort_order', ascending = true, limit = 200, filters = {} } = {}) => {
-  let query = supabase.from('tools').select('*, categories(id,name,slug)');
+  let query = excludeRetiredTools(supabase.from('tools').select('*, categories(id,name,slug)'));
   if (published) query = query.eq('status', 'published');
   if (filters?.is_featured !== undefined) query = query.eq('is_featured', filters.is_featured);
   if (filters?.is_trending !== undefined) query = query.eq('is_trending', filters.is_trending);
@@ -413,30 +421,9 @@ export const getCategoryCounts = async ({ categoryIds = [], published = true } =
   const sanitizedCategoryIds = Array.isArray(categoryIds) ? categoryIds.filter(Boolean) : [];
   if (sanitizedCategoryIds.length === 0) return {};
 
-  // Use a single RPC call to fetch grouped counts for published tools.
-  // The RPC `get_published_tool_counts` is defined in `supabase_schema.sql` and
-  // returns rows: { category_id, published_tool_count }.
-  try {
-    const params = { ids: sanitizedCategoryIds };
-    const { data, error } = await supabase.rpc('get_published_tool_counts', params);
-    if (error) {
-      console.error('getCategoryCounts RPC error:', error);
-      // fallback to per-category counting if RPC fails
-    } else if (Array.isArray(data)) {
-      const map = {};
-      data.forEach((r) => {
-        if (r && r.category_id) map[r.category_id] = Number(r.published_tool_count || 0);
-      });
-      return map;
-    }
-  } catch (err) {
-    console.error('getCategoryCounts unexpected error:', err);
-  }
-
-  // RPC unavailable or errored: fall back to per-category head count requests
   const counts = {};
   await Promise.all(sanitizedCategoryIds.map(async (id) => {
-    let q = supabase.from('tools').select('id', { count: 'exact', head: true }).eq('category_id', id);
+    let q = excludeRetiredTools(supabase.from('tools').select('id', { count: 'exact', head: true })).eq('category_id', id);
     if (published) q = q.eq('status', 'published');
     const res = await q;
     counts[id] = (res && typeof res.count === 'number') ? res.count : 0;
@@ -620,18 +607,19 @@ export const getSiteSettings = async () => {
 
 export const searchTools = async (searchQuery, { limit = 8 } = {}) => {
   if (!searchQuery) return [];
-  const query = supabase
+  let query = supabase
     .from('tools')
     .select('*')
     .eq('status', 'published')
     .or(
       `name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`
-    )
-    .limit(limit);
+    );
+  query = excludeRetiredTools(query).limit(limit);
   return handleResponse(await query);
 };
 
 export const createTool = async (tool) => {
+  if (isRetiredToolSlug(tool?.slug)) return [];
   const result = await supabase.from('tools').insert([{ ...tool }]);
   return handleResponse(result);
 };
@@ -738,6 +726,7 @@ export const deleteSiteSetting = async (id) => {
 };
 
 export const getToolBySlug = async (slug) => {
+  if (isRetiredToolSlug(slug)) return null;
   const result = await supabase.from('tools').select('*').eq('slug', slug).maybeSingle();
   if (result.error) {
     console.error('getToolBySlug error:', result.error)
@@ -765,7 +754,7 @@ export const updateToolUsage = async (id, usage_count) => {
 };
 
 export const getTotalUsageCount = async () => {
-  const result = await supabase.from('tools').select('usage_count').eq('status', 'published');
+  const result = await excludeRetiredTools(supabase.from('tools').select('usage_count')).eq('status', 'published');
   const data = handleResponse(result);
   return data.reduce((total, tool) => total + (tool.usage_count || 0), 0);
 };

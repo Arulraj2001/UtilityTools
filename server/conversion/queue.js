@@ -1,5 +1,5 @@
 import { config } from './config.js';
-import { convertPdfToWord, convertWordToPdf } from './engines.js';
+import { convertWordToPdf } from './engines.js';
 import { logger } from './logger.js';
 import { cleanupExpiredJobs, removeJobFiles } from './storage.js';
 
@@ -80,9 +80,7 @@ async function processJob(job) {
       inputName: job.originalName,
     });
 
-    if (job.conversionType === 'pdf-to-word') {
-      await convertPdfToWord(job, update);
-    } else if (job.conversionType === 'word-to-pdf') {
+    if (job.conversionType === 'word-to-pdf') {
       await convertWordToPdf(job, update);
     } else {
       throw new Error(`Unsupported conversion type: ${job.conversionType}`);
