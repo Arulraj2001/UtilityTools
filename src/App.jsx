@@ -41,6 +41,7 @@ const AdminLayout = lazy(() => import('./components/admin/AdminLayout'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const AdminTools = lazy(() => import('./pages/admin/AdminTools'))
 const AdminBlog = lazy(() => import('./pages/admin/AdminBlog'))
+const AdminBlogImport = lazy(() => import('./pages/admin/AdminBlogImport'))
 const AdminCategories = lazy(() => import('./pages/admin/AdminCategories'))
 const AdminBlogCategories = lazy(() => import('./pages/admin/AdminBlogCategories'))
 const AdminJobCategories = lazy(() => import('./pages/admin/AdminJobCategories'))
@@ -126,6 +127,7 @@ const AuthenticatedApp = () => {
           <Route path="jobs" element={wrap(<AdminJobs />)} />
           <Route path="job-categories" element={wrap(<AdminJobCategories />)} />
           <Route path="blog" element={wrap(<AdminBlog />)} />
+          <Route path="blog-import" element={wrap(<AdminBlogImport />)} />
           <Route path="blog-categories" element={wrap(<AdminBlogCategories />)} />
           <Route path="categories" element={wrap(<AdminCategories />)} />
           <Route path="workflow-pages" element={wrap(<AdminWorkflowPages />)} />

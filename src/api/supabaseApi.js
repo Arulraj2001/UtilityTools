@@ -944,3 +944,119 @@ export const searchBlogs = async (term, { limit = 8 } = {}) => {
   const result = await supabase.from('blog_posts').select('*').eq('status', 'published').or(`title.ilike.%${q}%,excerpt.ilike.%${q}%,content.ilike.%${q}%`).limit(limit);
   return handleResponse(result);
 };
+
+/* ─────────────────────── Blog Bulk Import / Export ─────────────────────── */
+
+/**
+ * Check which slugs from the provided list already exist in blog_posts.
+ * Batched in groups of 100 to stay under URL length limits.
+ */
+export const checkExistingBlogSlugs = async (slugs = []) => {
+  if (!slugs.length) return [];
+  const BATCH = 100;
+  const found = [];
+  for (let i = 0; i < slugs.length; i += BATCH) {
+    const chunk = slugs.slice(i, i + BATCH);
+    const res = await supabase.from('blog_posts').select('id, slug, title').in('slug', chunk);
+    if (!res.error && res.data) found.push(...res.data);
+  }
+  return found;
+};
+
+/**
+ * Batch-insert posts in chunks of 100.
+ * Returns { inserted: [{id, title, slug}], errors: [{title, error}] }
+ * onProgress(n) is called with the number of posts processed per batch.
+ */
+export const bulkCreateBlogPosts = async (posts, onProgress) => {
+  const CHUNK = 100;
+  const inserted = [];
+  const errors = [];
+
+  for (let i = 0; i < posts.length; i += CHUNK) {
+    const chunk = posts.slice(i, i + CHUNK);
+    const res = await supabase.from('blog_posts').insert(chunk).select('id, title, slug');
+
+    if (res.error) {
+      // Batch rejected — try one-by-one so we isolate the bad row
+      for (const post of chunk) {
+        const single = await supabase.from('blog_posts').insert([post]).select('id, title, slug').single();
+        if (single.error) {
+          errors.push({ title: post.title, slug: post.slug, error: single.error.message });
+        } else if (single.data) {
+          inserted.push(single.data);
+        }
+        onProgress?.(1);
+      }
+    } else {
+      inserted.push(...(res.data ?? []));
+      onProgress?.(chunk.length);
+    }
+  }
+
+  return { inserted, errors };
+};
+
+/* ────────────── Import History (requires blog_import_history table) ──────── */
+
+export const createImportHistory = async (record) => {
+  const res = await supabase.from('blog_import_history').insert([{ ...record }]).select();
+  if (res.error) {
+    logSupabaseError('createImportHistory', res.error, record);
+    throw res.error;
+  }
+  return res.data ?? [];
+};
+
+export const getImportHistory = async ({ limit = 50 } = {}) => {
+  const res = await supabase
+    .from('blog_import_history')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (res.error) {
+    // Table may not exist yet — degrade gracefully
+    console.warn('getImportHistory:', res.error.message);
+    return [];
+  }
+  return res.data ?? [];
+};
+
+export const updateImportHistory = async (id, data) => {
+  if (!id) return [];
+  const res = await supabase
+    .from('blog_import_history')
+    .update({ ...data, updated_at: new Date() })
+    .eq('id', id);
+  if (res.error) logSupabaseError('updateImportHistory', res.error, { id, ...data });
+  return res.data ?? [];
+};
+
+export const deleteImportHistory = async (id) => {
+  const res = await supabase.from('blog_import_history').delete().eq('id', id);
+  if (res.error) logSupabaseError('deleteImportHistory', res.error, { id });
+  return res.data ?? [];
+};
+
+/**
+ * Delete all posts that were created by a specific import and mark it rolled back.
+ * importedIds must be the array stored in blog_import_history.imported_ids.
+ */
+export const rollbackImport = async (importId, importedIds = []) => {
+  if (!importedIds.length) return { deleted: 0 };
+
+  const BATCH = 200;
+  let deleted = 0;
+  for (let i = 0; i < importedIds.length; i += BATCH) {
+    const chunk = importedIds.slice(i, i + BATCH);
+    const res = await supabase.from('blog_posts').delete().in('id', chunk);
+    if (res.error) {
+      logSupabaseError('rollbackImport', res.error, { importId, chunk });
+      throw res.error;
+    }
+    deleted += chunk.length;
+  }
+
+  await updateImportHistory(importId, { status: 'rolled_back' });
+  return { deleted };
+};

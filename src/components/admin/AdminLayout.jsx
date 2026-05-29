@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { 
+import {
   LayoutDashboard, Wrench, BookOpen, FolderOpen,
   Settings, LinkIcon, Megaphone, Download, Sparkles,
-  ChevronLeft, ChevronRight, Menu, LogOut
+  ChevronLeft, ChevronRight, Menu, LogOut, FileUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -13,6 +13,7 @@ const navItems = [
   { to: '/admin/tools', label: 'Tools', icon: Wrench },
   { to: '/admin/seeder', label: 'Tool Seeder', icon: Download },
   { to: '/admin/blog', label: 'Blog Posts', icon: BookOpen },
+  { to: '/admin/blog-import', label: 'Blog Import', icon: FileUp },
   { to: '/admin/jobs', label: 'Jobs', icon: FolderOpen },
   { to: '/admin/job-categories', label: 'Job Categories', icon: FolderOpen },
   { to: '/admin/blog-categories', label: 'Blog Categories', icon: FolderOpen },
