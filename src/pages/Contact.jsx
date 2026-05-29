@@ -102,7 +102,10 @@ export default function Contact() {
           <h2 className="text-xl font-semibold mb-3">What you can reach us about</h2>
           <ul className="space-y-2">
             {reachUsItems.map((item) => (
-              <li key={item} className="flex items-start gap-2 text-muted-foreground leading-relaxed">
+              <li
+                key={item}
+                className="rounded-lg bg-muted/40 hover:bg-muted/70 p-3 flex gap-3 items-start text-muted-foreground leading-relaxed transition-colors"
+              >
                 <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                 {item}
               </li>
@@ -114,7 +117,7 @@ export default function Contact() {
           {/* Contact form */}
           <form
             onSubmit={handleSubmit}
-            className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8 space-y-5"
+            className="rounded-xl border border-border/60 bg-card/80 p-6 sm:p-8 space-y-5"
           >
             <h2 className="text-xl font-semibold mb-1">Send a message</h2>
 
@@ -153,7 +156,11 @@ export default function Contact() {
               />
             </div>
 
-            <Button type="submit" disabled={sending} className="w-full sm:w-auto">
+            <Button
+              type="submit"
+              disabled={sending}
+              className="w-full sm:w-auto focus-visible:ring-offset-2"
+            >
               <Send className="w-4 h-4 mr-2" />
               {sending ? 'Sending...' : 'Send message'}
             </Button>
@@ -166,9 +173,9 @@ export default function Contact() {
 
           {/* Sidebar info cards */}
           <aside className="space-y-5">
-            <section className="rounded-lg border border-border/60 bg-card/80 p-6">
+            <section className="rounded-xl border border-border/60 bg-card/80 p-6">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <Mail className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -178,7 +185,7 @@ export default function Contact() {
                   </p>
                   <a
                     href={`mailto:${contactEmail}`}
-                    className="text-sm font-medium text-primary hover:underline"
+                    className="text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
                   >
                     {contactEmail}
                   </a>
@@ -186,9 +193,9 @@ export default function Contact() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-border/60 bg-card/80 p-6">
+            <section className="rounded-xl border border-border/60 bg-card/80 p-6">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <Clock className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -200,9 +207,9 @@ export default function Contact() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-border/60 bg-card/80 p-6">
+            <section className="rounded-xl border border-border/60 bg-card/80 p-6">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <MessageSquare className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -215,9 +222,9 @@ export default function Contact() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-border/60 bg-card/80 p-6">
+            <section className="rounded-xl border border-border/60 bg-card/80 p-6">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -240,7 +247,10 @@ export default function Contact() {
           </div>
           <div className="space-y-6">
             {faqItems.map((item) => (
-              <div key={item.question} className="rounded-lg border border-border/60 bg-card/80 p-6">
+              <div
+                key={item.question}
+                className="rounded-xl border border-border/60 bg-card/80 p-6 hover:border-primary/20 transition-colors"
+              >
                 <p className="font-semibold mb-2">{item.question}</p>
                 <p className="text-muted-foreground leading-relaxed">{item.answer}</p>
               </div>

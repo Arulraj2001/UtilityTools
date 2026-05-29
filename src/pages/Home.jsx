@@ -491,6 +491,8 @@ export default function Home() {
   } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ orderBy: 'sort_order', ascending: true, limit: 50 }),
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
     retry: false,
   })
 
@@ -501,6 +503,8 @@ export default function Home() {
     queryKey: ['category-counts', categories.map(c => c.id)],
     enabled: categories.length > 0,
     queryFn: () => getCategoryCounts({ categoryIds: categories.map(c => c.id) }),
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
     retry: false,
   })
 

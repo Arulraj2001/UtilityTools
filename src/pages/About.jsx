@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import StaticPageSEO from '@/components/seo/StaticPageSEO'
 
@@ -81,6 +80,7 @@ export default function About() {
 
         {/* Page header */}
         <header className="mb-12">
+          <span className="text-sm font-semibold text-primary mb-3 inline-block">About</span>
           <h1 className="text-3xl font-bold mb-4">About QuickUtils</h1>
           <p className="text-muted-foreground leading-relaxed text-lg">
             QuickUtils is a free online utility tools website. It brings together 150+ task-focused
@@ -90,7 +90,7 @@ export default function About() {
         </header>
 
         {/* What is QuickUtils */}
-        <section className="rounded-lg border border-border/60 bg-card/80 p-6 mb-8">
+        <section className="rounded-xl border border-border/60 border-l-4 border-l-primary/40 bg-card/80 p-6 mb-8">
           <h2 className="text-xl font-semibold mb-3">What is QuickUtils?</h2>
           <div className="space-y-4 text-muted-foreground leading-relaxed">
             <p>
@@ -115,7 +115,7 @@ export default function About() {
         </section>
 
         {/* Who QuickUtils is for */}
-        <section className="rounded-lg border border-border/60 bg-card/80 p-6 mb-8">
+        <section className="rounded-xl border border-border/60 border-l-4 border-l-primary/40 bg-card/80 p-6 mb-8">
           <h2 className="text-xl font-semibold mb-3">Who QuickUtils is for</h2>
           <p className="text-muted-foreground leading-relaxed mb-5">
             The tools are built for anyone who runs into a common file, calculation, or data task
@@ -125,7 +125,7 @@ export default function About() {
             {audiences.map((item) => (
               <div
                 key={item.heading}
-                className="rounded-lg border border-border/60 bg-background p-4"
+                className="rounded-lg border border-border/60 bg-background p-4 hover:border-primary/20 hover:bg-card transition-colors duration-200"
               >
                 <p className="text-sm font-semibold mb-1">{item.heading}</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">{item.detail}</p>
@@ -135,7 +135,7 @@ export default function About() {
         </section>
 
         {/* Tool categories */}
-        <section className="rounded-lg border border-border/60 bg-card/80 p-6 mb-8">
+        <section className="rounded-xl border border-border/60 border-l-4 border-l-primary/40 bg-card/80 p-6 mb-8">
           <h2 className="text-xl font-semibold mb-3">Tool categories</h2>
           <p className="text-muted-foreground leading-relaxed mb-5">
             QuickUtils organises its tools into six main categories:
@@ -143,23 +143,29 @@ export default function About() {
           <ul className="space-y-4">
             {toolCategories.map((cat) => (
               <li key={cat.name}>
-                <span className="font-semibold text-sm">{cat.name} — </span>
+                <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-semibold mr-2">{cat.name}</span>
                 <span className="text-sm text-muted-foreground leading-relaxed">{cat.description}</span>
               </li>
             ))}
           </ul>
           <div className="mt-6 flex flex-wrap gap-4">
-            <Link to="/tools" className="text-primary hover:underline text-sm font-medium">
+            <Link
+              to="/tools"
+              className="text-primary hover:underline text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:rounded"
+            >
               Browse all tools
             </Link>
-            <Link to="/categories" className="text-primary hover:underline text-sm font-medium">
+            <Link
+              to="/categories"
+              className="text-primary hover:underline text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:rounded"
+            >
               View by category
             </Link>
           </div>
         </section>
 
         {/* Our approach */}
-        <section className="rounded-lg border border-border/60 bg-card/80 p-6 mb-8">
+        <section className="rounded-xl border border-border/60 border-l-4 border-l-primary/40 bg-card/80 p-6 mb-8">
           <h2 className="text-xl font-semibold mb-3">Our approach</h2>
           <div className="space-y-4 text-muted-foreground leading-relaxed">
             <p>
@@ -184,17 +190,22 @@ export default function About() {
         </section>
 
         {/* Get in touch */}
-        <section className="mt-12 pt-8 border-t border-border/50">
-          <h2 className="text-xl font-semibold mb-3">Get in touch</h2>
-          <p className="text-muted-foreground leading-relaxed mb-4">
-            If a tool produces an unexpected result, a page has unclear instructions, or you have
-            a suggestion for a new utility, the QuickUtils team is happy to hear from you. When
-            reporting an issue, including the tool name, the URL of the page, and a brief
-            description of what happened helps resolve it faster.
-          </p>
-          <Link to="/contact" className="text-primary hover:underline text-sm font-medium">
-            Contact QuickUtils
-          </Link>
+        <section className="mt-12">
+          <div className="rounded-xl border border-border/60 bg-card/80 p-6">
+            <h2 className="text-xl font-semibold mb-3">Get in touch</h2>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              If a tool produces an unexpected result, a page has unclear instructions, or you have
+              a suggestion for a new utility, the QuickUtils team is happy to hear from you. When
+              reporting an issue, including the tool name, the URL of the page, and a brief
+              description of what happened helps resolve it faster.
+            </p>
+            <Link
+              to="/contact"
+              className="text-primary hover:underline text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:rounded"
+            >
+              Contact QuickUtils
+            </Link>
+          </div>
         </section>
 
       </div>

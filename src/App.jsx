@@ -68,7 +68,9 @@ const AuthenticatedApp = () => {
 
   useSupabaseRealtime(shouldEnableRealtime);
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  // Only block rendering for admin routes while auth is loading.
+  // Public routes render immediately; auth resolves in the background.
+  if (isAdminRoute && isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -82,7 +84,7 @@ const AuthenticatedApp = () => {
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
+    } else if (isAdminRoute && authError.type === 'auth_required') {
       navigateToLogin();
       return null;
     }
@@ -143,7 +145,7 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <SplashScreen duration={800} />
+        <SplashScreen duration={300} />
         <SiteThemeSettings />
         <Router>
           <BackgroundLighting />

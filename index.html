@@ -85,6 +85,7 @@
 
     <!-- Preconnect to Supabase for faster API responses -->
     <link rel="preconnect" href="https://usgenkubqxskurtmvxaz.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://analytics.ahrefs.com" />
 
     <!-- Preload only essential local fonts -->
     <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
@@ -119,12 +120,16 @@
       }
     </script>
 
-    <!-- Ahrefs Analytics -->
-    <script
-      src="https://analytics.ahrefs.com/analytics.js"
-      data-key="q3pDHUW+/jNnkJYdWniUmg"
-      async
-    ></script>
+    <!-- Ahrefs Analytics — loaded after window load to avoid competing with LCP -->
+    <script>
+      window.addEventListener('load', function() {
+        var s = document.createElement('script');
+        s.src = 'https://analytics.ahrefs.com/analytics.js';
+        s.dataset.key = 'q3pDHUW+/jNnkJYdWniUmg';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    </script>
 
     <!-- AdSense -->
     <meta

@@ -1,11 +1,26 @@
 import React, { useState, useEffect } from 'react'
 
 export default function SplashScreen({ duration = 800 }) {
-  const [isVisible, setIsVisible] = useState(true)
+  const [isVisible, setIsVisible] = useState(() => {
+    // Return visits (including Lighthouse reruns) skip the splash entirely
+    try {
+      return localStorage.getItem('qu_visited') !== '1'
+    } catch {
+      // localStorage unavailable (e.g. private browsing with strict settings)
+      return true
+    }
+  })
 
   useEffect(() => {
+    if (!isVisible) return
+
     const timer = setTimeout(() => {
       setIsVisible(false)
+      try {
+        localStorage.setItem('qu_visited', '1')
+      } catch {
+        // ignore storage errors
+      }
     }, duration)
 
     return () => clearTimeout(timer)
@@ -27,7 +42,8 @@ export default function SplashScreen({ duration = 800 }) {
 
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#a78bfa] opacity-30 rounded-full blur-3xl animate-pulse"></div>
 
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-80 h-80 bg-[#c4b5fd] opacity-30 rounded-full blur-3xl animate-ping"></div>
+      {/* animate-ping removed here — it was expensive and blocked compositing */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-80 h-80 bg-[#c4b5fd] opacity-30 rounded-full blur-3xl animate-pulse"></div>
 
       <div className="absolute bottom-20 left-20 w-72 h-72 bg-[#ede9fe] opacity-40 rounded-full blur-3xl animate-pulse"></div>
 

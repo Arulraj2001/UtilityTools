@@ -776,6 +776,12 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://quickutils.page/tool/amazon-fee-calculator</loc>
+    <lastmod>2026-05-29T02:38:32.932Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://quickutils.page/tool/background-remover</loc>
     <lastmod>2026-05-26T10:40:01.689Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -784,12 +790,6 @@
   <url>
     <loc>https://quickutils.page/tool/sgpa-calculator</loc>
     <lastmod>2026-05-26T10:35:46.973Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://quickutils.page/tool/amazon-fee-calculator</loc>
-    <lastmod>2026-05-29T01:12:45.102Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Star, TrendingUp, ArrowRight } from 'lucide-react';
+import { Star, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useLocalStorage } from '@/lib/useLocalStorage';
 import { getIcon } from '@/lib/iconMap';
@@ -20,13 +19,14 @@ export default function ToolCard({ tool, index = 0, categoryName }) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.35 }}
-      className="h-full"
+    <div
+      className="h-full animate-fade-in-up"
+      style={{ animationDelay: `${index * 40}ms` }}
     >
-      <Link to={`/tool/${encodeURIComponent(tool.slug)}`} className="group block h-full">
+      <Link
+        to={`/tool/${encodeURIComponent(tool.slug)}`}
+        className="group block h-full rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+      >
         <div className="relative h-full p-5 rounded-3xl bg-card border border-border/50 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden premium-card panel-highlight">
           {/* Hover gradient */}
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/4 to-accent/4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
@@ -50,7 +50,7 @@ export default function ToolCard({ tool, index = 0, categoryName }) {
                 <button
                   onClick={toggleBookmark}
                   aria-label={isBookmarked ? 'Remove from saved tools' : 'Save tool'}
-                  className="min-h-11 min-w-11 flex items-center justify-center rounded-lg hover:bg-muted transition-colors"
+                  className="min-h-11 min-w-11 flex items-center justify-center rounded-lg hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:rounded-lg"
                 >
                   <Star className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/50'}`} />
                 </button>
@@ -64,12 +64,15 @@ export default function ToolCard({ tool, index = 0, categoryName }) {
               {tool.description}
             </p>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pt-4 border-t border-border/30">
               <div className="flex items-center gap-2">
                 {categoryName && (
-                  <span className="text-xs text-muted-foreground/80 bg-muted px-2.5 py-1 rounded-lg font-medium">
+                  <span className="text-xs text-muted-foreground/80 bg-muted px-2.5 py-1 rounded-full border border-border/50 font-medium">
                     {categoryName}
                   </span>
+                )}
+                {categoryName && tool.usage_count > 100 && (
+                  <span className="w-1 h-1 rounded-full bg-muted-foreground/40 flex-shrink-0" />
                 )}
                 {tool.usage_count > 100 && (
                   <span className="text-xs text-muted-foreground">
@@ -78,12 +81,12 @@ export default function ToolCard({ tool, index = 0, categoryName }) {
                 )}
               </div>
               <div className="w-6 h-6 rounded-lg bg-primary/0 group-hover:bg-primary/10 flex items-center justify-center transition-all">
-                <ArrowRight className="w-3.5 h-3.5 text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                <ArrowRight className="w-3.5 h-3.5 text-primary opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
               </div>
             </div>
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }

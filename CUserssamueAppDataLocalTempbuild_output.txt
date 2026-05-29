@@ -1,0 +1,26 @@
+
+> utility-tools-app@0.0.0 build
+> npm run setup-pdf-worker && vite build && npm run generate-sitemap
+
+
+> utility-tools-app@0.0.0 setup-pdf-worker
+> node scripts/setup-pdf-worker.js
+
+✓ Copied PDF worker (mjs): C:\Users\samue\OneDrive\Desktop\New folder\New folder\UtilityTools\public\pdf.worker.min.mjs
+
+> utility-tools-app@0.0.0 generate-sitemap
+> node scripts/generate-sitemap.js
+
+◇ injected env (20) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Generating sitemap...
+Using Supabase URL: https://usgenkubqxskurtmvxaz.supabase.co
+Using Site URL: https://quickutils.page
+Tools loaded: 153
+Categories loaded: 16
+Blog posts loaded: 19
+Workflow pages loaded: 5
+Jobs loaded: 1
+Sitemap written successfully:
+C:\Users\samue\OneDrive\Desktop\New folder\New folder\UtilityTools\public\sitemap.xml
+Total URLs: 205
+robots.txt already contains sitemap

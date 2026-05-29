@@ -31,8 +31,8 @@ const TRUST_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border/50 bg-card/60 backdrop-blur-sm pb-3 pl-8 pr-10 pt-10">
-      <div className="max-w-7xl mx-auto sm:px-6 px-4">
+    <footer className="border-t border-border/50 bg-card/60 backdrop-blur-sm pt-12 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>
             <Link to="/" className="flex items-center gap-2.5 mb-4 group">
@@ -57,13 +57,13 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-bold text-sm mb-4 uppercase tracking-wide text-foreground">Popular Tools</h4>
+            <h4 className="font-bold text-sm mb-4 uppercase tracking-widest text-foreground">Popular Tools</h4>
             <div className="flex flex-col gap-2">
               {TOOL_LINKS.map(({ to, label }) => (
                 <Link
                   key={to}
                   to={to}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 group"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors hover:translate-x-0.5 transition-transform flex items-center gap-1 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:rounded"
                 >
                   <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   {label}
@@ -73,10 +73,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-bold text-sm mb-4 uppercase tracking-wide text-foreground">Explore</h4>
+            <h4 className="font-bold text-sm mb-4 uppercase tracking-widest text-foreground">Explore</h4>
             <div className="flex flex-col gap-2">
               {EXPLORE_LINKS.map(({ to, label }) => (
-                <Link key={to} to={to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  key={to}
+                  to={to}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors hover:translate-x-0.5 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:rounded"
+                >
                   {label}
                 </Link>
               ))}
@@ -84,15 +88,19 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-bold text-sm mb-4 uppercase tracking-wide text-foreground">Trust & Policies</h4>
+            <h4 className="font-bold text-sm mb-4 uppercase tracking-widest text-foreground">Trust & Policies</h4>
             <div className="flex flex-col gap-2">
               {TRUST_LINKS.map(({ to, label }) => (
-                <Link key={to} to={to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  key={to}
+                  to={to}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors hover:translate-x-0.5 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:rounded"
+                >
                   {label}
                 </Link>
               ))}
             </div>
-            <div className="mt-6 rounded-lg border border-border/60 bg-background/70 p-4">
+            <div className="mt-6 rounded-lg border border-border/60 bg-background/70 p-4 hover:border-primary/20 transition-colors">
               <p className="text-xs font-semibold text-foreground mb-1">Simple utility tools</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Review important outputs before using them for official, financial, health, or legal decisions.
@@ -101,13 +109,16 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-border/50 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
-            Copyright {new Date().getFullYear()} QuickUtils. All rights reserved.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Built for useful, everyday web work.
-          </p>
+        <div className="mt-12">
+          <hr className="border-0 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent mb-6" />
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              Copyright {new Date().getFullYear()} QuickUtils. All rights reserved.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Built for useful, everyday web work.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

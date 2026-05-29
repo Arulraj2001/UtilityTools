@@ -25,7 +25,7 @@ export default function HeroSection({ toolCount }) {
   }
 
   return (
-    <section className="relative overflow-hidden py-24 sm:py-32">
+    <section className="relative overflow-hidden py-20 sm:py-28">
       <div className="absolute inset-0 hero-visual-bg" />
       <div className="absolute inset-0 hero-grid-pattern pointer-events-none" />
       <div className="hidden md:block absolute top-10 left-[8%] w-72 h-72 rounded-full bg-primary/12 blur-3xl animate-float pointer-events-none" />
@@ -35,7 +35,7 @@ export default function HeroSection({ toolCount }) {
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
         <div className="transition-opacity duration-500 ease-out">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-8 shadow-sm">
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-semibold text-primary">
               {toolCount}+ free tools for common online tasks
@@ -66,6 +66,7 @@ export default function HeroSection({ toolCount }) {
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Search for any tool..."
+                  aria-label="Search QuickUtils tools"
                   className="border-0 focus-visible:ring-0 text-base h-13 bg-transparent py-3.5 relative z-10"
                 />
                 <Button type="submit" aria-label="Search tools" className="mr-1.5 rounded-xl h-9 px-5 bg-primary hover:bg-primary/90 shadow-sm z-10">
@@ -81,29 +82,31 @@ export default function HeroSection({ toolCount }) {
                 key={link}
                 type="button"
                 onClick={() => navigate(`/tools?q=${encodeURIComponent(link)}`)}
-                className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border/50 transition-colors motion-safe:transform-gpu motion-safe:transition-transform hover:scale-[1.02] active:scale-95"
+                className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border/50 transition-colors motion-safe:transform-gpu motion-safe:transition-transform hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:rounded-full"
               >
                 {link}
               </button>
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 py-2">
               <Zap className="w-4 h-4 text-yellow-500" />
               <span>Fast tools for routine tasks</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 py-2">
               <Lock className="w-4 h-4 text-green-500" />
               <span>Browser-side processing where supported</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 py-2">
               <Shield className="w-4 h-4 text-blue-500" />
               <span>No sign-up for most public tools</span>
             </div>
           </div>
         </div>
       </div>
+
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent pointer-events-none" />
     </section>
   )
 }
