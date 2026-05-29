@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getSiteSettings } from '@/api/supabaseApi'
 
@@ -83,14 +83,21 @@ const applySpotlightCss = ({ enabled, colorLight, colorDark, blur, opacity, inte
 }
 
 export function SiteThemeSettings() {
+  const [deferred, setDeferred] = useState(false)
+
+  useEffect(() => {
+    setDeferred(true)
+  }, [])
+
   const { data: settings = [] } = useQuery({
     queryKey: ['settings'],
     queryFn: () => getSiteSettings(),
     staleTime: 1000 * 60 * 5,
+    enabled: deferred,
   })
 
   useEffect(() => {
-    applySpotlightCss(buildSpotlightConfig(settings))
+    if (settings.length > 0) applySpotlightCss(buildSpotlightConfig(settings))
   }, [settings])
 
   return null

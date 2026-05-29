@@ -49,7 +49,8 @@ export default function ToolCard({ tool, index = 0, categoryName }) {
                 )}
                 <button
                   onClick={toggleBookmark}
-                  className="p-1 rounded-lg hover:bg-muted transition-colors"
+                  aria-label={isBookmarked ? 'Remove from saved tools' : 'Save tool'}
+                  className="min-h-11 min-w-11 flex items-center justify-center rounded-lg hover:bg-muted transition-colors"
                 >
                   <Star className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/50'}`} />
                 </button>

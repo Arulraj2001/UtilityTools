@@ -87,6 +87,11 @@ export default function AdBanner({ placement = 'in_content', pageType, className
   const containerRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const [shouldLoadAd, setShouldLoadAd] = useState(false)
   const [activeAdRender, setActiveAdRender] = useState(false)
+  const [deferred, setDeferred] = useState(false)
+
+  useEffect(() => {
+    setDeferred(true)
+  }, [])
 
   const { data: ads = [] } = useQuery({
     queryKey: ['ad-placements', placement, targetPageType],
@@ -96,6 +101,7 @@ export default function AdBanner({ placement = 'in_content', pageType, className
     cacheTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
     keepPreviousData: true,
+    enabled: deferred,
   })
 
   const matchingAd = useMemo(() => {

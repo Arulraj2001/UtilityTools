@@ -79,7 +79,7 @@ export default function Navbar({ onSearchOpen }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group">
+            <Link to="/" aria-label="QuickUtils home" className="flex items-center gap-2.5 group">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg group-hover:shadow-primary/30 transition-shadow">
                 <Wrench className="w-5 h-5 text-white" />
               </div>
@@ -114,6 +114,7 @@ export default function Navbar({ onSearchOpen }) {
                 variant="ghost"
                 size="icon"
                 onClick={onSearchOpen}
+                aria-label="Search tools"
                 className="rounded-xl h-11 w-11 flex items-center justify-center"
               >
                 <Search className="w-5 h-5" />
@@ -124,6 +125,7 @@ export default function Navbar({ onSearchOpen }) {
                 variant="ghost"
                 size="icon"
                 onClick={toggle}
+                aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                 className="rounded-xl h-11 w-11 flex items-center justify-center"
               >
                 {isDark ? (
@@ -133,21 +135,23 @@ export default function Navbar({ onSearchOpen }) {
                 )}
               </Button>
 
-              {/* Home */}
-              <Link to="/">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-xl h-11 w-11 flex items-center justify-center"
-                >
-                  <Home className="w-5 h-5" />
-                </Button>
-              </Link>
+              {/* Home — use asChild to avoid invalid a>button nesting */}
+              <Button
+                asChild
+                variant="ghost"
+                size="icon"
+                aria-label="Go to homepage"
+                className="rounded-xl h-11 w-11 flex items-center justify-center"
+              >
+                <Link to="/"><Home className="w-5 h-5" /></Link>
+              </Button>
 
               {/* Mobile Menu Button */}
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={mobileOpen}
                 className="md:hidden rounded-xl h-11 w-11 flex items-center justify-center"
                 onClick={() => setMobileOpen(!mobileOpen)}
               >

@@ -68,7 +68,7 @@ export default function HeroSection({ toolCount }) {
                   placeholder="Search for any tool..."
                   className="border-0 focus-visible:ring-0 text-base h-13 bg-transparent py-3.5 relative z-10"
                 />
-                <Button type="submit" className="mr-1.5 rounded-xl h-9 px-5 bg-primary hover:bg-primary/90 shadow-sm z-10">
+                <Button type="submit" aria-label="Search tools" className="mr-1.5 rounded-xl h-9 px-5 bg-primary hover:bg-primary/90 shadow-sm z-10">
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>

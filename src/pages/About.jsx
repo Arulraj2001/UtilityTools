@@ -1,136 +1,202 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import StaticPageSEO, { SITE_URL, buildBreadcrumbSchema } from '@/components/seo/StaticPageSEO'
+import StaticPageSEO from '@/components/seo/StaticPageSEO'
 
-const aboutDescription =
-  'Learn what QuickUtils is, who it helps, what tools are available, and how users can report errors or suggest improvements.'
+const toolCategories = [
+  {
+    name: 'PDF Tools',
+    description:
+      'Compress, merge, split, reorder, and convert PDF files entirely in your browser — no upload to a server required for most operations.',
+  },
+  {
+    name: 'Image Tools',
+    description:
+      'Resize, compress, crop, convert, and add watermarks to images, plus check file dimensions and metadata before uploading to a platform.',
+  },
+  {
+    name: 'Calculators',
+    description:
+      'Estimate EMI payments, SIP returns, BMI, volumetric shipping weight, Amazon seller fees, percentage changes, and dozens of other everyday figures.',
+  },
+  {
+    name: 'Developer and SEO Tools',
+    description:
+      'Format and validate JSON, encode and decode URLs, generate meta tags, minify text, and inspect page-level SEO details without leaving the browser.',
+  },
+  {
+    name: 'Government Exam Tools',
+    description:
+      'Resize passport photos and signatures to exact pixel and file-size requirements for UPSC, SSC, banking, and state exam application portals.',
+  },
+  {
+    name: 'Seller and Logistics Tools',
+    description:
+      'Calculate chargeable weight, estimate courier fees, compare shipping rates, and work out Amazon or Flipkart seller margins and net payouts.',
+  },
+]
 
-const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: 'Home', url: `${SITE_URL}/` },
-  { name: 'About', url: `${SITE_URL}/about` },
-])
-
-const toolGroups = [
-  'PDF tools for compression, merging, splitting, conversion, and document cleanup.',
-  'Image tools for resizing, compression, cropping, conversion, metadata checks, and upload preparation.',
-  'Calculators for finance, health, study, dates, percentages, logistics, and everyday estimates.',
-  'Developer and SEO tools for formatting data, generating metadata, encoding URLs, and checking website details.',
-  'Government exam and job application tools for photos, signatures, PDFs, and document requirements.',
-  'Seller and shipping tools for pricing, fees, parcel dimensions, labels, and chargeable weight estimates.',
+const audiences = [
+  {
+    heading: 'Students and exam applicants',
+    detail:
+      'Prepare assignment PDFs, resize passport photos and signatures to portal specifications, compress documents under the required file-size limit, and calculate grades or percentages quickly.',
+  },
+  {
+    heading: 'Job seekers',
+    detail:
+      'Resize application photos to exact dimensions, compress CVs and certificates to email-friendly sizes, and convert documents to the format an employer or portal requires.',
+  },
+  {
+    heading: 'Developers and SEO professionals',
+    detail:
+      'Format and validate JSON payloads, encode query strings, generate open-graph and meta tags, and run quick checks on URLs without switching tools or writing one-off scripts.',
+  },
+  {
+    heading: 'Online sellers',
+    detail:
+      'Calculate Amazon and Flipkart fee breakdowns, estimate volumetric chargeable weight for courier billing, and compare net payouts across shipping options before listing a product.',
+  },
+  {
+    heading: 'Office workers and freelancers',
+    detail:
+      'Merge or split PDF reports, compress scanned documents before emailing, crop or convert images for presentations, and run quick financial estimates without opening a spreadsheet.',
+  },
+  {
+    heading: 'Content creators',
+    detail:
+      'Compress images for faster page loads, convert between formats, check dimensions before uploading to a CMS or social platform, and strip unnecessary metadata from files.',
+  },
 ]
 
 export default function About() {
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14">
+    <div className="min-h-screen bg-background">
       <StaticPageSEO
-        title="About QuickUtils - Free Online Utility Tools"
-        description={aboutDescription}
+        title="About QuickUtils — Free Online Utility Tools"
+        description="Learn about QuickUtils, a free online utility tools website with 150+ tools for PDFs, images, calculators, developer tasks, exam documents, and more."
         path="/about"
-        ogTitle="About QuickUtils"
-        ogDescription="QuickUtils provides practical online tools for PDFs, images, calculators, text, developer tasks, exam documents, sellers, and shipping work."
-        jsonLd={breadcrumbSchema}
       />
 
-      <header className="mb-10">
-        <p className="text-sm font-semibold text-primary mb-3">About QuickUtils</p>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-5">
-          Practical online tools for everyday work
-        </h1>
-        <p className="text-lg text-muted-foreground leading-relaxed">
-          QuickUtils is a free online tools website built to help people finish common digital
-          tasks without installing separate software. The site brings together utility tools for
-          files, images, documents, calculations, text, SEO, development, exam uploads, seller
-          work, and logistics.
-        </p>
-      </header>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16">
 
-      <div className="space-y-8">
-        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
-          <h2 className="text-2xl font-semibold mb-4">What QuickUtils is</h2>
+        {/* Page header */}
+        <header className="mb-12">
+          <h1 className="text-3xl font-bold mb-4">About QuickUtils</h1>
+          <p className="text-muted-foreground leading-relaxed text-lg">
+            QuickUtils is a free online utility tools website. It brings together 150+ task-focused
+            tools for working with PDFs, images, calculations, developer data, exam documents,
+            and seller logistics — all available from a browser without creating an account.
+          </p>
+        </header>
+
+        {/* What is QuickUtils */}
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-3">What is QuickUtils?</h2>
           <div className="space-y-4 text-muted-foreground leading-relaxed">
             <p>
-              QuickUtils is designed as a simple utility hub. Each tool focuses on a specific
-              task, such as compressing a PDF, resizing an image, formatting JSON, estimating a
-              loan payment, preparing an exam photo, or calculating shipping weight.
+              QuickUtils is a collection of single-purpose tools built for everyday digital tasks.
+              Instead of installing desktop software or hunting for a trustworthy site each time,
+              you can open a tool, complete the task, and move on. Every tool page includes a brief
+              explanation of what the tool does, how to use it, and what to check in the output.
             </p>
             <p>
-              The goal is to make common tasks easier to complete from a browser while keeping
-              instructions clear enough for users who may not be technical.
+              Many tools — including PDF compression, image resizing, and JSON formatting — process
+              files directly inside your browser using client-side JavaScript. Your files are not
+              uploaded to a remote server for these operations, which keeps the process fast and
+              private. A small number of conversion tools use a backend server where browser-only
+              processing is not practical; those pages note this clearly.
+            </p>
+            <p>
+              Most tools require no account and no sign-up. You can bookmark individual tools for
+              quicker access on return visits. An account is only needed for administrative access
+              to the site itself.
             </p>
           </div>
         </section>
 
-        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
-          <h2 className="text-2xl font-semibold mb-4">Who QuickUtils helps</h2>
-          <p className="text-muted-foreground leading-relaxed mb-4">
-            The tools are useful for students, job applicants, creators, office workers,
-            developers, freelancers, small business owners, online sellers, logistics teams, and
-            anyone who needs a quick browser-based utility.
+        {/* Who QuickUtils is for */}
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-3">Who QuickUtils is for</h2>
+          <p className="text-muted-foreground leading-relaxed mb-5">
+            The tools are built for anyone who runs into a common file, calculation, or data task
+            and wants to complete it quickly without installing software. Some specific examples:
           </p>
           <div className="grid sm:grid-cols-2 gap-3">
-            {[
-              'Students preparing assignments, marks, study plans, and file uploads.',
-              'Exam applicants resizing photos, signatures, and PDFs for portals.',
-              'Creators optimizing images, checking files, and preparing web assets.',
-              'Developers and SEO users working with data, URLs, metadata, and snippets.',
-              'Sellers estimating pricing, margins, fees, invoices, and shipping costs.',
-              'Everyday users converting, cleaning, counting, calculating, and comparing information.',
-            ].map((item) => (
-              <div key={item} className="rounded-lg border border-border/60 bg-background p-4 text-sm text-muted-foreground leading-relaxed">
-                {item}
+            {audiences.map((item) => (
+              <div
+                key={item.heading}
+                className="rounded-lg border border-border/60 bg-background p-4"
+              >
+                <p className="text-sm font-semibold mb-1">{item.heading}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.detail}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
-          <h2 className="text-2xl font-semibold mb-4">Types of tools available</h2>
-          <ul className="space-y-3 text-muted-foreground leading-relaxed">
-            {toolGroups.map((group) => (
-              <li key={group}>{group}</li>
+        {/* Tool categories */}
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-3">Tool categories</h2>
+          <p className="text-muted-foreground leading-relaxed mb-5">
+            QuickUtils organises its tools into six main categories:
+          </p>
+          <ul className="space-y-4">
+            {toolCategories.map((cat) => (
+              <li key={cat.name}>
+                <span className="font-semibold text-sm">{cat.name} — </span>
+                <span className="text-sm text-muted-foreground leading-relaxed">{cat.description}</span>
+              </li>
             ))}
           </ul>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Link to="/tools" className="text-sm font-medium text-primary hover:text-primary/80">
+          <div className="mt-6 flex flex-wrap gap-4">
+            <Link to="/tools" className="text-primary hover:underline text-sm font-medium">
               Browse all tools
             </Link>
-            <Link to="/categories" className="text-sm font-medium text-primary hover:text-primary/80">
-              View categories
+            <Link to="/categories" className="text-primary hover:underline text-sm font-medium">
+              View by category
             </Link>
           </div>
         </section>
 
-        <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8">
-          <h2 className="text-2xl font-semibold mb-4">Mission and maintenance</h2>
+        {/* Our approach */}
+        <section className="rounded-lg border border-border/60 bg-card/80 p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-3">Our approach</h2>
           <div className="space-y-4 text-muted-foreground leading-relaxed">
             <p>
-              The mission of QuickUtils is to make practical web tools easier to access, easier
-              to understand, and easier to use on both desktop and mobile devices.
+              Each tool page is built around a single task. The page title, instructions, and
+              output labels are written to match how someone would describe the task in plain
+              language, not how a developer might describe the underlying process. Where a tool
+              has known limitations — a maximum file size, a format it cannot handle, or a scenario
+              where the output should be double-checked — that information is shown on the page.
             </p>
             <p>
-              Tool explanations are maintained alongside the tools themselves. When a tool
-              changes, its instructions, examples, limitations, and FAQ content should be
-              reviewed so users understand what the tool does and how to check the output.
+              Browser-side processing is used wherever it is practical. This avoids unnecessary
+              file transfers for sensitive documents such as ID photos, salary slips, or exam
+              forms. When a tool does send data to a server, the page says so.
             </p>
             <p>
-              QuickUtils does not claim that every calculator or file output is perfect for every
-              situation. Important results should be reviewed before they are submitted, shared,
-              or used for decisions.
+              Calculators on QuickUtils produce estimates based on the values you enter and standard
+              formulas. They are useful for planning and comparison, but results should be verified
+              against official sources before being used in financial, medical, or legal decisions.
+              The site does not claim that any calculator output is authoritative.
             </p>
           </div>
         </section>
 
-        <section className="rounded-lg border border-border/60 bg-muted/40 p-6 sm:p-8">
-          <h2 className="text-2xl font-semibold mb-4">Report errors or suggest improvements</h2>
-          <p className="text-muted-foreground leading-relaxed mb-5">
-            If a tool gives an unexpected result, a page has unclear instructions, or you want to
-            suggest a new utility, please contact the QuickUtils team with the tool name, page URL,
-            device or browser details, and a short description of the issue.
+        {/* Get in touch */}
+        <section className="mt-12 pt-8 border-t border-border/50">
+          <h2 className="text-xl font-semibold mb-3">Get in touch</h2>
+          <p className="text-muted-foreground leading-relaxed mb-4">
+            If a tool produces an unexpected result, a page has unclear instructions, or you have
+            a suggestion for a new utility, the QuickUtils team is happy to hear from you. When
+            reporting an issue, including the tool name, the URL of the page, and a brief
+            description of what happened helps resolve it faster.
           </p>
-          <Link to="/contact" className="inline-flex text-sm font-medium text-primary hover:text-primary/80">
+          <Link to="/contact" className="text-primary hover:underline text-sm font-medium">
             Contact QuickUtils
           </Link>
         </section>
+
       </div>
     </div>
   )

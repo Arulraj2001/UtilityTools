@@ -26,6 +26,7 @@ const TRUST_LINKS = [
   { to: '/terms', label: 'Terms of Use' },
   { to: '/disclaimer', label: 'Disclaimer' },
   { to: '/editorial-policy', label: 'Editorial Policy' },
+  { to: '/cookie-policy', label: 'Cookie Policy' },
 ]
 
 export default function Footer() {
