@@ -56,12 +56,11 @@ export default function JobsCategoryPage() {
             </div>
           </div>
           <aside>
-            {/* simple featured widget placeholder */}
-      )
             <div className="rounded-2xl border bg-card p-4">Related resources</div>
           </aside>
         </div>
       </section>
     </main>
+    )
   )
 }

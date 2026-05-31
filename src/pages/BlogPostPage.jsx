@@ -286,12 +286,6 @@ export default function BlogPostPage() {
                   {post.reading_time} min read
                 </span>
               )}
-              {post.author_name && (
-                <span className="flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5" />
-                  {post.author_name}
-                </span>
-              )}
               {post.last_updated_label && (
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5" />

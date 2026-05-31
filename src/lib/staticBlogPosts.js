@@ -222,127 +222,6 @@ export const STATIC_BLOG_POSTS = [
   }),
 
   makePost({
-    slug: 'sgpa-vs-cgpa-vs-gpa',
-    title: 'SGPA vs CGPA vs GPA: What Students Should Know',
-    excerpt:
-      'Understand the difference between SGPA, CGPA, and GPA, and learn when each grade average is used.',
-    categorySlug: 'student-guides',
-    readingTime: 7,
-    tags: ['sgpa', 'cgpa', 'gpa', 'students'],
-    seoTitle: 'SGPA vs CGPA vs GPA: Meaning, Difference, and Examples',
-    seoDescription:
-      'Compare SGPA, CGPA, and GPA in simple terms. Learn what each grade average means, where it is used, and what students should verify.',
-    seoKeywords: 'sgpa vs cgpa, cgpa calculator, sgpa calculator, gpa meaning, marks percentage',
-    content: `
-      <p>SGPA, CGPA, and GPA are all ways to summarize academic performance, but they are not always used in the same way. Students often see these terms in marksheets, transcripts, applications, and scholarship forms. The confusion usually starts because different institutions use different grading systems.</p>
-      <p>This guide explains the common meaning of each term. It is not an official conversion rule. If you need a value for admission, scholarship, employment, or official reporting, verify the formula from your university or the organization requesting the score.</p>
-
-      <h2>What is SGPA?</h2>
-      <p>SGPA stands for Semester Grade Point Average. It usually measures performance in one semester. If your course has six or eight semesters, each semester may have a separate SGPA.</p>
-      <p>SGPA is commonly calculated using subject credits and grade points. A subject with more credits affects the result more than a subject with fewer credits.</p>
-
-      <h2>What is CGPA?</h2>
-      <p>CGPA stands for Cumulative Grade Point Average. It usually combines performance across multiple semesters. For example, after four semesters, your CGPA may summarize all completed semesters up to that point.</p>
-      <p>Some institutions calculate CGPA from semester-level SGPAs. Others calculate it from all subject credits across all semesters. This difference matters, especially when credits are not equal across semesters.</p>
-
-      <h2>What is GPA?</h2>
-      <p>GPA stands for Grade Point Average. It is a general term and may be used in different grading systems, including 4-point and 10-point systems. In some countries, GPA often refers to a term or cumulative average depending on context.</p>
-      <p>If a form asks for GPA, do not assume it means SGPA or CGPA. Check whether the form asks for semester, cumulative, 4-point, 10-point, percentage, or transcript-reported value.</p>
-
-      <h2>Simple comparison</h2>
-      <table>
-        <thead><tr><th>Term</th><th>Usually means</th><th>Common use</th></tr></thead>
-        <tbody>
-          <tr><td>SGPA</td><td>One semester average</td><td>Semester marksheet and performance check</td></tr>
-          <tr><td>CGPA</td><td>Cumulative average across semesters</td><td>Transcript, final result, applications</td></tr>
-          <tr><td>GPA</td><td>General grade point average</td><td>Depends on institution or country</td></tr>
-        </tbody>
-      </table>
-
-      <h2>Example: SGPA and CGPA together</h2>
-      <p>Suppose a student has these semester results:</p>
-      <ul>
-        <li>Semester 1 SGPA: 8.2</li>
-        <li>Semester 2 SGPA: 8.6</li>
-        <li>Semester 3 SGPA: 8.0</li>
-        <li>Semester 4 SGPA: 8.4</li>
-      </ul>
-      <p>If all semesters have equal credit weight, a simple average gives CGPA = (8.2 + 8.6 + 8.0 + 8.4) / 4 = 8.3. If semester credits differ, your institution may use a weighted method instead.</p>
-
-      <h2>Common mistakes students make</h2>
-      <ul>
-        <li>Submitting SGPA when the form asks for CGPA.</li>
-        <li>Converting CGPA to percentage using a random online formula.</li>
-        <li>Ignoring credit weight across semesters.</li>
-        <li>Assuming a 10-point CGPA is directly comparable to a 4-point GPA.</li>
-        <li>Rounding grades differently from the official transcript.</li>
-      </ul>
-
-      <h2>What should you use in applications?</h2>
-      <p>Use the value requested by the application form. If it asks for CGPA, use the official cumulative value from your transcript or result portal. If it asks for percentage, use the official conversion formula from your institution. If no formula is provided, avoid guessing and ask the receiving organization what format they accept.</p>
-
-      <h2>How transcripts usually present grades</h2>
-      <p>A semester marksheet often shows subject grades, credits, and SGPA for that semester. A consolidated transcript may show every semester plus the final CGPA. Some transcripts also include a conversion note, such as a university-approved percentage formula. If that note exists, use it exactly as written.</p>
-      <p>When the transcript does not show a percentage conversion, be careful. Many students search for a general formula such as CGPA x 9.5, but that formula is not universal. It may be accepted in one board or institution and wrong in another.</p>
-
-      <h2>How to avoid reporting mistakes</h2>
-      <ul>
-        <li>Read the form label carefully: semester, cumulative, grade point, percentage, or GPA scale.</li>
-        <li>Use the same decimal places shown in the official record unless the form asks otherwise.</li>
-        <li>Do not convert from a 10-point scale to a 4-point scale unless a recognized conversion method is provided.</li>
-        <li>Keep a copy of the official marksheet or transcript near you while filling applications.</li>
-      </ul>
-
-      <h2>Example: choosing the right value</h2>
-      <p>If a scholarship form asks for "latest semester SGPA", enter the most recent semester's SGPA. If a job form asks for "overall CGPA", enter the cumulative value. If an overseas application asks for "GPA scale", check whether it expects a 4-point GPA, a transcript value, or an evaluation from a credential service.</p>
-      <p>The safest habit is to avoid mental shortcuts. Match the field wording with your official document, and ask for clarification when the form is unclear.</p>
-
-      <h2>Scale confusion: 10-point and 4-point systems</h2>
-      <p>A 10-point grade system and a 4-point GPA system are not automatically interchangeable. A student with 8.5 on a 10-point scale should not simply divide or multiply to create a 4-point GPA unless the receiving institution provides that method. Some applications ask you to report the original scale instead of converting it. In that case, writing 8.5/10 is clearer than inventing a 4-point value.</p>
-      <p>If a form has only one GPA field, look for help text. Many forms mention whether they accept the original transcript value, a percentage, or an evaluated GPA.</p>
-
-      <h2>Record-keeping tip</h2>
-      <p>Keep a small note with your official SGPA, CGPA, grading scale, and any approved percentage formula. Reusing verified values reduces mistakes when filling multiple applications.</p>
-
-      ${relatedToolsHtml([
-        { slug: 'sgpa-calculator', label: 'SGPA Calculator', description: 'check semester averages from credits and grade points' },
-        { slug: 'cgpa-calculator', label: 'CGPA Calculator', description: 'estimate cumulative grade point average' },
-        { slug: 'marks-percentage-calculator', label: 'Marks Percentage Calculator', description: 'calculate marks percentage when totals are known' },
-      ])}
-
-      <h2>Academic disclaimer</h2>
-      <p>This guide explains common usage only. Universities may define SGPA, CGPA, GPA, conversion formulas, and rounding rules differently. Always rely on official documents for admissions, jobs, scholarships, or final reporting.</p>
-    `,
-    faqItems: [
-      {
-        question: 'Is SGPA the same as CGPA?',
-        answer:
-          'No. SGPA usually refers to one semester, while CGPA usually combines multiple semesters or the full course.',
-      },
-      {
-        question: 'Is GPA the same as CGPA?',
-        answer:
-          'Not always. GPA is a general term and may refer to term or cumulative performance depending on the system.',
-      },
-      {
-        question: 'Can I convert CGPA to percentage?',
-        answer:
-          'Only use the conversion formula given by your institution or the receiving organization. Random formulas may be wrong.',
-      },
-      {
-        question: 'Which value should I enter in a job or admission form?',
-        answer:
-          'Enter the value the form asks for. Use official transcript values and official conversion rules whenever possible.',
-      },
-      {
-        question: 'Can semester credits affect CGPA?',
-        answer:
-          'Yes. If semesters have different credit totals, a weighted method may be used instead of a simple average of SGPAs.',
-      },
-    ],
-  }),
-
-  makePost({
     slug: 'how-to-calculate-percentage-of-marks',
     title: 'How to Calculate Percentage of Marks Correctly',
     excerpt:
@@ -1369,7 +1248,7 @@ export function getStaticBlogPostBySlug(slug) {
 // List of static blog post slugs that have been deleted/hidden from public
 // Add any static blog slugs here that you want to hide from the public
 export const DELETED_STATIC_BLOG_SLUGS = new Set([
-  // Example: 'how-to-calculate-sgpa'
+  'sgpa-vs-cgpa-vs-gpa',
 ])
 
 export function mergeBlogPosts(remotePosts = []) {
