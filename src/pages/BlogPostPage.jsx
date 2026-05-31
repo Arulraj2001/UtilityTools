@@ -22,6 +22,7 @@ import { getBlogPostBySlug, getBlogPosts, getBlogCategories, getTools, getCatego
 import KeywordSuggestions from '@/components/seo/KeywordSuggestions'
 import { suggestLinksFromText } from '@/lib/semanticLinker'
 import BlogSEO from '@/components/seo/BlogSEO'
+import { getStaticBlogPostBySlug, mergeBlogCategories, mergeBlogPosts } from '@/lib/staticBlogPosts'
 
 export default function BlogPostPage() {
   const { slug } = useParams()
