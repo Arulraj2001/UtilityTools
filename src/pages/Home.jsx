@@ -9,6 +9,7 @@ const FeaturedTools = lazy(() => import('../components/home/FeaturedTools'))
 const PopularWorkflows = lazy(() => import('../components/home/PopularWorkflows'))
 import AdBanner from '../components/shared/AdBanner'
 import StaticPageSEO, { SITE_URL } from '@/components/seo/StaticPageSEO'
+import { FEATURED_STATIC_BLOG_POSTS } from '@/lib/staticBlogPosts'
 
 const homepageDescription =
   'QuickUtils is a free online tools website for everyday PDF, image, calculator, text, developer, SEO, student, and business tasks.'
