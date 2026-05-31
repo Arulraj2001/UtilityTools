@@ -501,27 +501,6 @@ export default function BlogPostPage() {
             )}
 
             {/* Related Tools */}
-            {(post.author_name || post.author_image || post.author_title || post.author_bio) && (
-              <div className="mb-6">
-                <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-card p-3 shadow-sm">
-                  {post.author_image ? (
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={post.author_image} alt={post.author_name || 'Author'} />
-                    </Avatar>
-                  ) : (
-                    <Avatar className="h-12 w-12">
-                      <AvatarFallback>{(post.author_name || 'A').charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  )}
-
-                  <div className="flex-1 min-w-0">
-                    {post.author_name && <div className="text-sm font-semibold">{post.author_name}</div>}
-                    {post.author_title && <div className="text-xs text-muted-foreground">{post.author_title}</div>}
-                    {post.author_bio && <div className="text-xs text-muted-foreground mt-1 line-clamp-3">{post.author_bio}</div>}
-                  </div>
-                </div>
-              </div>
-            )}
             {relatedTools.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-5">

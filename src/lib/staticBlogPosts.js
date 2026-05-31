@@ -1366,18 +1366,28 @@ export function getStaticBlogPostBySlug(slug) {
   return STATIC_BLOG_POSTS.find((post) => post.slug === slug) || null
 }
 
+// List of static blog post slugs that have been deleted/hidden from public
+// Add any static blog slugs here that you want to hide from the public
+export const DELETED_STATIC_BLOG_SLUGS = new Set([
+  // Example: 'how-to-calculate-sgpa'
+])
+
 export function mergeBlogPosts(remotePosts = []) {
   const seen = new Set()
   const merged = []
 
-  for (const post of STATIC_BLOG_POSTS) {
+  // Add remote posts first (database takes precedence)
+  for (const post of remotePosts || []) {
     if (!post?.slug || seen.has(post.slug)) continue
     seen.add(post.slug)
     merged.push(post)
   }
 
-  for (const post of remotePosts || []) {
+  // Add static posts only if they haven't been deleted/hidden
+  for (const post of STATIC_BLOG_POSTS) {
     if (!post?.slug || seen.has(post.slug)) continue
+    // Skip if this static post has been marked as deleted
+    if (DELETED_STATIC_BLOG_SLUGS.has(post.slug)) continue
     seen.add(post.slug)
     merged.push(post)
   }
