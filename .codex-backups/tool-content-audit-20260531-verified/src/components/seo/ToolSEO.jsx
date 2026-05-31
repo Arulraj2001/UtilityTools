@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Helmet } from 'react-helmet-async';
+import { getToolContentProfile } from './toolContentProfiles';
 
 /**
  * Production-grade SEO component
@@ -15,26 +16,35 @@ export default function ToolSEO({
 
   if (!tool) return null;
 
+  const profile = getToolContentProfile(tool.slug);
+  const profileSeo = profile?.seo || {};
+
   // SEO values
   const title =
+    profileSeo.title ||
     tool.seo_title ||
     `${tool.name} – Free Online Tool`;
 
   const description =
+    profileSeo.description ||
     tool.seo_description ||
     tool.description ||
     '';
 
   const ogTitle =
+    profileSeo.ogTitle ||
     title;
 
   const ogDescription =
+    profileSeo.ogDescription ||
     description;
 
   const twitterTitle =
+    profileSeo.twitterTitle ||
     ogTitle;
 
   const twitterDescription =
+    profileSeo.twitterDescription ||
     ogDescription;
 
   const canonical =
@@ -60,7 +70,9 @@ export default function ToolSEO({
   const keywords = allKeywords || ''
 
   const faqItems =
-    Array.isArray(tool.faq) ? tool.faq : [];
+    profile?.faqs ||
+    tool.faq ||
+    [];
 
   /**
    * FAQ Schema

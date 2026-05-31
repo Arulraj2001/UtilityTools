@@ -77,9 +77,9 @@ export default function AiDashboard() {
 
   const alerts = []
   if (!activeProviders.length) alerts.push({ level: 'error',   msg: 'No AI providers configured — go to AI Settings' })
-  if (pendingDrafts.length > 0) alerts.push({ level: 'warning', msg: `${pendingDrafts.length} draft(s) awaiting moderation review` })
+  if (pendingDrafts > 0)        alerts.push({ level: 'warning', msg: `${pendingDrafts} draft(s) awaiting moderation review` })
   if (pendingUpdates > 0)       alerts.push({ level: 'warning', msg: `${pendingUpdates} job update(s) need review` })
-  if (pendingQueue.length > 5)  alerts.push({ level: 'info',    msg: `${pendingQueue.length} items in research queue` })
+  if (pendingQueue > 5)         alerts.push({ level: 'info',    msg: `${pendingQueue.length} items in research queue` })
   if (avgScore < 50)            alerts.push({ level: 'warning', msg: `Average content quality score is ${avgScore} — run SEO Audit` })
 
   return (
@@ -120,7 +120,7 @@ export default function AiDashboard() {
       {/* Key stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         <StatCard label="Pending Queue"    value={pendingQueue.length}  sub="Awaiting generation"   icon={Clock}         color="text-yellow-500" />
-        <StatCard label="Drafts to Review" value={pendingDrafts.length} sub="Awaiting moderation"   icon={Shield}        color="text-blue-500" />
+        <StatCard label="Drafts to Review" value={pendingDrafts}        sub="Awaiting moderation"   icon={Shield}        color="text-blue-500" />
         <StatCard label="Change Alerts"    value={pendingUpdates}        sub="Updates detected"      icon={GitCompare}    color="text-orange-500" />
         <StatCard label="Avg Quality Score" value={avgScore}            sub={`${jobs.length} jobs`} icon={BarChart3}     color={avgScore >= 70 ? 'text-green-500' : 'text-yellow-500'} />
       </div>

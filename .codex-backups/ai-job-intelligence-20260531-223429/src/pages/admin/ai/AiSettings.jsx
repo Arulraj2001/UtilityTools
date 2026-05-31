@@ -69,7 +69,7 @@ const PROVIDER_META = {
 }
 
 // Ordered display list
-const PROVIDER_ORDER = ['deepseek', 'gemini', 'groq', 'openrouter', 'huggingface', 'cerebras']
+const PROVIDER_ORDER = ['gemini', 'groq', 'deepseek', 'openrouter', 'cerebras', 'huggingface']
 
 // ── Health indicator ──────────────────────────────────────────────────────────
 
@@ -518,7 +518,7 @@ export default function AiSettings() {
               {!failuresLoading && failures.length === 0 && <p className="text-muted-foreground">No failures recorded</p>}
               {failures.map((f, i) => (
                 <div key={f.id || i} className="rounded-xl p-2 bg-muted/20">
-                  <p className="font-medium">{f.provider_name || f.provider || f.event_data?.provider_name || f.event_data?.provider || 'unknown'}</p>
+                  <p className="font-medium">{f.provider || f.event_data?.provider || 'unknown'}</p>
                   <p className="text-rose-600 text-xs truncate">{String(f.error || f.event_data?.error || f.event_data?.message || f.message || '').slice(0, 200)}</p>
                   <p className="text-muted-foreground text-xs">{new Date(f.created_at || f.occurred_at || f.event_time || Date.now()).toLocaleString()}</p>
                 </div>
@@ -587,7 +587,10 @@ export default function AiSettings() {
       {/* Note */}
       <div className="mt-6 rounded-2xl border border-border/50 bg-muted/20 px-5 py-4">
         <p className="text-xs text-muted-foreground">
-          <strong>Tip:</strong> Keep provider keys out of <code className="font-mono">VITE_*</code> variables. Add keys here only after login, or keep them in server-only environment variables for scripts such as provider monitoring.
+          <strong>Tip:</strong> Your <code className="font-mono">.env</code> file already contains{' '}
+          <code className="font-mono">VITE_GROQ_API_KEY</code>,{' '}
+          <code className="font-mono">OPENROUTER_API_KEY</code>, and{' '}
+          <code className="font-mono">DEEPSEEK_API_KEY</code>. Paste them here — they are stored in Supabase with admin-only RLS, not in the browser bundle.
         </p>
       </div>
     </main>

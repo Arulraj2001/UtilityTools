@@ -14,8 +14,9 @@ import FAQAccordion from '@/components/shared/FAQAccordion'
 import ToolCard from '@/components/shared/ToolCard'
 import AdBanner from '@/components/shared/AdBanner'
 import ToolSEO from '@/components/seo/ToolSEO'
+import { getToolContentProfile, hasToolContentProfile } from '@/components/seo/toolContentProfiles'
 import { useLocalStorage } from '@/lib/useLocalStorage'
-import { getTools, getToolBySlug, getCategories, updateToolUsage, getBlogPosts, getWorkflowPages } from '@/api/supabaseApi'
+import { getTools, getCategories, updateToolUsage, getBlogPosts, getWorkflowPages } from '@/api/supabaseApi'
 import { trackToolEvent } from '@/lib/analytics'
 
 const ToolInputForm = lazy(() => import('@/components/tools/ToolInputForm'))
@@ -117,16 +118,7 @@ export default function ToolPage() {
   const [bookmarks, setBookmarks] = useLocalStorage('bookmarked_tools', [])
   const [recentTools, setRecentTools] = useLocalStorage('recent_tools', [])
 
-  const { data: tool = null, isLoading: isToolLoading } = useQuery({
-    queryKey: ['tool-by-slug', slug],
-    queryFn: () => getToolBySlug(slug, { published: true }),
-    enabled: !!slug,
-    staleTime: 0,
-    cacheTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: true,
-  })
-
-  const { data: tools = [] } = useQuery({
+  const { data: tools = [], isLoading, isFetching } = useQuery({
     queryKey: ['tools-published'],
     queryFn: () => getTools({ published: true, orderBy: 'sort_order', ascending: true, limit: 200 }),
     // keep previous data to avoid clearing UI during background refetches
@@ -155,6 +147,8 @@ export default function ToolPage() {
     enabled: !!slug,
   })
 
+  const tool = useMemo(() => tools.find(t => t.slug === slug), [tools, slug])
+  const toolContentProfile = useMemo(() => getToolContentProfile(tool?.slug), [tool?.slug])
   const category = useMemo(() => categories.find(c => c.id === tool?.category_id), [categories, tool])
   const relatedTools = useMemo(() => {
     if (!tool) return []
@@ -322,9 +316,9 @@ export default function ToolPage() {
     navigator.clipboard.writeText(window.location.href).then(() => toast.success('Link copied!'))
   }
 
-  // Resolve the active tool directly by slug so page content and metadata use the matching DB row.
-  if (isToolLoading) return <ToolPageSkeleton />
-  if (!tool && !isToolLoading) return (
+  // Only show the full page skeleton when there is no cached tools data.
+  if (isLoading && (!tools || tools.length === 0)) return <ToolPageSkeleton />
+  if (!tool && !isLoading) return (
     <div className="max-w-4xl mx-auto px-4 py-20 text-center">
       <p className="text-2xl font-bold mb-2">Tool not found</p>
       <p className="text-muted-foreground mb-6">The tool you're looking for doesn't exist.</p>
@@ -359,7 +353,7 @@ export default function ToolPage() {
                       {tool?.is_trending && <Badge className="bg-accent/10 text-accent border-0 text-xs">?? Trending</Badge>}
                       {category && <Badge variant="secondary" className="text-xs">{category.name}</Badge>}
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold mb-2">{tool?.name}</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold mb-2">{toolContentProfile?.h1 || tool?.name}</h1>
                     <p className="text-muted-foreground">{tool?.description}</p>
                   </div>
                 </div>
@@ -516,7 +510,7 @@ export default function ToolPage() {
               </motion.div>
             )}
 
-            {tool?.faq?.length > 0 && (
+            {tool?.faq?.length > 0 && !hasToolContentProfile(tool?.slug) && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="mt-8">
                 <FAQAccordion items={tool.faq} />
               </motion.div>

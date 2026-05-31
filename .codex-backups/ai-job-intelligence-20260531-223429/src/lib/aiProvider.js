@@ -11,84 +11,12 @@
 
 // ── Individual provider callers ───────────────────────────────────────────────
 
-export const DEFAULT_PROVIDER_TIMEOUT_MS = 45_000
-
-export const DEFAULT_PROVIDER_PRIORITY = {
-  deepseek: 1,
-  gemini: 2,
-  groq: 3,
-  openrouter: 4,
-  huggingface: 5,
-  cerebras: 6,
-}
-
 const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash'
 
-const redactSensitive = (value) => {
-  if (value === null || value === undefined) return ''
-  const text = typeof value === 'string'
-    ? value
-    : JSON.stringify(value, (_key, nestedValue) => {
-        if (/api[_-]?key|authorization|token|secret|password/i.test(_key)) return '[REDACTED]'
-        return nestedValue
-      })
-
-  return String(text)
-    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/gi, 'Bearer [REDACTED]')
-    .replace(/([?&]key=)[^&\s"']+/gi, '$1[REDACTED]')
-    .replace(/("api_key"\s*:\s*")[^"]+/gi, '$1[REDACTED]')
-    .replace(/("authorization"\s*:\s*")[^"]+/gi, '$1[REDACTED]')
-}
-
-const normalizeErrorMessage = (err) =>
-  redactSensitive(err?.message || err?.body || String(err || 'Unknown error'))
-
-export const classifyProviderError = (err) => {
-  const status = Number(err?.status || 0)
-  const message = `${err?.message || ''} ${err?.body || ''}`.toLowerCase()
-
-  if (err?.name === 'AbortError' || /abort|cancel/.test(message)) return 'cancelled'
-  if (/timeout|timed out/.test(message)) return 'timeout'
-  if (status === 401 || status === 403 || /unauthorized|forbidden|invalid api key|invalid key/.test(message)) return 'auth'
-  if (status === 402 || /insufficient balance|payment required|quota/.test(message)) return 'quota'
-  if (status === 408 || status === 429 || /rate.?limit|too many requests|temporarily rate-limited/.test(message)) return 'rate_limit'
-  if (status >= 500 || /fetch failed|network|econnreset|enotfound|failed to fetch/.test(message)) return 'network'
-  if (/empty content|invalid json|parse/.test(message)) return 'invalid_response'
-  return 'provider_error'
-}
-
-const createAttemptSignal = (outerSignal, timeoutMs = DEFAULT_PROVIDER_TIMEOUT_MS) => {
-  const controller = new AbortController()
-  let timeoutId = null
-
-  const abortFromOuter = () => {
-    if (!controller.signal.aborted) controller.abort(outerSignal?.reason || new Error('Cancelled'))
-  }
-
-  if (outerSignal) {
-    if (outerSignal.aborted) abortFromOuter()
-    else outerSignal.addEventListener('abort', abortFromOuter, { once: true })
-  }
-
-  if (timeoutMs > 0) {
-    timeoutId = setTimeout(() => {
-      if (!controller.signal.aborted) controller.abort(new Error(`Provider timed out after ${timeoutMs}ms`))
-    }, timeoutMs)
-  }
-
-  return {
-    signal: controller.signal,
-    cleanup: () => {
-      if (timeoutId) clearTimeout(timeoutId)
-      if (outerSignal) outerSignal.removeEventListener('abort', abortFromOuter)
-    },
-  }
-}
-
-const selectSupportedGeminiModel = async (apiKey, configuredModel, options = {}) => {
+const selectSupportedGeminiModel = async (apiKey, configuredModel) => {
   const preferredModel = configuredModel || GEMINI_DEFAULT_MODEL
   try {
-    const supportedModels = await fetchProviderModels({ provider_name: 'gemini', api_key: apiKey }, options)
+    const supportedModels = await fetchProviderModels({ provider_name: 'gemini', api_key: apiKey })
     if (Array.isArray(supportedModels) && supportedModels.length > 0) {
       if (supportedModels.some((m) => m.value === preferredModel)) {
         return preferredModel
@@ -102,18 +30,17 @@ const selectSupportedGeminiModel = async (apiKey, configuredModel, options = {})
       return fallbackModel
     }
   } catch (err) {
-    console.warn('[Gemini] unable to validate configured model:', normalizeErrorMessage(err))
+    console.warn('[Gemini] unable to validate configured model:', err.message)
   }
   return preferredModel
 }
 
-const callGemini = async (apiKey, model, prompt, _baseUrl, options = {}) => {
-  const mdl = await selectSupportedGeminiModel(apiKey, model, options)
+const callGemini = async (apiKey, model, prompt, _baseUrl) => {
+  const mdl = await selectSupportedGeminiModel(apiKey, model)
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${mdl}:generateContent?key=${apiKey}`,
     {
       method: 'POST',
-      signal: options.signal,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
@@ -123,10 +50,7 @@ const callGemini = async (apiKey, model, prompt, _baseUrl, options = {}) => {
   )
   if (!res.ok) {
     const body = await res.text()
-    const error = new Error(`Gemini ${res.status}: ${redactSensitive(body.slice(0, 300))}`)
-    error.status = res.status
-    error.body = body
-    throw error
+    throw new Error(`Gemini ${res.status}: ${body.slice(0, 300)}`)
   }
   const data = await res.json()
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text
@@ -152,26 +76,23 @@ const inferModelMaxTokens = (modelInfo) => {
   )
 }
 
-const fetchOpenAIModelInfo = async (apiKey, model, baseUrl, providerName, signal) => {
+const fetchOpenAIModelInfo = async (apiKey, model, baseUrl, providerName) => {
   if (!apiKey || !model || !baseUrl) return null
   try {
     const url = `${baseUrl.replace(/\/$/, '')}/models/${encodeURIComponent(model)}`
     const res = await fetch(url, {
-      signal,
       headers: { Authorization: `Bearer ${apiKey}` },
     })
     if (!res.ok) {
       const body = await res.text()
       console.warn(
-        `[fetchOpenAIModelInfo] ${providerName} ${model}: ${res.status} ${redactSensitive(body.slice(0, 300))}`
+        `[fetchOpenAIModelInfo] ${providerName} ${model}: ${res.status} ${body.slice(0, 300)}`
       )
       return null
     }
     return await res.json()
   } catch (err) {
-    if (err?.name !== 'AbortError') {
-      console.warn(`[fetchOpenAIModelInfo] ${providerName} ${model}:`, normalizeErrorMessage(err))
-    }
+    console.warn(`[fetchOpenAIModelInfo] ${providerName} ${model}:`, err.message)
     return null
   }
 }
@@ -184,13 +105,12 @@ const capMaxTokens = (requestedTokens, modelInfo) => {
   return requestedTokens
 }
 
-const callOpenAICompat = async (apiKey, model, prompt, baseUrl, providerName, extraHeaders = {}, options = {}) => {
-  const modelInfo = await fetchOpenAIModelInfo(apiKey, model, baseUrl, providerName, options.signal)
+const callOpenAICompat = async (apiKey, model, prompt, baseUrl, providerName, extraHeaders = {}) => {
+  const modelInfo = await fetchOpenAIModelInfo(apiKey, model, baseUrl, providerName)
   const maxTokens = capMaxTokens(8000, modelInfo)
 
   const res = await fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
-    signal: options.signal,
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
@@ -205,10 +125,7 @@ const callOpenAICompat = async (apiKey, model, prompt, baseUrl, providerName, ex
   })
   if (!res.ok) {
     const body = await res.text()
-    const error = new Error(`${providerName} ${res.status}: ${redactSensitive(body.slice(0, 300))}`)
-    error.status = res.status
-    error.body = body
-    throw error
+    throw new Error(`${providerName} ${res.status}: ${body.slice(0, 300)}`)
   }
   const data = await res.json()
   const text = data.choices?.[0]?.message?.content
@@ -216,54 +133,47 @@ const callOpenAICompat = async (apiKey, model, prompt, baseUrl, providerName, ex
   return { text, tokensUsed: data.usage?.total_tokens ?? 0 }
 }
 
-const callGroq = (apiKey, model, prompt, _baseUrl, options = {}) =>
+const callGroq = (apiKey, model, prompt, _baseUrl) =>
   callOpenAICompat(
     apiKey,
     model || 'llama-3.1-8b-instant',
     prompt,
     'https://api.groq.com/openai/v1',
-    'Groq',
-    {},
-    options
+    'Groq'
   )
 
-const callDeepSeek = (apiKey, model, prompt, baseUrl, options = {}) =>
+const callDeepSeek = (apiKey, model, prompt, baseUrl) =>
   callOpenAICompat(
     apiKey,
     model || 'deepseek-chat',
     prompt,
     (baseUrl || 'https://api.deepseek.com/v1').replace(/\/$/, ''),
-    'DeepSeek',
-    {},
-    options
+    'DeepSeek'
   )
 
-const callOpenRouter = (apiKey, model, prompt, _baseUrl, options = {}) =>
+const callOpenRouter = (apiKey, model, prompt, _baseUrl) =>
   callOpenAICompat(
     apiKey,
-    model || 'openrouter/free',
+    model || 'meta-llama/llama-3.1-8b-instruct:free',
     prompt,
     'https://openrouter.ai/api/v1',
     'OpenRouter',
     {
       'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : '',
       'X-Title': 'AI Job Intelligence',
-    },
-    options
+    }
   )
 
-const callCerebras = (apiKey, model, prompt, baseUrl, options = {}) =>
+const callCerebras = (apiKey, model, prompt, baseUrl) =>
   callOpenAICompat(
     apiKey,
     model || 'llama-3.3-70b',
     prompt,
     (baseUrl || 'https://api.cerebras.ai/v1').replace(/\/$/, ''),
-    'Cerebras',
-    {},
-    options
+    'Cerebras'
   )
 
-const callHuggingFace = async (apiKey, model, prompt, _baseUrl, options = {}) => {
+const callHuggingFace = async (apiKey, model, prompt, _baseUrl) => {
   const mdl = model || 'mistralai/Mistral-7B-Instruct-v0.2'
   const encodedModel = mdl
     .split('/')
@@ -283,23 +193,24 @@ const callHuggingFace = async (apiKey, model, prompt, _baseUrl, options = {}) =>
   try {
     res = await fetch(endpoint, {
       method: 'POST',
-      signal: options.signal,
       headers,
       body,
     })
   } catch (err) {
     console.warn('[HuggingFace] request failed', {
       endpoint,
-      model: mdl,
-      error: normalizeErrorMessage(err),
+      headers,
+      requestBody: body,
+      error: err,
     })
     const error = new Error(
-      `HuggingFace fetch failed: ${err.name}: ${normalizeErrorMessage(err)} | endpoint=${endpoint}`
+      `HuggingFace fetch failed: ${err.name}: ${err.message} | endpoint=${endpoint}`
     )
     error.endpoint = endpoint
     error.status = err.status || null
     error.body = err.body || null
     error.requestBody = body
+    error.requestHeaders = headers
     error.rawError = err
     throw error
   }
@@ -307,7 +218,7 @@ const callHuggingFace = async (apiKey, model, prompt, _baseUrl, options = {}) =>
   if (!res.ok) {
     const responseText = await res.text()
     const error = new Error(
-      `HuggingFace ${res.status}: ${redactSensitive(responseText.slice(0, 1000))} | endpoint=${endpoint}`
+      `HuggingFace ${res.status}: ${responseText.slice(0, 1000)} | endpoint=${endpoint}`
     )
     error.status = res.status
     error.body = responseText
@@ -363,10 +274,6 @@ export const PROVIDER_MODELS = {
     { value: 'deepseek-reasoner',                  label: 'DeepSeek Reasoner R1' },
   ],
   openrouter: [
-    { value: 'openrouter/free',                            label: 'OpenRouter Free Router (auto-select)' },
-    { value: 'deepseek/deepseek-v4-flash:free',            label: 'DeepSeek V4 Flash (free)' },
-    { value: 'meta-llama/llama-3.3-70b-instruct:free',     label: 'Llama 3.3 70B (free)' },
-    { value: 'qwen/qwen3-coder:free',                      label: 'Qwen3 Coder (free)' },
     { value: 'meta-llama/llama-3.1-8b-instruct:free',    label: 'Llama 3.1 8B (free)' },
     { value: 'meta-llama/llama-3.2-3b-instruct:free',    label: 'Llama 3.2 3B (free)' },
     { value: 'google/gemma-3-12b-it:free',               label: 'Gemma 3 12B (free)' },
@@ -395,55 +302,7 @@ export const PROVIDER_MODELS = {
  * Fetch the live model list directly from a provider's API.
  * Returns [{ value, label }] or falls back to PROVIDER_MODELS static list on error.
  */
-export const PROVIDER_MODEL_PREFERENCES = {
-  deepseek: ['deepseek-v4-flash', 'deepseek-chat', 'deepseek-v4-pro', 'deepseek-reasoner'],
-  gemini: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'],
-  groq: ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile', 'openai/gpt-oss-20b'],
-  openrouter: ['openrouter/free', 'deepseek/deepseek-v4-flash:free', 'meta-llama/llama-3.3-70b-instruct:free', 'qwen/qwen3-coder:free'],
-  huggingface: ['mistralai/Mistral-7B-Instruct-v0.2', 'HuggingFaceH4/zephyr-7b-beta'],
-  cerebras: ['llama-3.3-70b', 'gpt-oss-120b', 'zai-glm-4.7'],
-}
-
-const getAvailableModelIds = (provider) => (
-  Array.isArray(provider?.available_models)
-    ? provider.available_models.map((model) => model?.value || model?.id || model?.name).filter(Boolean)
-    : []
-)
-
-export const chooseProviderModel = (provider = {}) => {
-  const configured = provider.model || ''
-  const available = getAvailableModelIds(provider)
-  const availableSet = new Set(available)
-  const preferences = PROVIDER_MODEL_PREFERENCES[provider.provider_name] || []
-  const staticModels = (PROVIDER_MODELS[provider.provider_name] || []).map((m) => m.value)
-  const candidates = [...preferences, ...staticModels].filter(Boolean)
-  const lastError = String(provider.stats?.last_error || '').toLowerCase()
-  const shouldBypassConfigured =
-    provider.health_status === 'down' ||
-    /rate.?limit|temporarily rate-limited|insufficient balance|not found|invalid model/.test(lastError)
-
-  if (!shouldBypassConfigured && configured && (!available.length || availableSet.has(configured))) {
-    return configured
-  }
-
-  const availablePreferred = candidates.find((model) => availableSet.has(model))
-  if (availablePreferred) return availablePreferred
-
-  if (configured) return configured
-  return candidates[0] || ''
-}
-
-export const sortProvidersForFallback = (providers = []) => (
-  [...providers]
-    .filter(p => p?.is_active && p?.api_key)
-    .sort((a, b) => {
-      const aPriority = Number.isFinite(a.priority) ? a.priority : DEFAULT_PROVIDER_PRIORITY[a.provider_name] || 99
-      const bPriority = Number.isFinite(b.priority) ? b.priority : DEFAULT_PROVIDER_PRIORITY[b.provider_name] || 99
-      return aPriority - bPriority
-    })
-)
-
-export const fetchProviderModels = async (provider, { signal } = {}) => {
+export const fetchProviderModels = async (provider) => {
   const { provider_name, api_key, base_url } = provider
   if (!api_key) return PROVIDER_MODELS[provider_name] || []
 
@@ -451,8 +310,7 @@ export const fetchProviderModels = async (provider, { signal } = {}) => {
     switch (provider_name) {
       case 'gemini': {
         const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models?key=${api_key}&pageSize=50`,
-          { signal }
+          `https://generativelanguage.googleapis.com/v1beta/models?key=${api_key}&pageSize=50`
         )
         if (!res.ok) throw new Error(`Gemini models API ${res.status}`)
         const data = await res.json()
@@ -470,7 +328,6 @@ export const fetchProviderModels = async (provider, { signal } = {}) => {
 
       case 'groq': {
         const res = await fetch('https://api.groq.com/openai/v1/models', {
-          signal,
           headers: { Authorization: `Bearer ${api_key}` },
         })
         if (!res.ok) throw new Error(`Groq models API ${res.status}`)
@@ -484,7 +341,6 @@ export const fetchProviderModels = async (provider, { signal } = {}) => {
       case 'deepseek': {
         const base = (base_url || 'https://api.deepseek.com/v1').replace(/\/$/, '')
         const res = await fetch(`${base}/models`, {
-          signal,
           headers: { Authorization: `Bearer ${api_key}` },
         })
         if (!res.ok) throw new Error(`DeepSeek models API ${res.status}`)
@@ -494,7 +350,6 @@ export const fetchProviderModels = async (provider, { signal } = {}) => {
 
       case 'openrouter': {
         const res = await fetch('https://openrouter.ai/api/v1/models', {
-          signal,
           headers: { Authorization: `Bearer ${api_key}` },
         })
         if (!res.ok) throw new Error(`OpenRouter models API ${res.status}`)
@@ -511,7 +366,6 @@ export const fetchProviderModels = async (provider, { signal } = {}) => {
       case 'cerebras': {
         const base = (base_url || 'https://api.cerebras.ai/v1').replace(/\/$/, '')
         const res = await fetch(`${base}/models`, {
-          signal,
           headers: { Authorization: `Bearer ${api_key}` },
         })
         if (!res.ok) throw new Error(`Cerebras models API ${res.status}`)
@@ -527,9 +381,7 @@ export const fetchProviderModels = async (provider, { signal } = {}) => {
         return PROVIDER_MODELS[provider_name] || []
     }
   } catch (err) {
-    if (err?.name !== 'AbortError') {
-      console.warn(`[fetchProviderModels] ${provider_name}:`, normalizeErrorMessage(err))
-    }
+    console.warn(`[fetchProviderModels] ${provider_name}:`, err.message)
     return PROVIDER_MODELS[provider_name] || []
   }
 }
@@ -543,8 +395,10 @@ export const fetchProviderModels = async (provider, { signal } = {}) => {
  *
  * Backward compatible: signature unchanged.
  */
-export const callAI = async (providers, prompt, { signal, timeoutMs = DEFAULT_PROVIDER_TIMEOUT_MS, onAttempt } = {}) => {
-  const active = sortProvidersForFallback(providers)
+export const callAI = async (providers, prompt, { signal } = {}) => {
+  const active = [...providers]
+    .filter(p => p.is_active && p.api_key)
+    .sort((a, b) => a.priority - b.priority)
 
   if (active.length === 0) {
     throw new Error(
@@ -560,65 +414,28 @@ export const callAI = async (providers, prompt, { signal, timeoutMs = DEFAULT_PR
     const caller = CALLERS[provider.provider_name]
     if (!caller) continue
 
-    const model = chooseProviderModel(provider)
-    const attemptSignal = createAttemptSignal(signal, timeoutMs)
     const t0 = Date.now()
     try {
       const result = await caller(
         provider.api_key,
-        model,
+        provider.model,
         prompt,
-        provider.base_url || null,
-        { signal: attemptSignal.signal, provider }
+        provider.base_url || null
       )
-      const durationMs = Date.now() - t0
-      if (typeof onAttempt === 'function') {
-        await Promise.resolve(onAttempt({
-          provider,
-          providerName: provider.provider_name,
-          model,
-          ok: true,
-          durationMs,
-          tokensUsed: result.tokensUsed || 0,
-          error: null,
-          errorType: null,
-        })).catch(() => {})
-      }
       return {
         ...result,
         provider: provider.provider_name,
-        model,
-        durationMs,
+        durationMs: Date.now() - t0,
       }
     } catch (err) {
-      const durationMs = Date.now() - t0
-      const error = normalizeErrorMessage(err)
-      const errorType = classifyProviderError(err)
-      console.warn(`[AI] ${provider.provider_name} failed (${errorType}):`, error)
-      errors.push({ provider: provider.provider_name, model, error, errorType, durationMs })
-      if (typeof onAttempt === 'function') {
-        await Promise.resolve(onAttempt({
-          provider,
-          providerName: provider.provider_name,
-          model,
-          ok: false,
-          durationMs,
-          tokensUsed: 0,
-          error,
-          errorType,
-        })).catch(() => {})
-      }
-    } finally {
-      attemptSignal.cleanup()
+      console.warn(`[AI] ${provider.provider_name} failed:`, err.message)
+      errors.push(`${provider.provider_name}: ${err.message}`)
     }
   }
 
-  const error = new Error(
-    `All AI providers failed.\n${errors.map(e => `${e.provider}: ${e.error}`).join('\n')}\n\nCheck API keys in AI Settings.`
+  throw new Error(
+    `All AI providers failed.\n${errors.join('\n')}\n\nCheck API keys in AI Settings.`
   )
-  error.code = 'AI_PROVIDERS_FAILED'
-  error.attempts = errors
-  throw error
 }
 
 /**
@@ -627,38 +444,26 @@ export const callAI = async (providers, prompt, { signal, timeoutMs = DEFAULT_PR
  *
  * Backward compatible: signature unchanged.
  */
-export const testProvider = async (provider, { timeoutMs = 20_000, signal } = {}) => {
+export const testProvider = async (provider) => {
   const caller = CALLERS[provider.provider_name]
   if (!caller) return { ok: false, error: `Unknown provider: ${provider.provider_name}` }
 
-  const model = chooseProviderModel(provider)
-  const attemptSignal = createAttemptSignal(signal, timeoutMs)
   const t0 = Date.now()
   try {
     const result = await caller(
       provider.api_key,
-      model,
+      provider.model,
       'Reply with exactly one word: OK',
-      provider.base_url || null,
-      { signal: attemptSignal.signal, provider }
+      provider.base_url || null
     )
     return {
       ok: !!result.text,
       durationMs: Date.now() - t0,
       response: result.text?.slice(0, 60),
       tokensUsed: result.tokensUsed,
-      model,
     }
   } catch (err) {
-    return {
-      ok: false,
-      durationMs: Date.now() - t0,
-      error: normalizeErrorMessage(err),
-      errorType: classifyProviderError(err),
-      model,
-    }
-  } finally {
-    attemptSignal.cleanup()
+    return { ok: false, durationMs: Date.now() - t0, error: err.message }
   }
 }
 
@@ -702,33 +507,20 @@ export const monitorProviders = async (providers = [], { recordFn, failureLogger
     if (signal?.aborted) break;
     try {
       const res = await testProvider(p);
-      results.push({ provider: p.provider_name, ok: res.ok, durationMs: res.durationMs, error: res.error || null, errorType: res.errorType || null });
+      results.push({ provider: p.provider_name, ok: res.ok, durationMs: res.durationMs, error: res.error || null });
       if (typeof recordFn === 'function' && p.id) {
         await recordFn(p.id, { success: !!res.ok, latencyMs: res.durationMs, error: res.error || null }).catch(() => {});
       }
       if (!res.ok && typeof failureLogger === 'function') {
-        await failureLogger({
-          provider_name: p.provider_name,
-          error: res.error || null,
-          details: { error_type: res.errorType || null, model: res.model || p.model || null },
-          duration_ms: res.durationMs,
-          occurred_at: new Date().toISOString(),
-        }).catch(() => {});
+        await failureLogger({ provider: p.provider_name, error: res.error || null, durationMs: res.durationMs, occurred_at: new Date().toISOString() }).catch(() => {});
       }
     } catch (err) {
-      const error = normalizeErrorMessage(err);
-      results.push({ provider: p.provider_name, ok: false, durationMs: 0, error, errorType: classifyProviderError(err) });
+      results.push({ provider: p.provider_name, ok: false, durationMs: 0, error: err.message });
       if (typeof recordFn === 'function' && p.id) {
-        await recordFn(p.id, { success: false, latencyMs: 0, error }).catch(() => {});
+        await recordFn(p.id, { success: false, latencyMs: 0, error: err.message }).catch(() => {});
       }
       if (typeof failureLogger === 'function') {
-        await failureLogger({
-          provider_name: p.provider_name,
-          error,
-          details: { error_type: classifyProviderError(err), model: p.model || null },
-          duration_ms: 0,
-          occurred_at: new Date().toISOString(),
-        }).catch(() => {});
+        await failureLogger({ provider: p.provider_name, error: err.message, durationMs: 0, occurred_at: new Date().toISOString() }).catch(() => {});
       }
     }
   }

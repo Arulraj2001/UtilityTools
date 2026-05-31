@@ -1,0 +1,430 @@
+[
+  {
+    "id": "d2dc29ef-a687-4783-a7ef-c4e7d83bab27",
+    "provider_name": "gemini",
+    "model": "gemini-1.5-flash",
+    "priority": 1,
+    "is_active": true,
+    "base_url": null,
+    "available_models": [
+      {
+        "label": "Gemini 2.0 Flash",
+        "value": "gemini-2.0-flash"
+      },
+      {
+        "label": "Gemini 2.0 Flash 001",
+        "value": "gemini-2.0-flash-001"
+      },
+      {
+        "label": "Gemini 2.0 Flash-Lite",
+        "value": "gemini-2.0-flash-lite"
+      },
+      {
+        "label": "Gemini 2.0 Flash-Lite 001",
+        "value": "gemini-2.0-flash-lite-001"
+      },
+      {
+        "label": "Gemini 2.5 Computer Use Preview 10-2025",
+        "value": "gemini-2.5-computer-use-preview-10-2025"
+      },
+      {
+        "label": "Gemini 2.5 Flash",
+        "value": "gemini-2.5-flash"
+      },
+      {
+        "label": "Gemini 2.5 Flash Preview TTS",
+        "value": "gemini-2.5-flash-preview-tts"
+      },
+      {
+        "label": "Gemini 2.5 Flash-Lite",
+        "value": "gemini-2.5-flash-lite"
+      },
+      {
+        "label": "Gemini 2.5 Pro",
+        "value": "gemini-2.5-pro"
+      },
+      {
+        "label": "Gemini 2.5 Pro Preview TTS",
+        "value": "gemini-2.5-pro-preview-tts"
+      },
+      {
+        "label": "Gemini 3 Flash Preview",
+        "value": "gemini-3-flash-preview"
+      },
+      {
+        "label": "Gemini 3 Pro Preview",
+        "value": "gemini-3-pro-preview"
+      },
+      {
+        "label": "Gemini 3.1 Flash Lite",
+        "value": "gemini-3.1-flash-lite"
+      },
+      {
+        "label": "Gemini 3.1 Flash Lite Preview",
+        "value": "gemini-3.1-flash-lite-preview"
+      },
+      {
+        "label": "Gemini 3.1 Flash TTS Preview",
+        "value": "gemini-3.1-flash-tts-preview"
+      },
+      {
+        "label": "Gemini 3.1 Pro Preview",
+        "value": "gemini-3.1-pro-preview"
+      },
+      {
+        "label": "Gemini 3.1 Pro Preview Custom Tools",
+        "value": "gemini-3.1-pro-preview-customtools"
+      },
+      {
+        "label": "Gemini 3.5 Flash",
+        "value": "gemini-3.5-flash"
+      },
+      {
+        "label": "Gemini Flash Latest",
+        "value": "gemini-flash-latest"
+      },
+      {
+        "label": "Gemini Flash-Lite Latest",
+        "value": "gemini-flash-lite-latest"
+      },
+      {
+        "label": "Gemini Pro Latest",
+        "value": "gemini-pro-latest"
+      },
+      {
+        "label": "Gemini Robotics-ER 1.5 Preview",
+        "value": "gemini-robotics-er-1.5-preview"
+      },
+      {
+        "label": "Gemini Robotics-ER 1.6 Preview",
+        "value": "gemini-robotics-er-1.6-preview"
+      },
+      {
+        "label": "Nano Banana",
+        "value": "gemini-2.5-flash-image"
+      },
+      {
+        "label": "Nano Banana 2",
+        "value": "gemini-3.1-flash-image-preview"
+      },
+      {
+        "label": "Nano Banana 2",
+        "value": "gemini-3.1-flash-image"
+      },
+      {
+        "label": "Nano Banana Pro",
+        "value": "gemini-3-pro-image-preview"
+      },
+      {
+        "label": "Nano Banana Pro",
+        "value": "gemini-3-pro-image"
+      }
+    ],
+    "last_tested": "2026-05-31T01:00:41.811+00:00",
+    "last_latency_ms": 1768,
+    "health_status": "healthy",
+    "stats": {
+      "failures": 9,
+      "requests": 11,
+      "successes": 2,
+      "last_error": null,
+      "avg_latency_ms": 779
+    }
+  },
+  {
+    "id": "802c8f5e-2cae-4fd3-913e-70178040d3b1",
+    "provider_name": "openrouter",
+    "model": "meta-llama/llama-3.2-3b-instruct:free",
+    "priority": 2,
+    "is_active": true,
+    "base_url": null,
+    "available_models": [
+      {
+        "label": "DeepSeek: DeepSeek V4 Flash (free) (free)",
+        "value": "deepseek/deepseek-v4-flash:free"
+      },
+      {
+        "label": "Free Models Router (free)",
+        "value": "openrouter/free"
+      },
+      {
+        "label": "Google: Gemma 4 26B A4B  (free) (free)",
+        "value": "google/gemma-4-26b-a4b-it:free"
+      },
+      {
+        "label": "Google: Gemma 4 31B (free) (free)",
+        "value": "google/gemma-4-31b-it:free"
+      },
+      {
+        "label": "Google: Lyria 3 Clip Preview (free)",
+        "value": "google/lyria-3-clip-preview"
+      },
+      {
+        "label": "Google: Lyria 3 Pro Preview (free)",
+        "value": "google/lyria-3-pro-preview"
+      },
+      {
+        "label": "LiquidAI: LFM2.5-1.2B-Instruct (free) (free)",
+        "value": "liquid/lfm-2.5-1.2b-instruct:free"
+      },
+      {
+        "label": "LiquidAI: LFM2.5-1.2B-Thinking (free) (free)",
+        "value": "liquid/lfm-2.5-1.2b-thinking:free"
+      },
+      {
+        "label": "Meta: Llama 3.2 3B Instruct (free) (free)",
+        "value": "meta-llama/llama-3.2-3b-instruct:free"
+      },
+      {
+        "label": "Meta: Llama 3.3 70B Instruct (free) (free)",
+        "value": "meta-llama/llama-3.3-70b-instruct:free"
+      },
+      {
+        "label": "MiniMax: MiniMax M2.5 (free) (free)",
+        "value": "minimax/minimax-m2.5:free"
+      },
+      {
+        "label": "MoonshotAI: Kimi K2.6 (free) (free)",
+        "value": "moonshotai/kimi-k2.6:free"
+      },
+      {
+        "label": "Nous: Hermes 3 405B Instruct (free) (free)",
+        "value": "nousresearch/hermes-3-llama-3.1-405b:free"
+      },
+      {
+        "label": "NVIDIA: Nemotron 3 Nano 30B A3B (free) (free)",
+        "value": "nvidia/nemotron-3-nano-30b-a3b:free"
+      },
+      {
+        "label": "NVIDIA: Nemotron 3 Nano Omni (free) (free)",
+        "value": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"
+      },
+      {
+        "label": "NVIDIA: Nemotron 3 Super (free) (free)",
+        "value": "nvidia/nemotron-3-super-120b-a12b:free"
+      },
+      {
+        "label": "NVIDIA: Nemotron Nano 12B 2 VL (free) (free)",
+        "value": "nvidia/nemotron-nano-12b-v2-vl:free"
+      },
+      {
+        "label": "NVIDIA: Nemotron Nano 9B V2 (free) (free)",
+        "value": "nvidia/nemotron-nano-9b-v2:free"
+      },
+      {
+        "label": "OpenAI: gpt-oss-120b (free) (free)",
+        "value": "openai/gpt-oss-120b:free"
+      },
+      {
+        "label": "OpenAI: gpt-oss-20b (free) (free)",
+        "value": "openai/gpt-oss-20b:free"
+      },
+      {
+        "label": "Owl Alpha (free)",
+        "value": "openrouter/owl-alpha"
+      },
+      {
+        "label": "Poolside: Laguna M.1 (free) (free)",
+        "value": "poolside/laguna-m.1:free"
+      },
+      {
+        "label": "Poolside: Laguna XS.2 (free) (free)",
+        "value": "poolside/laguna-xs.2:free"
+      },
+      {
+        "label": "Qwen: Qwen3 Coder 480B A35B (free) (free)",
+        "value": "qwen/qwen3-coder:free"
+      },
+      {
+        "label": "Qwen: Qwen3 Next 80B A3B Instruct (free) (free)",
+        "value": "qwen/qwen3-next-80b-a3b-instruct:free"
+      },
+      {
+        "label": "Venice: Uncensored (free) (free)",
+        "value": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free"
+      },
+      {
+        "label": "Z.ai: GLM 4.5 Air (free) (free)",
+        "value": "z-ai/glm-4.5-air:free"
+      }
+    ],
+    "last_tested": "2026-05-31T00:58:15.294+00:00",
+    "last_latency_ms": 1342,
+    "health_status": "down",
+    "stats": {
+      "failures": 14,
+      "requests": 15,
+      "successes": 1,
+      "last_error": "OpenRouter 429: {\"error\":{\"message\":\"Provider returned error\",\"code\":429,\"metadata\":{\"raw\":\"meta-llama/llama-3.2-3b-instruct:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations\",\"provider_name\":\"Venice\",\"is_",
+      "avg_latency_ms": 1419
+    }
+  },
+  {
+    "id": "6f12762c-222c-47f4-86a8-e916c2215ce6",
+    "provider_name": "groq",
+    "model": "allam-2-7b",
+    "priority": 3,
+    "is_active": true,
+    "base_url": null,
+    "available_models": [
+      {
+        "label": "allam-2-7b",
+        "value": "allam-2-7b"
+      },
+      {
+        "label": "canopylabs/orpheus-arabic-saudi",
+        "value": "canopylabs/orpheus-arabic-saudi"
+      },
+      {
+        "label": "canopylabs/orpheus-v1-english",
+        "value": "canopylabs/orpheus-v1-english"
+      },
+      {
+        "label": "groq/compound",
+        "value": "groq/compound"
+      },
+      {
+        "label": "groq/compound-mini",
+        "value": "groq/compound-mini"
+      },
+      {
+        "label": "llama-3.1-8b-instant",
+        "value": "llama-3.1-8b-instant"
+      },
+      {
+        "label": "llama-3.3-70b-versatile",
+        "value": "llama-3.3-70b-versatile"
+      },
+      {
+        "label": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "value": "meta-llama/llama-4-scout-17b-16e-instruct"
+      },
+      {
+        "label": "meta-llama/llama-prompt-guard-2-22m",
+        "value": "meta-llama/llama-prompt-guard-2-22m"
+      },
+      {
+        "label": "meta-llama/llama-prompt-guard-2-86m",
+        "value": "meta-llama/llama-prompt-guard-2-86m"
+      },
+      {
+        "label": "openai/gpt-oss-120b",
+        "value": "openai/gpt-oss-120b"
+      },
+      {
+        "label": "openai/gpt-oss-20b",
+        "value": "openai/gpt-oss-20b"
+      },
+      {
+        "label": "openai/gpt-oss-safeguard-20b",
+        "value": "openai/gpt-oss-safeguard-20b"
+      },
+      {
+        "label": "qwen/qwen3-32b",
+        "value": "qwen/qwen3-32b"
+      }
+    ],
+    "last_tested": "2026-05-31T00:58:16.958+00:00",
+    "last_latency_ms": 713,
+    "health_status": "healthy",
+    "stats": {
+      "failures": 8,
+      "requests": 15,
+      "successes": 7,
+      "last_error": null,
+      "avg_latency_ms": 471
+    }
+  },
+  {
+    "id": "eb0ce738-6529-49ef-8f46-6ee9b497c935",
+    "provider_name": "huggingface",
+    "model": "microsoft/Phi-3-mini-4k-instruct",
+    "priority": 4,
+    "is_active": true,
+    "base_url": null,
+    "available_models": [
+      {
+        "label": "Mistral 7B Instruct v0.2",
+        "value": "mistralai/Mistral-7B-Instruct-v0.2"
+      },
+      {
+        "label": "Mistral 7B Instruct v0.1",
+        "value": "mistralai/Mistral-7B-Instruct-v0.1"
+      },
+      {
+        "label": "Zephyr 7B Beta",
+        "value": "HuggingFaceH4/zephyr-7b-beta"
+      },
+      {
+        "label": "Phi-3 Mini 4K",
+        "value": "microsoft/Phi-3-mini-4k-instruct"
+      }
+    ],
+    "last_tested": "2026-05-31T00:58:18.056+00:00",
+    "last_latency_ms": 293,
+    "health_status": "down",
+    "stats": {
+      "failures": 15,
+      "requests": 15,
+      "successes": 0,
+      "last_error": "HuggingFace fetch failed: TypeError: fetch failed | endpoint=https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct",
+      "avg_latency_ms": 560
+    }
+  },
+  {
+    "id": "389ad9e1-1af6-4379-860d-19054451d10e",
+    "provider_name": "deepseek",
+    "model": "deepseek-v4-flash",
+    "priority": 5,
+    "is_active": true,
+    "base_url": "https://api.deepseek.com/v1",
+    "available_models": [
+      {
+        "label": "deepseek-v4-flash",
+        "value": "deepseek-v4-flash"
+      },
+      {
+        "label": "deepseek-v4-pro",
+        "value": "deepseek-v4-pro"
+      }
+    ],
+    "last_tested": "2026-05-31T00:58:20.084+00:00",
+    "last_latency_ms": 1389,
+    "health_status": "down",
+    "stats": {
+      "failures": 13,
+      "requests": 13,
+      "successes": 0,
+      "last_error": "DeepSeek 402: {\"error\":{\"message\":\"Insufficient Balance\",\"type\":\"unknown_error\",\"param\":null,\"code\":\"invalid_request_error\"}}",
+      "avg_latency_ms": 1000
+    }
+  },
+  {
+    "id": "b70b7ed8-c076-4b58-acab-b762c8a82e07",
+    "provider_name": "cerebras",
+    "model": "zai-glm-4.7",
+    "priority": 6,
+    "is_active": true,
+    "base_url": "https://api.cerebras.ai/v1",
+    "available_models": [
+      {
+        "label": "zai-glm-4.7",
+        "value": "zai-glm-4.7"
+      },
+      {
+        "label": "gpt-oss-120b",
+        "value": "gpt-oss-120b"
+      }
+    ],
+    "last_tested": "2026-05-31T00:58:21.806+00:00",
+    "last_latency_ms": 1030,
+    "health_status": "healthy",
+    "stats": {
+      "failures": 1,
+      "requests": 15,
+      "successes": 14,
+      "last_error": null,
+      "avg_latency_ms": 1809
+    }
+  }
+]

@@ -9,10 +9,10 @@ import {
 } from 'lucide-react'
 import {
   getResearchQueue, createResearchItem, updateResearchItem, deleteResearchItem,
-  createAiDraft, getAiProviders, getAiPrompts, recordProviderCall, logProviderFailure,
+  createAiDraft, getAiProviders, getAiPrompts,
 } from '@/api/supabaseApi'
 import { callAI, extractJSON } from '@/lib/aiProvider'
-import { buildJobPrompt, buildLocalFallbackJobDraft, JOB_TYPES } from '@/lib/jobWritingFramework'
+import { buildJobPrompt, JOB_TYPES } from '@/lib/jobWritingFramework'
 import { scoreJob } from '@/lib/jobQualityScorer'
 
 const STATUS_META = {
@@ -181,26 +181,44 @@ export default function AiResearchQueue() {
 
   const handleGenerate = async (item) => {
     const activeProviders = providers.filter(p => p.is_active && p.api_key)
-    const systemPrompt = prompts.find(p => p.job_type === item.job_type)?.prompt_text || ''
-    const promptRecord = prompts.find(p => p.job_type === item.job_type)
-    const jobData = {
-      title: item.title,
-      organization: item.organization,
-      source_url: item.source_url,
-      notification_text: item.raw_input,
-      ...item.extracted_data,
+    if (!activeProviders.length) {
+      toast.error('No AI providers configured. Go to AI Settings first.')
+      return
     }
 
     setGenerating(item.id)
-    abortRef.current?.abort?.()
-    abortRef.current = new AbortController()
+    updateMutation.mutate({ id: item.id, data: { status: 'processing' } })
 
-    const persistDraft = async ({ parsed, provider, tokensUsed = 0, durationMs = 0 }) => {
+    try {
+      const systemPrompt = prompts.find(p => p.job_type === item.job_type)?.prompt_text || ''
+      const jobData = {
+        title: item.title,
+        organization: item.organization,
+        source_url: item.source_url,
+        notification_text: item.raw_input,
+        ...item.extracted_data,
+      }
+
+      const prompt = buildJobPrompt({ jobData, jobType: item.job_type, systemPrompt, extraInstructions: item.notes || '' })
+
+      const t0 = Date.now()
+      const { text, provider: usedProvider, tokensUsed } = await callAI(activeProviders, prompt)
+      const durationMs = Date.now() - t0
+
+      const parsed = extractJSON(text)
+      if (!parsed) {
+        toast.error('AI returned invalid JSON. Try again or switch provider.')
+        updateMutation.mutate({ id: item.id, data: { status: 'pending' } })
+        return
+      }
+
       const scores = scoreJob(parsed)
+
+      const promptRecord = prompts.find(p => p.job_type === item.job_type)
       await createAiDraft({
         queue_item_id: item.id,
         job_type: item.job_type,
-        ai_provider: provider,
+        ai_provider: usedProvider,
         prompt_id: promptRecord?.id || null,
         generated_data: parsed,
         quality_scores: scores,
@@ -209,75 +227,13 @@ export default function AiResearchQueue() {
         status: 'pending_review',
       })
 
-      await updateMutation.mutateAsync({ id: item.id, data: { status: 'drafted' } })
+      updateMutation.mutate({ id: item.id, data: { status: 'drafted' } })
       queryClient.invalidateQueries({ queryKey: ['ai-drafts'] })
-    }
-
-    const createLocalFallbackDraft = async (reason, durationMs = 0) => {
-      const fallbackDraft = buildLocalFallbackJobDraft({ jobData, jobType: item.job_type, reason })
-      await persistDraft({ parsed: fallbackDraft, provider: 'local_fallback', durationMs })
-      await logProviderFailure({
-        provider_name: 'local_fallback',
-        error: reason,
-        details: { phase: 'draft_generation', queue_item_id: item.id, job_type: item.job_type },
-        duration_ms: durationMs,
-        occurred_at: new Date().toISOString(),
-      }).catch(() => {})
-      toast.warning('AI generation failed, so a local review draft was created instead.')
-    }
-
-    await updateMutation.mutateAsync({ id: item.id, data: { status: 'processing' } })
-
-    try {
-      if (!activeProviders.length) {
-        await createLocalFallbackDraft('No active AI providers are configured.')
-        return
-      }
-
-      const prompt = buildJobPrompt({ jobData, jobType: item.job_type, systemPrompt, extraInstructions: item.notes || '' })
-
-      const t0 = Date.now()
-      const { text, provider: usedProvider, tokensUsed } = await callAI(activeProviders, prompt, {
-        signal: abortRef.current.signal,
-        onAttempt: async ({ provider, ok, durationMs, error, errorType, model }) => {
-          if (provider?.id) {
-            await recordProviderCall(provider.id, {
-              success: ok,
-              latencyMs: durationMs,
-              error: error || null,
-            }).catch(() => {})
-          }
-          if (!ok) {
-            await logProviderFailure({
-              provider_name: provider?.provider_name || 'unknown',
-              error: error || 'Provider failed',
-              details: { phase: 'draft_generation', queue_item_id: item.id, error_type: errorType, model },
-              duration_ms: durationMs || 0,
-              occurred_at: new Date().toISOString(),
-            }).catch(() => {})
-          }
-        },
-      })
-      const durationMs = Date.now() - t0
-
-      const parsed = extractJSON(text)
-      if (!parsed) {
-        await createLocalFallbackDraft('AI returned invalid JSON.', durationMs)
-        return
-      }
-
-      await persistDraft({ parsed, provider: usedProvider, tokensUsed, durationMs })
       toast.success(`Draft created via ${usedProvider} in ${(durationMs/1000).toFixed(1)}s`)
     } catch (err) {
-      const durationMs = err?.attempts?.reduce((sum, attempt) => sum + (attempt.durationMs || 0), 0) || 0
-      try {
-        await createLocalFallbackDraft(err.message || 'All AI providers failed.', durationMs)
-      } catch (fallbackErr) {
-        toast.error(`Generation failed: ${fallbackErr.message}`)
-        updateMutation.mutate({ id: item.id, data: { status: 'pending' } })
-      }
+      toast.error(`Generation failed: ${err.message}`)
+      updateMutation.mutate({ id: item.id, data: { status: 'pending' } })
     } finally {
-      abortRef.current = null
       setGenerating(null)
     }
   }

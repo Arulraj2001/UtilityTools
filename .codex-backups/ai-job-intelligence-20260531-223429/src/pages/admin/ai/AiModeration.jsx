@@ -53,19 +53,15 @@ function DraftDrawer({ draft, onClose, onAction }) {
         seo_description: data.seo_description || '',
         seo_keywords: data.seo_keywords || '',
         canonical_url: data.canonical_url || '',
-        og_title: data.og_title || data.seo_title || '',
-        og_description: data.og_description || data.seo_description || '',
-        schema_type: data.schema_type || 'JobPosting',
         faq_items: data.faq_items || null,
         tags: data.tags || null,
         status: 'draft',    // Always draft first — never auto-publish
         featured: false,
       }
-      const createdJob = await createJob(payload)
-      const createdJobId = Array.isArray(createdJob) ? createdJob[0]?.id : createdJob?.id
-      await updateAiDraft(draft.id, { status: 'published', published_job_id: createdJobId || null })
+      await createJob(payload)
+      await updateAiDraft(draft.id, { status: 'published' })
       queryClient.invalidateQueries({ queryKey: ['ai-drafts'] })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'jobs'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-jobs'] })
       toast.success('Job created as Draft — go to Jobs Management to review and publish.')
       onClose()
     } catch (err) {

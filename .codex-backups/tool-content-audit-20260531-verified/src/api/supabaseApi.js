@@ -118,34 +118,11 @@ const validateJobPayload = (job) => {
  * @param {Record<string, any>} [payload] - Optional payload that was submitted
  * @param {Record<string, any>} [context] - Additional debugging context
  */
-const redactForLog = (value) => {
-  if (value === null || value === undefined) return value;
-  if (Array.isArray(value)) return value.map(redactForLog);
-  if (typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, nestedValue]) => [
-        key,
-        /api[_-]?key|authorization|token|secret|password/i.test(key)
-          ? '[REDACTED]'
-          : redactForLog(nestedValue),
-      ])
-    );
-  }
-  if (typeof value === 'string') {
-    return value
-      .replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/gi, 'Bearer [REDACTED]')
-      .replace(/([?&]key=)[^&\s"']+/gi, '$1[REDACTED]');
-  }
-  return value;
-};
-
 const logSupabaseError = (operation, error, payload = null, context = null) => {
-  const safePayload = redactForLog(payload);
-  const safeContext = redactForLog(context);
   const errorLog = {
     timestamp: new Date().toISOString(),
     operation,
-    payload: safePayload,
+    payload,
     error: {
       message: error?.message || 'Unknown error',
       details: error?.details || null,
@@ -153,7 +130,7 @@ const logSupabaseError = (operation, error, payload = null, context = null) => {
       code: error?.code || null,
       status: error?.status || null,
     },
-    context: safeContext,
+    context,
     fullError: error,
   };
 
@@ -165,7 +142,7 @@ const logSupabaseError = (operation, error, payload = null, context = null) => {
   console.error('Code:', error?.code);
   console.error('Details:', error?.details);
   console.error('Hint:', error?.hint);
-  if (safePayload) console.error('Payload:', safePayload);
+  if (payload) console.error('Payload:', payload);
   console.error('Full error:', error);
   console.groupEnd();
 };
@@ -226,7 +203,7 @@ const validateJsonField = (value, fieldName) => {
  * @returns {{valid: boolean, errors?: Record<string, string>}}
  */
 const validateJobJsonFields = (job) => {
-  const jsonFields = ['tags', 'eligibility', 'selection_process', 'important_dates', 'faq_items'];
+  const jsonFields = ['tags', 'eligibility', 'selection_process', 'important_dates'];
   const errors = {};
 
   jsonFields.forEach((field) => {
@@ -240,24 +217,6 @@ const validateJobJsonFields = (job) => {
     valid: Object.keys(errors).length === 0,
     errors: Object.keys(errors).length > 0 ? errors : undefined,
   };
-};
-
-const OPTIONAL_JOB_EXTENSION_FIELDS = ['faq_items', 'og_title', 'og_description', 'schema_type'];
-
-const stripOptionalJobExtensionFields = (payload = {}) => {
-  const next = { ...payload };
-  OPTIONAL_JOB_EXTENSION_FIELDS.forEach((field) => {
-    delete next[field];
-  });
-  return next;
-};
-
-const isMissingOptionalJobColumnError = (error) => {
-  const haystack = `${error?.message || ''} ${error?.details || ''} ${error?.hint || ''}`.toLowerCase();
-  return OPTIONAL_JOB_EXTENSION_FIELDS.some((field) => (
-    haystack.includes(field) &&
-    /column|schema cache|could not find|does not exist/.test(haystack)
-  ));
 };
 
 /**
@@ -377,18 +336,6 @@ const cleanJobPayload = (payload) => {
       cleaned[field] = validation.parsed || null;
     } else {
       cleaned[field] = null;
-    }
-  });
-
-  if (payload.faq_items !== undefined) {
-    const validation = validateJsonField(payload.faq_items, 'faq_items');
-    cleaned.faq_items = validation.parsed || null;
-  }
-
-  ['og_title', 'og_description', 'schema_type'].forEach((field) => {
-    if (payload[field] !== undefined) {
-      const value = payload[field];
-      cleaned[field] = value === '' || value === null ? null : String(value).trim() || null;
     }
   });
 
@@ -778,13 +725,9 @@ export const deleteSiteSetting = async (id) => {
   return handleResponse(result);
 };
 
-export const getToolBySlug = async (slug, { published = false } = {}) => {
+export const getToolBySlug = async (slug) => {
   if (isRetiredToolSlug(slug)) return null;
-
-  let query = supabase.from('tools').select('*').eq('slug', slug);
-  if (published) query = query.eq('status', 'published');
-
-  const result = await query.maybeSingle();
+  const result = await supabase.from('tools').select('*').eq('slug', slug).maybeSingle();
   if (result.error) {
     console.error('getToolBySlug error:', result.error)
     return null
@@ -901,14 +844,9 @@ export const createJob = async (job) => {
   const payload = { ...cleanedPayload, slug: uniqueSlug };
 
   // Step 5: Attempt insert
-  let result = await supabase.from('jobs').insert([payload]).select();
+  let result = await supabase.from('jobs').insert([payload]);
   
   if (result.error) {
-    if (isMissingOptionalJobColumnError(result.error)) {
-      result = await supabase.from('jobs').insert([stripOptionalJobExtensionFields(payload)]).select();
-      if (!result.error) return handleResponse(result);
-    }
-
     // Check if it's a slug conflict and retry with next suffix
     if (result.error.code === '23505' || /duplicate|conflict/i.test(result.error.message || '')) {
       logSupabaseError('createJob', result.error, payload, { phase: 'initial-insert', slug: uniqueSlug });
@@ -916,7 +854,7 @@ export const createJob = async (job) => {
       const retrySlug = await generateUniqueJobSlug(uniqueSlug);
       if (retrySlug !== uniqueSlug) {
         // Try with incremented slug
-        result = await supabase.from('jobs').insert([{ ...payload, slug: retrySlug }]).select();
+        result = await supabase.from('jobs').insert([{ ...payload, slug: retrySlug }]);
         if (!result.error) {
           return handleResponse(result);
         }
@@ -957,11 +895,6 @@ export const updateJob = async (id, job) => {
   let result = await supabase.from('jobs').update(payload).eq('id', id);
   
   if (result.error) {
-    if (isMissingOptionalJobColumnError(result.error)) {
-      result = await supabase.from('jobs').update(stripOptionalJobExtensionFields(payload)).eq('id', id);
-      if (!result.error) return handleResponse(result);
-    }
-
     // Check if it's a slug conflict and retry with next suffix
     if (result.error.code === '23505' || /duplicate|conflict/i.test(result.error.message || '')) {
       logSupabaseError('updateJob', result.error, payload, { phase: 'initial-update', jobId: id, slug: uniqueSlug });
@@ -1352,7 +1285,7 @@ export const recordProviderCall = async (id, { success, latencyMs, error = null 
   const avg_latency_ms = requests > 0 ? Math.round(totalMs / requests) : 0;
 
   const patch = {
-    stats: { requests, successes, failures, avg_latency_ms, last_error: success ? null : (redactForLog(error) || null) },
+    stats: { requests, successes, failures, avg_latency_ms, last_error: success ? null : (error || null) },
     last_latency_ms: latencyMs || null,
     last_tested: new Date().toISOString(),
     health_status: success ? 'healthy' : (failures >= 3 ? 'down' : 'degraded'),
@@ -1411,23 +1344,15 @@ export const getProviderFailures = async ({ limit = 100 } = {}) => {
  * If table missing, writes an `analytics_events` fallback record.
  */
 export const logProviderFailure = async (payload) => {
-  const normalized = {
-    provider_name: payload.provider_name || payload.provider || 'unknown',
-    error: redactForLog(payload.error || payload.message || 'unknown'),
-    details: redactForLog(payload.details || payload.event_data || {}),
-    duration_ms: payload.duration_ms ?? payload.durationMs ?? null,
-    occurred_at: payload.occurred_at || payload.event_time || new Date().toISOString(),
-  };
-
-  const res = await supabase.from('ai_provider_failures').insert([normalized]).select();
+  const res = await supabase.from('ai_provider_failures').insert([{ ...payload }]).select();
   if (res.error) {
     // fallback
     const fallback = await supabase.from('analytics_events').insert([{
       event_type: 'provider_failure',
-      event_data: normalized,
+      event_data: payload,
       page_url: '',
     }]);
-    if (fallback.error) logSupabaseError('logProviderFailure', fallback.error, normalized);
+    if (fallback.error) logSupabaseError('logProviderFailure', fallback.error, payload);
     return fallback.data ?? [];
   }
   return res.data ?? [];

@@ -24,7 +24,6 @@ export default function AdminTools() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all-tools'] })
       queryClient.invalidateQueries({ queryKey: ['tools-published'] })
-      queryClient.invalidateQueries({ queryKey: ['tool-by-slug'] })
       toast.success('Tool deleted')
     },
   })
@@ -46,7 +45,6 @@ export default function AdminTools() {
     setEditingTool(null)
     queryClient.invalidateQueries({ queryKey: ['all-tools'] })
     queryClient.invalidateQueries({ queryKey: ['tools-published'] })
-    queryClient.invalidateQueries({ queryKey: ['tool-by-slug'] })
   }
 
   if (showEditor) {

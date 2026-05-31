@@ -106,7 +106,6 @@ export default function AdminToolSeeder() {
     setErrors(errorSlugs)
     queryClient.invalidateQueries({ queryKey: ['tools-all'] })
     queryClient.invalidateQueries({ queryKey: ['tools-published'] })
-    queryClient.invalidateQueries({ queryKey: ['tool-by-slug'] })
     setSeeding(false)
     const successCount = seededSlugs.length
     toast.success(`Seed complete: ${successCount} tools imported, ${errorSlugs.length} failures.`)
@@ -119,7 +118,6 @@ export default function AdminToolSeeder() {
     }
     queryClient.invalidateQueries({ queryKey: ['tools-all'] })
     queryClient.invalidateQueries({ queryKey: ['tools-published'] })
-    queryClient.invalidateQueries({ queryKey: ['tool-by-slug'] })
     toast.success('All tools deleted')
   }
 
