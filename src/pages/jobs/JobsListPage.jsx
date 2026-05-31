@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 
 import { useJobs, useFeaturedJobs } from '@/hooks/jobs/useJobs'
+import { useSiteBooleanSetting } from '@/hooks/useSiteSettings'
 import JobsFilterSidebar from '@/components/jobs/JobsFilterSidebar'
 
 import {
@@ -36,6 +37,8 @@ export default function JobsListPage() {
   const [search, setSearch] = useState('')
   const [searchParams] = useSearchParams()
 
+  const { value: jobsEnabled = true } = useSiteBooleanSetting('jobs_enabled', true)
+
   const categoryParam =
     searchParams.get('category') || undefined
 
@@ -47,9 +50,23 @@ export default function JobsListPage() {
   } = useJobs({
     search,
     category: categoryParam,
+    enabled: jobsEnabled,
   })
 
   const { data: featured = [] } = useFeaturedJobs()
+
+  if (!jobsEnabled) {
+    return (
+      <main className="min-h-screen bg-background">
+        <section className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
+          <div className="rounded-3xl border bg-card p-10 text-center">
+            <h2 className="text-2xl font-bold">Job listings are paused</h2>
+            <p className="text-muted-foreground mt-3">Job content is temporarily hidden from public pages.</p>
+          </div>
+        </section>
+      </main>
+    )
+  }
 
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 

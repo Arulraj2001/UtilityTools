@@ -250,31 +250,79 @@ export default function ToolContentSections({ tool }) {
       </motion.section>
 
       {/* ============== KEYWORDS/RELATED SEARCHES ============== */}
-      {tool.seo_keywords && (
+      {(tool.primary_keywords || tool.secondary_keywords || tool.seo_keywords) && (
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
           className="rounded-2xl border border-border/50 bg-card p-5 sm:p-6"
         >
-          <h2 className="text-2xl font-bold mb-4">Related Search Terms</h2>
+          <h2 className="text-2xl font-bold mb-6">Search Terms & Keywords</h2>
           
-          <div className="flex flex-wrap gap-2">
-            {(tool.seo_keywords || '')
-              .split(',')
-              .slice(0, 15)
-              .map((keyword) => (
-                <span
-                  key={keyword}
-                  className="px-3 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
-                >
-                  {keyword.trim()}
-                </span>
-              ))}
+          <div className="space-y-6">
+            {/* Primary Keywords */}
+            {tool.primary_keywords && (
+              <div>
+                <h3 className="text-sm font-semibold text-primary uppercase tracking-wide mb-3">Primary Keywords</h3>
+                <div className="flex flex-wrap gap-2">
+                  {tool.primary_keywords
+                    .split(',')
+                    .map((keyword) => (
+                      <span
+                        key={keyword}
+                        className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
+                      >
+                        {keyword.trim()}
+                      </span>
+                    ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">Main target keywords for this tool</p>
+              </div>
+            )}
+
+            {/* Secondary Keywords */}
+            {tool.secondary_keywords && (
+              <div>
+                <h3 className="text-sm font-semibold text-accent uppercase tracking-wide mb-3">Secondary Keywords</h3>
+                <div className="flex flex-wrap gap-2">
+                  {tool.secondary_keywords
+                    .split(',')
+                    .map((keyword) => (
+                      <span
+                        key={keyword}
+                        className="px-3 py-2 rounded-lg bg-accent/20 text-accent text-sm font-medium hover:bg-accent/30 transition-colors"
+                      >
+                        {keyword.trim()}
+                      </span>
+                    ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">Related search terms</p>
+              </div>
+            )}
+
+            {/* Legacy Keywords (seo_keywords) */}
+            {tool.seo_keywords && !tool.primary_keywords && !tool.secondary_keywords && (
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wide mb-3">Related Search Terms</h3>
+                <div className="flex flex-wrap gap-2">
+                  {tool.seo_keywords
+                    .split(',')
+                    .slice(0, 15)
+                    .map((keyword) => (
+                      <span
+                        key={keyword}
+                        className="px-3 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+                      >
+                        {keyword.trim()}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          <p className="text-muted-foreground text-sm mt-4">
-            {tool.name} is also commonly searched under these terms. If you're looking for related functionality, explore our collection of tools for comprehensive solutions.
+          <p className="text-muted-foreground text-sm mt-6">
+            {tool.name} is commonly searched using these keywords and phrases. If you're looking for related functionality, explore our collection of tools for comprehensive solutions.
           </p>
         </motion.section>
       )}

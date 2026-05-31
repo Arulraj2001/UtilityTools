@@ -51,6 +51,18 @@ const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
 const AdminToolSeeder = lazy(() => import('./pages/admin/AdminToolSeeder'))
 const AdminWorkflowPages = lazy(() => import('./pages/admin/AdminWorkflowPages'))
 const AdminJobs = lazy(() => import('./pages/admin/jobs/AdminJobs'))
+// AI Job Intelligence
+const AiDashboard  = lazy(() => import('./pages/admin/ai/AiDashboard'))
+const AiResearch   = lazy(() => import('./pages/admin/ai/AiResearchQueue'))
+const AiModeration = lazy(() => import('./pages/admin/ai/AiModeration'))
+const AiDuplicates = lazy(() => import('./pages/admin/ai/AiDuplicates'))
+const AiSeoAudit   = lazy(() => import('./pages/admin/ai/AiSeoAudit'))
+const AiMonitoring = lazy(() => import('./pages/admin/ai/AiMonitoring'))
+const AiJobUpdates = lazy(() => import('./pages/admin/ai/AiJobUpdates'))
+const AiSources    = lazy(() => import('./pages/admin/ai/AiSources'))
+const AiSettings   = lazy(() => import('./pages/admin/ai/AiSettings'))
+const AiPrompts    = lazy(() => import('./pages/admin/ai/AiPrompts'))
+const AiReports    = lazy(() => import('./pages/admin/ai/AiReports'))
 const WorkflowPage = lazy(() => import('./pages/WorkflowPage'))
 const WorkflowListPage = lazy(() => import('./pages/WorkflowListPage'))
 const PageNotFound = lazy(() => import('./lib/PageNotFound'))
@@ -133,6 +145,18 @@ const AuthenticatedApp = () => {
           <Route path="workflow-pages" element={wrap(<AdminWorkflowPages />)} />
           <Route path="ads" element={wrap(<AdminAds />)} />
           <Route path="redirects" element={wrap(<AdminRedirects />)} />
+          {/* AI Job Intelligence */}
+          <Route path="ai-intelligence" element={wrap(<AiDashboard />)} />
+          <Route path="ai-research"     element={wrap(<AiResearch />)} />
+          <Route path="ai-moderation"   element={wrap(<AiModeration />)} />
+          <Route path="ai-duplicates"   element={wrap(<AiDuplicates />)} />
+          <Route path="ai-seo-audit"    element={wrap(<AiSeoAudit />)} />
+          <Route path="ai-monitoring"   element={wrap(<AiMonitoring />)} />
+          <Route path="ai-updates"      element={wrap(<AiJobUpdates />)} />
+          <Route path="ai-sources"      element={wrap(<AiSources />)} />
+          <Route path="ai-settings"     element={wrap(<AiSettings />)} />
+          <Route path="ai-prompts"      element={wrap(<AiPrompts />)} />
+          <Route path="ai-reports"      element={wrap(<AiReports />)} />
           <Route path="settings" element={wrap(<AdminSettings />)} />
           <Route path="seeder" element={wrap(<AdminToolSeeder />)} />
         </Route>

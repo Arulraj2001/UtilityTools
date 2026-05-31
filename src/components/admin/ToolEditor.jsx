@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Save, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -28,12 +28,16 @@ export default function ToolEditor({ tool, onSave, onCancel }) {
     seo_title: tool?.seo_title || '',
     seo_description: tool?.seo_description || '',
     seo_keywords: tool?.seo_keywords || '',
+    primary_keywords: tool?.primary_keywords || '',
+    secondary_keywords: tool?.secondary_keywords || '',
     featured_image: tool?.featured_image || '',
     seo_content: tool?.seo_content || '',
     input_fields: tool?.input_fields || [],
     faq: tool?.faq || [],
     sort_order: tool?.sort_order || 0,
   })
+
+  const [faqPasteText, setFaqPasteText] = useState('')
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -85,6 +89,87 @@ export default function ToolEditor({ tool, onSave, onCancel }) {
     const faqs = [...form.faq]
     faqs[idx] = { ...faqs[idx], [key]: value }
     update('faq', faqs)
+  }
+
+  const handleBulkFaqUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result || '{}')
+        let faqItems = []
+
+        // Handle different JSON formats
+        if (Array.isArray(json)) {
+          faqItems = json
+        } else if (json.faq && Array.isArray(json.faq)) {
+          faqItems = json.faq
+        } else if (json.faq_items && Array.isArray(json.faq_items)) {
+          faqItems = json.faq_items
+        } else if (json.faqs && Array.isArray(json.faqs)) {
+          faqItems = json.faqs
+        }
+
+        // Validate structure
+        const validItems = faqItems.filter(
+          item => item.question && item.answer && typeof item.question === 'string' && typeof item.answer === 'string'
+        )
+
+        if (validItems.length === 0) {
+          toast.error('No valid FAQ items found in JSON. Expected format: [{question: "...", answer: "..."}]')
+          return
+        }
+
+        update('faq', validItems)
+        setFaqPasteText('')
+        toast.success(`Loaded ${validItems.length} FAQ items from file`)
+      } catch (error) {
+        toast.error('Invalid JSON file. Make sure it contains an array of {question, answer} objects.')
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = '' // Reset file input
+  }
+
+  const handleFaqPaste = () => {
+    if (!faqPasteText.trim()) {
+      toast.error('Please paste some JSON first')
+      return
+    }
+
+    try {
+      const json = JSON.parse(faqPasteText)
+      let faqItems = []
+
+      // Handle different JSON formats
+      if (Array.isArray(json)) {
+        faqItems = json
+      } else if (json.faq && Array.isArray(json.faq)) {
+        faqItems = json.faq
+      } else if (json.faq_items && Array.isArray(json.faq_items)) {
+        faqItems = json.faq_items
+      } else if (json.faqs && Array.isArray(json.faqs)) {
+        faqItems = json.faqs
+      }
+
+      // Validate structure
+      const validItems = faqItems.filter(
+        item => item.question && item.answer && typeof item.question === 'string' && typeof item.answer === 'string'
+      )
+
+      if (validItems.length === 0) {
+        toast.error('No valid FAQ items found. Expected format: [{question: "...", answer: "..."}]')
+        return
+      }
+
+      update('faq', validItems)
+      setFaqPasteText('')
+      toast.success(`Loaded ${validItems.length} FAQ items`)
+    } catch (error) {
+      toast.error('Invalid JSON. Make sure it\'s properly formatted.')
+    }
   }
 
   return (
@@ -277,8 +362,30 @@ export default function ToolEditor({ tool, onSave, onCancel }) {
             <Textarea value={form.seo_description} onChange={e => update('seo_description', e.target.value)} rows={3} className="rounded-xl" />
           </div>
           <div className="space-y-2">
-            <Label>SEO Keywords (comma-separated)</Label>
-            <Input value={form.seo_keywords} onChange={e => update('seo_keywords', e.target.value)} className="rounded-xl" />
+            <Label>SEO Keywords (all keywords - comma-separated)</Label>
+            <Input value={form.seo_keywords} onChange={e => update('seo_keywords', e.target.value)} className="rounded-xl" placeholder="Used for backward compatibility" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Primary Keywords (comma-separated)</Label>
+              <Input 
+                value={form.primary_keywords} 
+                onChange={e => update('primary_keywords', e.target.value)} 
+                className="rounded-xl" 
+                placeholder="Main target keywords - appear prominently"
+              />
+              <p className="text-xs text-muted-foreground">High-priority keywords for the tool (3-5 keywords)</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Secondary Keywords (comma-separated)</Label>
+              <Input 
+                value={form.secondary_keywords} 
+                onChange={e => update('secondary_keywords', e.target.value)} 
+                className="rounded-xl" 
+                placeholder="Supporting keywords"
+              />
+              <p className="text-xs text-muted-foreground">Related/supporting keywords (5-10 keywords)</p>
+            </div>
           </div>
           <div className="space-y-2">
             <Label>Featured Image URL</Label>
@@ -286,6 +393,8 @@ export default function ToolEditor({ tool, onSave, onCancel }) {
           </div>
           <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 text-xs text-muted-foreground space-y-1">
             <p><strong>Current fields control:</strong> Meta tags, social previews, Google snippets</p>
+            <p><strong>Primary Keywords:</strong> Displayed on tool page, used in meta tags, most important for SEO</p>
+            <p><strong>Secondary Keywords:</strong> Displayed on tool page below primary, helps for related searches</p>
             <p><strong>Note:</strong> Use the SEO Content tab below for visible educational content on the tool page</p>
           </div>
         </TabsContent>
@@ -337,24 +446,96 @@ export default function ToolEditor({ tool, onSave, onCancel }) {
         </TabsContent>
 
         <TabsContent value="faq" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
             <p className="text-sm text-muted-foreground">FAQ items appear on the tool page and generate FAQ schema</p>
-            <Button variant="outline" size="sm" onClick={addFaq} className="rounded-lg">
-              <Plus className="w-4 h-4 mr-1" /> Add FAQ
-            </Button>
-          </div>
-          {form.faq.map((item, idx) => (
-            <div key={idx} className="p-4 rounded-xl border border-border space-y-3 bg-card">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground">FAQ {idx + 1}</span>
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeFaq(idx)}>
-                  <Trash2 className="w-3.5 h-3.5" />
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={addFaq} className="rounded-lg">
+                <Plus className="w-4 h-4 mr-1" /> Add FAQ
+              </Button>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleBulkFaqUpload}
+                  className="hidden"
+                  id="faq-upload"
+                  title="Upload JSON file with FAQ items"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-lg"
+                  onClick={() => document.getElementById('faq-upload')?.click()}
+                >
+                  <Upload className="w-4 h-4 mr-1" /> Upload JSON
                 </Button>
               </div>
-              <Input placeholder="Question" value={item.question} onChange={e => updateFaq(idx, 'question', e.target.value)} className="rounded-lg" />
-              <Textarea placeholder="Answer" value={item.answer} onChange={e => updateFaq(idx, 'answer', e.target.value)} rows={3} className="rounded-lg" />
             </div>
-          ))}
+          </div>
+
+          {/* Copy-Paste JSON Section */}
+          <div className="p-4 rounded-xl border border-border/50 bg-muted/20 space-y-3">
+            <div>
+              <Label className="text-sm font-semibold">Or paste FAQ JSON directly</Label>
+              <p className="text-xs text-muted-foreground mt-1">Copy-paste your FAQ items as JSON below</p>
+            </div>
+            <Textarea
+              placeholder={`[
+  {"question": "What is this?", "answer": "An explanation..."},
+  {"question": "How to use?", "answer": "Step by step..."}
+]`}
+              value={faqPasteText}
+              onChange={(e) => setFaqPasteText(e.target.value)}
+              rows={6}
+              className="rounded-lg font-mono text-xs"
+            />
+            <Button 
+              onClick={handleFaqPaste}
+              variant="default"
+              size="sm"
+              className="rounded-lg w-full"
+              disabled={!faqPasteText.trim()}
+            >
+              Load FAQ from JSON
+            </Button>
+          </div>
+
+          {/* FAQ Upload Format Help */}
+          <div className="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+            <p className="text-xs font-semibold text-amber-900 dark:text-amber-200 mb-2">📋 Supported JSON Formats:</p>
+            <div className="space-y-2 text-xs text-amber-900 dark:text-amber-100">
+              <div>
+                <p className="font-medium mb-1">Direct array (recommended):</p>
+                <pre className="bg-white dark:bg-black p-2 rounded overflow-auto max-h-20">{`[
+  {"question": "Q?", "answer": "A"},
+  {"question": "Q2?", "answer": "A2"}
+]`}</pre>
+              </div>
+              <div>
+                <p className="font-medium mb-1">Or wrapped in object:</p>
+                <pre className="bg-white dark:bg-black p-2 rounded overflow-auto max-h-16">{`{"faq": [...]} or {"faq_items": [...]} or {"faqs": [...]}`}</pre>
+              </div>
+            </div>
+          </div>
+
+          {/* FAQ List */}
+          {form.faq.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold mb-3">Current FAQ Items ({form.faq.length})</h3>
+              {form.faq.map((item, idx) => (
+                <div key={idx} className="p-4 rounded-xl border border-border space-y-3 bg-card mb-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">FAQ {idx + 1}</span>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeFaq(idx)}>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                  <Input placeholder="Question" value={item.question} onChange={e => updateFaq(idx, 'question', e.target.value)} className="rounded-lg" />
+                  <Textarea placeholder="Answer" value={item.answer} onChange={e => updateFaq(idx, 'answer', e.target.value)} rows={3} className="rounded-lg" />
+                </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

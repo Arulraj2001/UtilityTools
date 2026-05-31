@@ -1,0 +1,42 @@
+[
+  {
+    "question": "What is this tool?",
+    "answer": "This is a free online utility tool that helps you perform [specific task]. It runs entirely in your browser, so your files never leave your device and are completely private."
+  },
+  {
+    "question": "Is it really free?",
+    "answer": "Yes, completely free. There are no hidden fees, subscriptions, or payment required. We believe useful tools should be accessible to everyone."
+  },
+  {
+    "question": "Do I need to create an account?",
+    "answer": "No, there's no registration or login required. Just open the page and start using the tool immediately."
+  },
+  {
+    "question": "Is my data safe and private?",
+    "answer": "Absolutely. All processing happens in your browser. We don't upload, store, or access any of your files or data. Once you refresh the page or leave, everything is cleared."
+  },
+  {
+    "question": "What browsers are supported?",
+    "answer": "The tool works on all modern browsers including Chrome, Firefox, Safari, and Edge. We recommend using a recent version for the best experience."
+  },
+  {
+    "question": "Can I use this on mobile?",
+    "answer": "Yes, the tool is fully responsive and works on smartphones and tablets. The experience is optimized for all screen sizes."
+  },
+  {
+    "question": "What if I encounter an error?",
+    "answer": "If something goes wrong, try refreshing the page or clearing your browser cache. If the problem persists, please contact us through the contact page with details about what you were doing."
+  },
+  {
+    "question": "Can I process large files?",
+    "answer": "Yes, the tool can handle large files, but keep in mind it depends on your device's memory. If you experience slowness, try using a device with more resources or processing smaller portions."
+  },
+  {
+    "question": "What file formats are supported?",
+    "answer": "[List specific formats supported by your tool]. The tool will let you know if a format isn't supported."
+  },
+  {
+    "question": "Can I download the results?",
+    "answer": "Yes, you can download your processed files directly to your device. The download button appears once your file is ready."
+  }
+]

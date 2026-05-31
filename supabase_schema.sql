@@ -79,6 +79,8 @@ create table if not exists tools (
   seo_title text,
   seo_description text,
   seo_keywords text,
+  primary_keywords text,
+  secondary_keywords text,
   featured_image text,
   faq jsonb,
   seo_content text,

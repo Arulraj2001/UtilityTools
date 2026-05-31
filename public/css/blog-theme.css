@@ -1,0 +1,263 @@
+:root{
+  --bg:#f7fafc;
+  --card:#ffffff;
+  --ink:#172033;
+  --muted:#586174;
+  --line:#dce5ee;
+
+  --primary:#2357c6;
+  --secondary:#0f8a72;
+
+  --success:#157347;
+  --warning:#9a5b00;
+  --danger:#9d2c2c;
+
+  --radius:18px;
+  --shadow:0 12px 30px rgba(23,32,51,.05);
+}
+
+.pb{
+  font-family:Inter,system-ui,sans-serif;
+  color:var(--ink);
+  line-height:1.8;
+}
+
+/* HERO */
+
+.pb-hero{
+  background:linear-gradient(
+      135deg,
+      #112a5f 0%,
+      #1d5cc7 52%,
+      #0f8a72 100%
+  );
+
+  color:#fff;
+  border-radius:28px;
+  padding:48px 36px;
+  margin-bottom:30px;
+}
+
+.pb-eyebrow{
+  text-transform:uppercase;
+  font-size:.75rem;
+  letter-spacing:.12em;
+  opacity:.85;
+}
+
+.pb-hero h1{
+  font-size:clamp(2rem,5vw,4rem);
+  line-height:1.1;
+  margin:10px 0 20px;
+}
+
+.pb-lead{
+  font-size:1.1rem;
+}
+
+/* TAGS */
+
+.pb-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:20px;
+}
+
+.pb-tag{
+  padding:7px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.25);
+}
+
+/* CARDS */
+
+.pb-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px;
+  box-shadow:var(--shadow);
+}
+
+/* GRID */
+
+.pb-grid{
+  display:grid;
+  gap:24px;
+}
+
+.pb-2{
+  grid-template-columns:repeat(2,1fr);
+}
+
+.pb-3{
+  grid-template-columns:repeat(3,1fr);
+}
+
+.pb-4{
+  grid-template-columns:repeat(4,1fr);
+}
+
+/* QUICK ANSWER */
+
+.pb-answer{
+  border-left:6px solid var(--secondary);
+}
+
+/* METRICS */
+
+.pb-metric{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 0;
+  border-bottom:1px dashed var(--line);
+}
+
+/* PILLS */
+
+.pb-pill{
+  display:inline-flex;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:.8rem;
+  font-weight:700;
+}
+
+.pb-pill.success{
+  background:#edf7f2;
+  color:var(--success);
+}
+
+.pb-pill.warn{
+  background:#fff4db;
+  color:var(--warning);
+}
+
+.pb-pill.danger{
+  background:#ffecec;
+  color:var(--danger);
+}
+
+/* NOTICE */
+
+.pb-notice{
+  background:#fff8e6;
+  border:1px solid #f1d797;
+  padding:18px;
+  border-radius:16px;
+  margin:20px 0;
+}
+
+/* TABLES */
+
+.pb-table-wrap{
+  overflow-x:auto;
+}
+
+.pb table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+}
+
+.pb th{
+  background:#eef4ff;
+  padding:14px;
+  text-align:left;
+}
+
+.pb td{
+  padding:14px;
+  border-top:1px solid var(--line);
+}
+
+.pb tbody tr:nth-child(even){
+  background:#fbfdff;
+}
+
+/* CHECKLIST */
+
+.pb-check{
+  list-style:none;
+  padding:0;
+}
+
+.pb-check li{
+  padding:10px 0 10px 34px;
+  position:relative;
+}
+
+.pb-check li:before{
+  content:"✓";
+  position:absolute;
+  left:0;
+  top:10px;
+
+  width:24px;
+  height:24px;
+
+  border-radius:50%;
+  background:#e9f8f2;
+  color:var(--success);
+
+  text-align:center;
+  line-height:24px;
+}
+
+/* STEPS */
+
+.pb-step{
+  display:grid;
+  gap:16px;
+}
+
+.pb-step-card{
+  display:flex;
+  gap:16px;
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#fff;
+}
+
+/* TOOL BOX */
+
+.pb-tool{
+  background:#f8fbff;
+  border:1px solid #cfe0f7;
+  border-radius:20px;
+  padding:22px;
+}
+
+/* RELATED */
+
+.pb-related{
+  background:#111827;
+  color:#fff;
+  border-radius:24px;
+  padding:28px;
+}
+
+.pb-related-card{
+  background:rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:16px;
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+  .pb-2,
+  .pb-3,
+  .pb-4{
+    grid-template-columns:1fr;
+  }
+
+  .pb-hero{
+    padding:30px 20px;
+  }
+
+}

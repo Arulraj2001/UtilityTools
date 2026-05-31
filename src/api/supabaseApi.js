@@ -1060,3 +1060,300 @@ export const rollbackImport = async (importId, importedIds = []) => {
   await updateImportHistory(importId, { status: 'rolled_back' });
   return { deleted };
 };
+
+/* ─────────────────────── AI Job Intelligence ────────────────────────────── */
+
+// ── AI Provider Settings ──────────────────────────────────────────────────────
+
+export const getAiProviders = async () => {
+  const res = await supabase.from('ai_provider_settings').select('*').order('priority');
+  if (res.error) { console.warn('getAiProviders:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const updateAiProvider = async (id, data) => {
+  const res = await supabase.from('ai_provider_settings').update({ ...data, updated_at: new Date() }).eq('id', id).select();
+  if (res.error) { logSupabaseError('updateAiProvider', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+// ── AI Prompts ────────────────────────────────────────────────────────────────
+
+export const getAiPrompts = async () => {
+  const res = await supabase.from('ai_prompts').select('*').order('job_type');
+  if (res.error) { console.warn('getAiPrompts:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const updateAiPrompt = async (id, data) => {
+  const res = await supabase.from('ai_prompts').update({ ...data, updated_at: new Date() }).eq('id', id).select();
+  if (res.error) { logSupabaseError('updateAiPrompt', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+// ── AI Job Sources ────────────────────────────────────────────────────────────
+
+export const getAiSources = async ({ onlyActive = false } = {}) => {
+  let q = supabase.from('ai_job_sources').select('*').order('tier').order('name');
+  if (onlyActive) q = q.eq('is_active', true);
+  const res = await q;
+  if (res.error) { console.warn('getAiSources:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const createAiSource = async (data) => {
+  const res = await supabase.from('ai_job_sources').insert([{ ...data }]).select();
+  if (res.error) { logSupabaseError('createAiSource', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+export const updateAiSource = async (id, data) => {
+  const res = await supabase.from('ai_job_sources').update({ ...data, updated_at: new Date() }).eq('id', id).select();
+  if (res.error) { logSupabaseError('updateAiSource', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+export const deleteAiSource = async (id) => {
+  const res = await supabase.from('ai_job_sources').delete().eq('id', id);
+  if (res.error) { logSupabaseError('deleteAiSource', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+// ── Research Queue ────────────────────────────────────────────────────────────
+
+export const getResearchQueue = async ({ status = null, limit = 100 } = {}) => {
+  let q = supabase.from('ai_research_queue').select('*, ai_job_sources(name, tier)').order('created_at', { ascending: false }).limit(limit);
+  if (status) q = q.eq('status', status);
+  const res = await q;
+  if (res.error) { console.warn('getResearchQueue:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const createResearchItem = async (data) => {
+  const res = await supabase.from('ai_research_queue').insert([{ ...data }]).select();
+  if (res.error) { logSupabaseError('createResearchItem', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+export const updateResearchItem = async (id, data) => {
+  const res = await supabase.from('ai_research_queue').update({ ...data, updated_at: new Date() }).eq('id', id).select();
+  if (res.error) { logSupabaseError('updateResearchItem', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+export const deleteResearchItem = async (id) => {
+  const res = await supabase.from('ai_research_queue').delete().eq('id', id);
+  if (res.error) { logSupabaseError('deleteResearchItem', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+// ── AI Job Drafts ─────────────────────────────────────────────────────────────
+
+export const getAiDrafts = async ({ status = null, limit = 100 } = {}) => {
+  let q = supabase.from('ai_job_drafts').select('*, ai_research_queue(title, organization, job_type)').order('created_at', { ascending: false }).limit(limit);
+  if (status) q = q.eq('status', status);
+  const res = await q;
+  if (res.error) { console.warn('getAiDrafts:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const createAiDraft = async (data) => {
+  const res = await supabase.from('ai_job_drafts').insert([{ ...data }]).select();
+  if (res.error) { logSupabaseError('createAiDraft', res.error); throw res.error; }
+  return res.data?.[0] ?? null;
+};
+
+export const updateAiDraft = async (id, data) => {
+  const res = await supabase.from('ai_job_drafts').update({ ...data, updated_at: new Date() }).eq('id', id).select();
+  if (res.error) { logSupabaseError('updateAiDraft', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+export const deleteAiDraft = async (id) => {
+  const res = await supabase.from('ai_job_drafts').delete().eq('id', id);
+  if (res.error) { logSupabaseError('deleteAiDraft', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+// ── Duplicate Log ─────────────────────────────────────────────────────────────
+
+export const getDuplicateLog = async ({ resolved = false, limit = 100 } = {}) => {
+  const res = await supabase
+    .from('ai_duplicate_log')
+    .select('*, ai_research_queue(title, organization), ai_job_drafts(generated_data)')
+    .eq('resolved', resolved)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (res.error) { console.warn('getDuplicateLog:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const resolveDuplicate = async (id, isActualDuplicate) => {
+  const res = await supabase.from('ai_duplicate_log').update({ resolved: true, is_duplicate: isActualDuplicate }).eq('id', id);
+  if (res.error) { logSupabaseError('resolveDuplicate', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+// ── Monitoring Rules ──────────────────────────────────────────────────────────
+
+export const getMonitoringRules = async ({ limit = 100 } = {}) => {
+  const res = await supabase.from('ai_monitoring_rules').select('*').order('created_at', { ascending: false }).limit(limit);
+  if (res.error) { console.warn('getMonitoringRules:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const createMonitoringRule = async (data) => {
+  const res = await supabase.from('ai_monitoring_rules').insert([{ ...data }]).select();
+  if (res.error) { logSupabaseError('createMonitoringRule', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+export const updateMonitoringRule = async (id, data) => {
+  const res = await supabase.from('ai_monitoring_rules').update({ ...data, updated_at: new Date() }).eq('id', id).select();
+  if (res.error) { logSupabaseError('updateMonitoringRule', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+export const deleteMonitoringRule = async (id) => {
+  const res = await supabase.from('ai_monitoring_rules').delete().eq('id', id);
+  if (res.error) { logSupabaseError('deleteMonitoringRule', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+// ── Update Queue ──────────────────────────────────────────────────────────────
+
+export const getUpdateQueue = async ({ status = null, limit = 100 } = {}) => {
+  let q = supabase.from('ai_update_queue').select('*, ai_monitoring_rules(title, organization)').order('created_at', { ascending: false }).limit(limit);
+  if (status) q = q.eq('status', status);
+  const res = await q;
+  if (res.error) { console.warn('getUpdateQueue:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const createUpdateQueueItem = async (data) => {
+  const res = await supabase.from('ai_update_queue').insert([{ ...data }]).select();
+  if (res.error) { logSupabaseError('createUpdateQueueItem', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+export const updateUpdateQueueItem = async (id, data) => {
+  const res = await supabase.from('ai_update_queue').update({ ...data, updated_at: new Date() }).eq('id', id).select();
+  if (res.error) { logSupabaseError('updateUpdateQueueItem', res.error); throw res.error; }
+  return res.data ?? [];
+};
+
+/* ─────────────────────── AI Provider — Extended API (v2) ───────────────────── */
+
+/**
+ * Insert a provider row if it doesn't exist yet.
+ * Used to seed DeepSeek / Cerebras from the UI if the SQL migration hasn't been run.
+ */
+export const upsertAiProvider = async (providerName, defaults = {}) => {
+  const existing = await supabase
+    .from('ai_provider_settings')
+    .select('id')
+    .eq('provider_name', providerName)
+    .maybeSingle();
+  if (existing.data) return existing.data; // already exists
+
+  const res = await supabase.from('ai_provider_settings').insert([{
+    provider_name: providerName,
+    api_key: '',
+    model: defaults.model || '',
+    priority: defaults.priority || 99,
+    is_active: false,
+    base_url: defaults.base_url || null,
+  }]).select();
+  if (res.error) { logSupabaseError('upsertAiProvider', res.error); return null; }
+  return res.data?.[0] ?? null;
+};
+
+/**
+ * Update the stats JSONB column for a provider after a test or generation call.
+ * Increments request/success/failure counters and updates avg latency.
+ */
+export const recordProviderCall = async (id, { success, latencyMs, error = null }) => {
+  // Read current stats first
+  const cur = await supabase.from('ai_provider_settings').select('stats, last_latency_ms').eq('id', id).maybeSingle();
+  if (cur.error || !cur.data) return;
+
+  const prev = cur.data.stats || { requests: 0, successes: 0, failures: 0, avg_latency_ms: 0, last_error: null };
+  const requests   = (prev.requests   || 0) + 1;
+  const successes  = (prev.successes  || 0) + (success ? 1 : 0);
+  const failures   = (prev.failures   || 0) + (success ? 0 : 1);
+  const totalMs    = ((prev.avg_latency_ms || 0) * (requests - 1) + (latencyMs || 0));
+  const avg_latency_ms = requests > 0 ? Math.round(totalMs / requests) : 0;
+
+  const patch = {
+    stats: { requests, successes, failures, avg_latency_ms, last_error: success ? null : (error || null) },
+    last_latency_ms: latencyMs || null,
+    last_tested: new Date().toISOString(),
+    health_status: success ? 'healthy' : (failures >= 3 ? 'down' : 'degraded'),
+    updated_at: new Date(),
+  };
+
+  await supabase.from('ai_provider_settings').update(patch).eq('id', id);
+};
+
+/**
+ * Store the list of dynamically discovered models back into the DB.
+ * models: [{ value, label }]
+ */
+export const saveProviderModels = async (id, models) => {
+  const res = await supabase.from('ai_provider_settings').update({
+    available_models: models,
+    updated_at: new Date(),
+  }).eq('id', id);
+  if (res.error) logSupabaseError('saveProviderModels', res.error);
+  return res.data ?? [];
+};
+
+// ── Provider analytics / failures helpers ───────────────────────────────────
+
+/**
+ * Get aggregated analytics for AI providers from the `ai_provider_settings.stats` JSONB.
+ * Returns array of { provider_name, stats, health_status, last_tested, last_latency_ms }
+ */
+export const getProviderAnalytics = async () => {
+  const res = await supabase.from('ai_provider_settings').select('provider_name, stats, health_status, last_tested, last_latency_ms, priority, is_active').order('priority');
+  if (res.error) { console.warn('getProviderAnalytics:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+/**
+ * Fetch recent provider failure logs if the `ai_provider_failures` table exists.
+ * Falls back to reading analytics_events with event_type = 'provider_failure' if table absent.
+ */
+export const getProviderFailures = async ({ limit = 100 } = {}) => {
+  // Try provider failures table first
+  let res = await supabase.from('ai_provider_failures').select('*').order('created_at', { ascending: false }).limit(limit);
+  if (res.error) {
+    // Fallback to analytics_events
+    const fallback = await supabase.from('analytics_events').select('*').eq('event_type', 'provider_failure').order('created_at', { ascending: false }).limit(limit);
+    if (fallback.error) {
+      console.warn('getProviderFailures fallback error:', fallback.error.message);
+      return [];
+    }
+    return fallback.data ?? [];
+  }
+  return res.data ?? [];
+};
+
+/**
+ * Ingest a provider failure record (best-effort). Tries to insert into `ai_provider_failures`.
+ * If table missing, writes an `analytics_events` fallback record.
+ */
+export const logProviderFailure = async (payload) => {
+  const res = await supabase.from('ai_provider_failures').insert([{ ...payload }]).select();
+  if (res.error) {
+    // fallback
+    const fallback = await supabase.from('analytics_events').insert([{
+      event_type: 'provider_failure',
+      event_data: payload,
+      page_url: '',
+    }]);
+    if (fallback.error) logSupabaseError('logProviderFailure', fallback.error, payload);
+    return fallback.data ?? [];
+  }
+  return res.data ?? [];
+};

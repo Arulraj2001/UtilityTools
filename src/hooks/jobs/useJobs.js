@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { getJobs, getJobBySlug, getFeaturedJobs, searchJobs } from '@/api/supabaseApi'
 
-export const useJobs = ({ page = 0, pageSize = 20, category = null, search = null } = {}) => {
+export const useJobs = ({ page = 0, pageSize = 20, category = null, search = null, enabled = true } = {}) => {
   return useQuery({
     queryKey: ['jobs', { page, pageSize, category, search }],
     queryFn: () => getJobs({ limit: pageSize, page, pageSize, category, search }),
+    enabled,
     keepPreviousData: true,
   })
 }

@@ -4,10 +4,13 @@ import { useAuth } from '@/lib/AuthContext';
 import {
   LayoutDashboard, Wrench, BookOpen, FolderOpen,
   Settings, LinkIcon, Megaphone, Download, Sparkles,
-  ChevronLeft, ChevronRight, Menu, LogOut, FileUp
+  ChevronLeft, ChevronRight, Menu, LogOut, FileUp,
+  Brain, Search, Shield, Copy, BarChart3, Activity,
+  GitCompare, Globe, ChevronDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+// Existing nav items — unchanged
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { to: '/admin/tools', label: 'Tools', icon: Wrench },
@@ -24,9 +27,25 @@ const navItems = [
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
+// AI Job Intelligence sub-nav
+const aiNavItems = [
+  { to: '/admin/ai-intelligence', label: 'Dashboard',          icon: Brain },
+  { to: '/admin/ai-research',     label: 'Research Queue',     icon: Search },
+  { to: '/admin/ai-moderation',   label: 'AI Moderation',      icon: Shield },
+  { to: '/admin/ai-duplicates',   label: 'Duplicate Detection',icon: Copy },
+  { to: '/admin/ai-seo-audit',    label: 'SEO Audit',          icon: BarChart3 },
+  { to: '/admin/ai-monitoring',   label: 'Vacancy Monitoring', icon: Activity },
+  { to: '/admin/ai-updates',      label: 'Job Updates',        icon: GitCompare },
+  { to: '/admin/ai-sources',      label: 'Source Management',  icon: Globe },
+  { to: '/admin/ai-settings',     label: 'AI Settings',        icon: Settings },
+  { to: '/admin/ai-prompts',      label: 'Prompt Management',  icon: BookOpen },
+  { to: '/admin/ai-reports',      label: 'Quality Reports',    icon: BarChart3 },
+];
+
 export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [aiExpanded, setAiExpanded] = useState(false);
   const location = useLocation();
   const { logout } = useAuth();
 
@@ -34,6 +53,17 @@ export default function AdminLayout() {
     if (item.exact) return location.pathname === item.to;
     return location.pathname.startsWith(item.to);
   };
+
+  // Auto-expand AI section when on an AI route
+  const isOnAiRoute = location.pathname.startsWith('/admin/ai');
+  const aiSectionOpen = aiExpanded || isOnAiRoute;
+
+  const navLinkClass = (active) =>
+    `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+      active
+        ? 'bg-primary/10 text-primary'
+        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+    } ${collapsed ? 'justify-center' : ''}`;
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -56,10 +86,10 @@ export default function AdminLayout() {
               <span className="font-bold text-sm">Admin</span>
             </Link>
           )}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="hidden md:flex h-7 w-7" 
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden md:flex h-7 w-7"
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -67,25 +97,88 @@ export default function AdminLayout() {
         </div>
 
         <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
+          {/* ── Existing nav items (unchanged) ── */}
           {navItems.map(item => (
             <Link
               key={item.to}
               to={item.to}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                isActive(item)
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-              } ${collapsed ? 'justify-center' : ''}`}
+              className={navLinkClass(isActive(item))}
             >
               <item.icon className="w-4 h-4 shrink-0" />
               {!collapsed && <span>{item.label}</span>}
             </Link>
           ))}
+
+          {/* ── AI Job Intelligence section ── */}
+          <div className="pt-1">
+            {/* Section toggle button */}
+            <button
+              onClick={() => setAiExpanded(!aiSectionOpen)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                isOnAiRoute
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              } ${collapsed ? 'justify-center' : ''}`}
+            >
+              <Brain className="w-4 h-4 shrink-0" />
+              {!collapsed && (
+                <>
+                  <span className="flex-1 text-left">AI Intelligence</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${aiSectionOpen ? 'rotate-180' : ''}`} />
+                </>
+              )}
+            </button>
+
+            {/* Sub-items */}
+            {aiSectionOpen && !collapsed && (
+              <div className="ml-3 mt-0.5 border-l border-border/60 pl-2 space-y-0.5">
+                {aiNavItems.map(item => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      location.pathname === item.to
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    <item.icon className="w-3.5 h-3.5 shrink-0" />
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {/* Collapsed state: show AI icon only */}
+            {aiSectionOpen && collapsed && (
+              <div className="space-y-0.5 mt-0.5">
+                {aiNavItems.map(item => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setMobileOpen(false)}
+                    title={item.label}
+                    className={`flex items-center justify-center w-full py-2 rounded-lg transition-all ${
+                      location.pathname === item.to
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    <item.icon className="w-3.5 h-3.5" />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="p-3 border-t border-border space-y-2">
-          <Link to="/" className={`flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors ${collapsed ? 'justify-center' : ''}`}>
+          <Link
+            to="/"
+            className={`flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors ${collapsed ? 'justify-center' : ''}`}
+          >
             <ChevronLeft className="w-4 h-4" />
             {!collapsed && 'Back to site'}
           </Link>

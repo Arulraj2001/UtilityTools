@@ -14,7 +14,9 @@
     "preview": "vite preview",
     "conversion:server": "node -r ./server/conversion/preload-env.cjs server/conversion/server.js",
     "test:conversion": "node --test server/conversion/tests/validation.test.js",
-    "inspect:jobs-constraints": "node scripts/inspect-jobs-constraints.js"
+    "inspect:jobs-constraints": "node scripts/inspect-jobs-constraints.js",
+    "monitor:providers": "node scripts/monitorProviders.js --once",
+    "monitor:providers-daemon": "node scripts/monitorProviders.js"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -84,6 +86,7 @@
     "moment": "^2.30.1",
     "nanoid": "^5.1.11",
     "next-themes": "^0.4.4",
+    "node-cron": "^3.0.3",
     "pdf-lib": "^1.17.1",
     "pdf-merger-js": "^5.1.2",
     "pdfjs-dist": "^5.6.205",
@@ -115,7 +118,7 @@
     "three": "^0.171.0",
     "validator": "^13.15.35",
     "vaul": "^1.1.2",
-    "ws": "^8.20.1",
+    "ws": "^8.21.0",
     "xlsx": "^0.18.5",
     "xmlbuilder2": "^4.0.3",
     "zod": "^3.24.2"

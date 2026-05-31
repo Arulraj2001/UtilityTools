@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 
 import { useJob } from '@/hooks/jobs/useJobs'
+import { useSiteBooleanSetting } from '@/hooks/useSiteSettings'
 
 import JobMeta from '@/components/jobs/JobMeta'
 import JobApplyCard from '@/components/jobs/JobApplyCard'
@@ -35,6 +36,8 @@ import BlogCard from '@/components/blog/BlogCard'
 
 export default function JobDetailPage() {
   const { slug } = useParams()
+
+  const { value: jobsEnabled = true } = useSiteBooleanSetting('jobs_enabled', true)
 
   const {
     data: job,
@@ -107,11 +110,11 @@ export default function JobDetailPage() {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
         <div className="rounded-3xl border bg-card p-10 text-center">
           <h2 className="text-2xl font-bold">
-            Job not found
+            Job listings are temporarily paused
           </h2>
 
           <p className="text-muted-foreground mt-3">
-            This job may have been removed or expired.
+            The job listing feature is currently paused. Please check back later.
           </p>
         </div>
       </main>

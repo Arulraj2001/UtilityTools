@@ -54,9 +54,20 @@ export default function ToolSEO({
     tool.featured_image ||
     `${canonicalBase}/preview.png`;
 
-  const keywords =
-    tool.seo_keywords ||
-    '';
+  // Build keywords: primary + secondary + legacy seo_keywords
+  const primaryKeywords = (tool.primary_keywords || '').trim()
+  const secondaryKeywords = (tool.secondary_keywords || '').trim()
+  const legacyKeywords = (tool.seo_keywords || '').trim()
+  
+  const allKeywords = [
+    primaryKeywords,
+    secondaryKeywords,
+    legacyKeywords
+  ]
+    .filter(Boolean)
+    .join(', ')
+
+  const keywords = allKeywords || ''
 
   const faqItems =
     profile?.faqs ||

@@ -1,0 +1,198 @@
+/**
+ * Job Writing Framework
+ * Builds structured AI prompts following the 17-section article format.
+ * Anti-spam rules are baked into every prompt.
+ * Admin-editable system prompts are injected at runtime from the ai_prompts table.
+ */
+
+// ── Anti-spam system rules (non-negotiable, always included) ──────────────────
+
+export const ANTI_SPAM_RULES = `
+=== CONTENT RULES — MANDATORY ===
+
+PROHIBITED PHRASES (never use any of these):
+- "Apply now before it's too late" or any urgency variant
+- "Golden opportunity"
+- "Dream job"
+- "Limited seats" (say "limited vacancies" only if factually stated in notification)
+- "Hurry", "Rush", "Don't miss", "Last chance", "Grab this"
+- "Guaranteed selection" or similar false promises
+- "High salary" (cite exact salary from notification)
+- "Amazing", "Incredible", "Wonderful", "Fantastic" — no hype adjectives
+
+PROHIBITED PRACTICES:
+- No keyword stuffing (same keyword more than 3 times in 500 words)
+- No repetitive sentences that say the same thing in different words
+- No AI filler phrases: "It's important to note", "Delve into", "In conclusion", "It's worth mentioning"
+- No unverifiable claims about salaries, promotions, or benefits
+- No misleading information about selection or eligibility
+
+REQUIRED PRACTICES:
+- Every salary figure must be cited from the official notification
+- Every date must be confirmed accurate
+- Official website and apply link must be included
+- Write in clear, plain English — accessible to first-time applicants
+- Be factual, helpful, and comprehensive
+`
+
+// ── 17-section article structure ──────────────────────────────────────────────
+
+export const ARTICLE_SECTIONS = [
+  { num: 1,  title: 'Quick Summary',              desc: '2-3 precise sentences: organization name, post title, total vacancies, and application window.' },
+  { num: 2,  title: 'Vacancy Snapshot',           desc: 'Structured overview: Organization | Total Posts | Category | Start Date | Last Date. Use a clear format.' },
+  { num: 3,  title: 'Why This Recruitment Matters', desc: 'Factual significance: sector importance, scale of recruitment, career path. No hype.' },
+  { num: 4,  title: 'Organization Overview',      desc: 'Factual background: establishment year, headquarters, parent ministry/body, key functions.' },
+  { num: 5,  title: 'Vacancy Details Table',      desc: 'Table: Post Name | Vacancies | Category (UR/OBC/SC/ST/EWS) | Pay Scale. Include all categories.' },
+  { num: 6,  title: 'Eligibility Breakdown',      desc: 'Education qualification, subject requirements, percentage criteria, and experience per post.' },
+  { num: 7,  title: 'Age Limit Explanation',      desc: 'Min/max age. Relaxations with exact years for SC/ST/OBC/PwD/Ex-servicemen/Women.' },
+  { num: 8,  title: 'Salary Analysis',            desc: 'Pay scale, pay matrix level, grade pay, basic pay, total CTC including allowances. Only cite official figures.' },
+  { num: 9,  title: 'Selection Process',          desc: 'Numbered stages: CBT/Written Exam, Skill Test, Physical Test, Document Verification, Medical, Interview (if any).' },
+  { num: 10, title: 'Important Dates',            desc: 'Table: Event | Date. Include: notification, registration start, registration end, fee payment deadline, admit card, exam date, result date.' },
+  { num: 11, title: 'Application Fees',           desc: 'Category-wise fee table. Payment modes. Note if waived for SC/ST/PwD/Women.' },
+  { num: 12, title: 'Required Documents',         desc: 'Numbered checklist: photo, signature, identity proof, educational certificates, caste certificate (if applicable), experience, etc.' },
+  { num: 13, title: 'Step-by-Step Apply Process', desc: 'Numbered steps from visiting official website to submitting form and paying fee. Include screenshots guidance.' },
+  { num: 14, title: 'Common Applicant Mistakes',  desc: '5-7 factual, specific mistakes candidates make for this type of recruitment (wrong photo size, fee not paid, etc.).' },
+  { num: 15, title: 'Preparation Tips',           desc: 'Specific to this recruitment: syllabus topics, important books, exam pattern analysis. Factual and helpful.' },
+  { num: 16, title: 'Official Links',             desc: 'List: Official Notification PDF, Online Application Link, Official Website, Admit Card Link (when available).' },
+  { num: 17, title: 'FAQ',                        desc: '6-8 questions specific to this recruitment that applicants commonly ask. Precise answers only.' },
+]
+
+// ── Job type labels ───────────────────────────────────────────────────────────
+
+export const JOB_TYPES = [
+  { value: 'government', label: 'Government Job' },
+  { value: 'bank',       label: 'Bank Job' },
+  { value: 'railway',    label: 'Railway Job' },
+  { value: 'it',         label: 'IT Job' },
+  { value: 'remote',     label: 'Remote Job' },
+  { value: 'freshers',   label: 'Freshers Job' },
+  { value: 'private',    label: 'Private Sector Job' },
+]
+
+// ── Prompt builder ────────────────────────────────────────────────────────────
+
+/**
+ * Build the full AI prompt for job article generation.
+ *
+ * @param {object} opts
+ * @param {object}  opts.jobData       - Raw job information (title, org, vacancies, etc.)
+ * @param {string}  opts.jobType       - One of JOB_TYPES values
+ * @param {string}  opts.systemPrompt  - From ai_prompts table for this job type
+ * @param {string}  [opts.extraInstructions] - Any additional admin notes
+ */
+export const buildJobPrompt = ({ jobData, jobType = 'government', systemPrompt = '', extraInstructions = '' }) => {
+  const sectionsList = ARTICLE_SECTIONS
+    .map((s) => `  ${s.num}. ${s.title}: ${s.desc}`)
+    .join('\n')
+
+  return `${ANTI_SPAM_RULES}
+
+=== YOUR ROLE ===
+${systemPrompt || `You are an expert ${jobType} content writer for a recruitment news portal.`}
+
+=== ARTICLE STRUCTURE ===
+Your article MUST contain ALL 17 sections below, in this exact order:
+${sectionsList}
+
+=== JOB INFORMATION TO WRITE ABOUT ===
+${typeof jobData === 'string' ? jobData : JSON.stringify(jobData, null, 2)}
+
+${extraInstructions ? `=== ADDITIONAL INSTRUCTIONS ===\n${extraInstructions}\n` : ''}
+
+=== OUTPUT FORMAT ===
+Return ONLY a valid JSON object (no markdown, no explanation outside the JSON):
+{
+  "title": "Full job post title (e.g., 'SSC CGL 2024: 17,727 Vacancies Notification')",
+  "slug": "ssc-cgl-2024-notification",
+  "organization": "Full organization name",
+  "short_description": "150-160 character meta description. Factual.",
+  "full_description": "Complete HTML article with all 17 sections using <h2> for section titles, <h3> for sub-sections, <p> for paragraphs, <ul>/<li> for lists, <table><thead><tbody><tr><th><td> for tables. No inline styles.",
+  "eligibility": {"education": "...", "age": "...", "experience": "..."},
+  "selection_process": ["Stage 1: ...", "Stage 2: ..."],
+  "important_dates": [{"event": "...", "date": "..."}],
+  "application_fee": "Category-wise fees string",
+  "seo_title": "55-60 character SEO title with primary keyword",
+  "seo_description": "150-160 character meta description",
+  "seo_keywords": "keyword1, keyword2, keyword3, keyword4, keyword5",
+  "og_title": "Open Graph title (same as seo_title or variant)",
+  "og_description": "Open Graph description",
+  "canonical_url": "",
+  "faq_items": [{"question": "...", "answer": "..."}],
+  "tags": ["tag1", "tag2", "tag3"],
+  "job_type": "${jobType}",
+  "category": "${jobType}"
+}`
+}
+
+// ── SEO extraction helper ─────────────────────────────────────────────────────
+
+/**
+ * Build a quick SEO-only prompt (cheaper, faster).
+ * Used by the SEO Audit page to generate missing SEO fields.
+ */
+export const buildSeoPrompt = (job) => `
+${ANTI_SPAM_RULES}
+
+Generate SEO metadata ONLY for this job post. Return valid JSON:
+{
+  "seo_title": "55-60 char title with primary keyword",
+  "seo_description": "150-160 char factual description",
+  "seo_keywords": "5 keywords, comma separated",
+  "og_title": "OG title",
+  "og_description": "OG description",
+  "slug": "url-friendly-slug"
+}
+
+JOB:
+Title: ${job.title}
+Organization: ${job.organization || ''}
+Short description: ${job.short_description || ''}
+Category: ${job.category || ''}
+`
+
+// ── Duplicate check prompt ────────────────────────────────────────────────────
+
+export const buildDuplicateCheckPrompt = (newJob, existingJobs) => `
+You are checking if a new job posting is a duplicate of existing postings.
+
+NEW JOB:
+Title: ${newJob.title}
+Organization: ${newJob.organization || ''}
+Description: ${(newJob.short_description || newJob.raw_input || '').slice(0, 500)}
+
+EXISTING JOBS (last 50):
+${existingJobs.slice(0, 50).map((j, i) => `${i + 1}. ${j.title} — ${j.organization || ''}`).join('\n')}
+
+Return JSON:
+{
+  "is_duplicate": true/false,
+  "confidence": 0-100,
+  "matched_indices": [array of 1-based indices that are likely duplicates],
+  "reason": "brief explanation"
+}
+`
+
+// ── Update detection prompt ───────────────────────────────────────────────────
+
+export const buildUpdateDetectionPrompt = (previousContent, newContent, title) => `
+Compare these two versions of a government job notification and identify what changed.
+
+JOB: ${title}
+
+PREVIOUS VERSION:
+${previousContent.slice(0, 3000)}
+
+NEW VERSION:
+${newContent.slice(0, 3000)}
+
+Return JSON:
+{
+  "has_changes": true/false,
+  "change_type": "vacancy_update|date_change|eligibility_change|salary_revision|status_change|new_notification|no_change",
+  "changes": [
+    {"field": "field name", "old_value": "...", "new_value": "..."}
+  ],
+  "summary": "One sentence summary of what changed",
+  "urgency": "high|medium|low"
+}
+`

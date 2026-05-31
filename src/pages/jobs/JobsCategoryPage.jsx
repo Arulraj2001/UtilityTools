@@ -2,10 +2,13 @@ import React from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getJobCategoryBySlug, getJobsByCategorySlug } from '@/api/supabaseApi'
+import { useSiteBooleanSetting } from '@/hooks/useSiteSettings'
 import JobCard from '@/components/jobs/JobCard'
 
 export default function JobsCategoryPage() {
   const { slug } = useParams()
+
+  const { value: jobsEnabled = true } = useSiteBooleanSetting('jobs_enabled', true)
 
   const { data: category, isLoading: loadingCategory } = useQuery({
     queryKey: ['job-category', slug],
@@ -24,6 +27,16 @@ export default function JobsCategoryPage() {
   if (!category) return <div className="p-8">Category not found.</div>
 
   return (
+    !jobsEnabled ? (
+      <main className="max-w-5xl mx-auto px-4 py-16">
+        <div className="rounded-3xl border bg-card p-10 text-center">
+          <h2 className="text-2xl font-bold">Job listings are paused</h2>
+          <p className="text-muted-foreground mt-3">
+            Job content is currently hidden from public pages.
+          </p>
+        </div>
+      </main>
+    ) : (
     <main className="min-h-screen">
       <section className="border-b border-border/40 py-8">
         <div className="max-w-5xl mx-auto px-4">
@@ -44,6 +57,7 @@ export default function JobsCategoryPage() {
           </div>
           <aside>
             {/* simple featured widget placeholder */}
+      )
             <div className="rounded-2xl border bg-card p-4">Related resources</div>
           </aside>
         </div>

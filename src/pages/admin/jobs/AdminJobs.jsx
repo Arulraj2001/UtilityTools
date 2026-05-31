@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import useAdminJobs, {
   useCreateJob,
@@ -14,6 +15,10 @@ import JobAnalyticsDashboard from '@/components/jobs/admin/JobAnalyticsDashboard
 import { AdminJobsSkeleton } from '@/components/jobs/skeletons'
 import { AdminJobsEmptyState } from '@/components/jobs/empty-states'
 import { jobToasts } from '@/lib/jobs/jobToasts'
+import { getSiteSettings, createSiteSetting, updateSiteSetting } from '@/api/supabaseApi'
+import { getSiteSetting, parseSiteSettingValue } from '@/lib/siteSettings'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 
 import {
   Plus,
@@ -26,6 +31,40 @@ import {
 
 export default function AdminJobs() {
   const { data: jobs = [], isLoading } = useAdminJobs()
+
+  const { data: settings = [] } = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => getSiteSettings(),
+  })
+
+  const [jobsEnabled, setJobsEnabled] = useState(true)
+  const queryClient = useQueryClient()
+
+  const settingEntry = getSiteSetting(settings, 'jobs_enabled')
+  const parsedJobsEnabled = parseSiteSettingValue(settingEntry, true)
+
+  useEffect(() => {
+    setJobsEnabled(parsedJobsEnabled)
+  }, [parsedJobsEnabled])
+
+  const createSettingMutation = useMutation({
+    mutationFn: createSiteSetting,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings'] }),
+  })
+
+  const updateSettingMutation = useMutation({
+    mutationFn: ({ id, payload }) => updateSiteSetting(id, payload),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings'] }),
+  })
+
+  const saveJobsEnabled = async (value) => {
+    const payload = { key: 'jobs_enabled', value: String(value), type: 'boolean', group: 'jobs' }
+    if (settingEntry?.id) {
+      await updateSettingMutation.mutateAsync({ id: settingEntry.id, payload })
+      return
+    }
+    await createSettingMutation.mutateAsync(payload)
+  }
 
   const createMutation = useCreateJob()
   const updateMutation = useUpdateJob()
@@ -73,6 +112,23 @@ export default function AdminJobs() {
           <p className="text-muted-foreground mt-3">
             Create, manage, publish, and optimize SEO-ready job listings.
           </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+            <Label className="inline-flex items-center gap-3 rounded-full border border-border/60 bg-card/80 px-4 py-2">
+              <span>Public jobs</span>
+              <Switch
+                checked={jobsEnabled}
+                onCheckedChange={(checked) => {
+                  setJobsEnabled(checked)
+                  saveJobsEnabled(checked).catch(() => {
+                    setJobsEnabled(!checked)
+                  })
+                }}
+              />
+            </Label>
+            <span className="text-xs text-muted-foreground">
+              {jobsEnabled ? 'Visible to public pages' : 'Paused on public pages'}
+            </span>
+          </div>
         </div>
 
         <button

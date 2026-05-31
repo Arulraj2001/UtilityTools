@@ -126,7 +126,7 @@ export default function BlogEditor({ post, onSave, onCancel }) {
     schema_type: post?.schema_type || 'BlogPosting',
     featured: post?.featured || false,
     meta_robots: post?.meta_robots || 'index,follow',
-    author_name: post?.author_name || 'Arulraj',
+    author_name: post?.author_name || 'Arulraj S',
     reading_time: post?.reading_time || 0,
     seo_title: post?.seo_title || '',
     seo_description: post?.seo_description || '',
