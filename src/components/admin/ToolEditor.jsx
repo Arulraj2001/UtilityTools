@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { getCategories, createTool, updateTool } from '@/api/supabaseApi'
+import { sanitizeHtmlFields } from '@/lib/sanitizeHtml'
 
 export default function ToolEditor({ tool, onSave, onCancel }) {
   const [form, setForm] = useState({
@@ -56,11 +57,12 @@ export default function ToolEditor({ tool, onSave, onCancel }) {
     }
     setSaving(true)
     try {
+      const payload = sanitizeHtmlFields(form, ['long_description', 'seo_content'])
       if (tool?.id) {
-        await updateTool(tool.id, form)
+        await updateTool(tool.id, payload)
         toast.success('Tool updated')
       } else {
-        await createTool(form)
+        await createTool(payload)
         toast.success('Tool created')
       }
       onSave()

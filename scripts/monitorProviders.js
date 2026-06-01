@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
 import cron from 'node-cron'
 import ws from 'ws'
-import { fetchProviderModels, testProvider } from '../src/lib/aiProvider.js'
+import { fetchProviderModels, testProvider } from '../server/ai/providerCore.js'
 
 dotenv.config()
 

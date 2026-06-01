@@ -37,6 +37,8 @@ export default function JobsListPage() {
   const [search, setSearch] = useState('')
   const [searchParams] = useSearchParams()
 
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+
   const { value: jobsEnabled = true } = useSiteBooleanSetting('jobs_enabled', true)
 
   const categoryParam =
@@ -54,21 +56,6 @@ export default function JobsListPage() {
   })
 
   const { data: featured = [] } = useFeaturedJobs()
-
-  if (!jobsEnabled) {
-    return (
-      <main className="min-h-screen bg-background">
-        <section className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
-          <div className="rounded-3xl border bg-card p-10 text-center">
-            <h2 className="text-2xl font-bold">Job listings are paused</h2>
-            <p className="text-muted-foreground mt-3">Job content is temporarily hidden from public pages.</p>
-          </div>
-        </section>
-      </main>
-    )
-  }
-
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   const activeQuickFilters = useMemo(
     () =>
@@ -202,6 +189,34 @@ export default function JobsListPage() {
     })
   }, [jobs, searchParams])
 
+  if (!jobsEnabled) {
+    return (
+      <main className="min-h-screen bg-background">
+        <section className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
+          <div className="rounded-3xl border bg-card p-10 text-center shadow-sm">
+            <div className="mb-4">
+              <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
+                Temporary Notice
+              </span>
+            </div>
+
+            <h2 className="text-3xl font-bold tracking-tight">
+              Job Listings Temporarily Unavailable
+            </h2>
+
+            <p className="text-muted-foreground mt-4 text-base">
+              We are currently updating and reviewing job listings to ensure
+              quality and accuracy.
+            </p>
+
+            <p className="text-muted-foreground mt-2 text-sm">
+              Please check back later for new opportunities.
+            </p>
+          </div>
+        </section>
+      </main>
+    )
+  }
   return (
     <main className="min-h-screen bg-background">
       

@@ -225,6 +225,29 @@ const summarizeText = (text = '', maxLength = 155) => {
   return `${normalized.slice(0, maxLength - 1).replace(/\s+\S*$/, '')}.`
 }
 
+export const buildLocalFallbackSeo = (job = {}) => {
+  const title = String(job.title || 'Job Notification').trim()
+  const organization = String(job.organization || '').trim()
+  const category = String(job.category || job.job_type || 'jobs').trim()
+  const summarySource = job.short_description || job.full_description || `${title}${organization ? ` from ${organization}` : ''}`
+  const cleanedSummary = String(summarySource || '').replace(/<[^>]*>/g, ' ')
+
+  return {
+    seo_title: summarizeText(`${title}${organization ? ` - ${organization}` : ''}`, 60),
+    seo_description: summarizeText(cleanedSummary, 155) || summarizeText(`Latest details for ${title}${organization ? ` from ${organization}` : ''}.`, 155),
+    seo_keywords: [
+      fallbackSlugify(title).replace(/-/g, ' '),
+      organization,
+      category,
+      'job notification',
+      'recruitment',
+    ].filter(Boolean).join(', '),
+    og_title: summarizeText(title, 80),
+    og_description: summarizeText(cleanedSummary, 155),
+    slug: fallbackSlugify(job.slug || title),
+  }
+}
+
 export const buildLocalFallbackJobDraft = ({
   jobData = {},
   jobType = 'government',

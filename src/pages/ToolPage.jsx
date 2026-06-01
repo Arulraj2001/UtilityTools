@@ -17,6 +17,7 @@ import ToolSEO from '@/components/seo/ToolSEO'
 import { useLocalStorage } from '@/lib/useLocalStorage'
 import { getTools, getToolBySlug, getCategories, updateToolUsage, getBlogPosts, getWorkflowPages } from '@/api/supabaseApi'
 import { trackToolEvent } from '@/lib/analytics'
+import { sanitizeHtml } from '@/lib/sanitizeHtml'
 
 const ToolInputForm = lazy(() => import('@/components/tools/ToolInputForm'))
 const ToolResult = lazy(() => import('@/components/tools/ToolResult'))
@@ -453,7 +454,7 @@ export default function ToolPage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
                 className="rounded-2xl border border-border/50 bg-card p-5 sm:p-6 prose prose-sm max-w-none dark:prose-invert"
-                dangerouslySetInnerHTML={{ __html: tool.long_description }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(tool.long_description) }}
               />
             )}
 

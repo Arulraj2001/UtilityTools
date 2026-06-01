@@ -6,9 +6,25 @@ const AuthContext = createContext()
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [authError, setAuthError] = useState(null)
   const [authChecked, setAuthChecked] = useState(false)
+
+  const verifyAdminRole = useCallback(async (userId) => {
+    if (!userId) return false
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('is_admin')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (error) {
+      throw error
+    }
+
+    return !!data?.is_admin
+  }, [])
 
   const loadUser = useCallback(async () => {
     setIsLoadingAuth(true)
@@ -22,17 +38,30 @@ export const AuthProvider = ({ children }) => {
       const session = data?.session
       const currentUser = session?.user ?? null
 
+      if (currentUser) {
+        const adminVerified = await verifyAdminRole(currentUser.id)
+        if (!adminVerified) {
+          setUser(null)
+          setIsAuthenticated(false)
+          setIsAdmin(false)
+          setAuthError({ type: 'user_not_registered', message: 'This account is not registered as an admin.' })
+          return
+        }
+      }
+
       setUser(currentUser)
       setIsAuthenticated(!!currentUser)
+      setIsAdmin(!!currentUser)
     } catch (error) {
       setUser(null)
       setIsAuthenticated(false)
+      setIsAdmin(false)
       setAuthError({ type: 'auth_required', message: 'Unable to verify admin login. Please sign in again.' })
     } finally {
       setIsLoadingAuth(false)
       setAuthChecked(true)
     }
-  }, [])
+  }, [verifyAdminRole])
 
   useEffect(() => {
     loadUser()
@@ -65,8 +94,18 @@ export const AuthProvider = ({ children }) => {
         return { error: 'Login failed. No authenticated user returned.' }
       }
 
+      const adminVerified = await verifyAdminRole(authUser.id)
+      if (!adminVerified) {
+        await supabase.auth.signOut({ shouldClearSession: true })
+        setUser(null)
+        setIsAuthenticated(false)
+        setIsAdmin(false)
+        return { error: 'This account is not registered as an admin.' }
+      }
+
       setUser(authUser)
       setIsAuthenticated(true)
+      setIsAdmin(true)
       return { data: true }
     } catch (error) {
       return { error: error?.message || 'An unexpected error occurred during login.' }
@@ -90,6 +129,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setUser(null)
       setIsAuthenticated(false)
+      setIsAdmin(false)
       setIsLoadingAuth(false)
       setAuthChecked(true)
       if (typeof window !== 'undefined') {
@@ -108,6 +148,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{
       user,
       isAuthenticated,
+      isAdmin,
       isLoadingAuth,
       authError,
       authChecked,

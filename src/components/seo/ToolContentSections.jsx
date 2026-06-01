@@ -1,4 +1,5 @@
 import React from 'react';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import { motion } from 'framer-motion';
 
 export default function ToolContentSections({ tool }) {
@@ -18,7 +19,7 @@ export default function ToolContentSections({ tool }) {
         max-w-none
         dark:prose-invert
       "
-      dangerouslySetInnerHTML={{ __html: tool.seo_content }}
+      dangerouslySetInnerHTML={{ __html: sanitizeHtml(tool.seo_content) }}
     />
   );
 }

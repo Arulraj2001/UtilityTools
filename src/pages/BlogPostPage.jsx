@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { ChevronRight, Clock, Calendar, User, Tag, BookOpen, Share2, Heart, Copy, Facebook, Twitter, Linkedin } from 'lucide-react'
+import { ChevronRight, Clock, Calendar, Tag, BookOpen, Share2, Heart, Copy, Facebook, Twitter, Linkedin } from 'lucide-react'
 import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -23,6 +23,7 @@ import KeywordSuggestions from '@/components/seo/KeywordSuggestions'
 import { suggestLinksFromText } from '@/lib/semanticLinker'
 import BlogSEO from '@/components/seo/BlogSEO'
 import { getStaticBlogPostBySlug, mergeBlogCategories, mergeBlogPosts } from '@/lib/staticBlogPosts'
+import { sanitizeHtml } from '@/lib/sanitizeHtml'
 
 export default function BlogPostPage() {
   const { slug } = useParams()
@@ -335,7 +336,7 @@ export default function BlogPostPage() {
                 prose-table:border prose-table:rounded-xl
                 prose-th:bg-secondary prose-th:p-3
                 prose-td:p-3 prose-td:border-border"
-              dangerouslySetInnerHTML={{ __html: post.content || '' }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content || '') }}
             />
           </div>
 

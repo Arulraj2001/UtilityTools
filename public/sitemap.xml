@@ -57,13 +57,7 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/percentage-calculator</loc>
-    <lastmod>2026-05-31T12:18:29.222Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://quickutils.page/tool/emi-calculator</loc>
-    <lastmod>2026-05-31T16:52:03.147Z</lastmod>
+    <lastmod>2026-06-01T14:25:48.644Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -296,6 +290,12 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://quickutils.page/tool/pdf-merger</loc>
+    <lastmod>2026-05-31T17:35:48.383Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://quickutils.page/tool/marks-percentage-calculator</loc>
     <lastmod>2026-05-30T12:54:26.242Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -310,6 +310,12 @@
   <url>
     <loc>https://quickutils.page/tool/gpa-calculator</loc>
     <lastmod>2026-05-26T10:34:54.377Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://quickutils.page/tool/emi-calculator</loc>
+    <lastmod>2026-06-01T14:26:15.342Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -332,6 +338,12 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://quickutils.page/tool/railway-photo-resizer</loc>
+    <lastmod>2026-05-31T21:12:15.040Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://quickutils.page/tool/crush-compatibility-calculator</loc>
     <lastmod>2026-05-26T10:45:25.050Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -340,12 +352,6 @@
   <url>
     <loc>https://quickutils.page/tool/week-number-calculator</loc>
     <lastmod>2026-05-28T06:06:21.439Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://quickutils.page/tool/railway-photo-resizer</loc>
-    <lastmod>2026-05-30T00:39:22.912Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -376,12 +382,6 @@
   <url>
     <loc>https://quickutils.page/tool/jpg-to-pdf</loc>
     <lastmod>2026-05-26T10:51:49.122Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://quickutils.page/tool/protect-pdf</loc>
-    <lastmod>2026-05-28T23:41:55.122Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>

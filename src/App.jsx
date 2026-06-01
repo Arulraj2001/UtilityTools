@@ -40,6 +40,7 @@ const Login = lazy(() => import('./pages/Login'))
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const AdminTools = lazy(() => import('./pages/admin/AdminTools'))
+const AdminToolSeoImport = lazy(() => import('./pages/admin/AdminToolSeoImport'))
 const AdminBlog = lazy(() => import('./pages/admin/AdminBlog'))
 const AdminBlogImport = lazy(() => import('./pages/admin/AdminBlogImport'))
 const AdminCategories = lazy(() => import('./pages/admin/AdminCategories'))
@@ -94,7 +95,7 @@ const AuthenticatedApp = () => {
     );
   }
 
-  if (authError) {
+  if (authError && isAdminRoute) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (isAdminRoute && authError.type === 'auth_required') {
@@ -136,6 +137,7 @@ const AuthenticatedApp = () => {
         <Route element={wrap(<AdminLayout />)}>
           <Route index element={wrap(<AdminDashboard />)} />
           <Route path="tools" element={wrap(<AdminTools />)} />
+          <Route path="tool-seo-import" element={wrap(<AdminToolSeoImport />)} />
           <Route path="jobs" element={wrap(<AdminJobs />)} />
           <Route path="job-categories" element={wrap(<AdminJobCategories />)} />
           <Route path="blog" element={wrap(<AdminBlog />)} />

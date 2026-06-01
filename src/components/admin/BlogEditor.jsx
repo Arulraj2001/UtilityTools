@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Progress } from '@/components/ui/progress'
-import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import {
   Select,
@@ -23,6 +21,7 @@ import 'react-quill/dist/quill.snow.css'
 import { toast } from 'sonner'
 import { createBlogPost, getBlogPosts, getBlogCategories, updateBlogPost } from '@/api/supabaseApi'
 import { estimateReadingTime, getKeywordDensity, buildSeoScore, slugifyText } from '@/lib/seoUtils'
+import { sanitizeHtml } from '@/lib/sanitizeHtml'
 
 // Custom styles for rendered content and editor
 const rendererStyles = `
@@ -232,7 +231,7 @@ export default function BlogEditor({ post, onSave, onCancel }) {
         ...form,
         category: selectedCategory?.name || '',
         category_id: form.category_id || null,
-        content: cleanContent(form.content),
+        content: sanitizeHtml(cleanContent(form.content)),
         reading_time: estimateReadingTime(form.content),
         faq_items: form.faq_items,
         og_title: form.og_title,
@@ -317,7 +316,7 @@ export default function BlogEditor({ post, onSave, onCancel }) {
     return (
       <div 
         className="blog-preview prose prose-lg max-w-none"
-        dangerouslySetInnerHTML={{ __html: form.content }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(form.content) }}
       />
     )
   }

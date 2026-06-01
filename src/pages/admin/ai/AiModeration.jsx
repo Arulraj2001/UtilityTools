@@ -3,11 +3,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  Shield, CheckCircle2, XCircle, Eye, Pencil, ChevronRight,
-  BarChart3, AlertTriangle, Zap, Clock, RefreshCw, X,
+  Shield, CheckCircle2, XCircle, Eye,
+  AlertTriangle, RefreshCw, X,
 } from 'lucide-react'
 import { getAiDrafts, updateAiDraft, createJob } from '@/api/supabaseApi'
 import { scoreJob, scoreBg } from '@/lib/jobQualityScorer'
+import { sanitizeHtml } from '@/lib/sanitizeHtml'
+import { validateJobQualityGate } from '@/lib/jobQualityGate'
 
 const STATUS_META = {
   pending_review:  { label: 'Pending Review', color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20' },
@@ -34,6 +36,12 @@ function DraftDrawer({ draft, onClose, onAction }) {
   const queryClient = useQueryClient()
 
   const handlePublish = async () => {
+    const gate = validateJobQualityGate(scores)
+    if (!gate.ok) {
+      toast.error(`Quality gate blocked draft: ${gate.failures.join(' ')}`)
+      return
+    }
+
     setPublishing(true)
     try {
       // Build job payload from AI data
@@ -44,7 +52,7 @@ function DraftDrawer({ draft, onClose, onAction }) {
         category: data.category || data.job_type || 'government',
         job_type: data.job_type || '',
         short_description: data.short_description || '',
-        full_description: data.full_description || '',
+        full_description: sanitizeHtml(data.full_description || ''),
         eligibility: data.eligibility || null,
         selection_process: data.selection_process || null,
         important_dates: data.important_dates || null,
@@ -138,7 +146,7 @@ function DraftDrawer({ draft, onClose, onAction }) {
             <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-3">Article Preview</h4>
             <div
               className="prose prose-sm max-w-none rounded-2xl border border-border/50 bg-card/50 p-5 text-sm overflow-y-auto max-h-[500px]"
-              dangerouslySetInnerHTML={{ __html: data.full_description || '<p>No content generated</p>' }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.full_description || '<p>No content generated</p>') }}
             />
           </div>
 

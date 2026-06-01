@@ -76,7 +76,7 @@ function CheckDrawer({ rule, onClose, onUpdate }) {
 
   const handleCheck = async () => {
     if (!newContent.trim()) { toast.error('Paste the updated notification content first'); return }
-    const active = providers.filter(p => p.is_active && p.api_key)
+    const active = providers.filter(p => p.is_active && p.has_api_key)
     if (!active.length) { toast.error('Configure AI providers in AI Settings first'); return }
 
     setChecking(true)

@@ -30,6 +30,7 @@ import {
 } from '@/lib/jobs/jobRelations'
 
 import { trackJobView } from '@/lib/jobs/jobAnalytics'
+import { sanitizeHtml } from '@/lib/sanitizeHtml'
 
 import ToolCard from '@/components/shared/ToolCard'
 import BlogCard from '@/components/blog/BlogCard'
@@ -209,10 +210,11 @@ export default function JobDetailPage() {
               <div
                 className="prose prose-sm prose-neutral dark:prose-invert max-w-none leading-relaxed"
                 dangerouslySetInnerHTML={{
-                  __html:
+                  __html: sanitizeHtml(
                     job.full_description ||
                     job.short_description ||
-                    '',
+                    ''
+                  ),
                 }}
               />
             </div>

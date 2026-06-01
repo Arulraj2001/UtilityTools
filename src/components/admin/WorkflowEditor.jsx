@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { Save, Sparkles, BookOpen, Trash2 } from 'lucide-react'
+import { Sparkles, BookOpen, Trash2 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import ReactQuill from 'react-quill'
@@ -13,6 +12,7 @@ import 'react-quill/dist/quill.snow.css'
 import { toast } from 'sonner'
 import { createWorkflowPage, getBlogPosts, getToolsAll, getWorkflowPageBySlug, updateWorkflowPage } from '@/api/supabaseApi'
 import { estimateReadingTime, getKeywordDensity, buildSeoScore, slugifyText } from '@/lib/seoUtils'
+import { sanitizeHtml } from '@/lib/sanitizeHtml'
 
 // TODO: consider workflow category metadata and workflow conversion tracking in future releases
 const rendererStyles = `
@@ -150,7 +150,7 @@ export default function WorkflowEditor({ page, onSave, onCancel }) {
         title: form.title,
         slug: form.slug,
         excerpt: form.excerpt,
-        content: cleanContent(form.content),
+        content: sanitizeHtml(cleanContent(form.content)),
         category: form.category,
         tags: form.tags.split(/\s*,\s*/).filter(Boolean),
         status: form.status,
@@ -189,7 +189,7 @@ export default function WorkflowEditor({ page, onSave, onCancel }) {
       return <div className="text-center text-muted-foreground py-12">No content available yet.</div>
     }
 
-    return <div className="workflow-preview" dangerouslySetInnerHTML={{ __html: form.content }} />
+    return <div className="workflow-preview" dangerouslySetInnerHTML={{ __html: sanitizeHtml(form.content) }} />
   }
 
   return (

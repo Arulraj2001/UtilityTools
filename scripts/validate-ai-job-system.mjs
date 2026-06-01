@@ -7,7 +7,7 @@ import {
   callAI,
   classifyProviderError,
   extractJSON,
-} from '../src/lib/aiProvider.js'
+} from '../server/ai/providerCore.js'
 import { buildLocalFallbackJobDraft } from '../src/lib/jobWritingFramework.js'
 
 const root = process.cwd()
@@ -115,15 +115,29 @@ const testInvalidResponseFallbackShape = () => {
 
 const testStaticWiring = () => {
   const aiProvider = read('src/lib/aiProvider.js')
+  const providerCore = read('server/ai/providerCore.js')
+  const providerProxy = read('supabase/functions/ai-provider-proxy/index.ts')
   const queue = read('src/pages/admin/ai/AiResearchQueue.jsx')
   const api = read('src/api/supabaseApi.js')
   const settings = read('src/pages/admin/ai/AiSettings.jsx')
   const dashboard = read('src/pages/admin/ai/AiDashboard.jsx')
 
-  assert.ok(aiProvider.includes('DEFAULT_PROVIDER_TIMEOUT_MS'))
-  assert.ok(aiProvider.includes('classifyProviderError'))
-  assert.ok(aiProvider.includes('sortProvidersForFallback'))
-  assert.ok(!aiProvider.includes('requestHeaders = headers'))
+  assert.ok(aiProvider.includes('ai-provider-proxy'))
+  assert.ok(aiProvider.includes('has_api_key'))
+  assert.ok(!aiProvider.includes('generativelanguage.googleapis.com'))
+  assert.ok(!aiProvider.includes('api.groq.com/openai/v1'))
+  assert.ok(providerCore.includes('DEFAULT_PROVIDER_TIMEOUT_MS'))
+  assert.ok(providerCore.includes('classifyProviderError'))
+  assert.ok(providerCore.includes('sortProvidersForFallback'))
+  assert.ok(!providerCore.includes('requestHeaders = headers'))
+  assert.ok(providerProxy.includes('requireAdmin'))
+  assert.ok(providerProxy.includes('enforceRateLimit'))
+  assert.ok(providerProxy.includes('updateProviderSecret'))
+
+  for (const providerName of ['gemini', 'groq', 'deepseek', 'huggingface']) {
+    assert.equal(typeof CALLERS[providerName], 'function')
+    assert.ok(providerCore.includes(providerName))
+  }
 
   assert.ok(queue.includes('buildLocalFallbackJobDraft'))
   assert.ok(queue.includes('recordProviderCall'))
@@ -136,6 +150,7 @@ const testStaticWiring = () => {
 
   assert.ok(settings.includes("['deepseek', 'gemini', 'groq', 'openrouter', 'huggingface', 'cerebras']"))
   assert.ok(settings.includes('f.provider_name'))
+  assert.ok(settings.includes('has_api_key'))
 
   assert.ok(dashboard.includes('pendingDrafts.length > 0'))
   assert.ok(dashboard.includes('pendingQueue.length > 5'))

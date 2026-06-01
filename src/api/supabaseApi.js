@@ -1,4 +1,7 @@
 import { supabase } from './supabaseClient';
+import { sanitizeHtml, sanitizeHtmlFields } from '@/lib/sanitizeHtml';
+import { scoreJob } from '@/lib/jobQualityScorer';
+import { validateJobQualityGate } from '@/lib/jobQualityGate';
 
 const RETIRED_TOOL_SLUGS = ['pdf-to-word'];
 
@@ -243,6 +246,7 @@ const validateJobJsonFields = (job) => {
 };
 
 const OPTIONAL_JOB_EXTENSION_FIELDS = ['faq_items', 'og_title', 'og_description', 'schema_type'];
+const JOB_HTML_FIELDS = new Set(['full_description', 'short_description']);
 
 const stripOptionalJobExtensionFields = (payload = {}) => {
   const next = { ...payload };
@@ -343,7 +347,8 @@ const cleanJobPayload = (payload) => {
     if (value === undefined || value === '' || value === null) {
       cleaned[field] = null;
     } else {
-      cleaned[field] = String(value).trim() || null;
+      const normalized = String(value).trim();
+      cleaned[field] = JOB_HTML_FIELDS.has(field) ? sanitizeHtml(normalized) || null : normalized || null;
     }
   });
 
@@ -393,6 +398,20 @@ const cleanJobPayload = (payload) => {
   });
 
   return { cleaned, errors: null };
+};
+
+const enforceJobPublishQualityGate = (job) => {
+  if (job?.status !== 'published') return;
+
+  const scores = scoreJob(job);
+  const gate = validateJobQualityGate(scores);
+  if (!gate.ok) {
+    const error = new Error(`Quality gate blocked publishing. ${gate.failures.join(' ')}`);
+    error.code = 'JOB_QUALITY_GATE_FAILED';
+    error.qualityScores = scores;
+    error.qualityFailures = gate.failures;
+    throw error;
+  }
 };
 
 const handleResponse = (result) => {
@@ -525,7 +544,10 @@ export const createJobCategory = async (category) => {
 }
 
 export const updateJobCategory = async (id, category) => {
-  const result = await supabase.from('job_categories').update({ ...category, updated_at: new Date() }).eq('id', id)
+  let result = await supabase.from('job_categories').update({ ...category, updated_at: new Date() }).eq('id', id)
+  if (result.error && /updated_at/i.test(`${result.error.message || ''} ${result.error.details || ''}`)) {
+    result = await supabase.from('job_categories').update({ ...category }).eq('id', id)
+  }
   return handleResponse(result)
 }
 
@@ -587,12 +609,14 @@ export const getWorkflowPageBySlug = async (slug) => {
 };
 
 export const createWorkflowPage = async (page) => {
-  const result = await supabase.from('workflow_pages').insert([{ ...page }])
+  const payload = sanitizeHtmlFields(page, ['content'])
+  const result = await supabase.from('workflow_pages').insert([{ ...payload }])
   return handleResponse(result)
 };
 
 export const updateWorkflowPage = async (id, page) => {
-  const result = await supabase.from('workflow_pages').update({ ...page, updated_at: new Date() }).eq('id', id)
+  const payload = sanitizeHtmlFields(page, ['content'])
+  const result = await supabase.from('workflow_pages').update({ ...payload, updated_at: new Date() }).eq('id', id)
   return handleResponse(result)
 };
 
@@ -673,13 +697,47 @@ export const searchTools = async (searchQuery, { limit = 8 } = {}) => {
 
 export const createTool = async (tool) => {
   if (isRetiredToolSlug(tool?.slug)) return [];
-  const result = await supabase.from('tools').insert([{ ...tool }]);
+  const payload = sanitizeHtmlFields(tool, ['long_description', 'seo_content']);
+  const result = await supabase.from('tools').insert([{ ...payload }]);
   return handleResponse(result);
 };
 
 export const updateTool = async (id, tool) => {
-  const result = await supabase.from('tools').update({ ...tool, updated_at: new Date() }).eq('id', id);
+  const payload = sanitizeHtmlFields(tool, ['long_description', 'seo_content']);
+  const result = await supabase.from('tools').update({ ...payload, updated_at: new Date() }).eq('id', id);
   return handleResponse(result);
+};
+
+export const bulkUpdateTools = async (updates = [], onProgress = null) => {
+  const BATCH = 50;
+  const updated = [];
+  const errors = [];
+
+  for (let i = 0; i < updates.length; i += BATCH) {
+    const chunk = updates.slice(i, i + BATCH);
+    for (const item of chunk) {
+      try {
+        const payload = sanitizeHtmlFields(item.patch || {}, ['long_description', 'seo_content']);
+        const res = await supabase
+          .from('tools')
+          .update({ ...payload, updated_at: new Date() })
+          .eq('id', item.id)
+          .select();
+
+        if (res.error) {
+          errors.push({ id: item.id, slug: item.slug, error: res.error.message });
+          logSupabaseError('bulkUpdateTools', res.error, item);
+        } else {
+          updated.push(...(res.data ?? []));
+        }
+      } catch (error) {
+        errors.push({ id: item.id, slug: item.slug, error: error.message });
+      }
+      onProgress?.(1);
+    }
+  }
+
+  return { updated, errors };
 };
 
 export const deleteTool = async (id) => {
@@ -688,12 +746,14 @@ export const deleteTool = async (id) => {
 };
 
 export const createCategory = async (category) => {
-  const result = await supabase.from('categories').insert([{ ...category }]);
+  const payload = sanitizeHtmlFields(category, ['seo_content']);
+  const result = await supabase.from('categories').insert([{ ...payload }]);
   return handleResponse(result);
 };
 
 export const updateCategory = async (id, category) => {
-  const result = await supabase.from('categories').update({ ...category, updated_at: new Date() }).eq('id', id);
+  const payload = sanitizeHtmlFields(category, ['seo_content']);
+  const result = await supabase.from('categories').update({ ...payload, updated_at: new Date() }).eq('id', id);
   return handleResponse(result);
 };
 
@@ -718,12 +778,14 @@ export const deleteBlogCategory = async (id) => {
 };
 
 export const createBlogPost = async (post) => {
-  const result = await supabase.from('blog_posts').insert([{ ...post }]);
+  const payload = sanitizeHtmlFields(post, ['content']);
+  const result = await supabase.from('blog_posts').insert([{ ...payload }]);
   return handleResponse(result);
 };
 
 export const updateBlogPost = async (id, post) => {
-  const result = await supabase.from('blog_posts').update({ ...post, updated_at: new Date() }).eq('id', id);
+  const payload = sanitizeHtmlFields(post, ['content']);
+  const result = await supabase.from('blog_posts').update({ ...payload, updated_at: new Date() }).eq('id', id);
   return handleResponse(result);
 };
 
@@ -899,6 +961,7 @@ export const createJob = async (job) => {
   
   // Step 4: Prepare final payload with cleaned data
   const payload = { ...cleanedPayload, slug: uniqueSlug };
+  enforceJobPublishQualityGate(payload);
 
   // Step 5: Attempt insert
   let result = await supabase.from('jobs').insert([payload]).select();
@@ -952,6 +1015,7 @@ export const updateJob = async (id, job) => {
   
   // Step 4: Prepare final payload with cleaned data and timestamp
   const payload = { ...cleanedPayload, slug: uniqueSlug, updated_at: new Date() };
+  enforceJobPublishQualityGate(payload);
 
   // Step 5: Attempt update
   let result = await supabase.from('jobs').update(payload).eq('id', id);
@@ -1132,16 +1196,68 @@ export const rollbackImport = async (importId, importedIds = []) => {
 
 // ── AI Provider Settings ──────────────────────────────────────────────────────
 
+const AI_PROVIDER_SAFE_FIELDS = [
+  'id',
+  'provider_name',
+  'model',
+  'priority',
+  'is_active',
+  'base_url',
+  'available_models',
+  'stats',
+  'health_status',
+  'last_tested',
+  'last_latency_ms',
+  'updated_at',
+].join(',');
+
+const normalizeSafeAiProvider = (provider = {}) => ({
+  ...provider,
+  has_api_key: Boolean(provider.has_api_key),
+});
+
+const invokeAiProviderProxy = async (body) => {
+  const { data, error } = await supabase.functions.invoke('ai-provider-proxy', { body });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data || {};
+};
+
 export const getAiProviders = async () => {
-  const res = await supabase.from('ai_provider_settings').select('*').order('priority');
+  try {
+    const data = await invokeAiProviderProxy({ action: 'listProviders' });
+    if (Array.isArray(data.providers)) return data.providers.map(normalizeSafeAiProvider);
+  } catch (err) {
+    console.warn('getAiProviders proxy:', err.message);
+  }
+
+  const res = await supabase.from('ai_provider_settings').select(AI_PROVIDER_SAFE_FIELDS).order('priority');
   if (res.error) { console.warn('getAiProviders:', res.error.message); return []; }
-  return res.data ?? [];
+  return (res.data ?? []).map(normalizeSafeAiProvider);
 };
 
 export const updateAiProvider = async (id, data) => {
-  const res = await supabase.from('ai_provider_settings').update({ ...data, updated_at: new Date() }).eq('id', id).select();
-  if (res.error) { logSupabaseError('updateAiProvider', res.error); throw res.error; }
-  return res.data ?? [];
+  const { api_key, providerSecret, ...safeData } = data || {};
+  const secret = providerSecret !== undefined ? providerSecret : api_key;
+  const hasSafeUpdates = Object.keys(safeData).length > 0;
+  let updated = [];
+
+  if (hasSafeUpdates) {
+    const res = await supabase
+      .from('ai_provider_settings')
+      .update({ ...safeData, updated_at: new Date() })
+      .eq('id', id)
+      .select(AI_PROVIDER_SAFE_FIELDS);
+    if (res.error) { logSupabaseError('updateAiProvider', res.error); throw res.error; }
+    updated = res.data ?? [];
+  }
+
+  if (secret !== undefined) {
+    await invokeAiProviderProxy({ action: 'updateProviderSecret', providerId: id, apiKey: secret });
+    updated = await getAiProviders();
+  }
+
+  return updated.map(normalizeSafeAiProvider);
 };
 
 // ── AI Prompts ────────────────────────────────────────────────────────────────
@@ -1225,13 +1341,27 @@ export const getAiDrafts = async ({ status = null, limit = 100 } = {}) => {
 };
 
 export const createAiDraft = async (data) => {
-  const res = await supabase.from('ai_job_drafts').insert([{ ...data }]).select();
+  const payload = { ...data };
+  if (payload.generated_data?.full_description) {
+    payload.generated_data = {
+      ...payload.generated_data,
+      full_description: sanitizeHtml(payload.generated_data.full_description),
+    };
+  }
+  const res = await supabase.from('ai_job_drafts').insert([{ ...payload }]).select();
   if (res.error) { logSupabaseError('createAiDraft', res.error); throw res.error; }
   return res.data?.[0] ?? null;
 };
 
 export const updateAiDraft = async (id, data) => {
-  const res = await supabase.from('ai_job_drafts').update({ ...data, updated_at: new Date() }).eq('id', id).select();
+  const payload = { ...data };
+  if (payload.generated_data?.full_description) {
+    payload.generated_data = {
+      ...payload.generated_data,
+      full_description: sanitizeHtml(payload.generated_data.full_description),
+    };
+  }
+  const res = await supabase.from('ai_job_drafts').update({ ...payload, updated_at: new Date() }).eq('id', id).select();
   if (res.error) { logSupabaseError('updateAiDraft', res.error); throw res.error; }
   return res.data ?? [];
 };
@@ -1252,6 +1382,12 @@ export const getDuplicateLog = async ({ resolved = false, limit = 100 } = {}) =>
     .order('created_at', { ascending: false })
     .limit(limit);
   if (res.error) { console.warn('getDuplicateLog:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const createDuplicateLog = async (data) => {
+  const res = await supabase.from('ai_duplicate_log').insert([{ ...data }]).select();
+  if (res.error) { logSupabaseError('createDuplicateLog', res.error, data); throw res.error; }
   return res.data ?? [];
 };
 
@@ -1330,7 +1466,7 @@ export const upsertAiProvider = async (providerName, defaults = {}) => {
     priority: defaults.priority || 99,
     is_active: false,
     base_url: defaults.base_url || null,
-  }]).select();
+  }]).select(AI_PROVIDER_SAFE_FIELDS);
   if (res.error) { logSupabaseError('upsertAiProvider', res.error); return null; }
   return res.data?.[0] ?? null;
 };
@@ -1431,4 +1567,63 @@ export const logProviderFailure = async (payload) => {
     return fallback.data ?? [];
   }
   return res.data ?? [];
+};
+
+export const createToolSeoImportHistory = async (record) => {
+  const res = await supabase.from('tool_seo_import_history').insert([{ ...record }]).select();
+  if (res.error) {
+    logSupabaseError('createToolSeoImportHistory', res.error, record);
+    throw res.error;
+  }
+  return res.data ?? [];
+};
+
+export const getToolSeoImportHistory = async ({ limit = 50 } = {}) => {
+  const res = await supabase
+    .from('tool_seo_import_history')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (res.error) {
+    console.warn('getToolSeoImportHistory:', res.error.message);
+    return [];
+  }
+  return res.data ?? [];
+};
+
+export const updateToolSeoImportHistory = async (id, data) => {
+  if (!id) return [];
+  const res = await supabase
+    .from('tool_seo_import_history')
+    .update({ ...data, updated_at: new Date() })
+    .eq('id', id);
+  if (res.error) logSupabaseError('updateToolSeoImportHistory', res.error, { id, ...data });
+  return res.data ?? [];
+};
+
+export const deleteToolSeoImportHistory = async (id) => {
+  const res = await supabase.from('tool_seo_import_history').delete().eq('id', id);
+  if (res.error) logSupabaseError('deleteToolSeoImportHistory', res.error, { id });
+  return res.data ?? [];
+};
+
+export const rollbackToolSeoImport = async (importId, rollbackData = []) => {
+  if (!rollbackData.length) return { updated: 0 };
+
+  let updated = 0;
+  for (const item of rollbackData) {
+    const payload = sanitizeHtmlFields(item.previous || {}, ['long_description', 'seo_content']);
+    const res = await supabase
+      .from('tools')
+      .update({ ...payload, updated_at: new Date() })
+      .eq('id', item.id);
+    if (res.error) {
+      logSupabaseError('rollbackToolSeoImport', res.error, { importId, item });
+      throw res.error;
+    }
+    updated += 1;
+  }
+
+  await updateToolSeoImportHistory(importId, { status: 'rolled_back' });
+  return { updated };
 };

@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { Search, Wand2, RefreshCw, CheckCircle2, AlertTriangle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { getJobs, updateJob, getAiProviders } from '@/api/supabaseApi'
 import { callAI, extractJSON } from '@/lib/aiProvider'
-import { buildSeoPrompt } from '@/lib/jobWritingFramework'
+import { buildSeoPrompt, buildLocalFallbackSeo } from '@/lib/jobWritingFramework'
 import { scoreJob, scoreBg } from '@/lib/jobQualityScorer'
 
 function SeoScoreBar({ value, label, inverted = false }) {
@@ -121,22 +121,31 @@ export default function AiSeoAudit() {
   })
 
   const generateSeo = async (job) => {
-    const activeProviders = providers.filter(p => p.is_active && p.api_key)
-    if (!activeProviders.length) { toast.error('Configure AI providers in AI Settings first'); return }
+    const activeProviders = providers.filter(p => p.is_active && p.has_api_key)
+    let seoData = null
+    let usedFallback = false
     try {
+      if (!activeProviders.length) throw new Error('No active AI providers configured')
       const { text } = await callAI(activeProviders, buildSeoPrompt(job))
-      const seoData = extractJSON(text)
-      if (!seoData) { toast.error('AI returned invalid JSON'); return }
-      await updateMutation.mutateAsync({ id: job.id, data: {
-        seo_title: seoData.seo_title || job.seo_title,
-        seo_description: seoData.seo_description || job.seo_description,
-        seo_keywords: seoData.seo_keywords || job.seo_keywords,
-        slug: (!job.slug || job.slug === '') ? (seoData.slug || job.slug) : job.slug,
-      }})
-      toast.success(`SEO generated for: ${job.title}`)
+      seoData = extractJSON(text)
+      if (!seoData) throw new Error('AI returned invalid JSON')
     } catch (err) {
-      toast.error(`Failed: ${err.message}`)
+      if (err?.status === 429 || /^AI_(DAILY_CAP|RATE_LIMIT)/.test(err?.code || '')) {
+        toast.error(err.message || 'AI SEO generation is rate limited.')
+        return
+      }
+      seoData = buildLocalFallbackSeo(job)
+      usedFallback = true
+      toast.warning(`AI SEO unavailable; local SEO fallback applied. ${err.message}`)
     }
+
+    await updateMutation.mutateAsync({ id: job.id, data: {
+      seo_title: seoData.seo_title || job.seo_title,
+      seo_description: seoData.seo_description || job.seo_description,
+      seo_keywords: seoData.seo_keywords || job.seo_keywords,
+      slug: (!job.slug || job.slug === '') ? (seoData.slug || job.slug) : job.slug,
+    }})
+    toast.success(`${usedFallback ? 'Fallback SEO saved' : 'SEO generated'} for: ${job.title}`)
   }
 
   const handleBatchGenerate = async () => {

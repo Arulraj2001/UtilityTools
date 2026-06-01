@@ -15,6 +15,7 @@ const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { to: '/admin/tools', label: 'Tools', icon: Wrench },
   { to: '/admin/seeder', label: 'Tool Seeder', icon: Download },
+  { to: '/admin/tool-seo-import', label: 'Tool SEO Import', icon: FileUp },
   { to: '/admin/blog', label: 'Blog Posts', icon: BookOpen },
   { to: '/admin/blog-import', label: 'Blog Import', icon: FileUp },
   { to: '/admin/jobs', label: 'Jobs', icon: FolderOpen },

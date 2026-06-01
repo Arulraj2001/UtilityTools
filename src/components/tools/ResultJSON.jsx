@@ -5,27 +5,32 @@ import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import useIntersectionLoad from '../../hooks/useIntersectionLoad'
 
+const JSON_TOKEN_PATTERN = /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g
+
+const getTokenClass = (match) => {
+  if (/^"/.test(match)) {
+    return /:$/.test(match) ? 'text-purple-400' : 'text-green-400'
+  }
+  if (/true|false/.test(match)) return 'text-yellow-400'
+  if (/null/.test(match)) return 'text-red-400'
+  return 'text-blue-400'
+}
+
 // Simple JSON syntax highlighter (NO logic change)
 function highlight(json) {
-  return json
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(
-      /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
-      (match) => {
-        let cls = 'text-blue-400'
-        if (/^"/.test(match)) {
-          if (/:$/.test(match)) cls = 'text-purple-400'
-          else cls = 'text-green-400'
-        } else if (/true|false/.test(match)) {
-          cls = 'text-yellow-400'
-        } else if (/null/.test(match)) {
-          cls = 'text-red-400'
-        }
-        return `<span class="${cls}">${match}</span>`
-      }
-    )
+  const source = String(json || '')
+  const parts = []
+  let lastIndex = 0
+
+  source.replace(JSON_TOKEN_PATTERN, (match, _escaped, _plain, _key, _literal, offset) => {
+    if (offset > lastIndex) parts.push(source.slice(lastIndex, offset))
+    parts.push({ text: match, className: getTokenClass(match) })
+    lastIndex = offset + match.length
+    return match
+  })
+
+  if (lastIndex < source.length) parts.push(source.slice(lastIndex))
+  return parts
 }
 
 export default function ResultJSON({ value, label = 'JSON Output' }) {
@@ -148,10 +153,13 @@ export default function ResultJSON({ value, label = 'JSON Output' }) {
               overflow-auto
               bg-[#0b1220]
             "
-            dangerouslySetInnerHTML={{
-              __html: highlight(display),
-            }}
-          />
+          >
+            {highlight(display).map((part, index) => (
+              typeof part === 'string'
+                ? part
+                : <span key={`${part.text}-${index}`} className={part.className}>{part.text}</span>
+            ))}
+          </pre>
         )}
       </div>
     </motion.div>

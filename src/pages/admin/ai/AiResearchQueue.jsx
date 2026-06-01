@@ -1,11 +1,9 @@
 import React, { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { AnimatePresence, motion } from 'framer-motion'
 import {
-  Search, Plus, Brain, Trash2, Sparkles, Clock, CheckCircle2,
-  XCircle, Bookmark, AlertTriangle, RefreshCw, ChevronRight,
-  FileText, X, Wand2,
+  Search, Plus, Trash2, Clock, CheckCircle2,
+  XCircle, Bookmark, RefreshCw, Wand2,
 } from 'lucide-react'
 import {
   getResearchQueue, createResearchItem, updateResearchItem, deleteResearchItem,
@@ -180,7 +178,7 @@ export default function AiResearchQueue() {
   const handleAction = (id, status) => updateMutation.mutate({ id, data: { status } })
 
   const handleGenerate = async (item) => {
-    const activeProviders = providers.filter(p => p.is_active && p.api_key)
+    const activeProviders = providers.filter(p => p.is_active && p.has_api_key)
     const systemPrompt = prompts.find(p => p.job_type === item.job_type)?.prompt_text || ''
     const promptRecord = prompts.find(p => p.job_type === item.job_type)
     const jobData = {
@@ -269,6 +267,12 @@ export default function AiResearchQueue() {
       await persistDraft({ parsed, provider: usedProvider, tokensUsed, durationMs })
       toast.success(`Draft created via ${usedProvider} in ${(durationMs/1000).toFixed(1)}s`)
     } catch (err) {
+      if (err?.status === 429 || /^AI_(DAILY_CAP|RATE_LIMIT)/.test(err?.code || '')) {
+        toast.error(err.message || 'AI generation is rate limited.')
+        updateMutation.mutate({ id: item.id, data: { status: 'pending' } })
+        return
+      }
+
       const durationMs = err?.attempts?.reduce((sum, attempt) => sum + (attempt.durationMs || 0), 0) || 0
       try {
         await createLocalFallbackDraft(err.message || 'All AI providers failed.', durationMs)

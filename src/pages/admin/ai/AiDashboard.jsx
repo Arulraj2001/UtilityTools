@@ -65,7 +65,7 @@ export default function AiDashboard() {
   const { data: providers = [] }= useQuery({ queryKey: ['ai-providers'],    queryFn: getAiProviders, retry: false })
   const { data: jobs = [] }     = useQuery({ queryKey: ['all-jobs-dash'],   queryFn: () => getJobs({ published: false, limit: 200 }) })
 
-  const activeProviders = providers.filter(p => p.is_active && p.api_key)
+  const activeProviders = providers.filter(p => p.is_active && p.has_api_key)
   const pendingQueue    = queue.filter(q => q.status === 'pending')
   const pendingDrafts   = drafts.filter(d => d.status === 'pending_review')
   const pendingUpdates  = updates.length

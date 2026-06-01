@@ -5,8 +5,9 @@ import { ChevronRight, Sparkles, BookOpen, Globe } from 'lucide-react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { getWorkflowPageBySlug, getTools, getBlogPosts, getWorkflowPages, getCategories } from '@/api/supabaseApi'
+import { getWorkflowPageBySlug, getTools, getBlogPosts, getWorkflowPages } from '@/api/supabaseApi'
 import WorkflowSEO from '@/components/seo/WorkflowSEO'
+import { sanitizeHtml } from '@/lib/sanitizeHtml'
 
 const getTextFromHtml = (html) => {
   if (!html) return ''
@@ -213,7 +214,7 @@ export default function WorkflowPage() {
             )}
 
             <article className="rounded-3xl border border-border/70 bg-white p-8 prose prose-slate max-w-none">
-              <div dangerouslySetInnerHTML={{ __html: page.content }} />
+              <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content) }} />
             </article>
 
             {page.faq_items?.length > 0 && (

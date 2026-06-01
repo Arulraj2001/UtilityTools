@@ -5,10 +5,10 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import {
   Brain, Key, CheckCircle2, XCircle, AlertCircle, RefreshCw,
   Eye, EyeOff, Zap, Shield, Info, GripVertical, Activity,
-  BarChart3, Globe, ChevronDown, ChevronUp,
+  Globe, ChevronDown, ChevronUp,
 } from 'lucide-react'
 import {
-  getAiProviders, updateAiProvider, upsertAiProvider,
+  getAiProviders, updateAiProvider,
   recordProviderCall, saveProviderModels, getProviderAnalytics, getProviderFailures,
 } from '@/api/supabaseApi'
 import { testProvider, fetchProviderModels, PROVIDER_MODELS } from '@/lib/aiProvider'
@@ -90,10 +90,11 @@ function HealthDot({ status }) {
 
 function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
   const [showKey, setShowKey]       = useState(false)
-  const [localKey, setLocalKey]     = useState(provider.api_key || '')
+  const [localKey, setLocalKey]     = useState('')
   const [localModel, setLocalModel] = useState(provider.model || '')
   const [localBase, setLocalBase]   = useState(provider.base_url || '')
   const [dirty, setDirty]           = useState(false)
+  const [keyDirty, setKeyDirty]     = useState(false)
   const [testing, setTesting]       = useState(false)
   const [testResult, setTestResult] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
@@ -108,12 +109,14 @@ function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
   const successRate = stats.requests > 0 ? Math.round((stats.successes / stats.requests) * 100) : null
 
   const mark = (v) => { setDirty(true); return v }
+  const markKey = (v) => { setDirty(true); setKeyDirty(true); return v }
+  const hasSavedKey = !!provider.has_api_key
 
   const handleTest = async () => {
-    if (!localKey) { toast.error('Enter an API key first'); return }
+    if (!localKey && !hasSavedKey) { toast.error('Enter an API key first'); return }
     setTesting(true)
     setTestResult(null)
-    const p = { ...provider, api_key: localKey, model: localModel || meta.defaultModel, base_url: localBase || meta.defaultBaseUrl || null }
+    const p = { ...provider, transientKey: localKey || null, model: localModel || meta.defaultModel, base_url: localBase || meta.defaultBaseUrl || null }
     const result = await testProvider(p)
     setTestResult(result)
     setTesting(false)
@@ -130,9 +133,9 @@ function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
   }
 
   const handleRefreshModels = async () => {
-    if (!localKey) { toast.error('Enter an API key first'); return }
+    if (!localKey && !hasSavedKey) { toast.error('Enter an API key first'); return }
     setRefreshing(true)
-    const p = { ...provider, api_key: localKey, base_url: localBase || meta.defaultBaseUrl || null }
+    const p = { ...provider, transientKey: localKey || null, base_url: localBase || meta.defaultBaseUrl || null }
     const models = await fetchProviderModels(p)
     setLiveModels(models)
     if (provider.id && models.length) {
@@ -143,12 +146,15 @@ function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
   }
 
   const handleSave = () => {
-    onUpdate(provider.id, {
-      api_key: localKey,
+    const payload = {
       model: localModel || meta.defaultModel,
       base_url: localBase || meta.defaultBaseUrl || null,
-    })
+    }
+    if (keyDirty) payload.providerSecret = localKey
+    onUpdate(provider.id, payload)
     setDirty(false)
+    setKeyDirty(false)
+    setLocalKey('')
     toast.success(`${meta.label} saved`)
   }
 
@@ -213,8 +219,8 @@ function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
               <input
                 type={showKey ? 'text' : 'password'}
                 value={localKey}
-                onChange={e => { setLocalKey(e.target.value); mark(e.target.value) }}
-                placeholder="Paste API key…"
+                onChange={e => { setLocalKey(e.target.value); markKey(e.target.value) }}
+                placeholder={hasSavedKey ? 'Saved server-side - paste to replace' : 'Paste API key...'}
                 className="w-full pl-8 pr-9 py-2 text-sm rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <button onClick={() => setShowKey(!showKey)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -251,7 +257,7 @@ function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
               <label className="text-xs font-medium text-muted-foreground">Model</label>
               <button
                 onClick={handleRefreshModels}
-                disabled={refreshing || !localKey}
+                disabled={refreshing || (!localKey && !hasSavedKey)}
                 className="flex items-center gap-1 text-xs text-primary hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <RefreshCw className={`w-3 h-3 ${refreshing ? 'animate-spin' : ''}`} />
@@ -292,7 +298,7 @@ function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
           <div className="flex items-center gap-2 pt-1">
             <button
               onClick={handleTest}
-              disabled={testing || !localKey}
+              disabled={testing || (!localKey && !hasSavedKey)}
               className="flex items-center gap-1.5 h-8 px-3 rounded-xl border border-border text-xs font-medium hover:border-primary/40 hover:text-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {testing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
@@ -303,9 +309,9 @@ function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
                 Save
               </button>
             )}
-            {!dirty && provider.api_key && (
+            {!dirty && hasSavedKey && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Shield className="w-3 h-3" />Key saved
+                <Shield className="w-3 h-3" />Key saved server-side
               </span>
             )}
           </div>
@@ -336,7 +342,7 @@ function HealthDashboard({ providers }) {
               <span className="text-base leading-none">{statusMap[p.health_status || 'unknown']}</span>
               <p className="font-medium text-sm w-28 shrink-0">{meta?.label}</p>
               <div className="flex-1 flex items-center gap-4 text-xs text-muted-foreground">
-                {p.is_active && p.api_key
+                {p.is_active && p.has_api_key
                   ? <span className="text-green-600 font-medium">Active</span>
                   : <span>Inactive</span>
                 }
@@ -413,7 +419,7 @@ export default function AiSettings() {
 
   // Test all active providers sequentially
   const handleTestAll = async () => {
-    const active = providers.filter(p => p.is_active && p.api_key)
+    const active = providers.filter(p => p.is_active && p.has_api_key)
     if (!active.length) { toast.error('No active providers to test'); return }
 
     setTestingAll(true)
@@ -436,8 +442,8 @@ export default function AiSettings() {
   }
 
   const sorted = [...providers].sort((a, b) => a.priority - b.priority)
-  const activeCount = providers.filter(p => p.is_active && p.api_key).length
-  const configuredCount = providers.filter(p => p.api_key).length
+  const activeCount = providers.filter(p => p.is_active && p.has_api_key).length
+  const configuredCount = providers.filter(p => p.has_api_key).length
 
   return (
     <main className="max-w-[1200px] mx-auto px-4 lg:px-8 py-6">
@@ -535,7 +541,7 @@ export default function AiSettings() {
           Providers are tried top-to-bottom. <strong>Drag</strong> cards to reorder. The first active provider with a valid key is used; on failure the system moves to the next automatically. Click the card to expand and configure.
         </p>
         <div className="flex flex-wrap gap-1.5 mt-2">
-          {sorted.filter(p => p.is_active && p.api_key).map((p, i) => {
+          {sorted.filter(p => p.is_active && p.has_api_key).map((p, i) => {
             const meta = PROVIDER_META[p.provider_name]
             return (
               <span key={p.id} className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">

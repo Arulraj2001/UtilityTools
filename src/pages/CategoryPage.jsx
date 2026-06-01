@@ -6,6 +6,7 @@ import { ChevronRight } from 'lucide-react'
 import { getCategories, getTools, getBlogPostsByCategorySlug, getFeaturedWorkflows, getJobs } from '@/api/supabaseApi'
 import ToolCard from '../components/shared/ToolCard'
 import CategorySEO from '@/components/seo/CategorySEO'
+import { sanitizeHtml } from '@/lib/sanitizeHtml'
 
 export default function CategoryPage() {
   const { slug } = useParams()
@@ -155,7 +156,7 @@ export default function CategoryPage() {
         {/* SEO Content */}
         <section className="mb-8">
           {category.seo_content ? (
-            <div className="prose max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: category.seo_content }} />
+            <div className="prose max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(category.seo_content) }} />
           ) : (
             <div className="prose max-w-none dark:prose-invert">
               <h2>About {category.name}</h2>

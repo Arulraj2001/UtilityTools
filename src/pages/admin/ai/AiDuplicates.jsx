@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Copy, CheckCircle2, XCircle, AlertTriangle, RefreshCw, ExternalLink } from 'lucide-react'
-import { getDuplicateLog, resolveDuplicate, getAiDrafts, getAiProviders, getAiPrompts, getResearchQueue } from '@/api/supabaseApi'
+import { Copy, CheckCircle2, XCircle, RefreshCw } from 'lucide-react'
+import { getDuplicateLog, resolveDuplicate, createDuplicateLog, getAiProviders, getResearchQueue } from '@/api/supabaseApi'
 import { getJobs } from '@/api/supabaseApi'
 import { callAI, extractJSON } from '@/lib/aiProvider'
 import { buildDuplicateCheckPrompt } from '@/lib/jobWritingFramework'
@@ -36,7 +36,7 @@ export default function AiDuplicates() {
 
   const handleAiCheck = async () => {
     if (!queue.length) { toast.error('No pending queue items to check'); return }
-    const activeProviders = providers.filter(p => p.is_active && p.api_key)
+    const activeProviders = providers.filter(p => p.is_active && p.has_api_key)
     if (!activeProviders.length) { toast.error('Configure AI providers in AI Settings first'); return }
 
     setChecking(true)
@@ -51,11 +51,23 @@ export default function AiDuplicates() {
         const { text } = await callAI(activeProviders, prompt)
         const result = extractJSON(text)
         if (result?.is_duplicate || result?.confidence > 60) {
-          toast.warning(`Potential duplicate: "${item.title}" — ${result?.confidence}% confidence`)
+          const matchedIndex = Array.isArray(result.matched_indices) ? result.matched_indices[0] : null
+          const matchedJob = Number.isFinite(Number(matchedIndex)) ? jobs[Number(matchedIndex) - 1] : null
+          await createDuplicateLog({
+            queue_item_id: item.id,
+            matched_job_id: matchedJob?.id || null,
+            check_type: 'content',
+            similarity: Number(result.confidence || 0),
+            is_duplicate: !!result.is_duplicate,
+            details: result,
+            resolved: false,
+          })
+          toast.warning(`Potential duplicate: "${item.title}" - ${result?.confidence}% confidence`)
         }
         checked++
       } catch { /* skip */ }
     }
+    queryClient.invalidateQueries({ queryKey: ['duplicate-log'] })
     toast.success(`Checked ${checked} items`)
     setChecking(false)
   }
