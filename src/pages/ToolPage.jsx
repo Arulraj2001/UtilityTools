@@ -471,6 +471,14 @@ export default function ToolPage() {
               <ToolContentSections tool={tool} />
             </Suspense>
 
+            {tool?.faq?.length > 0 && (
+              <div className="mt-8">
+                <Suspense fallback={null}>
+                  <FAQAccordion items={tool.faq} />
+                </Suspense>
+              </div>
+            )}
+
             {/* Related Articles (SEO) */}
             {relatedArticles.length > 0 && (
               <div className="mt-8">
@@ -522,14 +530,6 @@ export default function ToolPage() {
                     </Link>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {tool?.faq?.length > 0 && (
-              <div className="mt-8">
-                <Suspense fallback={null}>
-                  <FAQAccordion items={tool.faq} />
-                </Suspense>
               </div>
             )}
 
