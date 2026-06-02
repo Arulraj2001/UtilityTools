@@ -1,7 +1,11 @@
 import { createContext, useState, useContext, useEffect, useCallback } from 'react'
-import { supabase } from '@/api/supabaseClient'
 
 const AuthContext = createContext()
+
+const getSupabase = async () => {
+  const module = await import('@/api/supabaseClient')
+  return module.supabase
+}
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
@@ -13,6 +17,7 @@ export const AuthProvider = ({ children }) => {
 
   const verifyAdminRole = useCallback(async (userId) => {
     if (!userId) return false
+    const supabase = await getSupabase()
     const { data, error } = await supabase
       .from('admin_users')
       .select('is_admin')
@@ -30,6 +35,7 @@ export const AuthProvider = ({ children }) => {
     setIsLoadingAuth(true)
     setAuthError(null)
     try {
+      const supabase = await getSupabase()
       const { data, error } = await supabase.auth.getSession()
       if (error) {
         throw error
@@ -64,7 +70,18 @@ export const AuthProvider = ({ children }) => {
   }, [verifyAdminRole])
 
   useEffect(() => {
-    loadUser()
+    if (typeof window === 'undefined' || window.location.pathname.startsWith('/admin')) {
+      loadUser()
+      return
+    }
+
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(() => loadUser(), { timeout: 2500 })
+      return () => window.cancelIdleCallback?.(id)
+    }
+
+    const timer = window.setTimeout(() => loadUser(), 1200)
+    return () => window.clearTimeout(timer)
   }, [loadUser])
 
   const checkUserAuth = async () => {
@@ -80,6 +97,7 @@ export const AuthProvider = ({ children }) => {
     setAuthError(null)
 
     try {
+      const supabase = await getSupabase()
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -120,6 +138,7 @@ export const AuthProvider = ({ children }) => {
     setAuthError(null)
 
     try {
+      const supabase = await getSupabase()
       const { error } = await supabase.auth.signOut({ shouldClearSession: true })
       if (error) {
         throw error

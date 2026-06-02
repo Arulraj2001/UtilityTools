@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { getSiteSettings } from '@/api/supabaseApi'
 
 const DEFAULTS = {
   enabled: true,
@@ -86,12 +85,21 @@ export function SiteThemeSettings() {
   const [deferred, setDeferred] = useState(false)
 
   useEffect(() => {
-    setDeferred(true)
+    if (typeof window === 'undefined') return
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(() => setDeferred(true), { timeout: 2500 })
+      return () => window.cancelIdleCallback?.(id)
+    }
+    const timer = window.setTimeout(() => setDeferred(true), 1500)
+    return () => window.clearTimeout(timer)
   }, [])
 
   const { data: settings = [] } = useQuery({
     queryKey: ['settings'],
-    queryFn: () => getSiteSettings(),
+    queryFn: async () => {
+      const { getSiteSettings } = await import('@/api/supabaseApi')
+      return getSiteSettings()
+    },
     staleTime: 1000 * 60 * 5,
     enabled: deferred,
   })

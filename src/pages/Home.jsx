@@ -1,18 +1,19 @@
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { getTools, getCategories, getTotalUsageCount, getFeaturedWorkflows, getCategoryCounts, getFeaturedJobs } from '@/api/supabaseApi'
 import HeroSection from '../components/home/HeroSection'
 import StatsBar from '../components/home/StatsBar'
 const CategoriesGrid = lazy(() => import('../components/home/CategoriesGrid'))
 const FeaturedTools = lazy(() => import('../components/home/FeaturedTools'))
 const PopularWorkflows = lazy(() => import('../components/home/PopularWorkflows'))
-import AdBanner from '../components/shared/AdBanner'
+const AdBanner = lazy(() => import('../components/shared/AdBanner'))
 import StaticPageSEO, { SITE_URL } from '@/components/seo/StaticPageSEO'
 import { FEATURED_STATIC_BLOG_POSTS } from '@/lib/staticBlogPosts'
 
 const homepageDescription =
   'QuickUtils is a free online tools website for everyday PDF, image, calculator, text, developer, SEO, student, and business tasks.'
+
+const loadHomepageApi = () => import('@/api/homepageApi')
 
 const categoryHighlights = [
   {
@@ -481,68 +482,36 @@ export default function Home() {
   const [deferHomepageQueries, setDeferHomepageQueries] = useState(false)
 
   useEffect(() => {
-    setDeferHomepageQueries(true)
+    if (typeof window === 'undefined') return
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(() => setDeferHomepageQueries(true), { timeout: 1500 })
+      return () => window.cancelIdleCallback?.(id)
+    }
+    const timer = window.setTimeout(() => setDeferHomepageQueries(true), 800)
+    return () => window.clearTimeout(timer)
   }, [])
 
   const {
     data: categories = [],
     isLoading: isLoadingCategories,
-    error: categoriesError,
   } = useQuery({
-    queryKey: ['categories'],
-    queryFn: () => getCategories({ orderBy: 'sort_order', ascending: true, limit: 50 }),
+    queryKey: ['homepage-categories-light'],
+    queryFn: async () => (await loadHomepageApi()).getHomepageCategories(),
+    enabled: deferHomepageQueries,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: false,
   })
 
   const {
-    data: categoryCounts = {},
-    isLoading: isLoadingCategoryCounts,
+    data: homepageTools = [],
+    isLoading: isLoadingHomepageTools,
+    isFetching: isFetchingHomepageTools,
   } = useQuery({
-    queryKey: ['category-counts', categories.map(c => c.id)],
-    enabled: categories.length > 0,
-    queryFn: () => getCategoryCounts({ categoryIds: categories.map(c => c.id) }),
+    queryKey: ['homepage-tools-light'],
+    queryFn: async () => (await loadHomepageApi()).getHomepageTools({ limit: 200 }),
+    enabled: deferHomepageQueries,
     staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    retry: false,
-  })
-
-  const {
-    data: featuredTools = [],
-    isLoading: isLoadingFeaturedTools,
-    isFetching: isFetchingFeaturedTools,
-    error: featuredToolsError,
-  } = useQuery({
-    queryKey: ['featured-tools'],
-    queryFn: () => getTools({ published: true, filters: { is_featured: true }, orderBy: 'created_at desc', ascending: false, limit: 6 }),
-    enabled: deferHomepageQueries,
-    refetchOnWindowFocus: false,
-    retry: false,
-  })
-
-  const {
-    data: trendingTools = [],
-    isLoading: isLoadingTrendingTools,
-    isFetching: isFetchingTrendingTools,
-    error: trendingToolsError,
-  } = useQuery({
-    queryKey: ['trending-tools'],
-    queryFn: () => getTools({ published: true, filters: { is_trending: true }, orderBy: 'created_at desc', ascending: false, limit: 6 }),
-    enabled: deferHomepageQueries,
-    refetchOnWindowFocus: false,
-    retry: false,
-  })
-
-  const {
-    data: recentTools = [],
-    isLoading: isLoadingRecentTools,
-    isFetching: isFetchingRecentTools,
-    error: recentToolsError,
-  } = useQuery({
-    queryKey: ['recent-tools'],
-    queryFn: () => getTools({ published: true, orderBy: 'created_at', ascending: false, limit: 6 }),
-    enabled: deferHomepageQueries,
     refetchOnWindowFocus: false,
     retry: false,
   })
@@ -553,7 +522,7 @@ export default function Home() {
     isFetching: isFetchingUsage,
   } = useQuery({
     queryKey: ['total-usage'],
-    queryFn: getTotalUsageCount,
+    queryFn: async () => (await loadHomepageApi()).getHomepageTotalUsageCount(),
     enabled: deferHomepageQueries,
     refetchOnWindowFocus: false,
     retry: false,
@@ -565,7 +534,7 @@ export default function Home() {
     isFetching: isFetchingWorkflows,
   } = useQuery({
     queryKey: ['workflows-featured'],
-    queryFn: () => getFeaturedWorkflows({ limit: 6 }),
+    queryFn: async () => (await loadHomepageApi()).getHomepageFeaturedWorkflows({ limit: 6 }),
     enabled: deferHomepageQueries,
     refetchOnWindowFocus: false,
     retry: false,
@@ -573,37 +542,39 @@ export default function Home() {
 
   const {
     data: featuredJobs = [],
-    isLoading: isLoadingFeaturedJobs
   } = useQuery({
     queryKey: ['featured-jobs'],
-    queryFn: () => getFeaturedJobs({ limit: 6 }),
+    queryFn: async () => (await loadHomepageApi()).getHomepageFeaturedJobs({ limit: 6 }),
     enabled: deferHomepageQueries,
     refetchOnWindowFocus: false,
     retry: false,
   })
 
   const toolCount = useMemo(() => {
-    const categoryTotal = categories.reduce((sum, category) => sum + (category.tool_count || categoryCounts[category.id] || 0), 0)
+    const categoryTotal = categories.reduce((sum, category) => sum + (category.tool_count || 0), 0)
     return categoryTotal > 0 ? categoryTotal : 50
-  }, [categories, categoryCounts])
+  }, [categories])
 
-  const hasError = categoriesError
-  const showCategoriesSectionSkeleton = isLoadingCategories || isLoadingCategoryCounts
-  const showFeaturedSectionSkeleton = !deferHomepageQueries || isLoadingFeaturedTools || isFetchingFeaturedTools || isLoadingRecentTools || isFetchingRecentTools
-  const showTrendingSectionSkeleton = !deferHomepageQueries || isLoadingTrendingTools || isFetchingTrendingTools
-  const showRecentSectionSkeleton = !deferHomepageQueries || isLoadingRecentTools || isFetchingRecentTools
+  const featuredTools = useMemo(
+    () => homepageTools.filter((tool) => tool.is_featured).slice(0, 6),
+    [homepageTools]
+  )
+
+  const trendingTools = useMemo(
+    () => homepageTools.filter((tool) => tool.is_trending).slice(0, 6),
+    [homepageTools]
+  )
+
+  const recentTools = useMemo(
+    () => homepageTools.slice(0, 6),
+    [homepageTools]
+  )
+
+  const showCategoriesSectionSkeleton = !deferHomepageQueries || isLoadingCategories
+  const showFeaturedSectionSkeleton = !deferHomepageQueries || isLoadingHomepageTools || isFetchingHomepageTools
+  const showTrendingSectionSkeleton = !deferHomepageQueries || isLoadingHomepageTools || isFetchingHomepageTools
+  const showRecentSectionSkeleton = !deferHomepageQueries || isLoadingHomepageTools || isFetchingHomepageTools
   const showWorkflowsSectionSkeleton = !deferHomepageQueries || isLoadingWorkflows || isFetchingWorkflows
-
-  if (hasError) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center bg-background px-4 text-center">
-        <h2 className="text-2xl font-semibold mb-3">Unable to load homepage data</h2>
-        <p className="text-sm text-muted-foreground max-w-xl">
-          {categoriesError?.message || featuredToolsError?.message || trendingToolsError?.message || recentToolsError?.message || 'There was an issue loading site data. Please try refreshing the page.'}
-        </p>
-      </div>
-    )
-  }
 
   return (
     <div>
@@ -625,7 +596,7 @@ export default function Home() {
         <CategoriesSectionSkeleton />
       ) : (
         <Suspense fallback={<CategoriesSectionSkeleton />}>
-          <CategoriesGrid categories={categories} countByCategory={categoryCounts} />
+          <CategoriesGrid categories={categories} />
         </Suspense>
       )}
 
@@ -644,7 +615,9 @@ export default function Home() {
         )
       )}
 
-      <AdBanner placement="in_content" pageType="home" className="py-6" />
+      <Suspense fallback={null}>
+        <AdBanner placement="in_content" pageType="home" className="py-6" />
+      </Suspense>
       <WhyQuickUtilsSection />
       <PrivacyFocusSection />
       <HowItWorksSection />

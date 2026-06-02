@@ -30,7 +30,7 @@ export const ICON_MAP = {
   Tag, Utensils, Activity, Calendar, IndianRupee, Fuel, Shield, Shuffle,
   FileImage, FilePlus, Scissors, Merge, SplitSquareHorizontal,
   Download, Upload, RefreshCw, Cpu, Database, Terminal, Key,
-  FileDown, FileUp, PackageOpen,
+  FileDown, FileUp, PackageOpen, 
 
   // Gov exam icons
   User, PenLine, Train, Landmark, Camera, TrendingDown, Pencil, Crop,

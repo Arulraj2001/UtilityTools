@@ -57,13 +57,13 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/percentage-calculator</loc>
-    <lastmod>2026-06-01T14:25:48.644Z</lastmod>
+    <lastmod>2026-06-01T16:40:37.225Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://quickutils.page/tool/sip-calculator</loc>
-    <lastmod>2026-05-31T08:47:19.068Z</lastmod>
+    <lastmod>2026-06-01T16:40:38.370Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -141,7 +141,7 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/discount-calculator</loc>
-    <lastmod>2026-05-31T08:47:18.375Z</lastmod>
+    <lastmod>2026-06-01T16:40:37.480Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -165,7 +165,7 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/compound-interest</loc>
-    <lastmod>2026-05-31T08:47:18.553Z</lastmod>
+    <lastmod>2026-06-01T16:40:37.700Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -219,7 +219,7 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/age-calculator</loc>
-    <lastmod>2026-05-31T09:52:00.216Z</lastmod>
+    <lastmod>2026-06-01T17:00:55.870Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -231,7 +231,7 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/simple-interest</loc>
-    <lastmod>2026-05-31T10:14:23.007Z</lastmod>
+    <lastmod>2026-06-01T16:40:37.908Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -316,6 +316,12 @@
   <url>
     <loc>https://quickutils.page/tool/emi-calculator</loc>
     <lastmod>2026-06-01T14:26:15.342Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://quickutils.page/tool/gst-calculator</loc>
+    <lastmod>2026-06-01T16:40:38.100Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -464,14 +470,14 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/cbm-calculator</loc>
-    <lastmod>2026-05-29T01:12:45.092Z</lastmod>
+    <loc>https://quickutils.page/tool/bmi-calculator</loc>
+    <lastmod>2026-06-01T16:40:36.743Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/bmi-calculator</loc>
-    <lastmod>2026-05-31T09:40:22.878Z</lastmod>
+    <loc>https://quickutils.page/tool/cbm-calculator</loc>
+    <lastmod>2026-05-29T01:12:45.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -495,7 +501,7 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/tip-calculator</loc>
-    <lastmod>2026-05-31T08:47:18.084Z</lastmod>
+    <lastmod>2026-06-01T16:40:37.012Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -508,12 +514,6 @@
   <url>
     <loc>https://quickutils.page/tool/pregnancy-calculator</loc>
     <lastmod>2026-05-26T10:39:34.567Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://quickutils.page/tool/gst-calculator</loc>
-    <lastmod>2026-05-31T08:47:18.901Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>

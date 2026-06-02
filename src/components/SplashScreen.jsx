@@ -65,7 +65,12 @@ export default function SplashScreen({ duration = 800 }) {
           <img
             src="/logo.svg"
             alt="Utility Tools Logo"
-            className="w-40 h-40 animate-bounce drop-shadow-[0_10px_30px_rgba(91,33,182,0.5)]"
+            width="160"
+            height="160"
+            loading="eager"
+            fetchPriority="high"
+            decoding="sync"
+            className="w-40 h-40 drop-shadow-[0_10px_30px_rgba(91,33,182,0.5)]"
           />
         </picture>
       </div>

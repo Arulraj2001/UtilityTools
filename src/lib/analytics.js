@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { logAnalyticsEvent } from '@/api/supabaseApi'
 
 const SESSION_STORAGE_KEY = 'analytics_session_id'
 const PAGE_VIEW_DEDUPE_KEY = 'analytics_page_viewed'
@@ -73,7 +72,16 @@ const getPageContext = (path = '') => {
   return { pageType: 'page' }
 }
 
-const safeSendEvent = async (eventType, eventData) => {
+const scheduleAnalytics = (callback) => {
+  if (typeof window === 'undefined') return
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(callback, { timeout: 3500 })
+  } else {
+    window.setTimeout(callback, 2000)
+  }
+}
+
+const safeSendEvent = (eventType, eventData) => {
   if (typeof window === 'undefined') return
   const payload = {
     event_type: eventType,
@@ -84,11 +92,14 @@ const safeSendEvent = async (eventType, eventData) => {
     ...getDeviceInfo(),
   }
 
-  try {
-    await logAnalyticsEvent(eventType, payload)
-  } catch (error) {
-    console.warn('Analytics event failed', eventType, error)
-  }
+  scheduleAnalytics(async () => {
+    try {
+      const { logAnalyticsEvent } = await import('@/api/supabaseApi')
+      await logAnalyticsEvent(eventType, payload)
+    } catch (error) {
+      console.warn('Analytics event failed', eventType, error)
+    }
+  })
 }
 
 export const trackPageView = async () => {
@@ -102,7 +113,7 @@ export const trackPageView = async () => {
   const referrer = document.referrer || ''
   const source = getTrafficSource(referrer)
 
-  await safeSendEvent('page_view', {
+  safeSendEvent('page_view', {
     pageTitle: document.title || pathname,
     referrer,
     traffic_source: source,
@@ -118,7 +129,7 @@ export const trackToolEvent = async (tool, action, extraData = {}) => {
     window.sessionStorage.setItem(key, String(Date.now()))
   }
 
-  await safeSendEvent('tool_event', {
+  safeSendEvent('tool_event', {
     action,
     toolSlug: tool.slug,
     toolName: tool.name,
@@ -139,7 +150,7 @@ export const trackWorkflowSearch = async ({ query = '', resultCount = 0, source 
   if (lastLogged && now - Number(lastLogged) < 1000 * 60 * 3) return
   window.sessionStorage.setItem(dedupeKey, String(now))
 
-  await safeSendEvent('workflow_search', {
+  safeSendEvent('workflow_search', {
     query: trimmed,
     result_count: Number(resultCount || 0),
     source,

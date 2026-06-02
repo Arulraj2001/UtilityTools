@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect } from 'react'
+import React, { lazy, Suspense, useEffect, useState } from 'react'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as SonnerToaster } from 'sonner'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -12,7 +12,6 @@ import SplashScreen from '@/components/SplashScreen'
 
 // Layouts
 import PublicLayout from './components/layout/PublicLayout'
-import BackgroundLighting from './components/layout/BackgroundLighting'
 import ScrollToTop from './components/layout/ScrollToTop'
 import { SiteThemeSettings } from '@/lib/useSiteThemeSettings'
 
@@ -67,6 +66,7 @@ const AiReports    = lazy(() => import('./pages/admin/ai/AiReports'))
 const WorkflowPage = lazy(() => import('./pages/WorkflowPage'))
 const WorkflowListPage = lazy(() => import('./pages/WorkflowListPage'))
 const PageNotFound = lazy(() => import('./lib/PageNotFound'))
+const BackgroundLighting = lazy(() => import('./components/layout/BackgroundLighting'))
 
 const RouteFallback = () => (
   <div className="min-h-[55vh] flex items-center justify-center bg-background">
@@ -170,13 +170,29 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
+  const [showBackgroundLighting, setShowBackgroundLighting] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(() => setShowBackgroundLighting(true), { timeout: 2200 })
+      return () => window.cancelIdleCallback?.(id)
+    }
+    const timer = window.setTimeout(() => setShowBackgroundLighting(true), 1200)
+    return () => window.clearTimeout(timer)
+  }, [])
+
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <SplashScreen duration={300} />
         <SiteThemeSettings />
         <Router>
-          <BackgroundLighting />
+          {showBackgroundLighting && (
+            <Suspense fallback={null}>
+              <BackgroundLighting />
+            </Suspense>
+          )}
           <ScrollToTop />
           <AuthenticatedApp />
         </Router>
