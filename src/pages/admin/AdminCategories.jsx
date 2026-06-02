@@ -197,7 +197,7 @@ export default function AdminCategories() {
 
               <div className="space-y-1.5">
                 <Label className="text-sm">Canonical URL</Label>
-                <Input value={form.canonical_url} onChange={e => setForm({ ...form, canonical_url: e.target.value })} className="rounded-lg" placeholder="https://quickutils.page/category/..." />
+                <Input value={form.canonical_url} onChange={e => setForm({ ...form, canonical_url: e.target.value })} className="rounded-lg" placeholder="https://www.quickutils.page/category/..." />
               </div>
             </TabsContent>
 

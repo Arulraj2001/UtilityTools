@@ -1,13 +1,14 @@
 import React from 'react'
 import { Helmet } from 'react-helmet-async'
+import { DEFAULT_IMAGE, SITE_NAME, SITE_URL } from '@/config/site'
 
-export default function WorkflowSEO({ page, canonicalBase = 'https://quickutils.page', steps = [] }) {
+export default function WorkflowSEO({ page, canonicalBase = SITE_URL, steps = [] }) {
   if (!page) return null
 
   const title = page.seo_title || page.title
   const description = page.seo_description || page.excerpt || ''
   const canonical = page.canonical_url || `${canonicalBase}/workflow/${encodeURIComponent(page.slug)}`
-  const image = page.featured_image || `${canonicalBase}/preview.png`
+  const image = page.featured_image || DEFAULT_IMAGE
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -59,7 +60,7 @@ export default function WorkflowSEO({ page, canonicalBase = 'https://quickutils.
       <meta property="og:description" content={description} />
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={image} />
-      <meta property="og:site_name" content="QuickUtils" />
+      <meta property="og:site_name" content={SITE_NAME} />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />

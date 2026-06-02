@@ -33,6 +33,12 @@ const Terms = lazy(() => import('./pages/Terms'))
 const Disclaimer = lazy(() => import('./pages/Disclaimer'))
 const EditorialPolicy = lazy(() => import('./pages/EditorialPolicy'))
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'))
+const Team = lazy(() => import('./pages/Team'))
+const AuthorPage = lazy(() => import('./pages/AuthorPage'))
+const Methodology = lazy(() => import('./pages/Methodology'))
+const CorrectionsPolicy = lazy(() => import('./pages/CorrectionsPolicy'))
+const Accessibility = lazy(() => import('./pages/Accessibility'))
+const JobSourcesPolicy = lazy(() => import('./pages/JobSourcesPolicy'))
 const Login = lazy(() => import('./pages/Login'))
 
 // Admin pages
@@ -129,6 +135,12 @@ const AuthenticatedApp = () => {
         <Route path="/disclaimer" element={wrap(<Disclaimer />)} />
         <Route path="/cookie-policy" element={wrap(<CookiePolicy />)} />
         <Route path="/editorial-policy" element={wrap(<EditorialPolicy />)} />
+        <Route path="/team" element={wrap(<Team />)} />
+        <Route path="/author/:slug" element={wrap(<AuthorPage />)} />
+        <Route path="/methodology" element={wrap(<Methodology />)} />
+        <Route path="/corrections-policy" element={wrap(<CorrectionsPolicy />)} />
+        <Route path="/accessibility" element={wrap(<Accessibility />)} />
+        <Route path="/job-sources-policy" element={wrap(<JobSourcesPolicy />)} />
         <Route path="/login" element={wrap(<Login />)} />
       </Route>
 

@@ -9,6 +9,7 @@ import { trackWorkflowSearch } from '@/lib/analytics'
 import AdBanner from '../components/shared/AdBanner'
 import { Link } from 'react-router-dom'
 import { SITE_URL } from '@/components/seo/StaticPageSEO'
+import { ORGANIZATION_NAME, SITE_NAME } from '@/config/site'
 
 export default function WorkflowListPage() {
   const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get('q') || '')
@@ -102,7 +103,7 @@ export default function WorkflowListPage() {
     return () => clearTimeout(timer)
   }, [search, filtered.length])
 
-  const seoTitle = 'Workflow Solutions for PDFs, Images, and Online Tools | UtilityTools'
+  const seoTitle = 'Workflow Solutions for PDFs, Images, and Online Tools | QuickUtils'
   const seoDescription = 'Discover guided workflow solutions for PDFs, images, exam forms, and online utilities. Step-by-step guides for common tasks.'
   const canonicalUrl = `${SITE_URL}/workflow`
 
@@ -133,7 +134,9 @@ export default function WorkflowListPage() {
     url: canonicalUrl,
     publisher: {
       '@type': 'Organization',
-      name: 'UtilityTools',
+      name: ORGANIZATION_NAME,
+      alternateName: SITE_NAME,
+      url: SITE_URL,
     },
     mainEntity: {
       '@type': 'ItemList',

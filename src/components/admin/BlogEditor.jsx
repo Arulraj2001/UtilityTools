@@ -22,6 +22,7 @@ import { toast } from 'sonner'
 import { createBlogPost, getBlogPosts, getBlogCategories, updateBlogPost } from '@/api/supabaseApi'
 import { estimateReadingTime, getKeywordDensity, buildSeoScore, slugifyText } from '@/lib/seoUtils'
 import { sanitizeHtml } from '@/lib/sanitizeHtml'
+import { DEFAULT_AUTHOR } from '@/lib/authors'
 
 // Custom styles for rendered content and editor
 const rendererStyles = `
@@ -125,7 +126,7 @@ export default function BlogEditor({ post, onSave, onCancel }) {
     schema_type: post?.schema_type || 'BlogPosting',
     featured: post?.featured || false,
     meta_robots: post?.meta_robots || 'index,follow',
-    author_name: post?.author_name || 'Arulraj S',
+    author_name: post?.author_name || DEFAULT_AUTHOR.name,
     reading_time: post?.reading_time || 0,
     seo_title: post?.seo_title || '',
     seo_description: post?.seo_description || '',
@@ -134,9 +135,9 @@ export default function BlogEditor({ post, onSave, onCancel }) {
     og_description: post?.og_description || '',
     twitter_title: post?.twitter_title || '',
     twitter_description: post?.twitter_description || '',
-    author_image: post?.author_image || 'https://res.cloudinary.com/dk8odjbsk/image/upload/v1779891643/profile-pic_2_fkqejj.png',
-    author_title: post?.author_title || 'Junior Content Developer',
-    author_bio: post?.author_bio || 'Passionate content developer specializing in crafting clear, engaging guides that transform complex ideas into easy-to-understand resources. Dedicated to creating content that readers can immediately understand and apply.',
+    author_image: post?.author_image || '',
+    author_title: post?.author_title || DEFAULT_AUTHOR.title,
+    author_bio: post?.author_bio || DEFAULT_AUTHOR.bio,
     faq_items: post?.faq_items || [],
   })
 

@@ -1,13 +1,14 @@
 import React from 'react'
 import { Helmet } from 'react-helmet-async'
+import { DEFAULT_IMAGE, SITE_NAME, SITE_URL } from '@/config/site'
 
-export default function CategorySEO({ category, canonicalBase = 'https://quickutils.page' }) {
+export default function CategorySEO({ category, canonicalBase = SITE_URL }) {
   if (!category) return null
 
   const title = category.seo_title || category.name
   const description = category.seo_description || category.description || ''
   const canonical = category.canonical_url || `${canonicalBase}/category/${encodeURIComponent(category.slug)}`
-  const image = category.featured_image || `${canonicalBase}/preview.png`
+  const image = category.featured_image || DEFAULT_IMAGE
   const keywords = category.seo_keywords || ''
 
   const breadcrumbSchema = {
@@ -42,7 +43,7 @@ export default function CategorySEO({ category, canonicalBase = 'https://quickut
       <meta property="og:description" content={description} />
       <meta property="og:image" content={image} />
       <meta property="og:url" content={canonical} />
-      <meta property="og:site_name" content="QuickUtils" />
+      <meta property="og:site_name" content={SITE_NAME} />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />

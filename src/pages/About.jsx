@@ -189,6 +189,22 @@ export default function About() {
           </div>
         </section>
 
+        <section className="rounded-xl border border-border/60 border-l-4 border-l-primary/40 bg-card/80 p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-3">Trust, review, and transparency</h2>
+          <p className="text-muted-foreground leading-relaxed mb-5">
+            QuickUtils is operated by Learnithm and led by Arulraj S. The public trust
+            pages below explain who is responsible for the site, how tool and content quality is
+            reviewed, and how users can report mistakes or accessibility barriers.
+          </p>
+          <div className="flex flex-wrap gap-4 text-sm font-medium">
+            <Link to="/team" className="text-primary hover:underline">Team</Link>
+            <Link to="/author/arulraj-s" className="text-primary hover:underline">Author profile</Link>
+            <Link to="/methodology" className="text-primary hover:underline">Methodology</Link>
+            <Link to="/corrections-policy" className="text-primary hover:underline">Corrections Policy</Link>
+            <Link to="/accessibility" className="text-primary hover:underline">Accessibility</Link>
+          </div>
+        </section>
+
         {/* Get in touch */}
         <section className="mt-12">
           <div className="rounded-xl border border-border/60 bg-card/80 p-6">

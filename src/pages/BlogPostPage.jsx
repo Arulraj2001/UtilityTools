@@ -24,6 +24,7 @@ import { suggestLinksFromText } from '@/lib/semanticLinker'
 import BlogSEO from '@/components/seo/BlogSEO'
 import { getStaticBlogPostBySlug, mergeBlogCategories, mergeBlogPosts } from '@/lib/staticBlogPosts'
 import { sanitizeHtml } from '@/lib/sanitizeHtml'
+import { getAuthorForPost } from '@/lib/authors'
 
 export default function BlogPostPage() {
   const { slug } = useParams()
@@ -45,6 +46,7 @@ export default function BlogPostPage() {
 
   const post = staticPost || remotePost
   const isPostError = !staticPost && isRemotePostError
+  const authorProfile = useMemo(() => (post ? getAuthorForPost(post) : null), [post])
 
   const { data: remotePosts = [], isLoading: isLoadingPosts } = useQuery({
     queryKey: ['blog-published'],
@@ -355,7 +357,18 @@ export default function BlogPostPage() {
                 )}
 
                 <div className="space-y-2">
-                  {post.author_name && <p className="text-lg font-semibold text-foreground">{post.author_name}</p>}
+                  {post.author_name && (
+                    authorProfile?.url ? (
+                      <Link
+                        to={new URL(authorProfile.url).pathname}
+                        className="text-lg font-semibold text-foreground hover:text-primary"
+                      >
+                        {post.author_name}
+                      </Link>
+                    ) : (
+                      <p className="text-lg font-semibold text-foreground">{post.author_name}</p>
+                    )
+                  )}
                   {post.author_title && <p className="text-sm text-primary">{post.author_title}</p>}
                   {post.author_bio && (
                     <p className="text-sm text-muted-foreground max-w-3xl">{post.author_bio}</p>

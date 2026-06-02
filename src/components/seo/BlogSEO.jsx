@@ -1,7 +1,9 @@
 import React from 'react'
 import { Helmet } from 'react-helmet-async'
+import { DEFAULT_IMAGE, LOGO_URL, ORGANIZATION_NAME, SITE_NAME, SITE_URL } from '@/config/site'
+import { getAuthorForPost } from '@/lib/authors'
 
-export default function BlogSEO({ post, canonicalBase = 'https://quickutils.page' }) {
+export default function BlogSEO({ post, canonicalBase = SITE_URL }) {
   if (!post) return null
 
   const title = post.seo_title || post.title
@@ -11,8 +13,10 @@ export default function BlogSEO({ post, canonicalBase = 'https://quickutils.page
   const twitterTitle = post.twitter_title || post.twitterTitle || ogTitle
   const twitterDescription = post.twitter_description || post.twitterDescription || ogDescription
   const canonical = `${canonicalBase}/blog/${encodeURIComponent(post.slug)}`
-  const image = post.featured_image || post.og_image || `${canonicalBase}/preview.png`
-  const authorName = post.author_name || post.author || 'QuickUtils Editorial Team'
+  const image = post.featured_image || post.og_image || DEFAULT_IMAGE
+  const author = getAuthorForPost(post)
+  const authorName = post.author_name || post.author || author.name
+  const authorUrl = post.author_url || author.url
   const categoryName = post.blog_categories?.name || post.category
 
   const breadcrumbSchema = {
@@ -34,16 +38,19 @@ export default function BlogSEO({ post, canonicalBase = 'https://quickutils.page
     author: {
       '@type': 'Person',
       name: authorName,
+      ...(authorUrl ? { url: authorUrl } : {}),
       ...(post.author_image ? { image: post.author_image } : {}),
       ...(post.author_bio ? { description: post.author_bio } : {}),
       ...(post.author_title ? { jobTitle: post.author_title } : {}),
     },
     publisher: {
       '@type': 'Organization',
-      name: 'QuickUtils',
+      name: ORGANIZATION_NAME,
+      alternateName: SITE_NAME,
+      url: canonicalBase,
       logo: {
         '@type': 'ImageObject',
-        url: `${canonicalBase}/logo.png`,
+        url: LOGO_URL,
       },
     },
     datePublished: post.created_at,
@@ -79,7 +86,7 @@ export default function BlogSEO({ post, canonicalBase = 'https://quickutils.page
       <meta property="og:description" content={ogDescription} />
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={image} />
-      <meta property="og:site_name" content="QuickUtils" />
+      <meta property="og:site_name" content={SITE_NAME} />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={twitterTitle} />

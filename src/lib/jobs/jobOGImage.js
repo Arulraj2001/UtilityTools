@@ -15,9 +15,10 @@
  * - CDN caching
  */
 
+import { SITE_NAME, SITE_URL } from '@/config/site'
+
 const OG_IMAGE_WIDTH = 1200
 const OG_IMAGE_HEIGHT = 630
-const SITE_URL = 'https://quickutils.page'
 
 /**
  * Build OG image metadata for a job
@@ -31,7 +32,7 @@ export const buildJobOGMeta = (job) => {
     image: generateOGImageUrl(job),
     url: `${SITE_URL}/jobs/${encodeURIComponent(job.slug)}`,
     type: 'article',
-    siteName: 'QuickUtils',
+    siteName: SITE_NAME,
     publishedTime: job.created_at,
     modifiedTime: job.updated_at,
   }

@@ -29,7 +29,7 @@ export default function Terms() {
           <p className="text-sm font-semibold text-primary mb-3">Legal</p>
           <h1 className="text-3xl font-bold mb-4">Terms of Service</h1>
           <p className="text-muted-foreground leading-relaxed">
-            These terms govern your use of QuickUtils (quickutils.page) and all tools, pages, and
+            These terms govern your use of QuickUtils (www.quickutils.page) and all tools, pages, and
             content available on the website. By using QuickUtils, you agree to these terms.
           </p>
           <p className="text-sm text-muted-foreground mt-4">Last updated: {updatedDate}</p>

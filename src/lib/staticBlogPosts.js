@@ -1,3 +1,5 @@
+import { DEFAULT_AUTHOR } from './authors.js'
+
 export const STATIC_BLOG_CATEGORIES = [
   {
     id: 'static-student-guides',
@@ -37,7 +39,7 @@ export const STATIC_BLOG_CATEGORIES = [
 ]
 
 const UPDATED_AT = '2026-05-27T00:00:00.000Z'
-const AUTHOR = 'QuickUtils Editorial Team'
+const AUTHOR = DEFAULT_AUTHOR.name
 
 const categoryBySlug = Object.fromEntries(
   STATIC_BLOG_CATEGORIES.map((category) => [category.slug, category])
@@ -83,6 +85,8 @@ const makePost = ({
     content,
     status: 'published',
     author_name: AUTHOR,
+    author_slug: DEFAULT_AUTHOR.slug,
+    author_url: DEFAULT_AUTHOR.url,
     created_at: UPDATED_AT,
     updated_at: UPDATED_AT,
     last_updated_label: 'May 2026',
@@ -97,9 +101,9 @@ const makePost = ({
     og_description: ogDescription,
     twitter_title: twitterTitle,
     twitter_description: twitterDescription,
-    author_title: authorTitle,
+    author_title: authorTitle || DEFAULT_AUTHOR.title,
     author_image: authorImage,
-    author_bio: authorBio,
+    author_bio: authorBio || DEFAULT_AUTHOR.bio,
     seo_keywords: seoKeywords,
     faq_items: faqItems,
     is_featured: isFeatured,

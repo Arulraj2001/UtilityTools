@@ -7,8 +7,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import StaticPageSEO, { SITE_URL, buildBreadcrumbSchema } from '@/components/seo/StaticPageSEO'
+import { CONTACT_EMAIL } from '@/config/site'
 
-const contactEmail = 'support@quickutils.page'
+const contactEmail = CONTACT_EMAIL
 const contactDescription =
   'Contact QuickUtils to report tool issues, send feedback, ask privacy questions, or suggest new online utilities. We aim to respond within a few business days.'
 
@@ -169,6 +170,19 @@ export default function Contact() {
               For issue reports, include the tool name, page URL, device, browser, and a short
               description of the input and expected result.
             </p>
+            <div className="flex flex-wrap gap-3 text-xs font-medium">
+              <a href={`mailto:${contactEmail}`} className="text-primary hover:underline">
+                {contactEmail}
+              </a>
+              <span className="text-muted-foreground">|</span>
+              <a href="/corrections-policy" className="text-primary hover:underline">
+                Corrections policy
+              </a>
+              <span className="text-muted-foreground">|</span>
+              <a href="/accessibility" className="text-primary hover:underline">
+                Accessibility feedback
+              </a>
+            </div>
           </form>
 
           {/* Sidebar info cards */}

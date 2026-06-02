@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Zap, Mail, ArrowRight } from 'lucide-react'
+import { CONTACT_EMAIL } from '@/config/site'
 
 const TOOL_LINKS = [
   { to: '/tool/photo-kb-reducer', label: 'Photo KB Reducer' },
@@ -21,11 +22,16 @@ const EXPLORE_LINKS = [
 
 const TRUST_LINKS = [
   { to: '/about', label: 'About' },
+  { to: '/team', label: 'Team' },
   { to: '/contact', label: 'Contact' },
+  { to: '/methodology', label: 'Methodology' },
   { to: '/privacy', label: 'Privacy Policy' },
   { to: '/terms', label: 'Terms of Use' },
   { to: '/disclaimer', label: 'Disclaimer' },
   { to: '/editorial-policy', label: 'Editorial Policy' },
+  { to: '/corrections-policy', label: 'Corrections Policy' },
+  { to: '/accessibility', label: 'Accessibility' },
+  { to: '/job-sources-policy', label: 'Job Sources Policy' },
   { to: '/cookie-policy', label: 'Cookie Policy' },
 ]
 
@@ -54,6 +60,12 @@ export default function Footer() {
               <Mail className="w-4 h-4" />
               Contact QuickUtils
             </Link>
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="mt-3 inline-flex text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              {CONTACT_EMAIL}
+            </a>
           </div>
 
           <div>

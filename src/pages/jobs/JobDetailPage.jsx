@@ -323,6 +323,22 @@ export default function JobDetailPage() {
 
               <JobMeta job={job} />
 
+              <section className="rounded-2xl border bg-card/80 backdrop-blur-sm p-5">
+                <h3 className="font-bold text-sm mb-3">Job Information Standards</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                  Verify eligibility, dates, fees, and application instructions on the official
+                  source before applying.
+                </p>
+                <div className="flex flex-col gap-2 text-xs font-medium">
+                  <Link to="/job-sources-policy" className="text-primary hover:underline">
+                    Job Sources Policy
+                  </Link>
+                  <Link to="/corrections-policy" className="text-primary hover:underline">
+                    Report a job correction
+                  </Link>
+                </div>
+              </section>
+
               {relatedTools.length > 0 && (
                 <section className="rounded-2xl border bg-card/80 backdrop-blur-sm p-5">
                   <h3 className="font-bold text-sm mb-4">

@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Helmet } from 'react-helmet-async';
+import { DEFAULT_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
 
 /**
  * Production-grade SEO component
@@ -9,8 +10,7 @@ import { Helmet } from 'react-helmet-async';
 
 export default function ToolSEO({
   tool,
-  canonicalBase =
-    'https://quickutils.page'
+  canonicalBase = SITE_URL
 }) {
 
   if (!tool) return null;
@@ -42,7 +42,7 @@ export default function ToolSEO({
 
   const image =
     tool.featured_image ||
-    `${canonicalBase}/preview.png`;
+    DEFAULT_IMAGE;
 
   // Build keywords: primary + secondary + legacy seo_keywords
   const primaryKeywords = (tool.primary_keywords || '').trim()
@@ -206,7 +206,7 @@ export default function ToolSEO({
       <meta property="og:description" content={ogDescription} />
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={image} />
-      <meta property="og:site_name" content="QuickUtils" />
+      <meta property="og:site_name" content={SITE_NAME} />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />

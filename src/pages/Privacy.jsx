@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import StaticPageSEO, { SITE_URL, buildBreadcrumbSchema } from '@/components/seo/StaticPageSEO'
+import { CONTACT_EMAIL } from '@/config/site'
 
 const privacyDescription =
   'Read the QuickUtils Privacy Policy covering data collection, cookies, analytics, advertising, file handling, and your privacy rights.'
@@ -11,7 +12,7 @@ const breadcrumbSchema = buildBreadcrumbSchema([
 ])
 
 const updatedDate = 'May 2025'
-const contactEmail = 'support@quickutils.page'
+const contactEmail = CONTACT_EMAIL
 
 export default function Privacy() {
   return (
@@ -32,7 +33,7 @@ export default function Privacy() {
             Privacy Policy
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            QuickUtils (https://quickutils.page) is a free online utility website offering 150+
+            QuickUtils ({SITE_URL}) is a free online utility website offering 150+
             tools including PDF tools, image editors, calculators, developer tools, SEO tools,
             and government exam helpers. This Privacy Policy describes what information we
             collect, how we use it, and your choices regarding your data.
@@ -47,7 +48,7 @@ export default function Privacy() {
             <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-                This Privacy Policy applies to all pages and tools available at quickutils.page.
+                This Privacy Policy applies to all pages and tools available at www.quickutils.page.
                 By using QuickUtils you agree to the practices described in this policy. If you
                 do not agree, please discontinue use of the site.
               </p>

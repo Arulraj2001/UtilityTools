@@ -29,7 +29,7 @@ const SUPABASE_KEY =
 const SITE_URL = (
   process.env.SITE_URL ||
   process.env.PUBLIC_SITE_URL ||
-  'https://quickutils.page'
+  'https://www.quickutils.page'
 ).replace(/\/$/, '')
 
 const RETIRED_TOOL_SLUGS = new Set(['pdf-to-word'])
@@ -203,6 +203,46 @@ async function main() {
   urls.set('/editorial-policy', {
     changefreq: 'monthly',
     priority: '0.5',
+  })
+
+  urls.set('/cookie-policy', {
+    changefreq: 'monthly',
+    priority: '0.5',
+  })
+
+  urls.set('/team', {
+    changefreq: 'monthly',
+    priority: '0.6',
+  })
+
+  urls.set('/author/arulraj-s', {
+    changefreq: 'monthly',
+    priority: '0.6',
+  })
+
+  urls.set('/methodology', {
+    changefreq: 'monthly',
+    priority: '0.6',
+  })
+
+  urls.set('/corrections-policy', {
+    changefreq: 'monthly',
+    priority: '0.5',
+  })
+
+  urls.set('/accessibility', {
+    changefreq: 'monthly',
+    priority: '0.5',
+  })
+
+  urls.set('/job-sources-policy', {
+    changefreq: 'monthly',
+    priority: '0.5',
+  })
+
+  urls.set('/workflow', {
+    changefreq: 'weekly',
+    priority: '0.75',
   })
 
   // Tools

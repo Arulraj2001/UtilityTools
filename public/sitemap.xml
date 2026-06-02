@@ -1,1268 +1,1308 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://quickutils.page/</loc>
+    <loc>https://www.quickutils.page/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tools</loc>
+    <loc>https://www.quickutils.page/tools</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/categories</loc>
+    <loc>https://www.quickutils.page/categories</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog</loc>
+    <loc>https://www.quickutils.page/blog</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/jobs</loc>
+    <loc>https://www.quickutils.page/jobs</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/about</loc>
+    <loc>https://www.quickutils.page/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/contact</loc>
+    <loc>https://www.quickutils.page/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/privacy</loc>
+    <loc>https://www.quickutils.page/privacy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/terms</loc>
+    <loc>https://www.quickutils.page/terms</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/disclaimer</loc>
+    <loc>https://www.quickutils.page/disclaimer</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/editorial-policy</loc>
+    <loc>https://www.quickutils.page/editorial-policy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/exam-document-pdf-compressor</loc>
+    <loc>https://www.quickutils.page/cookie-policy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.quickutils.page/team</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.quickutils.page/author/sanjay-krishnan</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.quickutils.page/methodology</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.quickutils.page/corrections-policy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.quickutils.page/accessibility</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.quickutils.page/job-sources-policy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.quickutils.page/workflow</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://www.quickutils.page/tool/exam-document-pdf-compressor</loc>
     <lastmod>2026-06-02T01:51:36.466Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/percentage-calculator</loc>
+    <loc>https://www.quickutils.page/tool/percentage-calculator</loc>
     <lastmod>2026-06-01T17:58:43.052Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/sip-calculator</loc>
+    <loc>https://www.quickutils.page/tool/sip-calculator</loc>
     <lastmod>2026-06-01T17:58:43.952Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/json-formatter</loc>
+    <loc>https://www.quickutils.page/tool/json-formatter</loc>
     <lastmod>2026-05-27T01:35:28.787Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/loan-eligibility-calculator-india</loc>
+    <loc>https://www.quickutils.page/tool/loan-eligibility-calculator-india</loc>
     <lastmod>2026-05-31T08:29:08.165Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/hcf-calculator</loc>
+    <loc>https://www.quickutils.page/tool/hcf-calculator</loc>
     <lastmod>2026-05-27T01:13:16.870Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/equation-solver</loc>
+    <loc>https://www.quickutils.page/tool/equation-solver</loc>
     <lastmod>2026-05-26T10:43:29.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/profit-margin-calculator</loc>
+    <loc>https://www.quickutils.page/tool/profit-margin-calculator</loc>
     <lastmod>2026-05-31T08:30:45.113Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/css-minifier</loc>
+    <loc>https://www.quickutils.page/tool/css-minifier</loc>
     <lastmod>2026-05-26T10:45:54.977Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/bank-exam-photo-tool</loc>
+    <loc>https://www.quickutils.page/tool/bank-exam-photo-tool</loc>
     <lastmod>2026-05-31T08:33:49.690Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/stopwatch</loc>
+    <loc>https://www.quickutils.page/tool/stopwatch</loc>
     <lastmod>2026-05-26T10:31:16.849Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/prime-number-checker</loc>
+    <loc>https://www.quickutils.page/tool/prime-number-checker</loc>
     <lastmod>2026-05-26T10:44:11.040Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/pdf-to-jpg</loc>
+    <loc>https://www.quickutils.page/tool/pdf-to-jpg</loc>
     <lastmod>2026-05-27T16:37:32.231Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/cutoff-calculator</loc>
+    <loc>https://www.quickutils.page/tool/cutoff-calculator</loc>
     <lastmod>2026-05-26T10:34:30.268Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/discount-calculator</loc>
+    <loc>https://www.quickutils.page/tool/discount-calculator</loc>
     <lastmod>2026-06-01T17:58:43.249Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/ovulation-calculator</loc>
+    <loc>https://www.quickutils.page/tool/ovulation-calculator</loc>
     <lastmod>2026-05-26T10:39:27.181Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/url-encoder</loc>
+    <loc>https://www.quickutils.page/tool/url-encoder</loc>
     <lastmod>2026-05-27T01:13:28.012Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/uuid-generator</loc>
+    <loc>https://www.quickutils.page/tool/uuid-generator</loc>
     <lastmod>2026-05-26T10:33:04.284Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/compound-interest</loc>
+    <loc>https://www.quickutils.page/tool/compound-interest</loc>
     <lastmod>2026-06-01T17:58:43.405Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/binary-converter</loc>
+    <loc>https://www.quickutils.page/tool/binary-converter</loc>
     <lastmod>2026-05-26T10:32:20.251Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/date-difference</loc>
+    <loc>https://www.quickutils.page/tool/date-difference</loc>
     <lastmod>2026-05-26T10:31:08.632Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/case-converter</loc>
+    <loc>https://www.quickutils.page/tool/case-converter</loc>
     <lastmod>2026-05-26T10:47:14.965Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/temperature-converter</loc>
+    <loc>https://www.quickutils.page/tool/temperature-converter</loc>
     <lastmod>2026-05-26T10:30:18.075Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/ideal-weight-calculator</loc>
+    <loc>https://www.quickutils.page/tool/ideal-weight-calculator</loc>
     <lastmod>2026-05-26T10:39:16.454Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/base64-decoder</loc>
+    <loc>https://www.quickutils.page/tool/base64-decoder</loc>
     <lastmod>2026-05-27T01:13:25.783Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/duplicate-remover</loc>
+    <loc>https://www.quickutils.page/tool/duplicate-remover</loc>
     <lastmod>2026-05-26T10:47:22.992Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/text-reverser</loc>
+    <loc>https://www.quickutils.page/tool/text-reverser</loc>
     <lastmod>2026-05-26T10:47:49.803Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/age-calculator</loc>
+    <loc>https://www.quickutils.page/tool/age-calculator</loc>
     <lastmod>2026-06-01T17:58:42.443Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/simple-interest</loc>
+    <loc>https://www.quickutils.page/tool/simple-interest</loc>
     <lastmod>2026-06-01T17:58:43.601Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/gratuity-calculator-india</loc>
+    <loc>https://www.quickutils.page/tool/gratuity-calculator-india</loc>
     <lastmod>2026-05-26T10:29:29.283Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/unit-converter</loc>
+    <loc>https://www.quickutils.page/tool/unit-converter</loc>
     <lastmod>2026-05-27T01:13:22.288Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/friendship-calculator</loc>
+    <loc>https://www.quickutils.page/tool/friendship-calculator</loc>
     <lastmod>2026-05-26T10:45:32.362Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/business-days-calculator</loc>
+    <loc>https://www.quickutils.page/tool/business-days-calculator</loc>
     <lastmod>2026-05-26T10:30:43.076Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/roi-calculator</loc>
+    <loc>https://www.quickutils.page/tool/roi-calculator</loc>
     <lastmod>2026-05-31T11:59:48.719Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/split-pdf</loc>
+    <loc>https://www.quickutils.page/tool/split-pdf</loc>
     <lastmod>2026-05-26T10:45:08.565Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/ssc-signature-resizer</loc>
+    <loc>https://www.quickutils.page/tool/ssc-signature-resizer</loc>
     <lastmod>2026-05-27T13:14:40.334Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/bmr-calculator</loc>
+    <loc>https://www.quickutils.page/tool/bmr-calculator</loc>
     <lastmod>2026-05-26T10:38:40.712Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/robots-txt-generator</loc>
+    <loc>https://www.quickutils.page/tool/robots-txt-generator</loc>
     <lastmod>2026-05-26T10:46:37.463Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/pdf-merger</loc>
+    <loc>https://www.quickutils.page/tool/pdf-merger</loc>
     <lastmod>2026-05-31T17:35:48.383Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/marks-percentage-calculator</loc>
+    <loc>https://www.quickutils.page/tool/marks-percentage-calculator</loc>
     <lastmod>2026-06-02T01:19:46.929Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/air-freight-calculator</loc>
+    <loc>https://www.quickutils.page/tool/air-freight-calculator</loc>
     <lastmod>2026-05-29T01:12:46.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/emi-calculator</loc>
+    <loc>https://www.quickutils.page/tool/emi-calculator</loc>
     <lastmod>2026-06-01T14:26:15.342Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/gst-calculator</loc>
+    <loc>https://www.quickutils.page/tool/gst-calculator</loc>
     <lastmod>2026-06-01T17:58:43.776Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/image-rotator</loc>
+    <loc>https://www.quickutils.page/tool/image-rotator</loc>
     <lastmod>2026-05-26T10:41:24.464Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/javascript-minifier</loc>
+    <loc>https://www.quickutils.page/tool/javascript-minifier</loc>
     <lastmod>2026-05-26T10:46:09.702Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/keyword-density-checker</loc>
+    <loc>https://www.quickutils.page/tool/keyword-density-checker</loc>
     <lastmod>2026-05-26T10:46:16.556Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/railway-photo-resizer</loc>
+    <loc>https://www.quickutils.page/tool/railway-photo-resizer</loc>
     <lastmod>2026-05-31T21:12:15.040Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/crush-compatibility-calculator</loc>
+    <loc>https://www.quickutils.page/tool/crush-compatibility-calculator</loc>
     <lastmod>2026-05-26T10:45:25.050Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/week-number-calculator</loc>
+    <loc>https://www.quickutils.page/tool/week-number-calculator</loc>
     <lastmod>2026-05-28T06:06:21.439Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/meta-tag-generator</loc>
+    <loc>https://www.quickutils.page/tool/meta-tag-generator</loc>
     <lastmod>2026-05-26T10:46:23.612Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/container-load-calculator</loc>
+    <loc>https://www.quickutils.page/tool/container-load-calculator</loc>
     <lastmod>2026-05-29T01:12:46.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/countdown-timer</loc>
+    <loc>https://www.quickutils.page/tool/countdown-timer</loc>
     <lastmod>2026-05-26T10:30:51.660Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/in-hand-salary-calculator</loc>
+    <loc>https://www.quickutils.page/tool/in-hand-salary-calculator</loc>
     <lastmod>2026-05-27T13:45:43.105Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/jpg-to-pdf</loc>
+    <loc>https://www.quickutils.page/tool/jpg-to-pdf</loc>
     <lastmod>2026-05-26T10:51:49.122Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/sgpa-calculator</loc>
+    <loc>https://www.quickutils.page/tool/sgpa-calculator</loc>
     <lastmod>2026-06-01T17:58:40.409Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/fuel-expense-calculator-india</loc>
+    <loc>https://www.quickutils.page/tool/fuel-expense-calculator-india</loc>
     <lastmod>2026-05-26T10:58:53.095Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/cgpa-calculator</loc>
+    <loc>https://www.quickutils.page/tool/cgpa-calculator</loc>
     <lastmod>2026-06-01T17:58:40.648Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/average-calculator</loc>
+    <loc>https://www.quickutils.page/tool/average-calculator</loc>
     <lastmod>2026-05-26T10:43:21.635Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/passport-size-photo-maker</loc>
+    <loc>https://www.quickutils.page/tool/passport-size-photo-maker</loc>
     <lastmod>2026-05-26T10:59:55.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/schema-generator</loc>
+    <loc>https://www.quickutils.page/tool/schema-generator</loc>
     <lastmod>2026-05-26T10:46:45.620Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/zodiac-compatibility</loc>
+    <loc>https://www.quickutils.page/tool/zodiac-compatibility</loc>
     <lastmod>2026-05-26T10:45:47.784Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/exam-photo-cropper</loc>
+    <loc>https://www.quickutils.page/tool/exam-photo-cropper</loc>
     <lastmod>2026-05-27T11:32:59.195Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/signature-maker</loc>
+    <loc>https://www.quickutils.page/tool/signature-maker</loc>
     <lastmod>2026-05-26T10:38:02.603Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/shipping-label-generator</loc>
+    <loc>https://www.quickutils.page/tool/shipping-label-generator</loc>
     <lastmod>2026-05-29T01:12:44.132Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/sitemap-generator</loc>
+    <loc>https://www.quickutils.page/tool/sitemap-generator</loc>
     <lastmod>2026-05-29T15:56:03.739Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/hashtag-density-checker</loc>
+    <loc>https://www.quickutils.page/tool/hashtag-density-checker</loc>
     <lastmod>2026-05-26T10:28:04.281Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/timezone-converter</loc>
+    <loc>https://www.quickutils.page/tool/timezone-converter</loc>
     <lastmod>2026-05-26T10:31:24.355Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/remove-pages-pdf</loc>
+    <loc>https://www.quickutils.page/tool/remove-pages-pdf</loc>
     <lastmod>2026-05-27T11:30:06.701Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/cbm-calculator</loc>
+    <loc>https://www.quickutils.page/tool/cbm-calculator</loc>
     <lastmod>2026-05-29T01:12:45.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/merge-pdf</loc>
+    <loc>https://www.quickutils.page/tool/merge-pdf</loc>
     <lastmod>2026-05-28T06:56:12.307Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/bmi-calculator</loc>
+    <loc>https://www.quickutils.page/tool/bmi-calculator</loc>
     <lastmod>2026-06-01T17:58:42.681Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/image-converter</loc>
+    <loc>https://www.quickutils.page/tool/image-converter</loc>
     <lastmod>2026-05-26T10:40:22.718Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/study-time-calculator</loc>
+    <loc>https://www.quickutils.page/tool/study-time-calculator</loc>
     <lastmod>2026-06-01T17:58:39.820Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/grade-calculator</loc>
+    <loc>https://www.quickutils.page/tool/grade-calculator</loc>
     <lastmod>2026-06-01T23:58:39.640Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/shipping-cost-calculator</loc>
+    <loc>https://www.quickutils.page/tool/shipping-cost-calculator</loc>
     <lastmod>2026-05-29T01:12:47.162Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/tip-calculator</loc>
+    <loc>https://www.quickutils.page/tool/tip-calculator</loc>
     <lastmod>2026-06-01T17:58:42.889Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/password-generator</loc>
+    <loc>https://www.quickutils.page/tool/password-generator</loc>
     <lastmod>2026-05-26T10:32:29.697Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/pregnancy-calculator</loc>
+    <loc>https://www.quickutils.page/tool/pregnancy-calculator</loc>
     <lastmod>2026-05-26T10:39:34.567Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/final-grade-calculator</loc>
+    <loc>https://www.quickutils.page/tool/final-grade-calculator</loc>
     <lastmod>2026-06-01T17:58:40.055Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/backlog-calculator</loc>
+    <loc>https://www.quickutils.page/tool/backlog-calculator</loc>
     <lastmod>2026-05-26T10:33:46.444Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/date-calculator</loc>
+    <loc>https://www.quickutils.page/tool/date-calculator</loc>
     <lastmod>2026-05-27T01:13:09.413Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/html-minifier</loc>
+    <loc>https://www.quickutils.page/tool/html-minifier</loc>
     <lastmod>2026-05-26T10:46:02.188Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/semester-planner</loc>
+    <loc>https://www.quickutils.page/tool/semester-planner</loc>
     <lastmod>2026-06-01T17:58:39.567Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/exam-score-calculator</loc>
+    <loc>https://www.quickutils.page/tool/exam-score-calculator</loc>
     <lastmod>2026-06-01T17:58:39.705Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/gpa-calculator</loc>
+    <loc>https://www.quickutils.page/tool/gpa-calculator</loc>
     <lastmod>2026-06-01T17:58:40.528Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/world-clock</loc>
+    <loc>https://www.quickutils.page/tool/world-clock</loc>
     <lastmod>2026-05-26T10:31:53.842Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/slug-generator</loc>
+    <loc>https://www.quickutils.page/tool/slug-generator</loc>
     <lastmod>2026-05-26T10:47:41.827Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/percentage-to-cgpa</loc>
+    <loc>https://www.quickutils.page/tool/percentage-to-cgpa</loc>
     <lastmod>2026-05-26T10:54:57.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/attendance-calculator</loc>
+    <loc>https://www.quickutils.page/tool/attendance-calculator</loc>
     <lastmod>2026-06-01T17:58:40.295Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/word-counter</loc>
+    <loc>https://www.quickutils.page/tool/word-counter</loc>
     <lastmod>2026-05-26T10:47:58.651Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/flipkart-fee-calculator</loc>
+    <loc>https://www.quickutils.page/tool/flipkart-fee-calculator</loc>
     <lastmod>2026-05-29T01:12:44.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/body-fat-calculator</loc>
+    <loc>https://www.quickutils.page/tool/body-fat-calculator</loc>
     <lastmod>2026-05-26T10:38:55.038Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/fuel-cost</loc>
+    <loc>https://www.quickutils.page/tool/fuel-cost</loc>
     <lastmod>2026-05-26T10:29:14.281Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/product-pricing-calculator</loc>
+    <loc>https://www.quickutils.page/tool/product-pricing-calculator</loc>
     <lastmod>2026-05-29T01:12:46.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/base64-encoder</loc>
+    <loc>https://www.quickutils.page/tool/base64-encoder</loc>
     <lastmod>2026-05-27T01:13:24.016Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/url-decoder</loc>
+    <loc>https://www.quickutils.page/tool/url-decoder</loc>
     <lastmod>2026-05-27T01:13:31.369Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/line-sorter</loc>
+    <loc>https://www.quickutils.page/tool/line-sorter</loc>
     <lastmod>2026-05-26T10:47:32.685Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/inventory-calculator</loc>
+    <loc>https://www.quickutils.page/tool/inventory-calculator</loc>
     <lastmod>2026-05-29T01:12:46.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/matrix-calculator</loc>
+    <loc>https://www.quickutils.page/tool/matrix-calculator</loc>
     <lastmod>2026-05-26T10:44:03.623Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/compress-pdf</loc>
+    <loc>https://www.quickutils.page/tool/compress-pdf</loc>
     <lastmod>2026-05-27T11:31:53.822Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/standard-deviation-calculator</loc>
+    <loc>https://www.quickutils.page/tool/standard-deviation-calculator</loc>
     <lastmod>2026-05-26T10:44:35.898Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/roman-numerals</loc>
+    <loc>https://www.quickutils.page/tool/roman-numerals</loc>
     <lastmod>2026-05-26T10:30:02.842Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/credit-calculator</loc>
+    <loc>https://www.quickutils.page/tool/credit-calculator</loc>
     <lastmod>2026-05-26T10:34:19.436Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/calorie-calculator</loc>
+    <loc>https://www.quickutils.page/tool/calorie-calculator</loc>
     <lastmod>2026-05-26T10:39:04.155Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/tiktok-money-calculator</loc>
+    <loc>https://www.quickutils.page/tool/tiktok-money-calculator</loc>
     <lastmod>2026-05-26T10:28:31.837Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/baby-name-numerology</loc>
+    <loc>https://www.quickutils.page/tool/baby-name-numerology</loc>
     <lastmod>2026-05-26T10:45:18.179Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/lcm-calculator</loc>
+    <loc>https://www.quickutils.page/tool/lcm-calculator</loc>
     <lastmod>2026-05-27T01:13:14.583Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/cod-charge-calculator</loc>
+    <loc>https://www.quickutils.page/tool/cod-charge-calculator</loc>
     <lastmod>2026-05-29T01:12:44.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/college-fees-calculator</loc>
+    <loc>https://www.quickutils.page/tool/college-fees-calculator</loc>
     <lastmod>2026-05-26T10:34:11.315Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/volumetric-weight-calculator</loc>
+    <loc>https://www.quickutils.page/tool/volumetric-weight-calculator</loc>
     <lastmod>2026-05-29T01:12:47.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/image-color-picker</loc>
+    <loc>https://www.quickutils.page/tool/image-color-picker</loc>
     <lastmod>2026-05-26T10:40:10.343Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/ssc-photo-resizer</loc>
+    <loc>https://www.quickutils.page/tool/ssc-photo-resizer</loc>
     <lastmod>2026-05-27T13:14:44.731Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/pf-calculator-india</loc>
+    <loc>https://www.quickutils.page/tool/pf-calculator-india</loc>
     <lastmod>2026-05-26T10:29:54.340Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/photo-kb-reducer</loc>
+    <loc>https://www.quickutils.page/tool/photo-kb-reducer</loc>
     <lastmod>2026-05-27T11:33:13.206Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/document-scanner</loc>
+    <loc>https://www.quickutils.page/tool/document-scanner</loc>
     <lastmod>2026-05-26T10:37:02.824Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/image-watermark</loc>
+    <loc>https://www.quickutils.page/tool/image-watermark</loc>
     <lastmod>2026-05-26T10:41:41.242Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/word-density-checker</loc>
+    <loc>https://www.quickutils.page/tool/word-density-checker</loc>
     <lastmod>2026-05-26T10:47:07.932Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/pdf-to-image</loc>
+    <loc>https://www.quickutils.page/tool/pdf-to-image</loc>
     <lastmod>2026-05-26T18:33:24.385Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/image-cropper</loc>
+    <loc>https://www.quickutils.page/tool/image-cropper</loc>
     <lastmod>2026-05-26T10:40:30.064Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/background-remover</loc>
+    <loc>https://www.quickutils.page/tool/background-remover</loc>
     <lastmod>2026-05-26T10:40:01.689Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/image-compressor</loc>
+    <loc>https://www.quickutils.page/tool/image-compressor</loc>
     <lastmod>2026-05-28T01:36:21.139Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/content-upload-scheduler</loc>
+    <loc>https://www.quickutils.page/tool/content-upload-scheduler</loc>
     <lastmod>2026-05-26T10:27:54.001Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/pdf-size-reducer</loc>
+    <loc>https://www.quickutils.page/tool/pdf-size-reducer</loc>
     <lastmod>2026-05-26T10:37:39.271Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/image-to-exam-pdf</loc>
+    <loc>https://www.quickutils.page/tool/image-to-exam-pdf</loc>
     <lastmod>2026-05-26T10:53:20.132Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/instagram-engagement-calculator</loc>
+    <loc>https://www.quickutils.page/tool/instagram-engagement-calculator</loc>
     <lastmod>2026-05-26T10:28:11.955Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/fraction-calculator</loc>
+    <loc>https://www.quickutils.page/tool/fraction-calculator</loc>
     <lastmod>2026-05-26T10:43:37.238Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/love-percentage-calculator</loc>
+    <loc>https://www.quickutils.page/tool/love-percentage-calculator</loc>
     <lastmod>2026-05-26T10:45:40.521Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/open-graph-generator</loc>
+    <loc>https://www.quickutils.page/tool/open-graph-generator</loc>
     <lastmod>2026-05-26T10:46:30.675Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/youtube-thumbnail-size-checker</loc>
+    <loc>https://www.quickutils.page/tool/youtube-thumbnail-size-checker</loc>
     <lastmod>2026-05-26T10:56:08.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/amazon-fee-calculator</loc>
+    <loc>https://www.quickutils.page/tool/amazon-fee-calculator</loc>
     <lastmod>2026-05-29T02:38:32.932Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/image-metadata-viewer</loc>
+    <loc>https://www.quickutils.page/tool/image-metadata-viewer</loc>
     <lastmod>2026-05-26T10:41:05.598Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/image-to-pdf</loc>
+    <loc>https://www.quickutils.page/tool/image-to-pdf</loc>
     <lastmod>2026-05-27T01:13:35.272Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/salary-hike-calculator-india</loc>
+    <loc>https://www.quickutils.page/tool/salary-hike-calculator-india</loc>
     <lastmod>2026-05-26T11:08:21.102Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/eb-bill-calculator-tamilnadu</loc>
+    <loc>https://www.quickutils.page/tool/eb-bill-calculator-tamilnadu</loc>
     <lastmod>2026-05-28T06:57:57.579Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/utm-builder</loc>
+    <loc>https://www.quickutils.page/tool/utm-builder</loc>
     <lastmod>2026-05-26T10:47:00.874Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/sleep-calculator</loc>
+    <loc>https://www.quickutils.page/tool/sleep-calculator</loc>
     <lastmod>2026-05-26T10:39:43.810Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/unix-timestamp-converter</loc>
+    <loc>https://www.quickutils.page/tool/unix-timestamp-converter</loc>
     <lastmod>2026-05-26T10:31:37.343Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/tneb-bill-calculator</loc>
+    <loc>https://www.quickutils.page/tool/tneb-bill-calculator</loc>
     <lastmod>2026-05-28T06:57:31.569Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/youtube-money-calculator</loc>
+    <loc>https://www.quickutils.page/tool/youtube-money-calculator</loc>
     <lastmod>2026-05-26T10:28:41.168Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/cgpa-to-percentage</loc>
+    <loc>https://www.quickutils.page/tool/cgpa-to-percentage</loc>
     <lastmod>2026-06-01T17:55:52.929Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/pdf-page-extractor</loc>
+    <loc>https://www.quickutils.page/tool/pdf-page-extractor</loc>
     <lastmod>2026-05-26T10:37:30.774Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/image-resizer</loc>
+    <loc>https://www.quickutils.page/tool/image-resizer</loc>
     <lastmod>2026-05-26T10:41:16.129Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/scientific-calculator</loc>
+    <loc>https://www.quickutils.page/tool/scientific-calculator</loc>
     <lastmod>2026-05-27T01:13:12.513Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/chargeable-weight-calculator</loc>
+    <loc>https://www.quickutils.page/tool/chargeable-weight-calculator</loc>
     <lastmod>2026-05-29T01:12:46.165Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/social-media-roi-calculator</loc>
+    <loc>https://www.quickutils.page/tool/social-media-roi-calculator</loc>
     <lastmod>2026-05-26T10:28:21.641Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/delivery-time-estimator</loc>
+    <loc>https://www.quickutils.page/tool/delivery-time-estimator</loc>
     <lastmod>2026-05-29T01:12:44.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/water-intake-calculator</loc>
+    <loc>https://www.quickutils.page/tool/water-intake-calculator</loc>
     <lastmod>2026-05-26T10:39:52.482Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/packaging-cost-calculator</loc>
+    <loc>https://www.quickutils.page/tool/packaging-cost-calculator</loc>
     <lastmod>2026-05-29T01:12:47.102Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/youtube-watch-time-calculator</loc>
+    <loc>https://www.quickutils.page/tool/youtube-watch-time-calculator</loc>
     <lastmod>2026-05-26T10:28:57.884Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/parcel-dimension-calculator</loc>
+    <loc>https://www.quickutils.page/tool/parcel-dimension-calculator</loc>
     <lastmod>2026-05-29T01:12:48.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/probability-calculator</loc>
+    <loc>https://www.quickutils.page/tool/probability-calculator</loc>
     <lastmod>2026-05-26T10:44:20.216Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/courier-charges-calculator</loc>
+    <loc>https://www.quickutils.page/tool/courier-charges-calculator</loc>
     <lastmod>2026-05-29T01:12:44.092Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/gst-invoice-generator</loc>
+    <loc>https://www.quickutils.page/tool/gst-invoice-generator</loc>
     <lastmod>2026-05-29T01:12:44.132Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/creator-tools</loc>
+    <loc>https://www.quickutils.page/category/creator-tools</loc>
     <lastmod>2026-05-20T06:03:16.605Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/finance</loc>
+    <loc>https://www.quickutils.page/category/finance</loc>
     <lastmod>2026-05-20T05:57:44.856Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/government-exam-tools</loc>
+    <loc>https://www.quickutils.page/category/government-exam-tools</loc>
     <lastmod>2026-05-20T05:48:58.287Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/image-tools</loc>
+    <loc>https://www.quickutils.page/category/image-tools</loc>
     <lastmod>2026-05-20T05:56:57.814Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/seo-tools</loc>
+    <loc>https://www.quickutils.page/category/seo-tools</loc>
     <lastmod>2026-05-20T05:58:59.570Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/developer-tools</loc>
+    <loc>https://www.quickutils.page/category/developer-tools</loc>
     <lastmod>2026-05-20T05:59:32.033Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/text-tools</loc>
+    <loc>https://www.quickutils.page/category/text-tools</loc>
     <lastmod>2026-05-20T06:00:12.724Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/date-time-tools</loc>
+    <loc>https://www.quickutils.page/category/date-time-tools</loc>
     <lastmod>2026-05-20T06:00:42.736Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/math-tools</loc>
+    <loc>https://www.quickutils.page/category/math-tools</loc>
     <lastmod>2026-05-20T06:01:38.148Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/daily-life</loc>
+    <loc>https://www.quickutils.page/category/daily-life</loc>
     <lastmod>2026-05-20T06:02:12.017Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/health-fitness</loc>
+    <loc>https://www.quickutils.page/category/health-fitness</loc>
     <lastmod>2026-05-20T06:02:50.415Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/education</loc>
+    <loc>https://www.quickutils.page/category/education</loc>
     <lastmod>2026-05-20T06:04:05.135Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/relationship-tools</loc>
+    <loc>https://www.quickutils.page/category/relationship-tools</loc>
     <lastmod>2026-05-20T06:04:29.706Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/logistics-shipping</loc>
+    <loc>https://www.quickutils.page/category/logistics-shipping</loc>
     <lastmod>2026-05-25T04:07:26.678Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/ecommerce-seller-tools</loc>
+    <loc>https://www.quickutils.page/category/ecommerce-seller-tools</loc>
     <lastmod>2026-05-25T04:08:39.178Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/category/pdf-tools</loc>
+    <loc>https://www.quickutils.page/category/pdf-tools</loc>
     <lastmod>2026-05-28T05:58:58.224Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/how-to-calculate-sgpa</loc>
+    <loc>https://www.quickutils.page/blog/how-to-calculate-sgpa</loc>
     <lastmod>2026-05-31T03:52:17.471Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/how-to-calculate-percentage-of-marks</loc>
+    <loc>https://www.quickutils.page/blog/how-to-calculate-percentage-of-marks</loc>
     <lastmod>2026-05-31T04:02:56.058Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/how-to-use-fraction-calculator</loc>
+    <loc>https://www.quickutils.page/blog/how-to-use-fraction-calculator</loc>
     <lastmod>2026-05-31T04:17:40.544Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/how-to-compress-images</loc>
+    <loc>https://www.quickutils.page/blog/how-to-compress-images</loc>
     <lastmod>2026-05-31T04:06:56.883Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/how-to-resize-images</loc>
+    <loc>https://www.quickutils.page/blog/how-to-resize-images</loc>
     <lastmod>2026-05-31T04:16:12.733Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/pdf-merge-vs-pdf-compress</loc>
+    <loc>https://www.quickutils.page/blog/pdf-merge-vs-pdf-compress</loc>
     <lastmod>2026-05-31T04:02:20.244Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/word-counter-guide</loc>
+    <loc>https://www.quickutils.page/blog/word-counter-guide</loc>
     <lastmod>2026-05-31T04:14:49.618Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/json-formatter-guide</loc>
+    <loc>https://www.quickutils.page/blog/json-formatter-guide</loc>
     <lastmod>2026-05-31T04:11:40.152Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/base64-encoding-explained</loc>
+    <loc>https://www.quickutils.page/blog/base64-encoding-explained</loc>
     <lastmod>2026-05-31T04:04:20.705Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/the-e-commerce-category-page-checklist-for-avoiding-missing-rich-results</loc>
+    <loc>https://www.quickutils.page/blog/the-e-commerce-category-page-checklist-for-avoiding-missing-rich-results</loc>
     <lastmod>2026-05-31T12:16:59.356Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/merge-multiple-pdfs-in-correct-order</loc>
+    <loc>https://www.quickutils.page/blog/merge-multiple-pdfs-in-correct-order</loc>
     <lastmod>2026-05-31T03:58:15.608Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/how-to-calculate-schema-errors-correctly-when-rules-change-mid-year</loc>
+    <loc>https://www.quickutils.page/blog/how-to-calculate-schema-errors-correctly-when-rules-change-mid-year</loc>
     <lastmod>2026-05-31T12:17:16.402Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/hidden-inp-delays-mistakes-that-cause-poor-crawlability</loc>
+    <loc>https://www.quickutils.page/blog/hidden-inp-delays-mistakes-that-cause-poor-crawlability</loc>
     <lastmod>2026-05-31T12:16:45.083Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/what-competitors-miss-about-robots-txt-blocks-and-the-numbers-users-actually-nee</loc>
+    <loc>https://www.quickutils.page/blog/what-competitors-miss-about-robots-txt-blocks-and-the-numbers-users-actually-nee</loc>
     <lastmod>2026-05-31T12:16:34.594Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/sitemap-mistakes-quality-test-before-and-after-results-across-10-scenarios</loc>
+    <loc>https://www.quickutils.page/blog/sitemap-mistakes-quality-test-before-and-after-results-across-10-scenarios</loc>
     <lastmod>2026-05-31T12:17:26.476Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/images-to-pdf-without-increasing-size</loc>
+    <loc>https://www.quickutils.page/blog/images-to-pdf-without-increasing-size</loc>
     <lastmod>2026-05-31T03:57:25.746Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/http-status-codes-explained-fix</loc>
+    <loc>https://www.quickutils.page/blog/http-status-codes-explained-fix</loc>
     <lastmod>2026-05-31T03:58:01.613Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/best-image-size-for-website-speed</loc>
+    <loc>https://www.quickutils.page/blog/best-image-size-for-website-speed</loc>
     <lastmod>2026-05-31T03:57:35.825Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/why-core-web-vitals-fixes-get-rejected-and-how-to-fix-them-before-submission</loc>
+    <loc>https://www.quickutils.page/blog/why-core-web-vitals-fixes-get-rejected-and-how-to-fix-them-before-submission</loc>
     <lastmod>2026-05-31T03:52:11.925Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/real-calculation-blog-article-template-using-schema-markup-generator-and-robots-</loc>
+    <loc>https://www.quickutils.page/blog/real-calculation-blog-article-template-using-schema-markup-generator-and-robots-</loc>
     <lastmod>2026-05-31T12:17:07.361Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/schema-markup-vs-structured-data-which-actually-matters-for-utility-tools-site-i</loc>
+    <loc>https://www.quickutils.page/blog/schema-markup-vs-structured-data-which-actually-matters-for-utility-tools-site-i</loc>
     <lastmod>2026-05-31T12:17:39.298Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/seo-title-writing-examples</loc>
+    <loc>https://www.quickutils.page/blog/seo-title-writing-examples</loc>
     <lastmod>2026-05-31T03:57:46.958Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/fix-invalid-pdf-upload-error</loc>
+    <loc>https://www.quickutils.page/blog/fix-invalid-pdf-upload-error</loc>
     <lastmod>2026-05-31T03:57:10.584Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/kb-vs-pixels-vs-dpi-upload-rejected</loc>
+    <loc>https://www.quickutils.page/blog/kb-vs-pixels-vs-dpi-upload-rejected</loc>
     <lastmod>2026-05-31T03:56:58.945Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/compress-pdf-below-200kb-online</loc>
+    <loc>https://www.quickutils.page/blog/compress-pdf-below-200kb-online</loc>
     <lastmod>2026-05-31T03:55:36.009Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/ssc-signature-resize-online</loc>
+    <loc>https://www.quickutils.page/blog/ssc-signature-resize-online</loc>
     <lastmod>2026-05-31T03:56:45.438Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/blog/volumetric-weight-calculator-shipping-guide</loc>
+    <loc>https://www.quickutils.page/blog/volumetric-weight-calculator-shipping-guide</loc>
     <lastmod>2026-05-31T03:58:31.645Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/workflow/resize-image-to-50kb</loc>
+    <loc>https://www.quickutils.page/workflow/resize-image-to-50kb</loc>
     <lastmod>2026-05-20T03:56:13.096Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/workflow/compress-pdf-below-200kb</loc>
+    <loc>https://www.quickutils.page/workflow/compress-pdf-below-200kb</loc>
     <lastmod>2026-05-20T03:57:24.404Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/workflow/image-to-pdf-for-exam-forms</loc>
+    <loc>https://www.quickutils.page/workflow/image-to-pdf-for-exam-forms</loc>
     <lastmod>2026-05-20T06:33:12.543Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/workflow/ssc-signature-resizer</loc>
+    <loc>https://www.quickutils.page/workflow/ssc-signature-resizer</loc>
     <lastmod>2026-05-20T06:39:51.056Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/workflow/passport-photo-with-white-background</loc>
+    <loc>https://www.quickutils.page/workflow/passport-photo-with-white-background</loc>
     <lastmod>2026-05-20T08:00:11.100Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/jobs/ssc-cgl-recruitment-2026</loc>
+    <loc>https://www.quickutils.page/jobs/ssc-cgl-recruitment-2026</loc>
     <lastmod>2026-05-27T06:27:11.724Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>

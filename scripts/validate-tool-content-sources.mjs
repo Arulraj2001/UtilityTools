@@ -17,7 +17,7 @@ const json = process.argv.includes('--json');
 const siteUrl = (
   process.env.SITE_URL ||
   process.env.PUBLIC_SITE_URL ||
-  'https://quickutils.page'
+  'https://www.quickutils.page'
 ).replace(/\/$/, '');
 
 const retiredToolSlugs = new Set(['pdf-to-word']);

@@ -455,6 +455,11 @@ export default function ToolPage() {
                 <li>Start with the default settings, then adjust only the fields you need.</li>
                 <li>Smaller input files usually process faster and keep the browser responsive.</li>
               </ul>
+              <div className="mt-5 flex flex-wrap gap-4 text-sm font-medium">
+                <Link to="/methodology" className="text-primary hover:underline">How tools are tested</Link>
+                <Link to="/corrections-policy" className="text-primary hover:underline">Report a correction</Link>
+                <Link to="/contact" className="text-primary hover:underline">Contact support</Link>
+              </div>
             </div>
 
             {tool?.long_description && (

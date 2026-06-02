@@ -29,7 +29,7 @@ export default function Disclaimer() {
           <p className="text-sm font-semibold text-primary mb-3">Legal</p>
           <h1 className="text-3xl font-bold mb-4">Disclaimer</h1>
           <p className="text-muted-foreground leading-relaxed">
-            QuickUtils (quickutils.page) offers 150+ free browser-based tools including PDF
+            QuickUtils (www.quickutils.page) offers 150+ free browser-based tools including PDF
             utilities, image editors, calculators, developer tools, SEO tools, and document
             preparation aids for government and competitive exam applications. This page sets out
             important limitations you should be aware of before relying on any output from this

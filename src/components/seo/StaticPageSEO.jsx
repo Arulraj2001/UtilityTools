@@ -1,8 +1,8 @@
 import React from 'react'
 import { Helmet } from 'react-helmet-async'
+import { DEFAULT_IMAGE, SITE_NAME, SITE_URL } from '@/config/site'
 
-export const SITE_URL = 'https://quickutils.page'
-const DEFAULT_IMAGE = `${SITE_URL}/preview.png`
+export { SITE_URL }
 
 export function buildBreadcrumbSchema(items = []) {
   return {
@@ -42,7 +42,7 @@ export default function StaticPageSEO({
       <meta property="og:description" content={ogDescription} />
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={image} />
-      <meta property="og:site_name" content="QuickUtils" />
+      <meta property="og:site_name" content={SITE_NAME} />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={ogTitle} />

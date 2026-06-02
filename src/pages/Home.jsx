@@ -7,7 +7,8 @@ const CategoriesGrid = lazy(() => import('../components/home/CategoriesGrid'))
 const FeaturedTools = lazy(() => import('../components/home/FeaturedTools'))
 const PopularWorkflows = lazy(() => import('../components/home/PopularWorkflows'))
 const AdBanner = lazy(() => import('../components/shared/AdBanner'))
-import StaticPageSEO, { SITE_URL } from '@/components/seo/StaticPageSEO'
+import StaticPageSEO from '@/components/seo/StaticPageSEO'
+import { organizationSchema, websiteSchema } from '@/config/site'
 import { FEATURED_STATIC_BLOG_POSTS } from '@/lib/staticBlogPosts'
 
 const homepageDescription =
@@ -135,28 +136,6 @@ const homepageFaq = [
   },
 ]
 
-const websiteSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  name: 'QuickUtils',
-  url: SITE_URL,
-  description: homepageDescription,
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: `${SITE_URL}/tools?q={search_term_string}`,
-    'query-input': 'required name=search_term_string',
-  },
-}
-
-const organizationSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: 'QuickUtils',
-  url: SITE_URL,
-  logo: `${SITE_URL}/logo.png`,
-  description: homepageDescription,
-}
-
 function HomeIntroSection() {
   return (
     <section className="py-12 sm:py-16">
@@ -189,6 +168,61 @@ function HomeIntroSection() {
             <li>Developers and SEO users formatting data, testing web snippets, and generating tags.</li>
             <li>Sellers and operations teams estimating pricing, shipping, fees, and parcel dimensions.</li>
           </ul>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function TrustResourcesSection() {
+  const trustLinks = [
+    {
+      to: '/team',
+      title: 'Team',
+      text: 'Meet the Learnithm founder and the review approach behind QuickUtils.',
+    },
+    {
+      to: '/methodology',
+      title: 'Methodology',
+      text: 'See how formulas, tools, data checks, and updates are handled.',
+    },
+    {
+      to: '/corrections-policy',
+      title: 'Corrections',
+      text: 'Report mistakes and learn how corrections are reviewed.',
+    },
+    {
+      to: '/editorial-policy',
+      title: 'Editorial policy',
+      text: 'Review the standards used for guides, examples, and FAQs.',
+    },
+  ]
+
+  return (
+    <section className="py-12 sm:py-16 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="max-w-3xl mb-8">
+          <p className="text-sm font-semibold text-primary mb-3">Trust and review</p>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+            Clear standards for tools, guides, and corrections
+          </h2>
+          <p className="text-muted-foreground leading-relaxed">
+            QuickUtils is operated by Learnithm and keeps public pages for methodology,
+            editorial standards, corrections, accessibility, and contact support.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {trustLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="block rounded-lg border border-border/60 bg-background p-5 transition-colors hover:border-primary/40"
+            >
+              <h3 className="font-semibold mb-2">{link.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{link.text}</p>
+            </Link>
+          ))}
         </div>
       </div>
     </section>
@@ -577,6 +611,7 @@ export default function Home() {
       </Suspense>
       <WhyQuickUtilsSection />
       <PrivacyFocusSection />
+      <TrustResourcesSection />
       <HowItWorksSection />
       <HelpfulGuidesSection />
 
