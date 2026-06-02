@@ -10,7 +10,7 @@ export default function StatsBar({ toolCount, userCount }) {
 
   const STATS = [
     { icon: Zap, label: 'Tools Available', value: toolCount ? `${toolCount}+` : '50+', color: 'text-yellow-500' },
-    { icon: Users, label: userCount ? 'Tool Uses' : 'Public Tools', value: userCount ? `${formatCount(userCount)}+` : 'No Sign-Up', color: 'text-blue-500' },
+    { icon: Users, label: 'Tool Uses', value: userCount ? `${formatCount(userCount)}+` : 'Public Tools', color: 'text-blue-500' },
     { icon: Shield, label: 'Privacy Approach', value: 'Browser-First', color: 'text-green-500' },
     { icon: Clock, label: 'Task Flow', value: 'Quick', color: 'text-purple-500' },
   ];
@@ -28,7 +28,14 @@ export default function StatsBar({ toolCount, userCount }) {
                 <stat.icon className={`w-4 h-4 ${stat.color}`} />
               </div>
               <div>
-                <p className="font-bold text-base leading-none">{stat.value}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-bold text-base leading-none">{stat.value}</p>
+                  {stat.info ? (
+                    <Badge className="bg-muted text-muted-foreground border-0 text-[10px] uppercase tracking-[0.12em]">
+                      {stat.info}
+                    </Badge>
+                  ) : null}
+                </div>
                 <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
               </div>
             </div>

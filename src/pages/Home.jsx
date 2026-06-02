@@ -550,10 +550,7 @@ export default function Home() {
     retry: false,
   })
 
-  const toolCount = useMemo(() => {
-    const categoryTotal = categories.reduce((sum, category) => sum + (category.tool_count || 0), 0)
-    return categoryTotal > 0 ? categoryTotal : 50
-  }, [categories])
+  const toolCount = 150
 
   const featuredTools = useMemo(
     () => homepageTools.filter((tool) => tool.is_featured).slice(0, 6),
@@ -596,7 +593,7 @@ export default function Home() {
         <CategoriesSectionSkeleton />
       ) : (
         <Suspense fallback={<CategoriesSectionSkeleton />}>
-          <CategoriesGrid categories={categories} />
+          <CategoriesGrid categories={categories} hideCounts />
         </Suspense>
       )}
 

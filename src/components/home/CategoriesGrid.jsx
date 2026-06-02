@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { getIcon } from '@/lib/iconMap';
 
-export default function CategoriesGrid({ categories = [], tools = [], countByCategory = {} }) {
+export default function CategoriesGrid({ categories = [], tools = [], countByCategory = {}, hideCounts = false }) {
   // Compute counts from any lightweight tools data if provided, and merge with incoming counts.
   const countsFromTools = useMemo(() => {
     if (!tools || tools.length === 0) return {};
@@ -43,7 +43,9 @@ export default function CategoriesGrid({ categories = [], tools = [], countByCat
                   </div>
                   <h3 className="font-semibold text-base mb-1 group-hover:text-primary transition-colors">{cat.name}</h3>
                   <div className="flex items-center justify-between">
-                    <span className="bg-muted px-2 py-0.5 rounded-full text-xs text-muted-foreground">{mergedCounts[cat.id] ?? cat.tool_count ?? 0} tools</span>
+                    {!hideCounts && (
+                      <span className="bg-muted px-2 py-0.5 rounded-full text-xs text-muted-foreground">{mergedCounts[cat.id] ?? cat.tool_count ?? 0} tools</span>
+                    )}
                     <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                   </div>
                 </Link>
