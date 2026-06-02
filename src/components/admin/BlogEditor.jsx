@@ -23,6 +23,7 @@ import { createBlogPost, getBlogPosts, getBlogCategories, updateBlogPost } from 
 import { estimateReadingTime, getKeywordDensity, buildSeoScore, slugifyText } from '@/lib/seoUtils'
 import { sanitizeHtml } from '@/lib/sanitizeHtml'
 import { DEFAULT_AUTHOR } from '@/lib/authors'
+import { formatQualityIssues, validateContentQuality } from '@/lib/contentQuality'
 
 // Custom styles for rendered content and editor
 const rendererStyles = `
@@ -239,6 +240,20 @@ export default function BlogEditor({ post, onSave, onCancel }) {
         og_description: form.og_description,
         twitter_title: form.twitter_title,
         twitter_description: form.twitter_description,
+      }
+
+      if (data.status === 'published') {
+        const quality = validateContentQuality(data, {
+          type: 'blog',
+          existingItems: suggestions,
+        })
+        if (!quality.ok) {
+          toast.error(formatQualityIssues(quality))
+          return
+        }
+        if (quality.warnings.length) {
+          toast.warning(formatQualityIssues({ ...quality, blockers: [] }))
+        }
       }
 
       if (post?.id) {

@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import { createWorkflowPage, getBlogPosts, getToolsAll, getWorkflowPageBySlug, updateWorkflowPage } from '@/api/supabaseApi'
 import { estimateReadingTime, getKeywordDensity, buildSeoScore, slugifyText } from '@/lib/seoUtils'
 import { sanitizeHtml } from '@/lib/sanitizeHtml'
+import { formatQualityIssues, validateContentQuality } from '@/lib/contentQuality'
 
 // TODO: consider workflow category metadata and workflow conversion tracking in future releases
 const rendererStyles = `
@@ -165,6 +166,20 @@ export default function WorkflowEditor({ page, onSave, onCancel }) {
         seo_keywords: form.seo_keywords,
         view_count: page?.view_count || 0,
         updated_at: new Date(),
+      }
+
+      if (payload.status === 'published') {
+        const quality = validateContentQuality(payload, {
+          type: 'workflow',
+          existingItems: blogs,
+        })
+        if (!quality.ok) {
+          toast.error(formatQualityIssues(quality))
+          return
+        }
+        if (quality.warnings.length) {
+          toast.warning(formatQualityIssues({ ...quality, blockers: [] }))
+        }
       }
 
       if (page?.id) {

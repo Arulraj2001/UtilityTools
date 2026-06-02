@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import useToolMemo from '@/hooks/useToolMemo'
 import ToolSEO from '@/components/seo/ToolSEO'
 import { useLocalStorage } from '@/lib/useLocalStorage'
+import PageNotFound from '@/lib/PageNotFound'
 import {
   getToolPageBlogPosts,
   getToolPageBySlug,
@@ -341,11 +342,12 @@ export default function ToolPage() {
   // Resolve the active tool directly by slug so page content and metadata use the matching DB row.
   if (isToolLoading) return <ToolPageSkeleton />
   if (!tool && !isToolLoading) return (
-    <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-      <p className="text-2xl font-bold mb-2">Tool not found</p>
-      <p className="text-muted-foreground mb-6">The tool you're looking for doesn't exist.</p>
-      <Button asChild><Link to="/tools">Browse All Tools</Link></Button>
-    </div>
+    <PageNotFound
+      title="Tool not found"
+      message="The tool you requested does not exist, has been removed, or is not published."
+      primaryHref="/tools"
+      primaryLabel="Browse All Tools"
+    />
   )
 
   return (

@@ -25,6 +25,7 @@ import BlogSEO from '@/components/seo/BlogSEO'
 import { getStaticBlogPostBySlug, mergeBlogCategories, mergeBlogPosts } from '@/lib/staticBlogPosts'
 import { sanitizeHtml } from '@/lib/sanitizeHtml'
 import { getAuthorForPost } from '@/lib/authors'
+import PageNotFound from '@/lib/PageNotFound'
 
 export default function BlogPostPage() {
   const { slug } = useParams()
@@ -116,6 +117,13 @@ export default function BlogPostPage() {
 
     return scored.filter(s => s.score > 0).sort((a, b) => b.score - a.score).slice(0, 6).map(s => s.tool)
   }, [post, tools])
+
+  const relatedCategoryLinks = useMemo(() => {
+    const ids = new Set(relatedTools.map((tool) => tool.category_id).filter(Boolean))
+    return toolCategories
+      .filter((category) => ids.has(category.id))
+      .slice(0, 4)
+  }, [relatedTools, toolCategories])
 
   const allTags = useMemo(() => {
     const tagSet = new Set()
@@ -213,19 +221,14 @@ export default function BlogPostPage() {
     )
   }
 
-  if (!post || isPostError) {
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-        <div className="bg-red-50 dark:bg-red-950/20 rounded-2xl p-8">
-          <p className="text-2xl font-bold mb-3 text-red-600 dark:text-red-400">Article not found</p>
-          <p className="text-muted-foreground mb-6">The article you requested does not exist or has been removed.</p>
-          <Link to="/blog">
-            <Button className="rounded-xl">Back to Blog</Button>
-          </Link>
-        </div>
-      </div>
-    )
-  }
+  if (!post || isPostError) return (
+    <PageNotFound
+      title="Article not found"
+      message="The article you requested does not exist, has been removed, or is not published."
+      primaryHref="/blog"
+      primaryLabel="Back to Blog"
+    />
+  )
 
   return (
     <div className="bg-gradient-to-b from-background to-secondary/20 min-h-screen">
@@ -527,6 +530,26 @@ export default function BlogPostPage() {
                       </div>
                       <div className="text-xs text-muted-foreground">{toolCategories.find(c => c.id === t.category_id)?.name}</div>
                     </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {relatedCategoryLinks.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-1 h-6 bg-primary rounded-full"></div>
+                  <h2 className="text-xl font-semibold">Related categories</h2>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {relatedCategoryLinks.map((category) => (
+                    <Link
+                      key={category.id}
+                      to={`/category/${encodeURIComponent(category.slug)}`}
+                      className="rounded-full border border-border/70 bg-card px-4 py-2 text-sm text-muted-foreground hover:border-primary/70 hover:text-primary transition"
+                    >
+                      {category.name}
+                    </Link>
                   ))}
                 </div>
               </div>

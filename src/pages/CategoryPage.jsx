@@ -3,10 +3,18 @@ import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
-import { getCategories, getTools, getBlogPostsByCategorySlug, getFeaturedWorkflows, getJobs } from '@/api/supabaseApi'
+import { getCategories, getTools, getBlogPosts, getWorkflowPages, getJobs } from '@/api/supabaseApi'
 import ToolCard from '../components/shared/ToolCard'
 import CategorySEO from '@/components/seo/CategorySEO'
 import { sanitizeHtml } from '@/lib/sanitizeHtml'
+import PageNotFound from '@/lib/PageNotFound'
+import { mergeBlogPosts } from '@/lib/staticBlogPosts'
+import {
+  getCategoryHub,
+  getCategoryRelatedBlogs,
+  getCategoryRelatedCategories,
+  getCategoryRelatedWorkflows,
+} from '@/lib/categoryHubContent'
 
 export default function CategoryPage() {
   const { slug } = useParams()
@@ -21,20 +29,22 @@ export default function CategoryPage() {
     queryFn: () => getTools({ published: true, orderBy: 'sort_order', ascending: true, limit: 200 }),
   })
 
-  const { data: postsForCategory = [] } = useQuery({
-    queryKey: ['blog-by-category', slug],
-    queryFn: () => getBlogPostsByCategorySlug(slug, { published: true, orderBy: 'created_at', ascending: false, limit: 50 }),
-    enabled: !!slug,
+  const { data: remotePosts = [] } = useQuery({
+    queryKey: ['blog-published'],
+    queryFn: () => getBlogPosts({ published: true, orderBy: 'created_at', ascending: false, limit: 100 }),
+    retry: false,
   })
 
-  const { data: featuredWorkflows = [] } = useQuery({
-    queryKey: ['workflows-featured'],
-    queryFn: () => getFeaturedWorkflows({ limit: 6 }),
+  const { data: workflowPages = [] } = useQuery({
+    queryKey: ['workflow-pages-public'],
+    queryFn: () => getWorkflowPages({ published: true, orderBy: 'updated_at', ascending: false, limit: 100 }),
     staleTime: 10 * 60 * 1000,
   })
 
   const category = useMemo(() => categories.find(c => c.slug === slug), [categories, slug])
   const categoryTools = useMemo(() => tools.filter(t => t.category_id === category?.id), [tools, category])
+  const categoryHub = useMemo(() => getCategoryHub(slug, category), [slug, category])
+  const posts = useMemo(() => mergeBlogPosts(remotePosts), [remotePosts])
 
   // Featured tools: prefer manual featured flag, then usage_count, then sort_order
   const featuredTools = useMemo(() => {
@@ -53,15 +63,15 @@ export default function CategoryPage() {
   }, [categoryTools])
 
   // Featured articles: prefer is_featured then recency
-  const featuredArticles = useMemo(() => {
-    if (!postsForCategory) return []
-    const list = postsForCategory.slice().filter(p => p)
-    list.sort((a, b) => {
-      if ((b.is_featured ? 1 : 0) !== (a.is_featured ? 1 : 0)) return (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0)
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    })
-    return list.slice(0, 6)
-  }, [postsForCategory])
+  const featuredArticles = useMemo(
+    () => getCategoryRelatedBlogs(posts, categoryHub, 6),
+    [posts, categoryHub]
+  )
+
+  const relatedWorkflows = useMemo(
+    () => getCategoryRelatedWorkflows(workflowPages, categoryHub, 6),
+    [workflowPages, categoryHub]
+  )
 
     const { data: jobsForCategory = [] } = useQuery({
       queryKey: ['jobs-by-category', category?.name],
@@ -70,31 +80,19 @@ export default function CategoryPage() {
       staleTime: 1000 * 60 * 5,
     })
 
-  // Related categories: simple name-token overlap (excluding current)
   const relatedCategories = useMemo(() => {
     if (!category) return []
-    const nameTokens = (category.name || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean)
-    return categories
-      .filter(c => c.id !== category.id)
-      .map(c => ({
-        category: c,
-        score: (c.name || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).reduce((s, t) => s + (nameTokens.includes(t) ? 1 : 0), 0)
-      }))
-      .filter(x => x.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 4)
-      .map(x => x.category)
-  }, [categories, category])
+    return getCategoryRelatedCategories(categories, category, categoryHub, 4)
+  }, [categories, category, categoryHub])
 
-  if (categories.length > 0 && !category) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-20 text-center">
-        <p className="text-2xl font-bold mb-2">Category not found</p>
-        <p className="text-muted-foreground mb-6">This category doesn't exist.</p>
-        <Link to="/categories" className="text-primary hover:underline">Browse all categories</Link>
-      </div>
-    )
-  }
+  if (categories.length > 0 && !category) return (
+    <PageNotFound
+      title="Category not found"
+      message="The category you requested does not exist or is not available."
+      primaryHref="/categories"
+      primaryLabel="Browse all categories"
+    />
+  )
 
   if (!category) {
     return <div className="max-w-7xl mx-auto px-4 py-20 text-center text-muted-foreground">Loading...</div>
@@ -102,7 +100,15 @@ export default function CategoryPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-      {category && <CategorySEO category={category} />}
+      {category && (
+        <CategorySEO
+          category={category}
+          tools={categoryTools}
+          faqs={categoryHub.faqs}
+          relatedBlogs={featuredArticles}
+          relatedWorkflows={relatedWorkflows}
+        />
+      )}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
         <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
         <ChevronRight className="w-3.5 h-3.5" />
@@ -120,6 +126,23 @@ export default function CategoryPage() {
             <span>{featuredTools.length} featured tools</span>
           </div>
         </div>
+
+        <section className="mb-8 rounded-2xl border border-border/70 bg-card p-6">
+          <h2 className="text-xl font-semibold mb-3">About {category.name}</h2>
+          <p className="text-muted-foreground leading-relaxed max-w-4xl">{categoryHub.intro}</p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            {categoryHub.highlights.map((item) => (
+              <div key={item} className="rounded-xl border border-border/60 bg-background p-4 text-sm text-muted-foreground">
+                {item}
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 flex flex-wrap gap-4 text-sm font-medium">
+            <Link to="/methodology" className="text-primary hover:underline">Methodology</Link>
+            <Link to="/blog" className="text-primary hover:underline">Related guides</Link>
+            <Link to="/workflow" className="text-primary hover:underline">Workflows</Link>
+          </div>
+        </section>
 
         {/* Featured Tools */}
         {featuredTools.length > 0 && (
@@ -159,17 +182,12 @@ export default function CategoryPage() {
             <div className="prose max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(category.seo_content) }} />
           ) : (
             <div className="prose max-w-none dark:prose-invert">
-              <h2>About {category.name}</h2>
-              <p>{category.description || `Explore ${category.name} tools and workflows to accelerate your work.`}</p>
+              <h2>How to use {category.name}</h2>
+              <p>{categoryHub.intro}</p>
 
-              <h3>Creator workflows</h3>
-              <p>Common workflows for {category.name} include optimizing assets, batch processing, and preparing images for social media or web.</p>
-
-              <h3>SEO & best practices</h3>
+              <h3>Recommended approach</h3>
               <ul>
-                <li>Optimize images for fast loading and correct aspect ratios.</li>
-                <li>Use descriptive filenames and alt text for accessibility and SEO.</li>
-                <li>Compress assets while preserving visual quality.</li>
+                {categoryHub.highlights.map((item) => <li key={item}>{item}</li>)}
               </ul>
             </div>
           )}
@@ -231,18 +249,32 @@ export default function CategoryPage() {
         )}
 
         {/* Featured Workflows */}
-        {featuredWorkflows.length > 0 && (
+        {relatedWorkflows.length > 0 && (
           <section className="mt-10">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1 h-6 bg-accent rounded-full"></div>
               <h2 className="text-xl font-semibold">Popular Workflows</h2>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {featuredWorkflows.slice(0, 3).map(workflow => (
+              {relatedWorkflows.slice(0, 6).map(workflow => (
                 <Link key={workflow.id} to={`/workflow/${encodeURIComponent(workflow.slug)}`} className="group block rounded-xl border border-border bg-card hover:border-accent/40 hover:shadow-md transition-all premium-card panel-highlight p-4">
                   <p className="text-sm font-semibold mb-2 group-hover:text-accent transition-colors line-clamp-2">{workflow.title}</p>
                   <p className="text-xs text-muted-foreground line-clamp-2">{workflow.excerpt || 'Step-by-step workflow guide'}</p>
                 </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {categoryHub.faqs.length > 0 && (
+          <section className="mt-10 rounded-2xl border border-border/70 bg-card p-6">
+            <h2 className="text-xl font-semibold mb-5">{category.name} FAQs</h2>
+            <div className="grid gap-4 md:grid-cols-3">
+              {categoryHub.faqs.map((faq) => (
+                <div key={faq.question}>
+                  <h3 className="font-medium mb-2">{faq.question}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{faq.answer}</p>
+                </div>
               ))}
             </div>
           </section>

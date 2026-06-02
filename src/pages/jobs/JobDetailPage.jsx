@@ -31,6 +31,7 @@ import {
 
 import { trackJobView } from '@/lib/jobs/jobAnalytics'
 import { sanitizeHtml } from '@/lib/sanitizeHtml'
+import PageNotFound from '@/lib/PageNotFound'
 
 import ToolCard from '@/components/shared/ToolCard'
 import BlogCard from '@/components/blog/BlogCard'
@@ -106,7 +107,7 @@ export default function JobDetailPage() {
     )
   }
 
-  if (!job) {
+  if (!jobsEnabled) {
     return (
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
         <div className="rounded-3xl border bg-card p-10 text-center">
@@ -121,6 +122,15 @@ export default function JobDetailPage() {
       </main>
     )
   }
+
+  if (!job) return (
+    <PageNotFound
+      title="Job not found"
+      message="The job listing you requested does not exist, has expired, or is not published."
+      primaryHref="/jobs"
+      primaryLabel="Browse jobs"
+    />
+  )
 
   return (
     <main className="min-h-screen">

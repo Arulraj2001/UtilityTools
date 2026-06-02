@@ -10,7 +10,7 @@ export const SITE_URL = envSiteUrl.replace(/\/$/, '')
 export const SITE_NAME = 'QuickUtils'
 export const ORGANIZATION_NAME = 'Learnithm'
 export const CONTACT_EMAIL = 'support@quickutils.page'
-export const FOUNDER_NAME = 'Arulraj S'
+export const FOUNDER_NAME = 'Sanjay Krishnan'
 export const FOUNDER_SLUG = 'arulraj-s'
 
 export const buildAbsoluteUrl = (path = '/') => {

@@ -7,11 +7,29 @@ import { Input } from '@/components/ui/input'
 import { getWorkflowPages, getCategories } from '@/api/supabaseApi'
 import { trackWorkflowSearch } from '@/lib/analytics'
 import AdBanner from '../components/shared/AdBanner'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { SITE_URL } from '@/components/seo/StaticPageSEO'
 import { ORGANIZATION_NAME, SITE_NAME } from '@/config/site'
+import { robotsForSearchParams } from '@/lib/indexation'
+import { buildFaqSchema } from '@/lib/pageSchemas'
+
+const workflowFaqs = [
+  {
+    question: 'What is a QuickUtils workflow?',
+    answer: 'A workflow is a step-by-step guide that connects tools, checks, and related resources for a specific task such as compressing a PDF, preparing an exam image, or formatting structured data.',
+  },
+  {
+    question: 'How are workflows different from tool pages?',
+    answer: 'Tool pages provide the utility itself, while workflows explain the order of steps and related tools needed to complete a broader task reliably.',
+  },
+  {
+    question: 'When should I use a workflow instead of searching tools?',
+    answer: 'Use a workflow when the task has multiple steps, file requirements, or decisions that need context before opening a single tool.',
+  },
+]
 
 export default function WorkflowListPage() {
+  const [searchParams] = useSearchParams()
   const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get('q') || '')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [sortBy, setSortBy] = useState('featured')
@@ -150,11 +168,14 @@ export default function WorkflowListPage() {
     },
   }
 
+  const faqSchema = buildFaqSchema(workflowFaqs)
+
   return (
     <>
       <Helmet>
         <title>{seoTitle}</title>
         <meta name="description" content={seoDescription} />
+        <meta name="robots" content={robotsForSearchParams(searchParams)} />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
@@ -165,6 +186,7 @@ export default function WorkflowListPage() {
         <meta name="twitter:description" content={seoDescription} />
         <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
         <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
+        {faqSchema && <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>}
       </Helmet>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
@@ -390,6 +412,23 @@ export default function WorkflowListPage() {
             </div>
           </section>
         )}
+
+        <section className="mt-12 rounded-3xl border border-border/70 bg-card p-6">
+          <h2 className="text-xl font-semibold">How workflow pages help</h2>
+          <div className="mt-4 grid gap-4 md:grid-cols-3 text-sm text-muted-foreground leading-relaxed">
+            {workflowFaqs.map((item) => (
+              <div key={item.question}>
+                <h3 className="font-semibold text-foreground mb-2">{item.question}</h3>
+                <p>{item.answer}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 flex flex-wrap gap-4 text-sm font-medium">
+            <Link to="/tools" className="text-primary hover:underline">Browse all tools</Link>
+            <Link to="/methodology" className="text-primary hover:underline">How tools are tested</Link>
+            <Link to="/contact" className="text-primary hover:underline">Suggest a workflow</Link>
+          </div>
+        </section>
       </div>
     </>
   )

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   BriefcaseBusiness,
   Search,
@@ -32,6 +32,12 @@ import {
   JobsEmptyState,
   SearchResultsEmptyState,
 } from '@/components/jobs/empty-states'
+import StaticPageSEO, { SITE_URL, buildBreadcrumbSchema } from '@/components/seo/StaticPageSEO'
+import { buildCollectionPageSchema } from '@/lib/pageSchemas'
+import { robotsForSearchParams } from '@/lib/indexation'
+
+const jobsDescription =
+  'Browse curated QuickUtils job listings, internships, fresher opportunities, and government openings with application-support tools and source review standards.'
 
 export default function JobsListPage() {
   const [search, setSearch] = useState('')
@@ -189,9 +195,27 @@ export default function JobsListPage() {
     })
   }, [jobs, searchParams])
 
+  const collectionSchema = useMemo(() => buildCollectionPageSchema({
+    name: 'QuickUtils Jobs',
+    description: jobsDescription,
+    url: `${SITE_URL}/jobs`,
+    items: results.slice(0, 50),
+    getItem: (job) => ({
+      name: job.title,
+      description: job.short_description,
+      url: `${SITE_URL}/jobs/${encodeURIComponent(job.slug)}`,
+    }),
+  }), [results])
+
   if (!jobsEnabled) {
     return (
       <main className="min-h-screen bg-background">
+        <StaticPageSEO
+          title="Jobs Temporarily Unavailable - QuickUtils"
+          description="QuickUtils job listings are temporarily unavailable while published listings are reviewed."
+          path="/jobs"
+          robots="noindex, follow"
+        />
         <section className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
           <div className="rounded-3xl border bg-card p-10 text-center shadow-sm">
             <div className="mb-4">
@@ -219,6 +243,21 @@ export default function JobsListPage() {
   }
   return (
     <main className="min-h-screen bg-background">
+      <StaticPageSEO
+        title="Jobs, Internships and Government Openings - QuickUtils"
+        description={jobsDescription}
+        path="/jobs"
+        ogTitle="QuickUtils Jobs"
+        ogDescription={jobsDescription}
+        robots={robotsForSearchParams(searchParams)}
+        jsonLd={[
+          collectionSchema,
+          buildBreadcrumbSchema([
+            { name: 'Home', url: `${SITE_URL}/` },
+            { name: 'Jobs', url: `${SITE_URL}/jobs` },
+          ]),
+        ]}
+      />
       
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-border/40">
@@ -249,6 +288,11 @@ export default function JobsListPage() {
               related tools, workflows, and application
               support.
             </p>
+            <div className="mt-5 flex flex-wrap gap-4 text-sm font-medium">
+              <Link to="/job-sources-policy" className="text-primary hover:underline">Job sources policy</Link>
+              <Link to="/corrections-policy" className="text-primary hover:underline">Report a job correction</Link>
+              <Link to="/category/government-exam-tools" className="text-primary hover:underline">Application document tools</Link>
+            </div>
 
             {/* SEARCH */}
             <div className="mt-7">
@@ -477,26 +521,26 @@ export default function JobsListPage() {
 
                 <div className="space-y-3 text-sm text-muted-foreground">
                   
-                  <div className="flex items-start gap-2">
+                  <Link to="/tool/passport-size-photo-maker" className="flex items-start gap-2 hover:text-primary">
                     <span className="mt-1 h-2.5 w-2.5 rounded-full bg-primary" />
                     <span>
                       Passport Photo Resizer
                     </span>
-                  </div>
+                  </Link>
 
-                  <div className="flex items-start gap-2">
+                  <Link to="/workflow/compress-pdf-below-200kb" className="flex items-start gap-2 hover:text-primary">
                     <span className="mt-1 h-2.5 w-2.5 rounded-full bg-primary" />
                     <span>
                       Compress PDF Below 200KB
                     </span>
-                  </div>
+                  </Link>
 
-                  <div className="flex items-start gap-2">
+                  <Link to="/tool/ssc-signature-resizer" className="flex items-start gap-2 hover:text-primary">
                     <span className="mt-1 h-2.5 w-2.5 rounded-full bg-primary" />
                     <span>
                       Signature Resize Tools
                     </span>
-                  </div>
+                  </Link>
                 </div>
               </div>
             </div>

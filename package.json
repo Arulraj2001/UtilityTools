@@ -10,6 +10,7 @@
     "generate-sitemap": "node scripts/generate-sitemap.js",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
+    "validate:content": "node scripts/validate-content-quality.mjs",
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",
     "conversion:server": "node -r ./server/conversion/preload-env.cjs server/conversion/server.js",

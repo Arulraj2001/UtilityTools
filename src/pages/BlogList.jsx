@@ -9,6 +9,7 @@ import { mergeBlogCategories, mergeBlogPosts } from '@/lib/staticBlogPosts'
 import BlogFilterDrawer from '@/components/blog/BlogFilterDrawer'
 import BlogCard from '@/components/blog/BlogCard'
 import StaticPageSEO, { SITE_URL, buildBreadcrumbSchema } from '@/components/seo/StaticPageSEO'
+import { robotsForSearchParams } from '@/lib/indexation'
 
 const blogDescription =
   'Helpful QuickUtils guides for calculators, PDF tools, image tools, text tools, developer utilities, and practical productivity workflows.'
@@ -95,6 +96,7 @@ export default function BlogList() {
         path="/blog"
         ogTitle="QuickUtils Blog - Tool Guides and Practical Tutorials"
         ogDescription="Learn how to use calculators, PDF tools, image tools, text tools, and developer utilities with clear examples."
+        robots={robotsForSearchParams(searchParams)}
         jsonLd={[
           blogSchema,
           buildBreadcrumbSchema([

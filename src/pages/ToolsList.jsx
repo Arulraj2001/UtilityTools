@@ -1,15 +1,32 @@
 import React, { useState, useMemo, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Search, Filter } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { getTools, getCategories } from '@/api/supabaseApi'
 import { trackWorkflowSearch } from '@/lib/analytics'
 import ToolCard from '../components/shared/ToolCard'
 import AdBanner from '../components/shared/AdBanner'
+import StaticPageSEO, { SITE_URL, buildBreadcrumbSchema } from '@/components/seo/StaticPageSEO'
+import { buildCollectionPageSchema } from '@/lib/pageSchemas'
+import { robotsForSearchParams } from '@/lib/indexation'
+
+const toolsDescription =
+  'Browse free QuickUtils tools for PDFs, images, calculators, text, developer tasks, SEO checks, student work, seller workflows, and shipping calculations.'
+
+const priorityCategorySlugs = [
+  'pdf-tools',
+  'image-tools',
+  'finance',
+  'education',
+  'developer-tools',
+  'seo-tools',
+]
 
 export default function ToolsList() {
-  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get('q') || '')
+  const [searchParams] = useSearchParams()
+  const [search, setSearch] = useState(() => searchParams.get('q') || '')
   const [selectedCategory, setSelectedCategory] = useState('all')
 
   const { data: tools = [], isLoading } = useQuery({
@@ -32,6 +49,24 @@ export default function ToolsList() {
     })
   }, [tools, search, selectedCategory])
 
+  const priorityCategories = useMemo(() => (
+    priorityCategorySlugs
+      .map((slug) => categories.find((category) => category.slug === slug))
+      .filter(Boolean)
+  ), [categories])
+
+  const collectionSchema = useMemo(() => buildCollectionPageSchema({
+    name: 'QuickUtils Free Online Tools',
+    description: toolsDescription,
+    url: `${SITE_URL}/tools`,
+    items: tools.slice(0, 50),
+    getItem: (tool) => ({
+      name: tool.name,
+      description: tool.description,
+      url: `${SITE_URL}/tool/${encodeURIComponent(tool.slug)}`,
+    }),
+  }), [tools])
+
   useEffect(() => {
     if (!search.trim()) return
 
@@ -47,10 +82,43 @@ export default function ToolsList() {
   }, [search, filtered.length, selectedCategory])
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <>
+      <StaticPageSEO
+        title="Free Online Tools - PDF, Image, Calculator, SEO and Developer Utilities"
+        description={toolsDescription}
+        path="/tools"
+        ogTitle="QuickUtils Free Online Tools"
+        ogDescription={toolsDescription}
+        robots={robotsForSearchParams(searchParams)}
+        jsonLd={[
+          collectionSchema,
+          buildBreadcrumbSchema([
+            { name: 'Home', url: `${SITE_URL}/` },
+            { name: 'Tools', url: `${SITE_URL}/tools` },
+          ]),
+        ]}
+      />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">All Tools</h1>
-        <p className="text-muted-foreground">Browse our complete collection of free online tools</p>
+        <p className="text-muted-foreground max-w-3xl">
+          Browse practical browser-based utilities for documents, images, finance, education,
+          developer tasks, SEO checks, seller operations, and shipping calculations. Start with a
+          category when you know the task area, or search when you already know the tool name.
+        </p>
+        {priorityCategories.length > 0 && (
+          <div className="mt-5 flex flex-wrap gap-2">
+            {priorityCategories.map((category) => (
+              <Link
+                key={category.id}
+                to={`/category/${encodeURIComponent(category.slug)}`}
+                className="rounded-full border border-border/70 bg-card px-3 py-1.5 text-sm text-muted-foreground hover:border-primary/70 hover:text-primary transition"
+              >
+                {category.name}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
@@ -98,6 +166,20 @@ export default function ToolsList() {
           </div>
         </>
       )}
-    </div>
+      <section className="mt-12 rounded-2xl border border-border/70 bg-card p-6">
+        <h2 className="text-xl font-semibold">How to choose the right tool</h2>
+        <div className="mt-4 grid gap-4 md:grid-cols-3 text-sm text-muted-foreground leading-relaxed">
+          <p>Use PDF and image tools when upload limits, dimensions, format, or document order matter.</p>
+          <p>Use calculator categories when you need transparent formulas for finance, study, math, or daily planning.</p>
+          <p>Use developer and SEO tools when you need clean structured data, metadata, encoding, or crawl-support files.</p>
+        </div>
+        <div className="mt-5 flex flex-wrap gap-4 text-sm font-medium">
+          <Link to="/methodology" className="text-primary hover:underline">How tools are tested</Link>
+          <Link to="/categories" className="text-primary hover:underline">Browse all categories</Link>
+          <Link to="/blog" className="text-primary hover:underline">Read tool guides</Link>
+        </div>
+      </section>
+      </div>
+    </>
   )
 }

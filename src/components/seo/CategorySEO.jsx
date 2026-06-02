@@ -1,8 +1,16 @@
 import React from 'react'
 import { Helmet } from 'react-helmet-async'
 import { DEFAULT_IMAGE, SITE_NAME, SITE_URL } from '@/config/site'
+import { buildFaqSchema, buildItemList } from '@/lib/pageSchemas'
 
-export default function CategorySEO({ category, canonicalBase = SITE_URL }) {
+export default function CategorySEO({
+  category,
+  canonicalBase = SITE_URL,
+  tools = [],
+  faqs = [],
+  relatedBlogs = [],
+  relatedWorkflows = [],
+}) {
   if (!category) return null
 
   const title = category.seo_title || category.name
@@ -28,8 +36,29 @@ export default function CategorySEO({ category, canonicalBase = SITE_URL }) {
     description,
     url: canonical,
     image: image,
-    ...(category.featured_image && { mainImage: { '@type': 'ImageObject', url: category.featured_image } })
+    ...(category.featured_image && { mainImage: { '@type': 'ImageObject', url: category.featured_image } }),
+    ...(tools.length ? {
+      mainEntity: buildItemList(tools.slice(0, 50), (tool) => ({
+        name: tool.name,
+        description: tool.description,
+        url: `${canonicalBase}/tool/${encodeURIComponent(tool.slug)}`,
+      })),
+    } : {}),
+    hasPart: [
+      ...relatedBlogs.slice(0, 6).map((post) => ({
+        '@type': 'Article',
+        name: post.title,
+        url: `${canonicalBase}/blog/${encodeURIComponent(post.slug)}`,
+      })),
+      ...relatedWorkflows.slice(0, 6).map((workflow) => ({
+        '@type': 'WebPage',
+        name: workflow.title,
+        url: `${canonicalBase}/workflow/${encodeURIComponent(workflow.slug)}`,
+      })),
+    ],
   }
+
+  const faqSchema = buildFaqSchema(faqs)
 
   return (
     <Helmet>
@@ -53,6 +82,7 @@ export default function CategorySEO({ category, canonicalBase = SITE_URL }) {
 
       <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
       <script type="application/ld+json">{JSON.stringify(collectionPageSchema)}</script>
+      {faqSchema && <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>}
     </Helmet>
   )
 }

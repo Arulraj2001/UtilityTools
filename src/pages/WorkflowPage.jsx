@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { getWorkflowPageBySlug, getTools, getBlogPosts, getWorkflowPages } from '@/api/supabaseApi'
 import WorkflowSEO from '@/components/seo/WorkflowSEO'
 import { sanitizeHtml } from '@/lib/sanitizeHtml'
+import PageNotFound from '@/lib/PageNotFound'
 
 const getTextFromHtml = (html) => {
   if (!html) return ''
@@ -128,21 +129,14 @@ export default function WorkflowPage() {
     )
   }
 
-  if (!page || isPageError) {
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-        <div className="rounded-3xl border border-border/70 bg-muted p-8">
-          <p className="text-2xl font-bold">Workflow not found</p>
-          <p className="mt-3 text-muted-foreground">The workflow page you requested is unavailable or has been removed.</p>
-          <div className="mt-6">
-            <Link to="/">
-              <Button className="rounded-xl">Return home</Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  if (!page || isPageError) return (
+    <PageNotFound
+      title="Workflow not found"
+      message="The workflow page you requested is unavailable, unpublished, or has been removed."
+      primaryHref="/workflow"
+      primaryLabel="Browse workflows"
+    />
+  )
 
   return (
     <div className="bg-gradient-to-b from-background to-secondary/20 min-h-screen">

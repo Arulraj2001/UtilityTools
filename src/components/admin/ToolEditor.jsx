@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { getCategories, createTool, updateTool } from '@/api/supabaseApi'
 import { sanitizeHtmlFields } from '@/lib/sanitizeHtml'
+import { formatQualityIssues, validateContentQuality } from '@/lib/contentQuality'
 
 export default function ToolEditor({ tool, onSave, onCancel }) {
   const [form, setForm] = useState({
@@ -58,6 +59,16 @@ export default function ToolEditor({ tool, onSave, onCancel }) {
     setSaving(true)
     try {
       const payload = sanitizeHtmlFields(form, ['long_description', 'seo_content'])
+      if (payload.status === 'published') {
+        const quality = validateContentQuality(payload, { type: 'tool' })
+        if (!quality.ok) {
+          toast.error(formatQualityIssues(quality))
+          return
+        }
+        if (quality.warnings.length) {
+          toast.warning(formatQualityIssues({ ...quality, blockers: [] }))
+        }
+      }
       if (tool?.id) {
         await updateTool(tool.id, payload)
         toast.success('Tool updated')

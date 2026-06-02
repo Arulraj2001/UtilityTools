@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import StaticPageSEO, { SITE_URL, buildBreadcrumbSchema } from '@/components/seo/StaticPageSEO'
 import { getAuthorBySlug } from '@/lib/authors'
 import { ORGANIZATION_NAME, organizationSchema } from '@/config/site'
+import PageNotFound from '@/lib/PageNotFound'
 
 const expertise = [
   {
@@ -27,15 +28,14 @@ export default function AuthorPage() {
   const { slug } = useParams()
   const author = getAuthorBySlug(slug)
 
-  if (!author) {
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-        <h1 className="text-2xl font-bold mb-3">Author not found</h1>
-        <p className="text-muted-foreground mb-6">The requested author profile is unavailable.</p>
-        <Link to="/team" className="text-primary hover:underline">View the QuickUtils team</Link>
-      </div>
-    )
-  }
+  if (!author) return (
+    <PageNotFound
+      title="Author not found"
+      message="The requested author profile is unavailable."
+      primaryHref="/team"
+      primaryLabel="View the QuickUtils team"
+    />
+  )
 
   const pageUrl = `${SITE_URL}/author/${author.slug}`
   const description =
@@ -95,7 +95,7 @@ export default function AuthorPage() {
         <section className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8 mb-8">
           <h2 className="text-2xl font-semibold mb-4">Biography</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Arulraj S leads QuickUtils under {ORGANIZATION_NAME}. His role covers tool
+            {author.name} leads QuickUtils under {ORGANIZATION_NAME}. His role covers tool
             planning, content quality, review standards, and practical user workflows. The goal
             is to make online utilities easier to understand, easier to verify, and safer to use
             for everyday tasks.

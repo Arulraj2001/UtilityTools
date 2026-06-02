@@ -20,7 +20,7 @@ export const AUTHORS = [
       'utility workflows',
     ],
     bio:
-      'Arulraj S is the founder of Learnithm and leads QuickUtils content, tool direction, and review standards. His work focuses on practical educational tools, browser-based utilities, AI-assisted workflows, and web applications that help users complete everyday digital tasks with clarity.',
+      'Sanjay Krishnan is the founder of Learnithm and leads QuickUtils content, tool direction, and review standards. His work focuses on practical educational tools, browser-based utilities, AI-assisted workflows, and web applications that help users complete everyday digital tasks with clarity.',
   },
 ]
 
