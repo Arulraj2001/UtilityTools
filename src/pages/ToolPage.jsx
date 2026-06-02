@@ -1,32 +1,36 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef, Suspense, lazy } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
 import { ArrowRight, ChevronRight, Home, Bookmark, BookmarkCheck, Share2, Clock, Zap } from 'lucide-react'
 import { getIcon } from '@/lib/iconMap'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { runTool } from '@/lib/toolEngine'
 import useToolMemo from '@/hooks/useToolMemo'
-import { buildLogisticsMetrics } from '@/lib/engines/logisticsMetricsEngine'
-import FAQAccordion from '@/components/shared/FAQAccordion'
-import ToolCard from '@/components/shared/ToolCard'
-import AdBanner from '@/components/shared/AdBanner'
 import ToolSEO from '@/components/seo/ToolSEO'
 import { useLocalStorage } from '@/lib/useLocalStorage'
-import { getTools, getToolBySlug, getCategories, updateToolUsage, getBlogPosts, getWorkflowPages } from '@/api/supabaseApi'
+import {
+  getToolPageBlogPosts,
+  getToolPageBySlug,
+  getToolPageCategories,
+  getToolPageRelatedTools,
+  getToolPageWorkflows,
+  updateToolPageUsage,
+} from '@/api/toolPageApi'
 import { trackToolEvent } from '@/lib/analytics'
-import { sanitizeHtml } from '@/lib/sanitizeHtml'
 
 const ToolInputForm = lazy(() => import('@/components/tools/ToolInputForm'))
 const ToolResult = lazy(() => import('@/components/tools/ToolResult'))
+const FAQAccordion = lazy(() => import('@/components/shared/FAQAccordion'))
+const ToolCard = lazy(() => import('@/components/shared/ToolCard'))
+const AdBanner = lazy(() => import('@/components/shared/AdBanner'))
 const ImageToolRouter = lazy(() => import('@/components/image-tools/ImageToolRouter'))
 const PDFTool = lazy(() => import('@/components/tools/PDFTool'))
 const GovToolRouter = lazy(() => import('@/components/gov-tools/GovToolRouter'))
 const LogisticsToolRouter = lazy(() => import('@/components/logistics-tools/LogisticsToolRouter'))
 const SellerToolRouter = lazy(() => import('@/components/seller-tools/SellerToolRouter'))
 const ToolContentSections = lazy(() => import('@/components/seo/ToolContentSections'))
+const SanitizedHtmlBlock = lazy(() => import('@/components/seo/SanitizedHtmlBlock'))
 
 const IMAGE_TOOLS = [
   'image-compressor',
@@ -120,7 +124,7 @@ export default function ToolPage() {
 
   const { data: tool = null, isLoading: isToolLoading } = useQuery({
     queryKey: ['tool-by-slug', slug],
-    queryFn: () => getToolBySlug(slug, { published: true }),
+    queryFn: () => getToolPageBySlug(slug, { published: true }),
     enabled: !!slug,
     staleTime: 0,
     cacheTime: 5 * 60 * 1000,
@@ -129,7 +133,7 @@ export default function ToolPage() {
 
   const { data: tools = [] } = useQuery({
     queryKey: ['tools-published'],
-    queryFn: () => getTools({ published: true, orderBy: 'sort_order', ascending: true, limit: 200 }),
+    queryFn: () => getToolPageRelatedTools({ limit: 200 }),
     // keep previous data to avoid clearing UI during background refetches
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000,
@@ -139,19 +143,19 @@ export default function ToolPage() {
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
-    queryFn: () => getCategories({ orderBy: 'sort_order', ascending: true, limit: 200 }),
+    queryFn: getToolPageCategories,
   })
 
   const { data: posts = [] } = useQuery({
     queryKey: ['blog-published', slug],
-    queryFn: () => getBlogPosts({ published: true, orderBy: 'created_at', ascending: false, limit: 50 }),
+    queryFn: () => getToolPageBlogPosts({ limit: 50 }),
     staleTime: 5 * 60 * 1000,
     enabled: !!slug,
   })
 
   const { data: workflows = [] } = useQuery({
     queryKey: ['workflows-published', slug],
-    queryFn: () => getWorkflowPages({ published: true, orderBy: 'updated_at', ascending: false, limit: 12 }),
+    queryFn: () => getToolPageWorkflows({ limit: 12 }),
     staleTime: 5 * 60 * 1000,
     enabled: !!slug,
   })
@@ -236,12 +240,17 @@ export default function ToolPage() {
     })
 
     if (tool?.id) {
-      updateToolUsage(tool.id, (tool.usage_count || 0) + 1).catch(() => {})
+      updateToolPageUsage(tool.id, (tool.usage_count || 0) + 1).catch(() => {})
       trackToolEvent(tool, 'tool_open').catch(() => {})
     }
   }, [tool?.id])
 
-  const memoRunTool = useToolMemo(runTool)
+  const runToolDynamic = useCallback(async (activeTool, activeInputs) => {
+    const { runTool } = await import('@/lib/toolEngine')
+    return runTool(activeTool, activeInputs)
+  }, [])
+
+  const memoRunTool = useToolMemo(runToolDynamic)
 
   const calculate = useCallback(async () => {
     if (!tool) return
@@ -250,11 +259,17 @@ export default function ToolPage() {
 
     try {
       const res = await memoRunTool(tool, inputs)
+      let metrics = null
+      if (!res?.error && isLogisticsTool) {
+        const { buildLogisticsMetrics } = await import('@/lib/engines/logisticsMetricsEngine')
+        metrics = buildLogisticsMetrics(res, inputs, tool.slug)
+      }
+
       const augmentedResult = res?.error
         ? res
         : {
             ...res,
-            metrics: buildLogisticsMetrics(res, inputs, tool.slug),
+            metrics,
           }
 
       setResult(augmentedResult)
@@ -274,7 +289,7 @@ export default function ToolPage() {
     } finally {
       setLoading(false)
     }
-  }, [tool, inputs, memoRunTool])
+  }, [tool, inputs, memoRunTool, isLogisticsTool])
 
   useEffect(() => {
     if (!tool || isImageTool || isPDFTool) return
@@ -348,7 +363,7 @@ export default function ToolPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-5">
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+            <div>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 flex items-center justify-center shrink-0 shadow-sm">
@@ -379,12 +394,9 @@ export default function ToolPage() {
                   Used {tool.usage_count.toLocaleString()} times • ✅ Free Forever
                 </div>
               )}
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
+            <div
               className="rounded-2xl border border-border/50 bg-card p-5 sm:p-6"
             >
               {isImageTool ? (
@@ -430,12 +442,9 @@ export default function ToolPage() {
                   </div>
                 </Suspense>
               )}
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1 }}
+            <div
               className="rounded-2xl border border-border/50 bg-card p-5 sm:p-6"
             >
               <div className="flex items-center justify-between gap-3 mb-4">
@@ -446,16 +455,15 @@ export default function ToolPage() {
                 <li>Start with the default settings, then adjust only the fields you need.</li>
                 <li>Smaller input files usually process faster and keep the browser responsive.</li>
               </ul>
-            </motion.div>
+            </div>
 
             {tool?.long_description && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="rounded-2xl border border-border/50 bg-card p-5 sm:p-6 prose prose-sm max-w-none dark:prose-invert"
-                dangerouslySetInnerHTML={{ __html: sanitizeHtml(tool.long_description) }}
-              />
+              <Suspense fallback={null}>
+                <SanitizedHtmlBlock
+                  html={tool.long_description}
+                  className="rounded-2xl border border-border/50 bg-card p-5 sm:p-6 prose prose-sm max-w-none dark:prose-invert"
+                />
+              </Suspense>
             )}
 
             {/* NEW SEO CONTENT */}
@@ -465,7 +473,7 @@ export default function ToolPage() {
 
             {/* Related Articles (SEO) */}
             {relatedArticles.length > 0 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }} className="mt-8">
+              <div className="mt-8">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-1 h-6 bg-primary rounded-full"></div>
                   <h2 className="text-xl font-semibold">Related articles</h2>
@@ -476,7 +484,7 @@ export default function ToolPage() {
                       <div className="flex gap-3 p-3">
                         {related.featured_image && (
                           <div className="flex-shrink-0">
-                            <img src={related.featured_image} alt={related.title} loading="lazy" className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300" />
+                            <img src={related.featured_image} alt={related.title} loading="lazy" decoding="async" className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300" />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
@@ -490,12 +498,12 @@ export default function ToolPage() {
                     </Link>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* Related Workflows */}
             {workflows.length > 0 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="mt-8">
+              <div className="mt-8">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-1 h-6 bg-accent rounded-full"></div>
                   <h2 className="text-xl font-semibold">Popular Workflows</h2>
@@ -514,32 +522,40 @@ export default function ToolPage() {
                     </Link>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {tool?.faq?.length > 0 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="mt-8">
-                <FAQAccordion items={tool.faq} />
-              </motion.div>
+              <div className="mt-8">
+                <Suspense fallback={null}>
+                  <FAQAccordion items={tool.faq} />
+                </Suspense>
+              </div>
             )}
 
           </div>
 
           <div className="space-y-5">
-            <AdBanner placement="tool_top" />
+            <Suspense fallback={null}>
+              <AdBanner placement="tool_top" />
+            </Suspense>
 
             {relatedTools.length > 0 && (
               <div>
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Related Tools</h3>
                 <div className="space-y-3">
                   {relatedTools.map((rt, i) => (
-                    <ToolCard key={rt.id} tool={rt} index={i} categoryName={category?.name} />
+                    <Suspense key={rt.id} fallback={null}>
+                      <ToolCard tool={rt} index={i} categoryName={category?.name} />
+                    </Suspense>
                   ))}
                 </div>
               </div>
             )}
 
-            <AdBanner placement="tool_bottom" />
+            <Suspense fallback={null}>
+              <AdBanner placement="tool_bottom" />
+            </Suspense>
           </div>
         </div>
       </div>

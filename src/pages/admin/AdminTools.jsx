@@ -4,12 +4,20 @@ import { Plus, Pencil, Trash2, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from 'sonner'
 import ToolEditor from '../../components/admin/ToolEditor'
-import { getToolsAll, deleteTool } from '@/api/supabaseApi'
+import { getToolsAll, deleteTool, getCategories } from '@/api/supabaseApi'
 
 export default function AdminTools() {
   const [search, setSearch] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('all')
   const [editingTool, setEditingTool] = useState(null)
   const [showEditor, setShowEditor] = useState(false)
   const queryClient = useQueryClient()
@@ -17,6 +25,11 @@ export default function AdminTools() {
   const { data: tools = [], isLoading } = useQuery({
     queryKey: ['all-tools'],
     queryFn: () => getToolsAll({ orderBy: 'created_at', ascending: false, limit: 200 }),
+  })
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ limit: 500 }),
   })
 
   const deleteMutation = useMutation({
@@ -29,7 +42,11 @@ export default function AdminTools() {
     },
   })
 
-  const filtered = tools.filter(t => t.name?.toLowerCase().includes(search.toLowerCase()))
+  const filtered = tools.filter(t => {
+    const matchesSearch = t.name?.toLowerCase().includes(search.toLowerCase())
+    const matchesCategory = selectedCategory === 'all' || t.category_id === selectedCategory
+    return matchesSearch && matchesCategory
+  })
 
   const handleNew = () => {
     setEditingTool(null)
@@ -71,6 +88,23 @@ export default function AdminTools() {
           placeholder="Search tools..."
           className="pl-10 rounded-xl"
         />
+      </div>
+
+      <div className="mb-4 flex gap-3 items-center">
+        <label className="text-sm font-medium">Filter by Category:</label>
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-48 rounded-xl">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories.map(category => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="rounded-xl border border-border overflow-hidden bg-card">

@@ -492,63 +492,23 @@ export default function Home() {
   }, [])
 
   const {
-    data: categories = [],
-    isLoading: isLoadingCategories,
+    data: homepageSummary = {},
+    isLoading: isLoadingHomepageSummary,
+    isFetching: isFetchingHomepageSummary,
   } = useQuery({
-    queryKey: ['homepage-categories-light'],
-    queryFn: async () => (await loadHomepageApi()).getHomepageCategories(),
+    queryKey: ['homepage-summary'],
+    queryFn: async () => (await loadHomepageApi()).getHomepageSummary(),
     enabled: deferHomepageQueries,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: false,
   })
 
-  const {
-    data: homepageTools = [],
-    isLoading: isLoadingHomepageTools,
-    isFetching: isFetchingHomepageTools,
-  } = useQuery({
-    queryKey: ['homepage-tools-light'],
-    queryFn: async () => (await loadHomepageApi()).getHomepageTools({ limit: 200 }),
-    enabled: deferHomepageQueries,
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    retry: false,
-  })
-
-  const {
-    data: totalUsage = 0,
-    isLoading: isLoadingUsage,
-    isFetching: isFetchingUsage,
-  } = useQuery({
-    queryKey: ['total-usage'],
-    queryFn: async () => (await loadHomepageApi()).getHomepageTotalUsageCount(),
-    enabled: deferHomepageQueries,
-    refetchOnWindowFocus: false,
-    retry: false,
-  })
-
-  const {
-    data: featuredWorkflows = [],
-    isLoading: isLoadingWorkflows,
-    isFetching: isFetchingWorkflows,
-  } = useQuery({
-    queryKey: ['workflows-featured'],
-    queryFn: async () => (await loadHomepageApi()).getHomepageFeaturedWorkflows({ limit: 6 }),
-    enabled: deferHomepageQueries,
-    refetchOnWindowFocus: false,
-    retry: false,
-  })
-
-  const {
-    data: featuredJobs = [],
-  } = useQuery({
-    queryKey: ['featured-jobs'],
-    queryFn: async () => (await loadHomepageApi()).getHomepageFeaturedJobs({ limit: 6 }),
-    enabled: deferHomepageQueries,
-    refetchOnWindowFocus: false,
-    retry: false,
-  })
+  const categories = homepageSummary.categories || []
+  const homepageTools = homepageSummary.tools || []
+  const totalUsage = homepageSummary.totalUsage || 0
+  const featuredWorkflows = homepageSummary.featuredWorkflows || []
+  const featuredJobs = homepageSummary.featuredJobs || []
 
   const toolCount = 150
 
@@ -567,11 +527,11 @@ export default function Home() {
     [homepageTools]
   )
 
-  const showCategoriesSectionSkeleton = !deferHomepageQueries || isLoadingCategories
-  const showFeaturedSectionSkeleton = !deferHomepageQueries || isLoadingHomepageTools || isFetchingHomepageTools
-  const showTrendingSectionSkeleton = !deferHomepageQueries || isLoadingHomepageTools || isFetchingHomepageTools
-  const showRecentSectionSkeleton = !deferHomepageQueries || isLoadingHomepageTools || isFetchingHomepageTools
-  const showWorkflowsSectionSkeleton = !deferHomepageQueries || isLoadingWorkflows || isFetchingWorkflows
+  const showCategoriesSectionSkeleton = !deferHomepageQueries || isLoadingHomepageSummary
+  const showFeaturedSectionSkeleton = !deferHomepageQueries || isLoadingHomepageSummary || isFetchingHomepageSummary
+  const showTrendingSectionSkeleton = !deferHomepageQueries || isLoadingHomepageSummary || isFetchingHomepageSummary
+  const showRecentSectionSkeleton = !deferHomepageQueries || isLoadingHomepageSummary || isFetchingHomepageSummary
+  const showWorkflowsSectionSkeleton = !deferHomepageQueries || isLoadingHomepageSummary || isFetchingHomepageSummary
 
   return (
     <div>

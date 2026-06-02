@@ -60,3 +60,42 @@ export const getHomepageFeaturedJobs = async ({ limit = 6 } = {}) => {
     .limit(limit)
   return handleResponse(result)
 }
+
+const fetchCachedHomepageSummary = async () => {
+  if (typeof window === 'undefined') return null
+  const response = await fetch('/api/homepage', {
+    headers: { Accept: 'application/json' },
+    cache: 'force-cache',
+  })
+  const contentType = response.headers.get('content-type') || ''
+  if (!response.ok || !contentType.includes('application/json')) {
+    throw new Error('Homepage cache endpoint unavailable')
+  }
+  return response.json()
+}
+
+export const getHomepageSummary = async () => {
+  try {
+    const cached = await fetchCachedHomepageSummary()
+    if (cached) return cached
+  } catch {
+    // Local Vite/dev environments do not have the Vercel function.
+  }
+
+  const [categories, tools, totalUsage, featuredWorkflows, featuredJobs] = await Promise.all([
+    getHomepageCategories(),
+    getHomepageTools({ limit: 200 }),
+    getHomepageTotalUsageCount(),
+    getHomepageFeaturedWorkflows({ limit: 6 }),
+    getHomepageFeaturedJobs({ limit: 6 }),
+  ])
+
+  return {
+    categories,
+    tools,
+    totalUsage,
+    featuredWorkflows,
+    featuredJobs,
+    generatedAt: new Date().toISOString(),
+  }
+}

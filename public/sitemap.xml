@@ -56,14 +56,20 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://quickutils.page/tool/exam-document-pdf-compressor</loc>
+    <lastmod>2026-06-02T01:51:36.466Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://quickutils.page/tool/percentage-calculator</loc>
-    <lastmod>2026-06-01T16:40:37.225Z</lastmod>
+    <lastmod>2026-06-01T17:58:43.052Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://quickutils.page/tool/sip-calculator</loc>
-    <lastmod>2026-06-01T16:40:38.370Z</lastmod>
+    <lastmod>2026-06-01T17:58:43.952Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -116,12 +122,6 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/semester-planner</loc>
-    <lastmod>2026-05-26T10:35:38.537Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://quickutils.page/tool/prime-number-checker</loc>
     <lastmod>2026-05-26T10:44:11.040Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -141,7 +141,7 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/discount-calculator</loc>
-    <lastmod>2026-06-01T16:40:37.480Z</lastmod>
+    <lastmod>2026-06-01T17:58:43.249Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -165,7 +165,7 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/compound-interest</loc>
-    <lastmod>2026-06-01T16:40:37.700Z</lastmod>
+    <lastmod>2026-06-01T17:58:43.405Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -219,19 +219,13 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/age-calculator</loc>
-    <lastmod>2026-06-01T17:00:55.870Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://quickutils.page/tool/final-grade-calculator</loc>
-    <lastmod>2026-05-26T10:34:44.312Z</lastmod>
+    <lastmod>2026-06-01T17:58:42.443Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://quickutils.page/tool/simple-interest</loc>
-    <lastmod>2026-06-01T16:40:37.908Z</lastmod>
+    <lastmod>2026-06-01T17:58:43.601Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -297,19 +291,13 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/marks-percentage-calculator</loc>
-    <lastmod>2026-05-30T12:54:26.242Z</lastmod>
+    <lastmod>2026-06-02T01:19:46.929Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://quickutils.page/tool/air-freight-calculator</loc>
     <lastmod>2026-05-29T01:12:46.092Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://quickutils.page/tool/gpa-calculator</loc>
-    <lastmod>2026-05-26T10:34:54.377Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -321,7 +309,7 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/gst-calculator</loc>
-    <lastmod>2026-06-01T16:40:38.100Z</lastmod>
+    <lastmod>2026-06-01T17:58:43.776Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -392,14 +380,20 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://quickutils.page/tool/sgpa-calculator</loc>
+    <lastmod>2026-06-01T17:58:40.409Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://quickutils.page/tool/fuel-expense-calculator-india</loc>
     <lastmod>2026-05-26T10:58:53.095Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/study-time-calculator</loc>
-    <lastmod>2026-05-26T10:35:59.850Z</lastmod>
+    <loc>https://quickutils.page/tool/cgpa-calculator</loc>
+    <lastmod>2026-06-01T17:58:40.648Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -470,12 +464,6 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/bmi-calculator</loc>
-    <lastmod>2026-06-01T16:40:36.743Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://quickutils.page/tool/cbm-calculator</loc>
     <lastmod>2026-05-29T01:12:45.092Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -488,8 +476,26 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://quickutils.page/tool/bmi-calculator</loc>
+    <lastmod>2026-06-01T17:58:42.681Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://quickutils.page/tool/image-converter</loc>
     <lastmod>2026-05-26T10:40:22.718Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://quickutils.page/tool/study-time-calculator</loc>
+    <lastmod>2026-06-01T17:58:39.820Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://quickutils.page/tool/grade-calculator</loc>
+    <lastmod>2026-06-01T23:58:39.640Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -501,7 +507,7 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/tip-calculator</loc>
-    <lastmod>2026-06-01T16:40:37.012Z</lastmod>
+    <lastmod>2026-06-01T17:58:42.889Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -514,6 +520,12 @@
   <url>
     <loc>https://quickutils.page/tool/pregnancy-calculator</loc>
     <lastmod>2026-05-26T10:39:34.567Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://quickutils.page/tool/final-grade-calculator</loc>
+    <lastmod>2026-06-01T17:58:40.055Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -536,6 +548,24 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://quickutils.page/tool/semester-planner</loc>
+    <lastmod>2026-06-01T17:58:39.567Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://quickutils.page/tool/exam-score-calculator</loc>
+    <lastmod>2026-06-01T17:58:39.705Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://quickutils.page/tool/gpa-calculator</loc>
+    <lastmod>2026-06-01T17:58:40.528Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://quickutils.page/tool/world-clock</loc>
     <lastmod>2026-05-26T10:31:53.842Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -550,6 +580,12 @@
   <url>
     <loc>https://quickutils.page/tool/percentage-to-cgpa</loc>
     <lastmod>2026-05-26T10:54:57.092Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://quickutils.page/tool/attendance-calculator</loc>
+    <lastmod>2026-06-01T17:58:40.295Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -692,12 +728,6 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/grade-calculator</loc>
-    <lastmod>2026-05-26T10:35:03.504Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://quickutils.page/tool/pf-calculator-india</loc>
     <lastmod>2026-05-26T10:29:54.340Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -728,22 +758,10 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/exam-document-pdf-compressor</loc>
-    <lastmod>2026-05-27T11:32:35.779Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://quickutils.page/tool/pdf-to-image</loc>
     <lastmod>2026-05-26T18:33:24.385Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://quickutils.page/tool/cgpa-calculator</loc>
-    <lastmod>2026-05-26T10:33:57.286Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://quickutils.page/tool/image-cropper</loc>
@@ -778,12 +796,6 @@
   <url>
     <loc>https://quickutils.page/tool/image-to-exam-pdf</loc>
     <lastmod>2026-05-26T10:53:20.132Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://quickutils.page/tool/exam-score-calculator</loc>
-    <lastmod>2026-05-26T10:34:37.470Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -824,20 +836,8 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickutils.page/tool/sgpa-calculator</loc>
-    <lastmod>2026-05-29T12:22:08.566Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://quickutils.page/tool/image-metadata-viewer</loc>
     <lastmod>2026-05-26T10:41:05.598Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://quickutils.page/tool/attendance-calculator</loc>
-    <lastmod>2026-05-26T10:33:37.889Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -891,7 +891,7 @@
   </url>
   <url>
     <loc>https://quickutils.page/tool/cgpa-to-percentage</loc>
-    <lastmod>2026-05-26T10:34:05.112Z</lastmod>
+    <lastmod>2026-06-01T17:55:52.929Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
