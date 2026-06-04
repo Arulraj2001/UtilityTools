@@ -31,6 +31,27 @@ const generateSlug = (title = '') => {
 
 const escapeRegExp = (value = '') => value.toString().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
+const normalizePostgrestSearchTerm = (value = '') => (
+  String(value || '')
+    .toLowerCase()
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .replace(/[,%()*_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120)
+)
+
+const buildJobSearchOrFilter = (value = '') => {
+  const q = normalizePostgrestSearchTerm(value)
+  if (q.length < 2) return ''
+
+  return [
+    `title.ilike.%${q}%`,
+    `organization.ilike.%${q}%`,
+    `short_description.ilike.%${q}%`,
+  ].join(',')
+}
+
 export const generateUniqueJobSlug = async (slug, excludeId = null) => {
   const normalized = slugify(slug || '')
   if (!normalized) return generateSlug('job')
@@ -919,16 +940,22 @@ export const getAnalyticsEvents = async ({ limit = 1000, sinceDays = 90, eventTy
 
 /* ------------------------------ Jobs API ------------------------------ */
 
-export const getJobs = async ({ published = true, orderBy = 'last_date', ascending = false, limit = 50, category = null, search = null, page = 0, pageSize = 20 } = {}) => {
+export const getJobs = async ({ published = true, orderBy = 'last_date', ascending = false, limit = 50, category = null, search = null, page = 0, pageSize = null } = {}) => {
   let query = supabase.from('jobs').select('*');
   if (published) query = query.eq('status', 'published');
   if (category) query = query.eq('category', category);
-  if (search && search.length > 1) {
-    const q = search.toLowerCase();
-    query = query.or(`title.ilike.%${q}%,organization.ilike.%${q}%,short_description.ilike.%${q}%`);
+  const searchFilter = buildJobSearchOrFilter(search);
+  if (searchFilter) {
+    query = query.or(searchFilter);
   }
   query = sortParams(query, orderBy, ascending);
-  if (limit) query = query.limit(limit);
+  if (Number.isFinite(pageSize) && pageSize > 0) {
+    const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 0;
+    const safePageSize = Math.min(Math.floor(pageSize), 100);
+    query = query.range(safePage * safePageSize, safePage * safePageSize + safePageSize - 1);
+  } else if (limit) {
+    query = query.limit(Math.min(Math.floor(limit), 500));
+  }
   return handleResponse(await query);
 };
 
@@ -1064,8 +1091,14 @@ export const getFeaturedJobs = async ({ limit = 6 } = {}) => {
 
 export const searchJobs = async (term, { limit = 12 } = {}) => {
   if (!term || term.length < 2) return [];
-  const q = term.toLowerCase();
-  const result = await supabase.from('jobs').select('*').eq('status', 'published').or(`title.ilike.%${q}%,organization.ilike.%${q}%,short_description.ilike.%${q}%`).limit(limit);
+  const searchFilter = buildJobSearchOrFilter(term);
+  if (!searchFilter) return [];
+  const result = await supabase
+    .from('jobs')
+    .select('*')
+    .eq('status', 'published')
+    .or(searchFilter)
+    .limit(Math.min(Math.floor(limit), 100));
   return handleResponse(result);
 };
 

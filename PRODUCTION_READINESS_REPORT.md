@@ -1,65 +1,215 @@
 # Production Readiness Report
 
-Audit date: 2026-06-01
+Audit date: 2026-06-03
 
-## Final Recommendation
+## Readiness Verdict
 
-Conditional Go.
+Not production-grade yet.
 
-The production blockers from the hardening audit have been addressed in code. Production launch is acceptable after applying `supabase_production_hardening.sql` and deploying the `ai-provider-proxy` Supabase Edge Function. Without those deployment steps, AI provider calls should be treated as blocked by design.
+The public site can build and read Supabase data, but the AI Job Intelligence system is only partially operational. The main blockers are provider health, missing automated ingestion, missing production cron wiring, failed local Edge Function auth validation, and broad lint/typecheck failures.
 
-## New Score
+## Overall Health Score
 
-Overall production readiness: 85/100.
+Overall: 58 / 100
 
-## Blocker Status
+| Area | Score |
+| --- | ---: |
+| Architecture | 68 |
+| Security | 72 |
+| Reliability | 45 |
+| Performance | 62 |
+| AI Quality | 52 |
+| Deployment | 55 |
 
-| Blocker | Status | Evidence |
-|---|---|---|
-| API keys exposed to browser | Fixed | Browser AI module now calls `ai-provider-proxy`; provider secrets are loaded server-side and provider rows return only `has_api_key`. |
-| Unsanitized HTML | Fixed | Central DOMPurify sanitizer added and applied before save and before render for jobs, blogs, tools, workflows, categories, and AI previews. |
-| Admin authorization | Fixed | Admin routes require `admin_users.is_admin`; Edge Function also verifies admin role before provider access. |
-| AI rate limiting | Fixed | Edge Function enforces daily generation caps, per-admin throttling, provider-test throttling, and prompt length protection. |
-| Quality gates | Fixed | AI draft progression and job publishing are blocked when SEO/spam/duplicate thresholds fail. |
-| Provider stability | Improved | Provider core moved server-side, fallback validation passes, monitor path passes for the active configured provider. |
+## Production Evidence
 
-## Validation Run
+Verified:
 
-- Full build: passed with `npm run build`.
-- AI provider/fallback tests: passed with `node scripts/validate-ai-job-system.mjs`.
-- Provider monitor: passed for active configured provider, Cerebras, at 1854ms.
-- Security checks: browser provider module has no direct provider API calls; all remaining `dangerouslySetInnerHTML` sites use `sanitizeHtml`.
-- Dependency audit: non-breaking fix applied; one high `xlsx` advisory remains with no upstream fix available, plus moderate `quill`/`node-cron` advisories that require breaking upgrades.
-- Quality gate simulation: passed.
-- Targeted lint on hardening files: 0 errors.
-- Full repo lint: still blocked by unrelated existing parser/unused-import issues outside this hardening scope.
+- Supabase URL reachable.
+- Service API can read job and AI tables.
+- Published jobs count: 1.
+- AI provider settings count: 6.
+- AI drafts count: 2.
+- Production build completed before repairs.
+- Sitemap generation loaded jobs and wrote `public/sitemap.xml`.
+- Conversion tests passed after repairs.
 
-## Scores
+Not verified:
 
-| Category | Score |
-|---|---:|
-| Architecture | 88/100 |
-| Database | 87/100 |
-| Providers | 78/100 |
-| Monitoring | 84/100 |
-| AI Generation | 88/100 |
-| SEO | 84/100 |
-| Security | 86/100 |
-| Performance | 80/100 |
-| Compatibility | 86/100 |
-| Overall | 85/100 |
+- Vercel build logs.
+- Vercel runtime logs.
+- Vercel environment variable list.
+- Edge Function deployed version after local code repairs.
+- Post-repair production build, due approval credit rejection.
+- Direct Postgres constraints/indexes, due missing DB connection string.
 
-## Remaining Launch Conditions
+## Deployment Config
 
-1. Run `supabase_production_hardening.sql` in Supabase.
-2. Deploy `supabase/functions/ai-provider-proxy`.
-3. Configure at least two active providers with valid server-side keys.
-4. Re-run live provider tests for Gemini, Groq, DeepSeek, and HuggingFace after keys are active.
-5. Accept or replace the admin-only `xlsx` import/export dependency risk; npm currently reports no fixed version.
-6. Track the unrelated full-repo lint debt separately; it did not block the production build.
+`vercel.json`:
 
-## Go/No-Go
+- static asset cache headers configured
+- `/api/convert/:path*` rewrites to Render conversion service
+- SPA fallback rewrite to `/index.html`
 
-Go after the migration and Edge Function are deployed.
+Missing:
 
-No-Go if provider calls are still routed from the browser or if the rate-limit table/function is not deployed.
+- no Vercel cron entries
+- no deployment-specific AI provider monitor endpoint
+- no CORS origin allowlist for Edge Function
+
+## Edge Function Readiness
+
+`ai-provider-proxy` has important controls:
+
+- POST-only
+- admin auth required
+- provider secrets loaded server-side
+- daily generation limit
+- throttle per admin
+- safe provider response shape
+
+Live local validation failed auth:
+
+- admin sign-in failed with configured credentials
+- Edge Function returned 401 for provider list/model/generation checks
+
+Required:
+
+- verify production admin login
+- rerun with `SUPABASE_ADMIN_ACCESS_TOKEN`
+- deploy updated shared provider core to Supabase Edge Functions
+
+## AI Provider Readiness
+
+Current best provider:
+
+- Cerebras
+
+Problem providers:
+
+- DeepSeek: insufficient balance
+- Gemini: quota/permission
+- Groq: rate limited for generation
+- OpenRouter: partial, slow/timeouts
+- HuggingFace: network/fetch failure
+
+Fix applied:
+
+- health-aware fallback now prefers healthy providers.
+
+Still needed:
+
+- deploy updated Edge shared provider core
+- correct provider plans/keys
+- monitor provider health automatically
+
+## Job Fetching Readiness
+
+Current state:
+
+- No automated external job API adapters found.
+- Official source URLs exist but are not checked.
+- Live reachability was 4/8 sources from this environment.
+
+Conclusion:
+
+- The system does not currently fetch jobs automatically from external providers.
+- It supports admin-assisted AI drafting from manually entered or pasted source data.
+
+## Frontend Readiness
+
+Working:
+
+- public routes exist for jobs list/detail/category
+- job cards display title, organization, location, deadline, salary, status
+- detail page sanitizes HTML before rendering
+
+Fixed:
+
+- load-more path added
+- backend range support added
+- search filter hardening added
+
+Still needed:
+
+- server-side quick filters
+- sort controls
+- stronger empty/error states for partial source/provider failures
+- mobile screenshot verification after build rerun
+
+## Cron Readiness
+
+Not ready.
+
+Findings:
+
+- `node-cron` monitor script exists.
+- package scripts exist for provider monitoring.
+- Vercel cron is not configured.
+- no production scheduler logs were available.
+
+Required:
+
+- add a secure scheduled monitor runner
+- store cron execution logs
+- alert on provider failure/quota
+
+## CI/QA Readiness
+
+Passed:
+
+- conversion tests
+- AI validation before repairs
+- build before repairs
+
+Failed:
+
+- lint: 109 existing errors
+- typecheck: broad JS checking failures
+
+Blocked:
+
+- post-repair build and AI validation due approval credit exhaustion
+
+Required:
+
+- make lint/typecheck meaningful and green
+- add CI for build, lint, focused AI tests, and migration checks
+
+## Production Launch Gate
+
+Do not treat this AI Job Intelligence system as production-grade until:
+
+1. `npm run build` passes after the current fixes.
+2. `node scripts/validate-ai-job-system.mjs` passes after the current fixes.
+3. Supabase Edge Function is redeployed with updated shared provider core.
+4. Valid admin auth token verifies `ai-provider-proxy`.
+5. Provider config is updated so at least one primary and one fallback provider pass draft and SEO generation.
+6. `supabase_job_intelligence_query_hardening.sql` is applied.
+7. Cron/provider monitor is deployed and logs are reviewed.
+8. Lint/typecheck failures are triaged or scoped so CI is trustworthy.
+
+## Priority Next Steps
+
+Critical:
+
+- Fix production AI provider health and Edge Function auth validation.
+- Deploy updated Supabase Edge Function shared provider code.
+- Apply database hardening migration.
+
+High:
+
+- Add a real scheduled monitor.
+- Remove `VITE_GROQ_API_KEY`.
+- Add automated ingestion only after SSRF-safe fetch rules are implemented.
+
+Medium:
+
+- Add JSON schema validation for AI responses.
+- Implement server-side filters/sorting for public jobs.
+- Add direct DB connection for constraints/index auditing.
+
+Low:
+
+- Re-run Lighthouse and screenshots after deploy.
+- Add bundle analysis and secret scan to CI.

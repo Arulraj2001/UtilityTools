@@ -43,6 +43,21 @@ const redactSensitive = (value) => {
 const normalizeErrorMessage = (err) =>
   redactSensitive(err?.message || err?.body || String(err || 'Unknown error'))
 
+const getRuntimeEnv = (name) => {
+  if (typeof process !== 'undefined' && process?.env?.[name]) return process.env[name]
+  if (typeof Deno !== 'undefined' && typeof Deno.env?.get === 'function') return Deno.env.get(name)
+  return ''
+}
+
+const getOpenRouterReferer = () => (
+  getRuntimeEnv('OPENROUTER_SITE_URL') ||
+  getRuntimeEnv('SITE_URL') ||
+  getRuntimeEnv('PUBLIC_SITE_URL') ||
+  getRuntimeEnv('VITE_SITE_URL') ||
+  globalThis?.location?.origin ||
+  ''
+)
+
 export const classifyProviderError = (err) => {
   const status = Number(err?.status || 0)
   const message = `${err?.message || ''} ${err?.body || ''}`.toLowerCase()
@@ -184,9 +199,16 @@ const capMaxTokens = (requestedTokens, modelInfo) => {
   return requestedTokens
 }
 
-const GROQ_MAX_REQUEST_TOKENS = 4000
+const GROQ_MAX_REQUEST_TOKENS = 2800
 const GROQ_MAX_REQUEST_CHARS = GROQ_MAX_REQUEST_TOKENS * 4
-const GROQ_HIGH_WATERMARK_TOKENS = 6000
+const GROQ_HIGH_WATERMARK_TOKENS = 5000
+
+const PROVIDER_MAX_OUTPUT_TOKENS = {
+  Groq: 1200,
+  OpenRouter: 2000,
+}
+
+const providerMaxOutputTokens = (providerName) => PROVIDER_MAX_OUTPUT_TOKENS[providerName] || 8000
 
 const estimateTokens = (text = '') => Math.max(1, Math.ceil(String(text).length / 4))
 
@@ -227,8 +249,11 @@ const prepareGroqPrompt = (prompt) => {
 }
 
 const callOpenAICompat = async (apiKey, model, prompt, baseUrl, providerName, extraHeaders = {}, options = {}) => {
-  const modelInfo = await fetchOpenAIModelInfo(apiKey, model, baseUrl, providerName, options.signal)
-  const maxTokens = capMaxTokens(8000, modelInfo)
+  const shouldFetchModelInfo = !(providerName === 'OpenRouter' && model === 'openrouter/free')
+  const modelInfo = shouldFetchModelInfo
+    ? await fetchOpenAIModelInfo(apiKey, model, baseUrl, providerName, options.signal)
+    : null
+  const maxTokens = capMaxTokens(providerMaxOutputTokens(providerName), modelInfo)
   const timings = { fetchStart: null, fetchEnd: null, readEnd: null }
   let res
   try {
@@ -334,7 +359,7 @@ const callDeepSeek = (apiKey, model, prompt, baseUrl, options = {}) =>
 
 const callOpenRouter = async (apiKey, model, prompt, _baseUrl, options = {}) => {
   const endpoint = 'https://openrouter.ai/api/v1'
-  const referer = (typeof window !== 'undefined' && window?.location?.origin) || ''
+  const referer = getOpenRouterReferer()
   const insight = {
     provider: 'OpenRouter',
     endpoint,
@@ -352,7 +377,7 @@ const callOpenRouter = async (apiKey, model, prompt, _baseUrl, options = {}) => 
       endpoint,
       'OpenRouter',
       {
-        'HTTP-Referer': referer,
+        ...(referer ? { 'HTTP-Referer': referer } : {}),
         'X-Title': 'AI Job Intelligence',
       },
       options
@@ -553,10 +578,28 @@ export const chooseProviderModel = (provider = {}) => {
   return candidates[0] || ''
 }
 
+const providerHealthPenalty = (provider = {}) => {
+  const status = String(provider.health_status || 'unknown').toLowerCase()
+  const lastError = String(provider.stats?.last_error || '').toLowerCase()
+
+  if (status === 'healthy') return 0
+  if (status === 'degraded') return 10
+  if (/insufficient balance|payment required|permission_denied|denied access|invalid api key|unauthorized|forbidden|quota/.test(lastError)) {
+    return 80
+  }
+  if (/rate.?limit|request too large|too large|timeout|timed out|network|fetch failed/.test(lastError)) {
+    return 35
+  }
+  if (status === 'down') return 50
+  return 20
+}
+
 export const sortProvidersForFallback = (providers = []) => (
   [...providers]
     .filter(p => p?.is_active && p?.api_key)
     .sort((a, b) => {
+      const healthDelta = providerHealthPenalty(a) - providerHealthPenalty(b)
+      if (healthDelta !== 0) return healthDelta
       const aPriority = Number.isFinite(a.priority) ? a.priority : DEFAULT_PROVIDER_PRIORITY[a.provider_name] || 99
       const bPriority = Number.isFinite(b.priority) ? b.priority : DEFAULT_PROVIDER_PRIORITY[b.provider_name] || 99
       return aPriority - bPriority

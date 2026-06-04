@@ -39,6 +39,18 @@ const classify = (source, result, err) => {
   return null
 }
 
+const recommendProviderState = (providerResult) => {
+  const testOk = !!providerResult.testProvider?.ok
+  const draftOk = !!providerResult.aiDraft?.ok
+  const seoOk = !!providerResult.seo?.ok
+  const modelsOk = !!providerResult.fetchModels?.ok
+
+  if (testOk && draftOk && seoOk) return 'active'
+  if (testOk && (draftOk || seoOk)) return 'standby'
+  if (modelsOk && (providerResult.testProvider?.errorType === 'rate_limit')) return 'standby'
+  return 'inactive'
+}
+
 const run = async () => {
   const { data: providers, error } = await supabase.from('ai_provider_settings').select('*').order('priority')
   if (error) throw error
@@ -68,6 +80,7 @@ const run = async () => {
       providerResult.fetchModels = { ok: false, reason: 'configuration' }
       providerResult.aiDraft = { ok: false, reason: 'configuration' }
       providerResult.seo = { ok: false, reason: 'configuration' }
+      providerResult.recommendedState = recommendProviderState(providerResult)
       results.push(providerResult)
       continue
     }
@@ -141,6 +154,7 @@ const run = async () => {
       }
     }
 
+    providerResult.recommendedState = recommendProviderState(providerResult)
     results.push(providerResult)
   }
 

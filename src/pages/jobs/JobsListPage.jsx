@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   BriefcaseBusiness,
@@ -42,6 +42,7 @@ const jobsDescription =
 export default function JobsListPage() {
   const [search, setSearch] = useState('')
   const [searchParams] = useSearchParams()
+  const [pageSize, setPageSize] = useState(20)
 
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
@@ -53,11 +54,13 @@ export default function JobsListPage() {
   const {
     data: jobs = [],
     isLoading,
+    isFetching,
     isError,
     error,
   } = useJobs({
     search,
     category: categoryParam,
+    pageSize,
     enabled: jobsEnabled,
   })
 
@@ -78,6 +81,10 @@ export default function JobsListPage() {
         .map((item) => item.label),
     [searchParams]
   )
+
+  useEffect(() => {
+    setPageSize(20)
+  }, [search, categoryParam, searchParams.toString()])
 
   const results = useMemo(() => {
     const filters = {
@@ -206,6 +213,8 @@ export default function JobsListPage() {
       url: `${SITE_URL}/jobs/${encodeURIComponent(job.slug)}`,
     }),
   }), [results])
+
+  const hasMoreServerResults = jobs.length >= pageSize
 
   if (!jobsEnabled) {
     return (
@@ -477,14 +486,28 @@ export default function JobsListPage() {
               </div>
             ) : results.length > 0 ? (
               
-              <div className="space-y-4">
-                {results.map((job) => (
-                  <JobCard
-                    key={job.id}
-                    job={job}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="space-y-4">
+                  {results.map((job) => (
+                    <JobCard
+                      key={job.id}
+                      job={job}
+                    />
+                  ))}
+                </div>
+
+                {hasMoreServerResults && (
+                  <div className="mt-6 flex justify-center">
+                    <Button
+                      variant="outline"
+                      disabled={isFetching}
+                      onClick={() => setPageSize((current) => current + 20)}
+                    >
+                      {isFetching ? 'Loading...' : 'Load More Jobs'}
+                    </Button>
+                  </div>
+                )}
+              </>
 
             ) : search.trim() ? (
               <SearchResultsEmptyState

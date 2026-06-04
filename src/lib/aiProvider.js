@@ -108,10 +108,28 @@ export const chooseProviderModel = (provider = {}) => {
   return candidates[0] || ''
 }
 
+const providerHealthPenalty = (provider = {}) => {
+  const status = String(provider.health_status || 'unknown').toLowerCase()
+  const lastError = String(provider.stats?.last_error || '').toLowerCase()
+
+  if (status === 'healthy') return 0
+  if (status === 'degraded') return 10
+  if (/insufficient balance|payment required|permission_denied|denied access|invalid api key|unauthorized|forbidden|quota/.test(lastError)) {
+    return 80
+  }
+  if (/rate.?limit|request too large|too large|timeout|timed out|network|fetch failed/.test(lastError)) {
+    return 35
+  }
+  if (status === 'down') return 50
+  return 20
+}
+
 export const sortProvidersForFallback = (providers = []) => (
   [...providers]
     .filter((provider) => provider?.is_active && hasStoredKey(provider))
     .sort((a, b) => {
+      const healthDelta = providerHealthPenalty(a) - providerHealthPenalty(b)
+      if (healthDelta !== 0) return healthDelta
       const aPriority = Number.isFinite(a.priority) ? a.priority : DEFAULT_PROVIDER_PRIORITY[a.provider_name] || 99
       const bPriority = Number.isFinite(b.priority) ? b.priority : DEFAULT_PROVIDER_PRIORITY[b.provider_name] || 99
       return aPriority - bPriority
