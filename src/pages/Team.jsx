@@ -40,20 +40,20 @@ const standards = [
 
 const teamMembers = [
   {
-    name: 'Sanjay Krishnan MCA',
+    name: 'Sanjay Krishnan',
     role: 'Content dev, SEO engineer',
   },
   {
-    name: 'Vigneshwaran MCA',
+    name: 'Vigneshwaran',
     role: 'Junior Software Developer',
   },
   {
-    name: 'Gayatri MCA',
+    name: 'Gayatri',
     role: 'Junior Software Developer',
   },
   {
-    name: 'Santhosh Kumar',
-    role: 'Digital Marketing Specialist',
+    name: 'Abiesh S',
+    role: 'Design and content support',
   }
 ]
 
