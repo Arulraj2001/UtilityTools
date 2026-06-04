@@ -51,6 +51,10 @@ const teamMembers = [
     name: 'Gayatri MCA',
     role: 'Junior Software Developer',
   },
+  {
+    name: 'Santhosh Kumar',
+    role: 'Digital Marketing Specialist',
+  }
 ]
 
 export default function Team() {
@@ -61,7 +65,7 @@ export default function Team() {
         description={pageDescription}
         path="/team"
         ogTitle="QuickUtils Team"
-      ogDescription="Learn about Sanjay Krishnan, Learnithm, and the editorial and development standards behind QuickUtils."
+      ogDescription="Learn about Arulraj S, Learnithm, and the editorial and development standards behind QuickUtils."
       />
 
       {/* HERO */}
@@ -86,7 +90,7 @@ export default function Team() {
             <p className="text-foreground font-semibold text-lg">{FOUNDER_NAME}</p>
 
             <p>
-              Sanjay Krishnan is the founder of {ORGANIZATION_NAME} and leads QuickUtils as a
+              {FOUNDER_NAME} is the founder of {ORGANIZATION_NAME} and leads QuickUtils as a
               practical online tools project for students, creators, developers, job applicants,
               sellers, and everyday web users.
             </p>

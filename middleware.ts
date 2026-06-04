@@ -58,7 +58,7 @@ const STATIC_BLOG_SLUGS = new Set([
   'base64-encoding-explained',
 ])
 
-const STATIC_AUTHOR_SLUGS = new Set(['sanjay-krishnan'])
+const STATIC_AUTHOR_SLUGS = new Set(['arulraj-s'])
 const RETIRED_TOOL_SLUGS = new Set(['pdf-to-word'])
 
 export const config = {

@@ -192,7 +192,7 @@ export default function About() {
         <section className="rounded-xl border border-border/60 border-l-4 border-l-primary/40 bg-card/80 p-6 mb-8">
           <h2 className="text-xl font-semibold mb-3">Trust, review, and transparency</h2>
           <p className="text-muted-foreground leading-relaxed mb-5">
-            QuickUtils is operated by Learnithm and led by Sanjay Krishnan. The public trust
+            QuickUtils is operated by Learnithm and led by Arulraj S. The public trust
             pages below explain who is responsible for the site, how tool and content quality is
             reviewed, and how users can report mistakes or accessibility barriers.
           </p>

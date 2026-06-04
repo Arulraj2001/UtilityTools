@@ -96,14 +96,14 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://www.quickutils.page/tool/youtube-money-calculator</loc>
-    <lastmod>2026-06-04T04:08:33.923Z</lastmod>
+    <loc>https://www.quickutils.page/tool/packaging-cost-calculator</loc>
+    <lastmod>2026-06-02T23:25:14.122Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://www.quickutils.page/tool/packaging-cost-calculator</loc>
-    <lastmod>2026-06-02T23:25:14.122Z</lastmod>
+    <loc>https://www.quickutils.page/tool/youtube-money-calculator</loc>
+    <lastmod>2026-06-04T08:41:07.788Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -156,14 +156,14 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://www.quickutils.page/tool/url-encoder</loc>
-    <lastmod>2026-06-04T04:06:45.326Z</lastmod>
+    <loc>https://www.quickutils.page/tool/percentage-calculator</loc>
+    <lastmod>2026-06-04T08:41:31.813Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://www.quickutils.page/tool/percentage-calculator</loc>
-    <lastmod>2026-06-04T04:07:37.253Z</lastmod>
+    <loc>https://www.quickutils.page/tool/url-encoder</loc>
+    <lastmod>2026-06-04T04:06:45.326Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -235,7 +235,7 @@
   </url>
   <url>
     <loc>https://www.quickutils.page/tool/ovulation-calculator</loc>
-    <lastmod>2026-05-26T10:39:27.181Z</lastmod>
+    <lastmod>2026-06-04T08:29:41.755Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -284,12 +284,6 @@
   <url>
     <loc>https://www.quickutils.page/tool/duplicate-remover</loc>
     <lastmod>2026-06-02T05:26:49.618Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://www.quickutils.page/tool/ideal-weight-calculator</loc>
-    <lastmod>2026-05-26T10:39:16.454Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -385,7 +379,7 @@
   </url>
   <url>
     <loc>https://www.quickutils.page/tool/bmr-calculator</loc>
-    <lastmod>2026-05-26T10:38:40.712Z</lastmod>
+    <lastmod>2026-06-04T08:29:42.304Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -510,6 +504,12 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://www.quickutils.page/tool/ideal-weight-calculator</loc>
+    <lastmod>2026-06-04T08:29:42.118Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://www.quickutils.page/tool/sgpa-calculator</loc>
     <lastmod>2026-06-04T04:06:05.844Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -624,16 +624,16 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://www.quickutils.page/tool/bmi-calculator</loc>
+    <lastmod>2026-06-04T08:29:43.052Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://www.quickutils.page/tool/merge-pdf</loc>
     <lastmod>2026-06-04T04:13:43.114Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.quickutils.page/tool/bmi-calculator</loc>
-    <lastmod>2026-06-01T17:58:42.681Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://www.quickutils.page/tool/seller-profit-estimator</loc>
@@ -655,7 +655,7 @@
   </url>
   <url>
     <loc>https://www.quickutils.page/tool/age-calculator</loc>
-    <lastmod>2026-06-04T04:06:53.953Z</lastmod>
+    <lastmod>2026-06-04T08:41:19.478Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -679,7 +679,7 @@
   </url>
   <url>
     <loc>https://www.quickutils.page/tool/pregnancy-calculator</loc>
-    <lastmod>2026-05-26T10:39:34.567Z</lastmod>
+    <lastmod>2026-06-04T08:29:41.957Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -709,7 +709,7 @@
   </url>
   <url>
     <loc>https://www.quickutils.page/tool/semester-planner</loc>
-    <lastmod>2026-06-04T04:12:34.986Z</lastmod>
+    <lastmod>2026-06-04T08:41:45.499Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -751,7 +751,7 @@
   </url>
   <url>
     <loc>https://www.quickutils.page/tool/body-fat-calculator</loc>
-    <lastmod>2026-05-26T10:38:55.038Z</lastmod>
+    <lastmod>2026-06-04T08:29:42.665Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -792,12 +792,6 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://www.quickutils.page/tool/calorie-calculator</loc>
-    <lastmod>2026-05-26T10:39:04.155Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://www.quickutils.page/tool/roman-numerals</loc>
     <lastmod>2026-06-04T04:09:48.138Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -812,6 +806,12 @@
   <url>
     <loc>https://www.quickutils.page/tool/compress-pdf</loc>
     <lastmod>2026-06-04T04:14:02.072Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.quickutils.page/tool/calorie-calculator</loc>
+    <lastmod>2026-06-04T08:29:42.845Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -936,14 +936,14 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://www.quickutils.page/tool/sleep-calculator</loc>
-    <lastmod>2026-05-26T10:39:43.810Z</lastmod>
+    <loc>https://www.quickutils.page/tool/salary-hike-calculator-india</loc>
+    <lastmod>2026-06-04T04:09:54.987Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://www.quickutils.page/tool/salary-hike-calculator-india</loc>
-    <lastmod>2026-06-04T04:09:54.987Z</lastmod>
+    <loc>https://www.quickutils.page/tool/sleep-calculator</loc>
+    <lastmod>2026-06-04T08:29:41.540Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -984,14 +984,14 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://www.quickutils.page/tool/water-intake-calculator</loc>
-    <lastmod>2026-05-26T10:39:52.482Z</lastmod>
+    <loc>https://www.quickutils.page/tool/social-media-roi-calculator</loc>
+    <lastmod>2026-06-04T04:08:22.962Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://www.quickutils.page/tool/social-media-roi-calculator</loc>
-    <lastmod>2026-06-04T04:08:22.962Z</lastmod>
+    <loc>https://www.quickutils.page/tool/water-intake-calculator</loc>
+    <lastmod>2026-06-04T08:29:42.476Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
