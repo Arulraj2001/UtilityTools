@@ -6,211 +6,201 @@ Audit date: 2026-06-04
 
 NOT READY FOR PHASE 2
 
-Deployment readiness score: 35 / 100
+Deployment readiness score: 82 / 100
 
-No fetchers, ingestion architecture, or AI extraction code were modified in this closure pass. The only final Phase 1.8 change is this deployment-readiness report.
+No fetchers were modified. No ingestion architecture was changed. No AI extraction was built.
 
-Fresh command validation for this pass was blocked because the workspace approval system rejected every required escalated command with an out-of-credits error, while sandboxed PowerShell execution is unavailable in this environment. The findings below use the last successful Phase 1.7 validation evidence from the same day and explicitly mark unverified deployment checks.
+Local deployment gates now pass for admin authentication, provider proxy access, provider proxy AI generation, local cron secret validation, cron GET handling, and duplicate execution guard. The remaining blocker is Vercel deployment environment configuration: the deployed cron endpoint accepts the real cron secret, but then returns `500` because Supabase server environment values are missing in the Vercel function environment.
 
 ## Gate Summary
 
-| Gate | Required | Status |
+| Gate | Status | Evidence |
 | --- | --- | --- |
-| Supabase Auth user exists | yes | failed in last verified probe |
-| `admin_users` role mapping exists | yes | failed in last verified probe |
-| `is_admin = true` | yes | failed in last verified probe |
-| Admin login works | yes | failed in last verified probe |
-| Admin access token generated | yes | failed in last verified probe |
-| Provider proxy `listProviders` works with admin token | yes | blocked |
-| Provider proxy `callAI` works with admin token | yes | blocked |
-| Local cron secret configured | yes | failed in last verified probe |
-| Vercel cron secret configured | yes | not verified |
-| Cron GET execution succeeds with real secret | yes | not verified |
-| Deployment environment variables verified | yes | not verified |
+| Supabase Auth user exists | passed | Auth user found for configured admin email. |
+| `admin_users` role mapping exists | passed | Admin row exists. |
+| `is_admin = true` | passed | Admin row has `is_admin = true`. |
+| Login works | passed | Supabase password login succeeded. |
+| Access token generated | passed | Admin session token generated. |
+| Provider proxy `listProviders` | passed | HTTP `200`, 6 providers returned. |
+| Provider proxy metadata | passed | Metadata includes provider, model, priority, health, key-presence, latency, and stats fields. |
+| Provider proxy `callAI` | passed | HTTP `200`, OpenRouter returned content. |
+| Local cron secret configured | passed | `JOB_FETCH_CRON_SECRET` and `CRON_SECRET` are configured locally. |
+| Local cron invalid secret fails | passed | `401 Invalid cron secret`. |
+| Local cron GET succeeds | passed | `200 success` with `maxSources: 0`. |
+| Local duplicate execution guard | passed | `202 skipped` when a running sentinel exists. |
+| Vercel cron secret configured | passed | Deployed endpoint returns `401` for invalid secret and proceeds past auth with real secret. |
+| Vercel cron GET execution | failed | Real-secret GET returns `500 Supabase service environment is not configured.` |
+| Vercel deployment env verified | failed | Supabase server env is missing or incomplete in deployed function environment. |
+
+Final decision: NOT READY FOR PHASE 2
 
 ## Admin Authentication Setup
 
-Last verified evidence:
+Validation command:
+
+```powershell
+node scripts\phase1-7-rc-probe.mjs all
+```
+
+Evidence:
 
 | Check | Result |
 | --- | --- |
-| Supabase URL configured | yes |
-| Supabase service role key configured | yes |
-| Supabase anon key configured | yes |
+| Supabase URL configured locally | yes |
+| Supabase service role key configured locally | yes |
+| Supabase anon key configured locally | yes |
 | Admin email configured | yes |
 | Admin password configured | yes |
-| Admin password length | 9 |
-| Admin password looks placeholder/weak | yes |
-| Supabase Auth user exists | no |
-| `admin_users` record exists | no |
-| `is_admin = true` | no |
-| Login succeeds | no |
-| Login error | `Invalid login credentials` |
-| Access token generated | no |
+| Supabase Auth user exists | yes |
+| Email confirmed | yes |
+| `admin_users` record exists | yes |
+| `is_admin = true` | yes |
+| Login succeeds | yes |
+| Access token generated | yes |
 
-Admin authentication is not release-ready.
-
-Exact repair instructions:
-
-1. Set a real admin email and a strong password of at least 16 characters.
-2. In Supabase Dashboard, create or update the Supabase Auth user for that email.
-3. Confirm the Auth user's email.
-4. Copy the Auth user UUID.
-5. Run this in Supabase SQL Editor:
-
-```sql
-insert into public.admin_users (id, is_admin)
-values ('<auth_user_uuid>', true)
-on conflict (id)
-do update set is_admin = true;
-```
-
-6. Update local and deployment env:
-
-```env
-VITE_ADMIN_USERNAME=<admin_email>
-VITE_ADMIN_PASSWORD=<same_supabase_auth_password>
-```
-
-7. Rerun admin validation and confirm:
-
-- Supabase Auth user exists.
-- `admin_users` record exists.
-- `is_admin = true`.
-- Login succeeds.
-- Access token is generated.
+Note: the configured admin password passed login, but the probe still classified its length/pattern as weak. Rotate it before production launch even though Phase 1.8 readiness is currently blocked by Vercel env, not local admin auth.
 
 ## Provider Proxy Validation
 
-Status: blocked.
+Validation source: admin session token generated by the local login flow.
 
-Required checks were not possible because no valid admin access token can be generated until admin auth is repaired.
-
-Required after admin repair:
-
-```bash
-curl -X POST "$SUPABASE_URL/functions/v1/ai-provider-proxy" \
-  -H "Authorization: Bearer $SUPABASE_ADMIN_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"action":"listProviders"}'
-```
-
-Expected:
-
-- HTTP `200`.
-- Provider metadata returned.
-- Provider API keys are not exposed.
-- Provider metadata includes active status, model, health, priority, and key-presence flag.
-
-Then validate:
-
-```bash
-curl -X POST "$SUPABASE_URL/functions/v1/ai-provider-proxy" \
-  -H "Authorization: Bearer $SUPABASE_ADMIN_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"action":"callAI","prompt":"Return JSON: {\"ok\":true}","timeoutMs":45000}'
-```
-
-Expected:
-
-- HTTP `200`.
-- AI response content returned.
-- Provider attempt metadata returned.
-
-## Cron Secret Validation
-
-Last verified real local env state:
+### `listProviders`
 
 | Check | Result |
 | --- | --- |
-| `JOB_FETCH_CRON_SECRET` configured locally | no |
-| `CRON_FETCH_SECRET` configured locally | no |
-| `CRON_SECRET` configured locally | no |
-| Any real local cron secret configured | no |
+| HTTP status | `200` |
+| Providers returned | 6 |
+| Providers with saved keys | 6 |
+| Error | none |
 
-Last verified temporary-secret code validation:
+Returned safe metadata fields:
 
-| Scenario | Result |
+- `available_models`
+- `base_url`
+- `has_api_key`
+- `health_status`
+- `id`
+- `is_active`
+- `last_latency_ms`
+- `last_tested`
+- `model`
+- `priority`
+- `provider_name`
+- `stats`
+- `updated_at`
+
+Provider API key values were not exposed.
+
+### `callAI`
+
+| Check | Result |
 | --- | --- |
+| HTTP status | `200` |
+| Response content returned | yes |
+| Successful provider | OpenRouter |
+| Error | none |
+
+Provider attempts:
+
+| Provider | Result | Error Type |
+| --- | --- | --- |
+| DeepSeek | failed | quota |
+| Gemini | failed | auth |
+| Groq | failed | rate_limit |
+| OpenRouter | passed | none |
+
+Provider proxy is locally validated and ready for Phase 2 from an auth/access standpoint.
+
+## Local Cron Secret Validation
+
+Validation command:
+
+```powershell
+node scripts\phase1-7-rc-probe.mjs all
+```
+
+Evidence:
+
+| Check | Result |
+| --- | --- |
+| `JOB_FETCH_CRON_SECRET` configured locally | yes |
+| `CRON_SECRET` configured locally | yes |
 | Invalid secret | `401 Invalid cron secret` |
-| GET with temporary configured secret | `200 success` |
-| Duplicate execution guard | `202 skipped` |
+| GET with configured secret | `200 success` |
+| GET test source count | 0 |
+| Duplicate guard | `202 skipped` |
 | Running validation sentinels after cleanup | none |
 
-Cron code is compatible, but deployment readiness is not satisfied because a real local and Vercel cron secret has not been verified.
+Deployment-only hardening applied:
 
-Required repair:
-
-1. Generate one high-entropy secret.
-2. Set the same value locally:
-
-```env
-JOB_FETCH_CRON_SECRET=<secret>
-CRON_SECRET=<secret>
-```
-
-3. Set the same value in Vercel Production:
-
-```bash
-vercel env add CRON_SECRET production
-vercel env add JOB_FETCH_CRON_SECRET production
-```
-
-4. Validate local GET:
-
-```bash
-curl -X GET http://localhost:5173/api/cron/fetch-jobs \
-  -H "Authorization: Bearer $CRON_SECRET"
-```
-
-5. Validate invalid secret returns `401`.
-6. Validate duplicate execution guard returns `202` when a recent running fetch exists.
+- `api/cron/fetch-jobs.js` now accepts `maxSources` and `sourceIds` from query params for safe GET validation.
+- This allows `GET /api/cron/fetch-jobs?maxSources=0` to validate cron auth without running full ingestion.
 
 ## Vercel Deployment Validation
 
-Status: not verified.
-
-Last verified local deployment evidence:
+Local Vercel tooling state:
 
 | Check | Result |
 | --- | --- |
 | Vercel CLI available locally | no |
 | Local `.vercel` project metadata exists | no |
 | `VERCEL_TOKEN` configured locally | no |
-| Vercel project env variables verified | no |
-| Vercel cron schedule verified | no |
+| `VERCEL_PROJECT_ID` configured locally | no |
+| `VERCEL_ORG_ID` configured locally | no |
 
-Required Vercel checks:
+Production endpoint checks:
+
+| Request | Result |
+| --- | --- |
+| `GET https://www.quickutils.page/api/cron/fetch-jobs?maxSources=0` with invalid secret | `401 Invalid cron secret` |
+| `GET https://www.quickutils.page/api/cron/fetch-jobs?maxSources=0` with real local secret | `500 Supabase service environment is not configured.` |
+
+Interpretation:
+
+- The deployed cron endpoint exists.
+- A cron secret is configured in the deployed environment.
+- The real local secret matches the deployed cron secret closely enough to pass cron auth.
+- The deployed Vercel function is missing at least one required Supabase server env value: `SUPABASE_URL` or `VITE_SUPABASE_URL`, and/or `SUPABASE_SERVICE_ROLE_KEY`.
+
+Required Vercel repair:
+
+1. In Vercel Production environment variables, set:
+
+```env
+SUPABASE_URL=<supabase_project_url>
+SUPABASE_SERVICE_ROLE_KEY=<supabase_service_role_key>
+CRON_SECRET=<same_secret_used_locally>
+JOB_FETCH_CRON_SECRET=<same_secret_used_locally>
+```
+
+2. Redeploy the Vercel project so serverless functions receive the updated env.
+3. Re-test:
 
 ```bash
-vercel env ls production
-vercel inspect <deployment-url>
+curl -X GET "https://www.quickutils.page/api/cron/fetch-jobs?maxSources=0" \
+  -H "Authorization: Bearer $CRON_SECRET"
 ```
 
-Verify these production variables:
+Expected:
 
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `CRON_SECRET`
-- `JOB_FETCH_CRON_SECRET`
-- AI provider server-side secrets required by `ai-provider-proxy`
+- HTTP `200`.
+- JSON body with `status: success`.
+- `totals.sources: 0`.
 
-Vercel cron schedule should be added only after admin and provider proxy gates pass:
+4. Keep the invalid-secret check:
 
-```json
-{
-  "crons": [
-    {
-      "path": "/api/cron/fetch-jobs",
-      "schedule": "0 */6 * * *"
-    }
-  ]
-}
+```bash
+curl -X GET "https://www.quickutils.page/api/cron/fetch-jobs?maxSources=0" \
+  -H "Authorization: Bearer invalid"
 ```
 
-## Build Status
+Expected:
 
-Last verified Phase 1.7 build after final cron hardening:
+- HTTP `401`.
+
+## Build And Focused Tests
+
+Build command:
 
 ```powershell
 npm run build
@@ -226,21 +216,32 @@ Evidence:
 - Jobs loaded: 1.
 - Total sitemap URLs: 222.
 
-Build was not rerun during Phase 1.8 because command execution requiring approval was rejected by the workspace approval system.
+Focused tests:
+
+```powershell
+node --test src\jobs\fetchers\baseFetcher.test.js src\jobs\duplicateDetector.test.js src\jobs\jobFetchService.test.js src\jobs\titleNormalizer.test.js
+```
+
+Result:
+
+- 10 tests passed.
+- 0 tests failed.
+
+## Files Changed In Phase 1.8
+
+| File | Change |
+| --- | --- |
+| `scripts/phase1-7-rc-probe.mjs` | Added provider proxy `callAI` validation and deployment env presence summary. |
+| `api/cron/fetch-jobs.js` | Added safe GET query support for `maxSources` and `sourceIds`. |
+| `PHASE1_DEPLOYMENT_READINESS.md` | Updated final deployment readiness evidence and verdict. |
 
 ## Closure Decision
 
 NOT READY FOR PHASE 2
 
-Blocking issues:
+Only one release blocker remains:
 
-1. Admin Auth user is missing.
-2. `admin_users` role mapping is missing.
-3. Admin login fails.
-4. No admin access token is available.
-5. Provider proxy `listProviders` is not validated with a valid admin token.
-6. Provider proxy `callAI` is not validated with a valid admin token.
-7. Real local cron secret is not configured.
-8. Vercel cron secret and deployment env variables are not verified.
-9. Cron GET execution with a real deployed secret is not verified.
+1. Vercel production function environment is missing Supabase server configuration. The deployed cron endpoint fails with `500 Supabase service environment is not configured.` after accepting the real cron secret.
+
+After setting `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel Production and redeploying, rerun the production cron GET validation. If it returns `200 success` with `maxSources=0`, Phase 1 will be deployment-ready for Phase 2.
 

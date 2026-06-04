@@ -50,6 +50,7 @@ const loadAdminState = async () => {
     loginError: null,
     accessTokenGenerated: false,
     providerProxy: null,
+    providerProxyCallAI: null,
   };
 
   if (!url || !serviceKey || !anonKey || !email || !password) return result;
@@ -116,6 +117,42 @@ const loadAdminState = async () => {
       error: body.error || null,
       code: body.code || null,
     };
+
+    if (response.ok) {
+      const aiResponse = await fetch(`${url.replace(/\/$/, '')}/functions/v1/ai-provider-proxy`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'callAI',
+          prompt: 'Return a compact JSON object: {"ok":true}.',
+          timeoutMs: 45_000,
+        }),
+      });
+      let aiBody = {};
+      try {
+        aiBody = await aiResponse.json();
+      } catch {
+        aiBody = {};
+      }
+
+      result.providerProxyCallAI = {
+        status: aiResponse.status,
+        ok: aiResponse.ok,
+        hasContent: Boolean(aiBody.content || aiBody.text || aiBody.result || aiBody.response),
+        provider: aiBody.provider || aiBody.providerName || null,
+        attempts: Array.isArray(aiBody.attempts) ? aiBody.attempts.map((attempt) => ({
+          providerName: attempt.providerName || attempt.provider?.provider_name || 'unknown',
+          ok: Boolean(attempt.ok),
+          errorType: attempt.errorType || null,
+          durationMs: attempt.durationMs || 0,
+        })) : [],
+        error: aiBody.error || null,
+        code: aiBody.code || null,
+      };
+    }
   }
 
   return result;
@@ -256,6 +293,15 @@ const closePhase17Sentinels = async () => {
   return { serviceRoleConfigured: true, updated: (data || []).length, error: null };
 };
 
+const validateVercelEnvPresence = () => ({
+  vercelTokenConfigured: Boolean(process.env.VERCEL_TOKEN),
+  vercelProjectIdConfigured: Boolean(process.env.VERCEL_PROJECT_ID),
+  vercelOrgIdConfigured: Boolean(process.env.VERCEL_ORG_ID),
+  deploymentUrlConfigured: Boolean(process.env.VERCEL_URL || process.env.DEPLOYMENT_URL || process.env.SITE_URL),
+  localProjectMetadataVerifiedByCommand: false,
+  productionEnvVerifiedByApi: false,
+});
+
 if (command === 'admin') {
   console.log(JSON.stringify(await loadAdminState(), null, 2));
 } else if (command === 'cron') {
@@ -264,9 +310,12 @@ if (command === 'admin') {
   console.log(JSON.stringify(await listRecentRunningLogs(), null, 2));
 } else if (command === 'close-sentinels') {
   console.log(JSON.stringify(await closePhase17Sentinels(), null, 2));
+} else if (command === 'vercel-env') {
+  console.log(JSON.stringify(validateVercelEnvPresence(), null, 2));
 } else {
   console.log(JSON.stringify({
     admin: await loadAdminState(),
     cron: await validateCron(),
+    vercel: validateVercelEnvPresence(),
   }, null, 2));
 }
