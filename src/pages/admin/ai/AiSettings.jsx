@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
@@ -8,7 +8,7 @@ import {
   Globe, ChevronDown, ChevronUp,
 } from 'lucide-react'
 import {
-  getAiProviders, updateAiProvider,
+  getAiProviders, updateAiProvider, upsertAiProvider,
   recordProviderCall, saveProviderModels, getProviderAnalytics, getProviderFailures,
 } from '@/api/supabaseApi'
 import { testProvider, fetchProviderModels, PROVIDER_MODELS } from '@/lib/aiProvider'
@@ -23,6 +23,14 @@ const PROVIDER_META = {
     docsUrl: 'https://aistudio.google.com/apikey',
     hasBaseUrl: false,
     defaultModel: 'gemini-2.5-flash',
+  },
+  openai: {
+    label: 'OpenAI',
+    color: 'from-sky-500 to-blue-400',
+    hint: 'OpenAI API key from platform.openai.com',
+    docsUrl: 'https://platform.openai.com/account/api-keys',
+    hasBaseUrl: false,
+    defaultModel: 'gpt-4o-mini',
   },
   groq: {
     label: 'Groq',
@@ -69,7 +77,7 @@ const PROVIDER_META = {
 }
 
 // Ordered display list
-const PROVIDER_ORDER = ['deepseek', 'gemini', 'groq', 'openrouter', 'huggingface', 'cerebras']
+const PROVIDER_ORDER = ['deepseek', 'gemini', 'openai', 'groq', 'openrouter', 'huggingface', 'cerebras']
 
 // ── Health indicator ──────────────────────────────────────────────────────────
 
@@ -88,7 +96,7 @@ function HealthDot({ status }) {
 
 // ── Provider Card ─────────────────────────────────────────────────────────────
 
-function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
+function ProviderCard({ provider, onUpdate, onCreate, index, dragHandleProps = {} }) {
   const [showKey, setShowKey]       = useState(false)
   const [localKey, setLocalKey]     = useState('')
   const [localModel, setLocalModel] = useState(provider.model || '')
@@ -98,11 +106,13 @@ function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
   const [testing, setTesting]       = useState(false)
   const [testResult, setTestResult] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
+  const [saving, setSaving]         = useState(false)
   const [expanded, setExpanded]     = useState(false)
   const [liveModels, setLiveModels] = useState(
     // Prefer DB-stored dynamic models, then static fallback
     provider.available_models?.length ? provider.available_models : (PROVIDER_MODELS[provider.provider_name] || [])
   )
+  const isMissing = !provider.id || String(provider.id).startsWith('missing-')
 
   const meta = PROVIDER_META[provider.provider_name] || {}
   const stats = provider.stats || { requests: 0, successes: 0, failures: 0, avg_latency_ms: 0 }
@@ -145,20 +155,52 @@ function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
     setRefreshing(false)
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const payload = {
       model: localModel || meta.defaultModel,
       base_url: localBase || meta.defaultBaseUrl || null,
     }
     if (keyDirty) payload.providerSecret = localKey
-    onUpdate(provider.id, payload)
+
+    if (isMissing) {
+      setSaving(true)
+      try {
+        await onCreate(provider.provider_name, payload)
+        toast.success(`${meta.label} created`)
+      } catch (err) {
+        toast.error(`Unable to create ${meta.label}: ${err?.message || 'Unknown error'}`)
+      } finally {
+        setSaving(false)
+      }
+    } else {
+      onUpdate(provider.id, payload)
+      toast.success(`${meta.label} saved`)
+    }
+
     setDirty(false)
     setKeyDirty(false)
     setLocalKey('')
-    toast.success(`${meta.label} saved`)
   }
 
-  const handleToggle = () => onUpdate(provider.id, { is_active: !provider.is_active })
+  const handleToggle = async () => {
+    if (isMissing) {
+      setSaving(true)
+      try {
+        await onCreate(provider.provider_name, {
+          model: localModel || meta.defaultModel,
+          base_url: localBase || meta.defaultBaseUrl || null,
+          is_active: true,
+          ...(keyDirty ? { providerSecret: localKey } : {}),
+        })
+      } catch (err) {
+        toast.error(`Unable to activate ${meta.label}: ${err?.message || 'Unknown error'}`)
+      } finally {
+        setSaving(false)
+      }
+    } else {
+      onUpdate(provider.id, { is_active: !provider.is_active })
+    }
+  }
 
   return (
     <div className={`rounded-[24px] border bg-card/80 backdrop-blur-sm overflow-hidden transition-all ${provider.is_active ? 'border-primary/30 shadow-sm' : 'border-border/50 opacity-75'}`}>
@@ -210,6 +252,11 @@ function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
       {/* Collapsible body */}
       {expanded && (
         <div className="px-4 py-4 space-y-3">
+          {isMissing && (
+            <div className="rounded-xl bg-yellow-50 border border-yellow-200 px-3 py-2 text-xs text-yellow-800">
+              Provider row is not created yet. Enter configuration below and click Save to add this provider.
+            </div>
+          )}
 
           {/* API Key */}
           <div>
@@ -305,8 +352,12 @@ function ProviderCard({ provider, onUpdate, index, dragHandleProps }) {
               Test
             </button>
             {dirty && (
-              <button onClick={handleSave} className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-all">
-                Save
+              <button
+              onClick={handleSave}
+              disabled={saving || (!dirty && !isMissing)}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {saving ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <span>Save</span>}
               </button>
             )}
             {!dirty && hasSavedKey && (
@@ -392,6 +443,8 @@ export default function AiSettings() {
     retry: false,
   })
 
+  const [seededProviders, setSeededProviders] = useState(false)
+
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => updateAiProvider(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ai-providers'] }),
@@ -401,6 +454,50 @@ export default function AiSettings() {
   const handleUpdate = useCallback((id, data) => {
     updateMutation.mutate({ id, data })
   }, [updateMutation])
+
+  const handleCreate = useCallback(async (providerName, data) => {
+    try {
+      const row = await upsertAiProvider(providerName, {
+        model: data.model,
+        base_url: data.base_url,
+        priority: PROVIDER_ORDER.indexOf(providerName) + 1,
+      })
+      if (!row) throw new Error(`Failed to create ${providerName}`)
+      await updateAiProvider(row.id, data)
+      queryClient.invalidateQueries({ queryKey: ['ai-providers'] })
+    } catch (err) {
+      throw new Error(err.message || `Failed to create ${providerName}`)
+    }
+  }, [queryClient])
+
+  useEffect(() => {
+    if (isLoading || seededProviders) return
+    const missingProviders = PROVIDER_ORDER.filter(name => !providers.some(p => p.provider_name === name))
+    if (missingProviders.length === 0) {
+      setSeededProviders(true)
+      return
+    }
+
+    let cancelled = false
+    const seedProviders = async () => {
+      await Promise.all(missingProviders.map((providerName) =>
+        upsertAiProvider(providerName, {
+          model: PROVIDER_META[providerName]?.defaultModel || '',
+          base_url: PROVIDER_META[providerName]?.defaultBaseUrl || null,
+          priority: PROVIDER_ORDER.indexOf(providerName) + 1,
+        })
+      ))
+      if (!cancelled) {
+        queryClient.invalidateQueries({ queryKey: ['ai-providers'] })
+        setSeededProviders(true)
+      }
+    }
+
+    seedProviders().catch(() => {
+      if (!cancelled) setSeededProviders(true)
+    })
+    return () => { cancelled = true }
+  }, [isLoading, providers, queryClient, seededProviders])
 
   // Drag-and-drop reorder
   const handleDragEnd = (result) => {
@@ -442,6 +539,22 @@ export default function AiSettings() {
   }
 
   const sorted = [...providers].sort((a, b) => a.priority - b.priority)
+  const missingProviderNames = PROVIDER_ORDER.filter(name => !providers.some(p => p.provider_name === name))
+  const visibleProviders = [
+    ...sorted,
+    ...missingProviderNames.map((providerName) => ({
+      id: `missing-${providerName}`,
+      provider_name: providerName,
+      model: PROVIDER_META[providerName]?.defaultModel || '',
+      base_url: PROVIDER_META[providerName]?.defaultBaseUrl || '',
+      available_models: PROVIDER_MODELS[providerName] || [],
+      stats: { requests: 0, successes: 0, failures: 0, avg_latency_ms: 0 },
+      is_active: false,
+      has_api_key: false,
+      health_status: 'unknown',
+      priority: PROVIDER_ORDER.indexOf(providerName) + 1,
+    })),
+  ]
   const activeCount = providers.filter(p => p.is_active && p.has_api_key).length
   const configuredCount = providers.filter(p => p.has_api_key).length
 
@@ -487,7 +600,7 @@ export default function AiSettings() {
       </div>
 
       {/* Health dashboard (toggle) */}
-      {showHealth && !isLoading && <HealthDashboard providers={providers} />}
+      {showHealth && !isLoading && <HealthDashboard providers={visibleProviders} />}
 
       {/* Usage statistics and failure logs */}
       {!isLoading && (
@@ -561,33 +674,60 @@ export default function AiSettings() {
           ))}
         </div>
       ) : (
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="providers">
-            {provided => (
-              <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3">
-                {sorted.map((provider, index) => (
-                  <Draggable key={provider.id} draggableId={provider.id} index={index}>
-                    {(drag, snapshot) => (
-                      <div
-                        ref={drag.innerRef}
-                        {...drag.draggableProps}
-                        className={snapshot.isDragging ? 'opacity-90 scale-[1.01]' : ''}
-                      >
-                        <ProviderCard
-                          provider={provider}
-                          index={index}
-                          onUpdate={handleUpdate}
-                          dragHandleProps={drag.dragHandleProps}
-                        />
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+        <>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="providers">
+              {provided => (
+                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3">
+                  {sorted.map((provider, index) => (
+                    <Draggable key={provider.id} draggableId={provider.id} index={index}>
+                      {(drag, snapshot) => (
+                        <div
+                          ref={drag.innerRef}
+                          {...drag.draggableProps}
+                          className={snapshot.isDragging ? 'opacity-90 scale-[1.01]' : ''}
+                        >
+                          <ProviderCard
+                            provider={provider}
+                            index={index}
+                            onUpdate={handleUpdate}
+                            dragHandleProps={drag.dragHandleProps}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+          {missingProviderNames.length > 0 && (
+            <div className="space-y-3 mt-4">
+              {missingProviderNames.map((providerName, index) => (
+                <ProviderCard
+                  key={`missing-${providerName}`}
+                  provider={{
+                    id: `missing-${providerName}`,
+                    provider_name: providerName,
+                    model: PROVIDER_META[providerName]?.defaultModel || '',
+                    base_url: PROVIDER_META[providerName]?.defaultBaseUrl || '',
+                    available_models: PROVIDER_MODELS[providerName] || [],
+                    stats: { requests: 0, successes: 0, failures: 0, avg_latency_ms: 0 },
+                    is_active: false,
+                    has_api_key: false,
+                    health_status: 'unknown',
+                    priority: PROVIDER_ORDER.indexOf(providerName) + 1,
+                  }}
+                  index={sorted.length + index}
+                  onUpdate={handleUpdate}
+                  onCreate={handleCreate}
+                  dragHandleProps={{}}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {/* Note */}

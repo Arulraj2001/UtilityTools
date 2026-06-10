@@ -172,14 +172,14 @@ export default function AdminBlogImport() {
       const existingSlugsList = existing.map((p) => p.slug)
 
       // Validate & generate
-      const result = processImportData(rows, categories, existingSlugsList)
+      const result = processImportData(rows, categories, existingSlugsList, allPosts)
       setValidationResult(result)
       setStep(2)
     } catch (err) {
       console.error('Parse error:', err)
       toast.error(`Parse failed: ${err.message}`)
     }
-  }, [categories])
+  }, [categories, allPosts])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: ([file]) => { if (file) parseFile(file) },

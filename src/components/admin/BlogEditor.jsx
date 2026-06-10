@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { ArrowLeft, Save, Eye, Edit2, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Save, Eye, Edit2, Plus, Trash2, Code } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,11 +15,11 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import ReactQuill from 'react-quill'
+import ReactQuill from '@/lib/reactQuillShim'
 import 'react-quill/dist/quill.snow.css'
 
 import { toast } from 'sonner'
-import { createBlogPost, getBlogPosts, getBlogCategories, updateBlogPost } from '@/api/supabaseApi'
+import { createBlogPost, getBlogPostSeoMetadata, getBlogPosts, getBlogCategories, updateBlogPost } from '@/api/supabaseApi'
 import { estimateReadingTime, getKeywordDensity, buildSeoScore, slugifyText } from '@/lib/seoUtils'
 import { sanitizeHtml } from '@/lib/sanitizeHtml'
 import { DEFAULT_AUTHOR } from '@/lib/authors'
@@ -112,6 +112,94 @@ const rendererStyles = `
   }
 `
 
+// HTML Validation and Utilities
+const validateHtmlStructure = (html) => {
+  if (!html || !html.trim()) return { isValid: true, errors: [], warnings: [] }
+  
+  const errors = []
+  const warnings = []
+  
+  // Check for unclosed tags (basic check)
+  const tagRegex = /<([a-z][a-z0-9]*)\b[^>]*>/gi
+  const closingTagRegex = /<\/([a-z][a-z0-9]*)\s*>/gi
+  
+  const openTags = {}
+  let match
+  
+  // Count opening tags
+  while ((match = tagRegex.exec(html)) !== null) {
+    const tagName = match[1].toLowerCase()
+    // Self-closing tags
+    if (!['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'].includes(tagName)) {
+      openTags[tagName] = (openTags[tagName] || 0) + 1
+    }
+  }
+  
+  // Count closing tags
+  while ((match = closingTagRegex.exec(html)) !== null) {
+    const tagName = match[1].toLowerCase()
+    openTags[tagName] = (openTags[tagName] || 0) - 1
+  }
+  
+  // Check for mismatched tags
+  Object.entries(openTags).forEach(([tag, count]) => {
+    if (count > 0) {
+      warnings.push(`Unclosed <${tag}> tag (${count} open)`)
+    } else if (count < 0) {
+      errors.push(`Extra closing </${tag}> tag`)
+    }
+  })
+  
+  // Check for script tags (security)
+  if (/<script/gi.test(html)) {
+    errors.push('Script tags detected and will be removed for security')
+  }
+  
+  // Check for event handlers (security)
+  if (/on\w+\s*=/gi.test(html)) {
+    warnings.push('Event handlers detected (onclick, onload, etc.) - these will be removed')
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  }
+}
+
+// Format HTML with proper indentation for readability
+const formatHtml = (html) => {
+  if (!html) return ''
+  
+  let formatted = html
+  let indent = 0
+  const indentStr = '  '
+  
+  // Basic formatting - add newlines and indentation
+  formatted = formatted
+    .replace(/></g, '>\n<')
+    .split('\n')
+    .map(line => {
+      const trimmed = line.trim()
+      
+      if (trimmed.startsWith('</')) {
+        indent = Math.max(0, indent - 1)
+      }
+      
+      const result = indentStr.repeat(indent) + trimmed
+      
+      if (trimmed.startsWith('<') && !trimmed.startsWith('</') && !trimmed.endsWith('/>') && !trimmed.includes('</')) {
+        indent++
+      }
+      
+      return result
+    })
+    .join('\n')
+    .replace(/\n\s*\n/g, '\n') // Remove extra blank lines
+  
+  return formatted
+}
+
 export default function BlogEditor({ post, onSave, onCancel }) {
   const [form, setForm] = useState({
     title: post?.title || '',
@@ -145,10 +233,17 @@ export default function BlogEditor({ post, onSave, onCancel }) {
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState('edit')
   const [slugTouched, setSlugTouched] = useState(Boolean(post?.slug))
+  const [htmlValidation, setHtmlValidation] = useState({ isValid: true, errors: [], warnings: [] })
+  const [lastEditor, setLastEditor] = useState('quill') // Track which editor last modified content
 
   const { data: categories = [] } = useQuery({
     queryKey: ['blog-categories'],
     queryFn: () => getBlogCategories({ orderBy: 'featured desc, sort_order', ascending: false, limit: 200 }),
+  })
+
+  const { data: seoMetaPosts = [] } = useQuery({
+    queryKey: ['blog-post-seo-metadata'],
+    queryFn: () => getBlogPostSeoMetadata({ published: false, orderBy: 'created_at', ascending: false, limit: 1000 }),
   })
 
   const { data: suggestions = [] } = useQuery({
@@ -193,6 +288,27 @@ export default function BlogEditor({ post, onSave, onCancel }) {
   const handleContentChange = (value) => {
     const cleaned = cleanContent(value)
     update('content', cleaned)
+    setLastEditor('quill')
+  }
+
+  // Handle HTML content changes
+  const handleHtmlChange = (value) => {
+    update('content', value)
+    setLastEditor('html')
+    
+    // Validate HTML in real-time
+    const validation = validateHtmlStructure(value)
+    setHtmlValidation(validation)
+  }
+
+  // Handle tab switching with validation
+  const handleTabChange = (tab) => {
+    if (tab === 'html' && form.content) {
+      // Validate when switching to HTML tab
+      const validation = validateHtmlStructure(form.content)
+      setHtmlValidation(validation)
+    }
+    setActiveTab(tab)
   }
 
   const keywordDensity = getKeywordDensity(form.content, form.seo_keywords)
@@ -218,6 +334,34 @@ export default function BlogEditor({ post, onSave, onCancel }) {
       })
       .slice(0, 4)
   }, [suggestions, form.tags, form.title, post?.slug])
+
+  const duplicateSeoDescriptionWarning = useMemo(() => {
+    // Check SEO description against other posts' SEO descriptions (exact match = warning)
+    if (form.seo_description?.trim()) {
+      const normalizedSeoDesc = form.seo_description.trim().toLowerCase()
+      const duplicate = seoMetaPosts.find((other) => (
+        other.slug !== post?.slug &&
+        other.seo_description?.trim().toLowerCase() === normalizedSeoDesc
+      ))
+      if (duplicate) {
+        return `This SEO description matches an existing post: "${duplicate.title || duplicate.slug}". Use a unique SEO description.`
+      }
+    }
+
+    // Check excerpt against other posts' excerpts only (not mixing with SEO descriptions)
+    if (form.excerpt?.trim()) {
+      const normalizedExcerpt = form.excerpt.trim().toLowerCase()
+      const excerptDuplicate = seoMetaPosts.find((other) => (
+        other.slug !== post?.slug &&
+        other.excerpt?.trim().toLowerCase() === normalizedExcerpt
+      ))
+      if (excerptDuplicate && !form.seo_description?.trim()) {
+        return `This excerpt matches an existing post: "${excerptDuplicate.title || excerptDuplicate.slug}". Add a unique SEO description to avoid duplicate metadata.`
+      }
+    }
+
+    return null
+  }, [form.seo_description, form.excerpt, seoMetaPosts, post?.slug])
 
   const handleSave = async () => {
     if (!form.title || !form.slug) {
@@ -245,7 +389,7 @@ export default function BlogEditor({ post, onSave, onCancel }) {
       if (data.status === 'published') {
         const quality = validateContentQuality(data, {
           type: 'blog',
-          existingItems: suggestions,
+          existingItems: seoMetaPosts,
         })
         if (!quality.ok) {
           toast.error(formatQualityIssues(quality))
@@ -498,11 +642,15 @@ export default function BlogEditor({ post, onSave, onCancel }) {
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">Content</Label>
             
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full max-w-[200px] grid-cols-2 mb-4">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+              <TabsList className="grid w-full max-w-[300px] grid-cols-3 mb-4">
                 <TabsTrigger value="edit" className="flex items-center gap-2">
                   <Edit2 className="w-3 h-3" />
                   Edit
+                </TabsTrigger>
+                <TabsTrigger value="html" className="flex items-center gap-2">
+                  <Code className="w-3 h-3" />
+                  HTML
                 </TabsTrigger>
                 <TabsTrigger value="preview" className="flex items-center gap-2">
                   <Eye className="w-3 h-3" />
@@ -521,6 +669,53 @@ export default function BlogEditor({ post, onSave, onCancel }) {
                     placeholder="Write your blog content here... Use the toolbar above to format your text."
                     className="min-h-[400px]"
                   />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="html" className="mt-0">
+                <div className="rounded-xl overflow-hidden border border-gray-200 bg-white space-y-3">
+                  {/* HTML Validation Feedback */}
+                  {htmlValidation.errors.length > 0 && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-xs font-semibold text-red-700 mb-2">❌ HTML Issues Found:</p>
+                      <ul className="space-y-1">
+                        {htmlValidation.errors.map((error, idx) => (
+                          <li key={idx} className="text-xs text-red-600">• {error}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {htmlValidation.warnings.length > 0 && htmlValidation.errors.length === 0 && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                      <p className="text-xs font-semibold text-yellow-700 mb-2">⚠️ Warnings:</p>
+                      <ul className="space-y-1">
+                        {htmlValidation.warnings.map((warning, idx) => (
+                          <li key={idx} className="text-xs text-yellow-600">• {warning}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {htmlValidation.isValid && htmlValidation.errors.length === 0 && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <p className="text-xs font-semibold text-green-700">✅ HTML is valid</p>
+                    </div>
+                  )}
+                  
+                  {/* HTML Editor */}
+                  <textarea
+                    value={form.content}
+                    onChange={(e) => handleHtmlChange(e.target.value)}
+                    placeholder="Paste or write your HTML content here..."
+                    className="w-full h-[400px] p-4 font-mono text-sm border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  
+                  {/* Character Count and Info */}
+                  <div className="flex justify-between items-center text-xs text-gray-500 px-2">
+                    <span>{form.content.length} characters</span>
+                    <span>Last edited in: {lastEditor === 'html' ? '📝 HTML Editor' : '✏️ Visual Editor'}</span>
+                  </div>
                 </div>
               </TabsContent>
               
@@ -708,6 +903,9 @@ export default function BlogEditor({ post, onSave, onCancel }) {
                   className="rounded-lg resize-none"
                 />
                 <p className="text-xs text-gray-500">Recommended: 150-160 characters</p>
+                {duplicateSeoDescriptionWarning && (
+                  <p className="text-xs text-amber-700">{duplicateSeoDescriptionWarning}</p>
+                )}
               </div>
 
               <div className="space-y-2">

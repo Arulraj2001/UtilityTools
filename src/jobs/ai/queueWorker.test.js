@@ -21,13 +21,22 @@ class Query {
   }
 
   eq(column, value) {
-    this.filters.push({ column, value });
+    this.filters.push({ column, value, op: 'eq' });
+    return this;
+  }
+
+  lt(column, value) {
+    this.filters.push({ column, value, op: 'lt' });
     return this;
   }
 
   _rows() {
     let rows = this.db[this.table] || [];
-    this.filters.forEach(({ column, value }) => {
+    this.filters.forEach(({ column, value, op }) => {
+      if (op === 'lt') {
+        rows = rows.filter((row) => String(row[column] || '') < String(value));
+        return;
+      }
       rows = rows.filter((row) => row[column] === value);
     });
     if (Number.isInteger(this.max)) rows = rows.slice(0, this.max);
@@ -143,8 +152,17 @@ test('QueueWorker saves a complete draft and marks queue drafted', async () => {
           tokensUsed: 100,
           durationMs: 200,
           attempts: [
-            { providerName: 'cerebras', ok: false, errorType: 'rate_limit' },
-            { providerName: 'openrouter', ok: true },
+            {
+              providerName: 'cerebras',
+              ok: false,
+              errorType: 'rate_limit',
+              provider: { id: 'provider-1', provider_name: 'cerebras', api_key: 'secret-key' },
+            },
+            {
+              providerName: 'openrouter',
+              ok: true,
+              provider: { id: 'provider-2', provider_name: 'openrouter', api_key: 'secret-key' },
+            },
           ],
         };
       },
@@ -165,6 +183,8 @@ test('QueueWorker saves a complete draft and marks queue drafted', async () => {
   assert.equal(supabase.db.ai_job_drafts.length, 1);
   assert.equal(supabase.db.ai_job_drafts[0].ai_provider, 'openrouter');
   assert.equal(supabase.db.ai_job_drafts[0].generated_data.phase2.provider_attempts.length, 2);
+  assert.equal(supabase.db.ai_job_drafts[0].generated_data.phase2.provider_attempts[0].provider, undefined);
+  assert.equal(supabase.db.ai_job_drafts[0].generated_data.phase2.provider_attempts[0].providerId, 'provider-1');
   assert.equal(supabase.db.ai_research_queue[0].status, 'drafted');
   assert.equal(supabase.db.raw_job_notifications[0].status, 'processed');
 });
@@ -193,4 +213,64 @@ test('QueueWorker does not save partial drafts when extraction fails', async () 
   assert.equal(result.status, 'rejected');
   assert.equal(supabase.db.ai_job_drafts.length, 0);
   assert.equal(supabase.db.ai_research_queue[0].status, 'rejected');
+  assert.equal(supabase.db.raw_job_notifications[0].status, 'failed');
+  assert.equal(supabase.db.raw_job_notifications[0].metadata.phase2_retries, 1);
+});
+
+test('QueueWorker recovers a pending item that already has a saved draft', async () => {
+  const supabase = createSupabaseMock();
+  supabase.db.ai_job_drafts.push({
+    id: 'draft-existing',
+    queue_item_id: 'queue-1',
+    ai_provider: 'gemini',
+    status: 'approved',
+    quality_scores: { queueStatus: 'drafted', finalScore: 91, duplicateRisk: 0 },
+    created_at: '2026-06-05T01:00:00Z',
+  });
+
+  const worker = new QueueWorker(supabase, {
+    extractor: {
+      async extract() {
+        throw new Error('extractor should not run when an existing draft is present');
+      },
+    },
+  });
+
+  const result = await worker.processItem(supabase.db.ai_research_queue[0]);
+
+  assert.equal(result.recovered, true);
+  assert.equal(result.draft_id, 'draft-existing');
+  assert.equal(supabase.db.ai_job_drafts.length, 1);
+  assert.equal(supabase.db.ai_research_queue[0].status, 'drafted');
+  assert.equal(supabase.db.raw_job_notifications[0].status, 'processed');
+});
+
+test('QueueWorker reclaims stale processing items without duplicating saved drafts', async () => {
+  const supabase = createSupabaseMock();
+  supabase.db.ai_research_queue[0].status = 'processing';
+  supabase.db.ai_research_queue[0].updated_at = '2026-06-05T00:00:00Z';
+  supabase.db.ai_job_drafts.push({
+    id: 'draft-after-crash',
+    queue_item_id: 'queue-1',
+    ai_provider: 'openrouter',
+    status: 'pending_review',
+    quality_scores: { queueStatus: 'drafted', finalScore: 78, duplicateRisk: 5 },
+    created_at: '2026-06-05T01:00:00Z',
+  });
+
+  const worker = new QueueWorker(supabase, {
+    extractor: {
+      async extract() {
+        throw new Error('extractor should not run for recovered stale draft');
+      },
+    },
+  });
+
+  const result = await worker.processQueue({ staleProcessingMinutes: 1 });
+
+  assert.equal(result.recovered, 1);
+  assert.equal(result.processed, 0);
+  assert.equal(supabase.db.ai_job_drafts.length, 1);
+  assert.equal(supabase.db.ai_research_queue[0].status, 'drafted');
+  assert.equal(supabase.db.raw_job_notifications[0].metadata.phase2_draft_id, 'draft-after-crash');
 });

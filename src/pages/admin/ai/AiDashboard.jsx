@@ -1,160 +1,341 @@
-import React from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import {
-  Brain, Search, Shield, Copy, BarChart3, Activity,
-  GitCompare, Globe, Settings, BookOpen, ChevronRight,
-  Zap, CheckCircle2, Clock, AlertTriangle,
-} from 'lucide-react'
-import { getResearchQueue, getAiDrafts, getMonitoringRules, getUpdateQueue, getAiProviders } from '@/api/supabaseApi'
-import { getJobs } from '@/api/supabaseApi'
-import { scoreJob } from '@/lib/jobQualityScorer'
-import { useMemo } from 'react'
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  Clock3,
+  Database,
+  FileText,
+  Gauge,
+  HeartPulse,
+  Inbox,
+  Layers3,
+  ListChecks,
+  Server,
+  Shield,
+  Timer,
+  TrendingUp,
+} from 'lucide-react';
+import {
+  getMonitoringAlerts,
+  getMonitoringOverview,
+  getReviewQueue,
+} from '@/api/adminOperationsApi';
+import {
+  ageLabel,
+  computeOperationsDashboard,
+} from '@/lib/phase5aAdminMetrics';
 
-const AI_NAV = [
-  { to: '/admin/ai-research',    label: 'Research Queue',      icon: Search,    desc: 'Collect & process job notifications',  color: 'from-blue-500 to-cyan-500' },
-  { to: '/admin/ai-moderation',  label: 'AI Moderation',       icon: Shield,    desc: 'Review AI-generated drafts',            color: 'from-purple-500 to-pink-500' },
-  { to: '/admin/ai-duplicates',  label: 'Duplicate Detection', icon: Copy,      desc: 'Prevent duplicate job posts',           color: 'from-orange-500 to-red-500' },
-  { to: '/admin/ai-seo-audit',   label: 'SEO Audit',           icon: BarChart3, desc: 'Auto-generate SEO metadata',           color: 'from-green-500 to-emerald-500' },
-  { to: '/admin/ai-monitoring',  label: 'Vacancy Monitoring',  icon: Activity,  desc: 'Track notification changes',            color: 'from-teal-500 to-cyan-500' },
-  { to: '/admin/ai-updates',     label: 'Job Updates',         icon: GitCompare,desc: 'Review detected changes',               color: 'from-indigo-500 to-blue-500' },
-  { to: '/admin/ai-sources',     label: 'Sources',             icon: Globe,     desc: 'Manage Tier 1/2/3 job sources',         color: 'from-pink-500 to-rose-500' },
-  { to: '/admin/ai-prompts',     label: 'Prompt Management',   icon: BookOpen,  desc: 'Edit AI writing prompts per job type', color: 'from-yellow-500 to-orange-500' },
-  { to: '/admin/ai-settings',    label: 'AI Settings',         icon: Settings,  desc: 'Configure provider chain & API keys',  color: 'from-gray-500 to-slate-500' },
-  { to: '/admin/ai-reports',     label: 'Quality Reports',     icon: BarChart3, desc: 'Content quality analytics',            color: 'from-violet-500 to-purple-500' },
-]
+const numberFmt = new Intl.NumberFormat('en-IN');
 
-function StatCard({ label, value, sub, color = 'text-foreground', icon: Icon }) {
+function MetricTile({ label, value, sub, icon: Icon, tone = 'text-foreground' }) {
   return (
-    <div className="rounded-[20px] border border-border/50 bg-card/80 backdrop-blur-sm p-5">
-      <div className="flex items-start justify-between mb-2">
-        <p className="text-xs text-muted-foreground font-medium">{label}</p>
-        {Icon && <Icon className={`w-4 h-4 ${color}`} />}
+    <div className="rounded-lg border border-border bg-card px-4 py-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <Icon className={`h-4 w-4 ${tone}`} />
       </div>
-      <p className={`text-3xl font-black ${color}`}>{value}</p>
-      {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
+      <p className={`mt-2 text-2xl font-bold tracking-tight ${tone}`}>{value}</p>
+      {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
     </div>
-  )
+  );
 }
 
-function NavCard({ item }) {
-  const Icon = item.icon
+function Section({ title, icon: Icon, action, children }) {
   return (
-    <Link to={item.to} className="group rounded-[20px] border border-border/50 bg-card/80 hover:border-primary/30 hover:shadow-sm transition-all overflow-hidden">
-      <div className={`bg-gradient-to-r ${item.color} p-0.5`}>
-        <div className="bg-card rounded-t-[19px] px-4 py-3 flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shrink-0`}>
-            <Icon className="w-4 h-4 text-white" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm">{item.label}</p>
-            <p className="text-xs text-muted-foreground">{item.desc}</p>
-          </div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+    <section className="rounded-lg border border-border bg-card">
+      <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold">{title}</h2>
         </div>
+        {action}
       </div>
-    </Link>
-  )
+      <div className="p-4">{children}</div>
+    </section>
+  );
+}
+
+function Row({ label, value, sub, tone = '' }) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-2 text-sm">
+      <div className="min-w-0">
+        <p className="truncate font-medium">{label}</p>
+        {sub && <p className="truncate text-xs text-muted-foreground">{sub}</p>}
+      </div>
+      <span className={`shrink-0 text-sm font-semibold ${tone}`}>{value}</span>
+    </div>
+  );
+}
+
+function BarRow({ label, value, max = 100, tone = 'bg-primary' }) {
+  const width = Math.max(0, Math.min(100, max ? (Number(value || 0) / max) * 100 : 0));
+  return (
+    <div className="py-2">
+      <div className="mb-1 flex items-center justify-between gap-3 text-xs">
+        <span className="truncate text-muted-foreground">{label}</span>
+        <span className="font-semibold">{value}</span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-muted">
+        <div className={`h-full rounded-full ${tone}`} style={{ width: `${width}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function AlertRow({ alert }) {
+  const severityTone = {
+    critical: 'text-red-700 bg-red-50 border-red-200',
+    high: 'text-orange-700 bg-orange-50 border-orange-200',
+    medium: 'text-amber-700 bg-amber-50 border-amber-200',
+    low: 'text-blue-700 bg-blue-50 border-blue-200',
+  }[alert.severity] || 'text-slate-700 bg-slate-50 border-slate-200';
+
+  return (
+    <div className="rounded-md border border-border px-3 py-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">{alert.title || alert.type}</p>
+          <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{alert.message}</p>
+        </div>
+        <span className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-semibold ${severityTone}`}>
+          {alert.severity || 'info'}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function ReportTable({ rows, valueLabel = 'Count' }) {
+  if (!rows?.length) {
+    return <p className="py-3 text-sm text-muted-foreground">No records in the current window.</p>;
+  }
+  const max = Math.max(...rows.map((row) => Number(row.count ?? row.successRate ?? 0)), 1);
+  return (
+    <div className="divide-y divide-border">
+      {rows.map((row) => (
+        <div key={`${row.name}-${row.status || ''}`} className="grid grid-cols-[1fr_auto] items-center gap-3 py-2">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium">{row.name}</p>
+            {row.status && <p className="text-xs text-muted-foreground">{row.status}</p>}
+          </div>
+          <div className="min-w-[120px]">
+            <BarRow
+              label={valueLabel}
+              value={row.count ?? row.successRate ?? 0}
+              max={max}
+              tone={row.status === 'degraded' || row.status === 'down' ? 'bg-orange-500' : 'bg-primary'}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function AiDashboard() {
-  const { data: queue = [] }    = useQuery({ queryKey: ['research-queue'],  queryFn: () => getResearchQueue({ limit: 100 }), retry: false })
-  const { data: drafts = [] }   = useQuery({ queryKey: ['ai-drafts'],       queryFn: () => getAiDrafts({ limit: 100 }),      retry: false })
-  const { data: monitors = [] } = useQuery({ queryKey: ['monitoring-rules'],queryFn: () => getMonitoringRules({ limit: 50 }), retry: false })
-  const { data: updates = [] }  = useQuery({ queryKey: ['update-queue'],    queryFn: () => getUpdateQueue({ status: 'pending', limit: 50 }), retry: false })
-  const { data: providers = [] }= useQuery({ queryKey: ['ai-providers'],    queryFn: getAiProviders, retry: false })
-  const { data: jobs = [] }     = useQuery({ queryKey: ['all-jobs-dash'],   queryFn: () => getJobs({ published: false, limit: 200 }) })
+  const overviewQuery = useQuery({
+    queryKey: ['admin-monitoring-overview', 30],
+    queryFn: () => getMonitoringOverview({ days: 30 }),
+    retry: false,
+    refetchInterval: 60_000,
+  });
+  const reviewQueueQuery = useQuery({
+    queryKey: ['admin-review-queue', 'phase5a', 100],
+    queryFn: () => getReviewQueue({ limit: 100 }),
+    retry: false,
+    refetchInterval: 60_000,
+  });
+  const alertsQuery = useQuery({
+    queryKey: ['admin-monitoring-alerts', 30],
+    queryFn: () => getMonitoringAlerts({ days: 30, limit: 25 }),
+    retry: false,
+    refetchInterval: 60_000,
+  });
 
-  const activeProviders = providers.filter(p => p.is_active && p.has_api_key)
-  const pendingQueue    = queue.filter(q => q.status === 'pending')
-  const pendingDrafts   = drafts.filter(d => d.status === 'pending_review')
-  const pendingUpdates  = updates.length
-
-  const avgScore = useMemo(() => {
-    if (!jobs.length) return 0
-    return Math.round(jobs.reduce((sum, j) => sum + scoreJob(j).overall, 0) / jobs.length)
-  }, [jobs])
-
-  const alerts = []
-  if (!activeProviders.length) alerts.push({ level: 'error',   msg: 'No AI providers configured — go to AI Settings' })
-  if (pendingDrafts.length > 0) alerts.push({ level: 'warning', msg: `${pendingDrafts.length} draft(s) awaiting moderation review` })
-  if (pendingUpdates > 0)       alerts.push({ level: 'warning', msg: `${pendingUpdates} job update(s) need review` })
-  if (pendingQueue.length > 5)  alerts.push({ level: 'info',    msg: `${pendingQueue.length} items in research queue` })
-  if (avgScore < 50)            alerts.push({ level: 'warning', msg: `Average content quality score is ${avgScore} — run SEO Audit` })
+  const overview = overviewQuery.data || {};
+  const reviewQueue = reviewQueueQuery.data || {};
+  const dashboard = computeOperationsDashboard({ overview, reviewQueue });
+  const alerts = alertsQuery.data?.active?.length
+    ? alertsQuery.data.active
+    : (overview.alerts || []);
+  const providerRows = dashboard.reports.providers;
+  const maxQueue = Math.max(...dashboard.reports.queue.map((row) => row.count), 1);
+  const isLoading = overviewQuery.isLoading || reviewQueueQuery.isLoading;
 
   return (
-    <main className="max-w-[1400px] mx-auto px-4 lg:px-8 py-6">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium mb-3">
-          <Brain className="w-3.5 h-3.5" />AI Job Intelligence
+    <main className="mx-auto max-w-[1500px] px-4 py-5 lg:px-8">
+      <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <div className="mb-2 inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+            <Activity className="h-3.5 w-3.5" />
+            AI Job Intelligence
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">Operations Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Queue, review, moderation, providers, alerts, SLA, and reports.
+          </p>
         </div>
-        <h1 className="text-4xl font-black tracking-tight">Intelligence Dashboard</h1>
-        <p className="text-muted-foreground mt-2 max-w-2xl">
-          Central command for AI-assisted job content production. Reduce admin time by 90% while maintaining full human review before any post goes live.
-        </p>
+        <div className="flex flex-wrap gap-2">
+          <Link to="/admin/ai-moderation" className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground">
+            <ListChecks className="h-4 w-4" />
+            Review Queue
+          </Link>
+          <Link to="/admin/ai-monitoring" className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm font-semibold">
+            <HeartPulse className="h-4 w-4" />
+            Monitoring
+          </Link>
+        </div>
       </div>
 
-      {/* System status */}
-      <div className={`rounded-2xl border px-5 py-3 flex items-center gap-3 mb-6 ${activeProviders.length ? 'bg-green-500/10 border-green-500/20 text-green-600' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
-        {activeProviders.length ? <Zap className="w-4 h-4 shrink-0" /> : <AlertTriangle className="w-4 h-4 shrink-0" />}
-        <span className="text-sm font-medium">
-          {activeProviders.length
-            ? `AI system active — ${activeProviders.map(p => p.provider_name).join(' → ')} fallback chain ready`
-            : 'AI system offline — configure at least one provider in AI Settings'}
-        </span>
-        <Link to="/admin/ai-settings" className="ml-auto text-xs underline hover:no-underline">Configure →</Link>
-      </div>
-
-      {/* Alerts */}
-      {alerts.length > 0 && (
-        <div className="space-y-2 mb-6">
-          {alerts.map((a, i) => (
-            <div key={i} className={`rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm ${a.level === 'error' ? 'bg-red-500/10 text-red-600' : a.level === 'warning' ? 'bg-yellow-500/10 text-yellow-700' : 'bg-blue-500/10 text-blue-600'}`}>
-              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />{a.msg}
-            </div>
-          ))}
+      {(overviewQuery.error || reviewQueueQuery.error) && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {overviewQuery.error?.message || reviewQueueQuery.error?.message}
         </div>
       )}
 
-      {/* Key stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <StatCard label="Pending Queue"    value={pendingQueue.length}  sub="Awaiting generation"   icon={Clock}         color="text-yellow-500" />
-        <StatCard label="Drafts to Review" value={pendingDrafts.length} sub="Awaiting moderation"   icon={Shield}        color="text-blue-500" />
-        <StatCard label="Change Alerts"    value={pendingUpdates}        sub="Updates detected"      icon={GitCompare}    color="text-orange-500" />
-        <StatCard label="Avg Quality Score" value={avgScore}            sub={`${jobs.length} jobs`} icon={BarChart3}     color={avgScore >= 70 ? 'text-green-500' : 'text-yellow-500'} />
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+        <MetricTile label="Pending Queue" value={dashboard.queue.pending || 0} sub={`${ageLabel(dashboard.oldestPendingItemHours)} oldest`} icon={Inbox} tone="text-amber-600" />
+        <MetricTile label="Processing" value={dashboard.queue.processing || 0} sub="active queue" icon={Timer} tone="text-blue-600" />
+        <MetricTile label="Drafted" value={dashboard.queue.drafted || 0} sub="queue complete" icon={FileText} tone="text-emerald-600" />
+        <MetricTile label="Rejected" value={dashboard.queue.rejected || 0} sub="queue rejected" icon={AlertTriangle} tone="text-red-600" />
+        <MetricTile label="Approved Drafts" value={dashboard.drafts.approved || 0} sub="ready state" icon={CheckCircle2} tone="text-emerald-600" />
+        <MetricTile label="Blocked Drafts" value={dashboard.drafts.blocked || 0} sub="decision band" icon={Shield} tone="text-red-600" />
+        <MetricTile label="Readiness" value={dashboard.review.averageReadiness || 0} sub="average score" icon={Gauge} tone="text-indigo-600" />
+        <MetricTile label="Confidence" value={dashboard.review.averageConfidence || 0} sub="average score" icon={TrendingUp} tone="text-cyan-700" />
       </div>
 
-      {/* Workflow guide */}
-      <div className="rounded-[24px] border border-border/50 bg-card/80 p-6 mb-8">
-        <h3 className="font-bold text-lg mb-4">AI Content Pipeline</h3>
-        <div className="grid sm:grid-cols-5 gap-2 items-center">
-          {[
-            { step: '1', label: 'Add to Queue',    desc: 'Paste notification text',    icon: Search },
-            { step: '→', label: '', desc: '', icon: null, isArrow: true },
-            { step: '2', label: 'Generate Draft',  desc: 'AI writes 17-section article', icon: Brain },
-            { step: '→', label: '', desc: '', icon: null, isArrow: true },
-            { step: '3', label: 'Review & Publish', desc: 'Human approves → Draft job', icon: CheckCircle2 },
-          ].map((s, i) => s.isArrow ? (
-            <div key={i} className="hidden sm:flex justify-center text-muted-foreground text-2xl">→</div>
-          ) : (
-            <div key={i} className="rounded-2xl bg-primary/5 border border-primary/10 p-4 text-center">
-              <div className="w-8 h-8 rounded-full bg-primary/20 text-primary text-sm font-black flex items-center justify-center mx-auto mb-2">{s.step}</div>
-              <p className="font-bold text-sm">{s.label}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{s.desc}</p>
-            </div>
-          ))}
+      {isLoading ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {[1, 2, 3, 4].map((item) => <div key={item} className="h-64 animate-pulse rounded-lg bg-muted/50" />)}
         </div>
-        <p className="text-xs text-muted-foreground text-center mt-4">
-          Jobs are <strong>never auto-published</strong>. Every AI draft requires human review in Moderation before entering the job database as a Draft.
-        </p>
-      </div>
+      ) : (
+        <div className="grid gap-4 xl:grid-cols-12">
+          <div className="space-y-4 xl:col-span-8">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Section title="Queue Overview" icon={Database}>
+                <div className="space-y-1">
+                  {dashboard.reports.queue.map((row) => (
+                    <BarRow key={row.name} label={row.name} value={row.count} max={maxQueue} />
+                  ))}
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3 text-xs text-muted-foreground">
+                  <span>Retries: <strong className="text-foreground">{overview.queue?.retryCount || 0}</strong></span>
+                  <span>Throughput/day: <strong className="text-foreground">{overview.queue?.throughput?.perDay || 0}</strong></span>
+                </div>
+              </Section>
 
-      {/* Navigation cards */}
-      <h3 className="font-bold text-lg mb-4">All AI Tools</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {AI_NAV.map(item => <NavCard key={item.to} item={item} />)}
-      </div>
+              <Section title="Draft Overview" icon={FileText}>
+                <div className="grid grid-cols-2 gap-2">
+                  <MetricTile label="Review Recommended" value={dashboard.drafts.reviewRecommended || 0} icon={ListChecks} tone="text-blue-600" />
+                  <MetricTile label="Manual Review" value={dashboard.drafts.manualReviewRequired || 0} icon={Shield} tone="text-amber-600" />
+                  <MetricTile label="Quality Avg" value={overview.quality?.averages?.qualityScore || 0} icon={Gauge} tone="text-indigo-600" />
+                  <MetricTile label="Dup Risk Avg" value={overview.quality?.averages?.duplicateRisk || 0} icon={AlertTriangle} tone="text-orange-600" />
+                </div>
+              </Section>
+
+              <Section
+                title="Review Overview"
+                icon={ListChecks}
+                action={<Link to="/admin/ai-moderation" className="inline-flex items-center gap-1 text-xs font-semibold text-primary">Open <ArrowRight className="h-3 w-3" /></Link>}
+              >
+                <Row label="Items in review queue" value={dashboard.review.queueItems || 0} />
+                <Row label="Average readiness" value={dashboard.review.averageReadiness || 0} />
+                <Row label="Average confidence" value={dashboard.review.averageConfidence || 0} />
+                <Row label="Validation failures" value={overview.quality?.validationFailures || 0} tone="text-orange-600" />
+                <Row label="Warning count" value={overview.quality?.warningCount || 0} tone="text-amber-600" />
+              </Section>
+
+              <Section title="Moderation Overview" icon={Shield}>
+                <div className="grid grid-cols-2 gap-x-5">
+                  {dashboard.reports.moderation.map((row) => (
+                    <Row key={row.name} label={row.name} value={row.count} />
+                  ))}
+                </div>
+              </Section>
+            </div>
+
+            <Section title="Publishing SLA" icon={Clock3}>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <MetricTile label="Draft Age" value={ageLabel(dashboard.sla.averageDraftAgeHours)} sub="average" icon={Clock3} tone="text-slate-700" />
+                <MetricTile label="Review Age" value={ageLabel(dashboard.sla.averageReviewAgeHours)} sub="average" icon={ListChecks} tone="text-indigo-600" />
+                <MetricTile label="Publish Age" value={ageLabel(dashboard.sla.publishAgeHours)} sub="latest publish" icon={CheckCircle2} tone="text-emerald-600" />
+                <MetricTile label="Oldest Pending" value={ageLabel(dashboard.sla.oldestPendingReviewHours)} sub="review item" icon={Timer} tone="text-amber-600" />
+                <MetricTile label="Oldest Blocked" value={ageLabel(dashboard.sla.oldestBlockedDraftHours)} sub="blocked draft" icon={AlertTriangle} tone="text-red-600" />
+              </div>
+            </Section>
+
+            <Section title="Admin Reports" icon={BarChart3}>
+              <div className="grid gap-5 lg:grid-cols-2">
+                <div>
+                  <h3 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Sources</h3>
+                  <ReportTable rows={dashboard.reports.sources} />
+                </div>
+                <div>
+                  <h3 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Categories</h3>
+                  <ReportTable rows={dashboard.reports.categories} />
+                </div>
+                <div>
+                  <h3 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Queue Health</h3>
+                  <ReportTable rows={dashboard.reports.queue} />
+                </div>
+                <div>
+                  <h3 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Moderation Outcomes</h3>
+                  <ReportTable rows={dashboard.reports.moderation} />
+                </div>
+              </div>
+            </Section>
+          </div>
+
+          <div className="space-y-4 xl:col-span-4">
+            <Section title="Provider Health" icon={Server}>
+              <div className="mb-3 grid grid-cols-3 gap-2">
+                <MetricTile label="Active" value={dashboard.providers.active || 0} icon={Server} tone="text-emerald-600" />
+                <MetricTile label="Unhealthy" value={dashboard.providers.unhealthy || 0} icon={AlertTriangle} tone="text-orange-600" />
+                <MetricTile label="Success" value={`${dashboard.providers.successRate || 0}%`} icon={Gauge} tone="text-indigo-600" />
+              </div>
+              <div className="divide-y divide-border">
+                {providerRows.slice(0, 6).map((provider) => (
+                  <Row
+                    key={provider.name}
+                    label={provider.name || 'Provider'}
+                    sub={`${provider.failures || 0} failures · ${numberFmt.format(provider.latency || 0)}ms p95/avg`}
+                    value={`${provider.successRate || 0}%`}
+                    tone={provider.status === 'healthy' ? 'text-emerald-600' : 'text-orange-600'}
+                  />
+                ))}
+              </div>
+            </Section>
+
+            <Section title="Monitoring Alerts" icon={AlertTriangle}>
+              <div className="mb-3 grid grid-cols-3 gap-2">
+                <MetricTile label="Active" value={dashboard.alerts.active || 0} icon={AlertTriangle} tone="text-orange-600" />
+                <MetricTile label="Critical" value={dashboard.alerts.critical || 0} icon={Shield} tone="text-red-600" />
+                <MetricTile label="High" value={dashboard.alerts.high || 0} icon={TrendingUp} tone="text-amber-600" />
+              </div>
+              <div className="space-y-2">
+                {alerts.length ? alerts.slice(0, 8).map((alert) => (
+                  <AlertRow key={alert.id || alert.fingerprint || alert.type} alert={alert} />
+                )) : (
+                  <p className="py-4 text-sm text-muted-foreground">No active alerts.</p>
+                )}
+              </div>
+            </Section>
+
+            <Section title="Provider Report" icon={Layers3}>
+              <ReportTable rows={providerRows.map((provider) => ({
+                name: provider.name,
+                status: provider.status,
+                successRate: provider.successRate,
+              }))} valueLabel="Success" />
+            </Section>
+          </div>
+        </div>
+      )}
     </main>
-  )
+  );
 }

@@ -69,6 +69,7 @@ const AiSources    = lazy(() => import('./pages/admin/ai/AiSources'))
 const AiSettings   = lazy(() => import('./pages/admin/ai/AiSettings'))
 const AiPrompts    = lazy(() => import('./pages/admin/ai/AiPrompts'))
 const AiReports    = lazy(() => import('./pages/admin/ai/AiReports'))
+const AiScaleOps   = lazy(() => import('./pages/admin/ai/AiScaleOps'))
 const WorkflowPage = lazy(() => import('./pages/WorkflowPage'))
 const WorkflowListPage = lazy(() => import('./pages/WorkflowListPage'))
 const PageNotFound = lazy(() => import('./lib/PageNotFound'))
@@ -171,6 +172,7 @@ const AuthenticatedApp = () => {
           <Route path="ai-settings"     element={wrap(<AiSettings />)} />
           <Route path="ai-prompts"      element={wrap(<AiPrompts />)} />
           <Route path="ai-reports"      element={wrap(<AiReports />)} />
+          <Route path="ai-scale-ops"    element={wrap(<AiScaleOps />)} />
           <Route path="settings" element={wrap(<AdminSettings />)} />
           <Route path="seeder" element={wrap(<AdminToolSeeder />)} />
         </Route>

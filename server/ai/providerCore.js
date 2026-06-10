@@ -3,7 +3,7 @@
  * Providers are tried in priority order; on any failure the next is used.
  * API keys are loaded from Supabase ai_provider_settings table (admin-only RLS).
  *
- * Supported: Gemini → Groq → DeepSeek → OpenRouter → Cerebras → HuggingFace
+ * Supported: Gemini → OpenAI → Groq → DeepSeek → OpenRouter → Cerebras → HuggingFace
  *
  * All existing exports (callAI, testProvider, extractJSON, PROVIDER_MODELS)
  * remain unchanged in signature — fully backward compatible.
@@ -21,6 +21,8 @@ export const DEFAULT_PROVIDER_PRIORITY = {
   huggingface: 5,
   cerebras: 6,
 }
+
+const normalizeProviderName = (providerName) => String(providerName || '').trim().toLowerCase()
 
 const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash'
 
@@ -397,6 +399,17 @@ const callOpenRouter = async (apiKey, model, prompt, _baseUrl, options = {}) => 
   }
 }
 
+const callOpenAI = (apiKey, model, prompt, baseUrl, options = {}) =>
+  callOpenAICompat(
+    apiKey,
+    model || 'gpt-4o-mini',
+    prompt,
+    (baseUrl || 'https://api.openai.com/v1').replace(/\/$/, ''),
+    'OpenAI',
+    {},
+    options
+  )
+
 const callCerebras = (apiKey, model, prompt, baseUrl, options = {}) =>
   callOpenAICompat(
     apiKey,
@@ -479,6 +492,7 @@ const callHuggingFace = async (apiKey, model, prompt, _baseUrl, options = {}) =>
 
 export const CALLERS = {
   gemini:      callGemini,
+  openai:      callOpenAI,
   groq:        callGroq,
   deepseek:    callDeepSeek,
   openrouter:  callOpenRouter,
@@ -506,6 +520,12 @@ export const PROVIDER_MODELS = {
   deepseek: [
     { value: 'deepseek-chat',                      label: 'DeepSeek Chat V3 (recommended)' },
     { value: 'deepseek-reasoner',                  label: 'DeepSeek Reasoner R1' },
+  ],
+  openai: [
+    { value: 'gpt-4o-mini', label: 'OpenAI GPT-4o Mini (fast)' },
+    { value: 'gpt-4o', label: 'OpenAI GPT-4o' },
+    { value: 'gpt-4.1', label: 'OpenAI GPT-4.1' },
+    { value: 'gpt-3.5-turbo', label: 'OpenAI GPT-3.5 Turbo' },
   ],
   openrouter: [
     { value: 'openrouter/free',                            label: 'OpenRouter Free Router (auto-select)' },
@@ -545,6 +565,7 @@ export const PROVIDER_MODEL_PREFERENCES = {
   gemini: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'],
   groq: ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile', 'openai/gpt-oss-20b'],
   openrouter: ['openrouter/free', 'deepseek/deepseek-v4-flash:free', 'meta-llama/llama-3.3-70b-instruct:free', 'qwen/qwen3-coder:free'],
+  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-3.5-turbo'],
   huggingface: ['mistralai/Mistral-7B-Instruct-v0.2', 'HuggingFaceH4/zephyr-7b-beta'],
   cerebras: ['llama-3.3-70b', 'gpt-oss-120b', 'zai-glm-4.7'],
 }
@@ -559,8 +580,9 @@ export const chooseProviderModel = (provider = {}) => {
   const configured = provider.model || ''
   const available = getAvailableModelIds(provider)
   const availableSet = new Set(available)
-  const preferences = PROVIDER_MODEL_PREFERENCES[provider.provider_name] || []
-  const staticModels = (PROVIDER_MODELS[provider.provider_name] || []).map((m) => m.value)
+  const providerName = normalizeProviderName(provider.provider_name)
+  const preferences = PROVIDER_MODEL_PREFERENCES[providerName] || []
+  const staticModels = (PROVIDER_MODELS[providerName] || []).map((m) => m.value)
   const candidates = [...preferences, ...staticModels].filter(Boolean)
   const lastError = String(provider.stats?.last_error || '').toLowerCase()
   const shouldBypassConfigured =
@@ -600,18 +622,19 @@ export const sortProvidersForFallback = (providers = []) => (
     .sort((a, b) => {
       const healthDelta = providerHealthPenalty(a) - providerHealthPenalty(b)
       if (healthDelta !== 0) return healthDelta
-      const aPriority = Number.isFinite(a.priority) ? a.priority : DEFAULT_PROVIDER_PRIORITY[a.provider_name] || 99
-      const bPriority = Number.isFinite(b.priority) ? b.priority : DEFAULT_PROVIDER_PRIORITY[b.provider_name] || 99
+      const aPriority = Number.isFinite(a.priority) ? a.priority : DEFAULT_PROVIDER_PRIORITY[normalizeProviderName(a.provider_name)] || 99
+      const bPriority = Number.isFinite(b.priority) ? b.priority : DEFAULT_PROVIDER_PRIORITY[normalizeProviderName(b.provider_name)] || 99
       return aPriority - bPriority
     })
 )
 
 export const fetchProviderModels = async (provider, { signal } = {}) => {
-  const { provider_name, api_key, base_url } = provider
-  if (!api_key) return PROVIDER_MODELS[provider_name] || []
+  const providerName = normalizeProviderName(provider.provider_name)
+  const { api_key, base_url } = provider
+  if (!api_key) return PROVIDER_MODELS[providerName] || []
 
   try {
-    switch (provider_name) {
+    switch (providerName) {
       case 'gemini': {
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models?key=${api_key}&pageSize=50`,
@@ -671,6 +694,20 @@ export const fetchProviderModels = async (provider, { signal } = {}) => {
           .slice(0, 40)
       }
 
+      case 'openai': {
+        const base = (base_url || 'https://api.openai.com/v1').replace(/\/$/, '')
+        const res = await fetch(`${base}/models`, {
+          signal,
+          headers: { Authorization: `Bearer ${api_key}` },
+        })
+        if (!res.ok) throw new Error(`OpenAI models API ${res.status}`)
+        const data = await res.json()
+        return (data.data || [])
+          .filter(m => typeof m.id === 'string' && !m.id.toLowerCase().includes('whisper'))
+          .map(m => ({ value: m.id, label: m.id }))
+          .sort((a, b) => a.label.localeCompare(b.label))
+      }
+
       case 'cerebras': {
         const base = (base_url || 'https://api.cerebras.ai/v1').replace(/\/$/, '')
         const res = await fetch(`${base}/models`, {
@@ -687,13 +724,13 @@ export const fetchProviderModels = async (provider, { signal } = {}) => {
         return PROVIDER_MODELS.huggingface
 
       default:
-        return PROVIDER_MODELS[provider_name] || []
+        return PROVIDER_MODELS[providerName] || []
     }
   } catch (err) {
     if (err?.name !== 'AbortError') {
-      console.warn(`[fetchProviderModels] ${provider_name}:`, normalizeErrorMessage(err))
+      console.warn(`[fetchProviderModels] ${providerName}:`, normalizeErrorMessage(err))
     }
-    return PROVIDER_MODELS[provider_name] || []
+    return PROVIDER_MODELS[providerName] || []
   }
 }
 
@@ -720,7 +757,8 @@ export const callAI = async (providers, prompt, { signal, timeoutMs = DEFAULT_PR
   for (const provider of active) {
     if (signal?.aborted) throw new Error('Cancelled')
 
-    const caller = CALLERS[provider.provider_name]
+    const providerName = normalizeProviderName(provider.provider_name)
+    const caller = CALLERS[providerName]
     if (!caller) continue
 
     const model = chooseProviderModel(provider)
@@ -738,7 +776,7 @@ export const callAI = async (providers, prompt, { signal, timeoutMs = DEFAULT_PR
       if (typeof onAttempt === 'function') {
         await Promise.resolve(onAttempt({
           provider,
-          providerName: provider.provider_name,
+          providerName,
           model,
           ok: true,
           durationMs,
@@ -749,7 +787,7 @@ export const callAI = async (providers, prompt, { signal, timeoutMs = DEFAULT_PR
       }
       return {
         ...result,
-        provider: provider.provider_name,
+        provider: providerName,
         model,
         durationMs,
       }
@@ -757,12 +795,12 @@ export const callAI = async (providers, prompt, { signal, timeoutMs = DEFAULT_PR
       const durationMs = Date.now() - t0
       const error = normalizeErrorMessage(err)
       const errorType = classifyProviderError(err)
-      console.warn(`[AI] ${provider.provider_name} failed (${errorType}):`, error)
-      errors.push({ provider: provider.provider_name, model, error, errorType, durationMs })
+      console.warn(`[AI] ${providerName} failed (${errorType}):`, error)
+      errors.push({ provider: providerName, model, error, errorType, durationMs })
       if (typeof onAttempt === 'function') {
         await Promise.resolve(onAttempt({
           provider,
-          providerName: provider.provider_name,
+          providerName,
           model,
           ok: false,
           durationMs,
@@ -791,7 +829,8 @@ export const callAI = async (providers, prompt, { signal, timeoutMs = DEFAULT_PR
  * Backward compatible: signature unchanged.
  */
 export const testProvider = async (provider, { timeoutMs = 20_000, signal } = {}) => {
-  const caller = CALLERS[provider.provider_name]
+  const providerName = normalizeProviderName(provider.provider_name)
+  const caller = CALLERS[providerName]
   if (!caller) return { ok: false, error: `Unknown provider: ${provider.provider_name}` }
 
   const model = chooseProviderModel(provider)

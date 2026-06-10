@@ -27,6 +27,10 @@ const singleOrThrow = (result, operation) => {
   return result.data || null;
 };
 
+const isDuplicateDbError = (error) => (
+  error?.code === '23505' || /duplicate|unique/i.test(`${error?.message || ''} ${error?.details || ''}`)
+);
+
 const serializeError = (error) => ({
   message: error?.message || String(error || 'Unknown error'),
   code: error?.code || error?.cause?.code || null,
@@ -39,6 +43,19 @@ const serializeError = (error) => ({
     durationMs: attempt.durationMs || 0,
   })) : [],
 });
+
+const sanitizeProviderAttempts = (attempts = []) => (
+  (Array.isArray(attempts) ? attempts : []).map((attempt) => ({
+    providerId: attempt.providerId || attempt.provider?.id || null,
+    providerName: attempt.providerName || attempt.provider?.provider_name || 'unknown',
+    model: attempt.model || null,
+    ok: Boolean(attempt.ok),
+    durationMs: Number(attempt.durationMs || 0),
+    tokensUsed: Number(attempt.tokensUsed || 0),
+    errorType: attempt.errorType || null,
+    error: attempt.error || null,
+  }))
+);
 
 export default class QueueWorker {
   constructor(supabase, options = {}) {
@@ -105,6 +122,23 @@ export default class QueueWorker {
     return result.data || null;
   }
 
+  async loadDraftForQueue(queueItemId) {
+    if (!queueItemId) return null;
+    const result = await this.supabase
+      .from('ai_job_drafts')
+      .select('*')
+      .eq('queue_item_id', queueItemId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (result.error) {
+      this.logger.warn?.(`Unable to load existing AI draft for queue item: ${result.error.message}`);
+      return null;
+    }
+    return result.data || null;
+  }
+
   async updateQueue(id, patch) {
     const result = await this.supabase
       .from('ai_research_queue')
@@ -118,7 +152,99 @@ export default class QueueWorker {
     return singleOrThrow(result, 'Update AI queue item');
   }
 
+  async recoverExistingDraft(queueItem, rawNotification = null, existingDraft = null) {
+    const draft = existingDraft || await this.loadDraftForQueue(queueItem.id);
+    if (!draft) return null;
+
+    const qualityScores = draft.quality_scores || {};
+    const queueStatus = qualityScores.queueStatus || (draft.status === 'rejected' ? 'rejected' : 'drafted');
+    await this.updateQueue(queueItem.id, {
+      status: queueStatus,
+      extracted_data: {
+        ...(queueItem.extracted_data || {}),
+        phase2_draft_id: draft.id,
+        phase2_quality: qualityScores,
+        phase2_recovered_at: new Date().toISOString(),
+      },
+      notes: 'Recovered existing Phase 2 draft after interrupted worker run.',
+    });
+    await this.markRawProcessed(rawNotification, draft.id);
+
+    return {
+      id: queueItem.id,
+      status: queueStatus,
+      draft_id: draft.id,
+      draft_status: draft.status,
+      finalScore: qualityScores.finalScore || qualityScores.overall || null,
+      duplicateRisk: qualityScores.duplicateRisk || 0,
+      provider: draft.ai_provider || 'unknown',
+      recovered: true,
+    };
+  }
+
+  async recoverStaleProcessing({ olderThanMinutes = 30, limit = 100 } = {}) {
+    const cutoff = new Date(Date.now() - olderThanMinutes * 60_000).toISOString();
+    const result = await this.supabase
+      .from('ai_research_queue')
+      .select('*')
+      .eq('status', 'processing')
+      .lt('updated_at', cutoff)
+      .limit(limit);
+
+    const staleItems = dataOrThrow(result, 'Load stale processing AI queue items');
+    const recovered = [];
+
+    for (const item of staleItems) {
+      const rawNotification = await this.loadRawNotification(item);
+      const existingDraft = await this.loadDraftForQueue(item.id);
+      if (existingDraft) {
+        recovered.push(await this.recoverExistingDraft(item, rawNotification, existingDraft));
+        continue;
+      }
+
+      const previousRecoveries = Number(item.extracted_data?.phase2_recovery_count || 0);
+      const recoveryCount = previousRecoveries + 1;
+      const exhausted = recoveryCount > (this.maxRetries + 1);
+      const serialized = {
+        message: `Recovered stale processing item after ${olderThanMinutes} minute worker timeout.`,
+        code: 'STALE_PROCESSING_RECOVERY',
+        errorType: exhausted ? 'stale_processing_exhausted' : 'stale_processing_recovered',
+        validation: null,
+        attempts: [],
+      };
+
+      await this.updateQueue(item.id, {
+        status: exhausted ? 'rejected' : 'pending',
+        extracted_data: {
+          ...(item.extracted_data || {}),
+          phase2_recovery_count: recoveryCount,
+          phase2_last_error: serialized,
+          phase2_recovered_at: new Date().toISOString(),
+        },
+        notes: exhausted
+          ? `Phase 2 stale processing recovery exhausted after ${recoveryCount} recovery attempt(s).`
+          : 'Phase 2 stale processing item returned to pending for retry.',
+      });
+
+      if (exhausted) {
+        await this.markRawFailed(rawNotification, serialized, recoveryCount);
+      }
+
+      recovered.push({
+        id: item.id,
+        status: exhausted ? 'rejected' : 'pending',
+        recovered: true,
+        recoveryCount,
+      });
+    }
+
+    return recovered;
+  }
+
   async saveDraft({ queueItem, rawNotification, extractionResult, draft, qualityScores }) {
+    const existingDraft = await this.loadDraftForQueue(queueItem.id);
+    if (existingDraft) return existingDraft;
+
     const payload = {
       queue_item_id: queueItem.id,
       job_type: queueItem.job_type || draft.job_type || 'government',
@@ -128,7 +254,7 @@ export default class QueueWorker {
         ...draft,
         phase2: {
           extraction_model: extractionResult.model || '',
-          provider_attempts: extractionResult.attempts || [],
+          provider_attempts: sanitizeProviderAttempts(extractionResult.attempts),
           raw_notification_id: rawNotification?.id || null,
         },
       },
@@ -143,6 +269,12 @@ export default class QueueWorker {
       .insert([payload])
       .select()
       .maybeSingle();
+
+    if (result.error && isDuplicateDbError(result.error)) {
+      const recovered = await this.loadDraftForQueue(queueItem.id);
+      if (recovered) return recovered;
+    }
+
     return singleOrThrow(result, 'Insert AI job draft');
   }
 
@@ -162,7 +294,24 @@ export default class QueueWorker {
       .eq('id', rawNotification.id);
   }
 
-  async handleFailure(queueItem, error) {
+  async markRawFailed(rawNotification, serialized, retries) {
+    if (!rawNotification?.id) return;
+    await this.supabase
+      .from('raw_job_notifications')
+      .update({
+        status: 'failed',
+        metadata: {
+          ...(rawNotification.metadata || {}),
+          phase2_failed_at: new Date().toISOString(),
+          phase2_retries: retries,
+          phase2_last_error: serialized,
+        },
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', rawNotification.id);
+  }
+
+  async handleFailure(queueItem, error, rawNotification = null) {
     const previous = queueItem.extracted_data?.phase2_retries || 0;
     const retries = previous + 1;
     const finalFailure = retries > this.maxRetries;
@@ -179,6 +328,10 @@ export default class QueueWorker {
         ? `Phase 2 failed after ${retries} attempt(s): ${serialized.message}`
         : `Phase 2 retry scheduled: ${serialized.message}`,
     });
+
+    if (finalFailure) {
+      await this.markRawFailed(rawNotification, serialized, retries);
+    }
 
     return {
       id: queueItem.id,
@@ -203,14 +356,22 @@ export default class QueueWorker {
       };
     }
 
+    const existingDraft = await this.loadDraftForQueue(queueItem.id);
+    if (existingDraft && !options.forceRegenerate) {
+      const rawNotification = await this.loadRawNotification(queueItem);
+      return this.recoverExistingDraft(queueItem, rawNotification, existingDraft);
+    }
+
     await this.updateQueue(queueItem.id, { status: 'processing' });
     const activeQueueItem = {
       ...queueItem,
       status: 'processing',
     };
 
+    let rawNotification = null;
+
     try {
-      const rawNotification = await this.loadRawNotification(activeQueueItem);
+      rawNotification = await this.loadRawNotification(activeQueueItem);
       const extractionResult = await this.extractor.extract({
         supabase: this.supabase,
         queueItem: activeQueueItem,
@@ -282,12 +443,18 @@ export default class QueueWorker {
       return this.handleFailure({
         ...activeQueueItem,
         extracted_data: activeQueueItem.extracted_data || {},
-      }, error);
+      }, error, rawNotification);
     }
   }
 
   async processQueue(options = {}) {
     const limit = Number.isInteger(options.limit) ? options.limit : 5;
+    const recovered = options.recoverStaleProcessing === false || options.itemIds?.length
+      ? []
+      : await this.recoverStaleProcessing({
+        olderThanMinutes: options.staleProcessingMinutes || 30,
+        limit,
+      });
     const items = options.itemIds?.length
       ? await Promise.all(options.itemIds.map((id) => this.loadItem(id)))
       : await this.loadPending(limit);
@@ -301,6 +468,7 @@ export default class QueueWorker {
       status: results.some((result) => result.status === 'retry_scheduled' || result.status === 'rejected')
         ? 'partial'
         : 'success',
+      recovered: recovered.length,
       processed: results.length,
       results,
     };

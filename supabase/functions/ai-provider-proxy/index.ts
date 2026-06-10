@@ -46,9 +46,11 @@ const getServiceClient = () => {
   return createClient(url, serviceKey, { auth: { persistSession: false } })
 }
 
+const normalizeProviderName = (providerName: unknown) => String(providerName || '').trim().toLowerCase()
+
 const safeProvider = (provider: Record<string, any> = {}) => ({
   id: provider.id,
-  provider_name: provider.provider_name,
+  provider_name: normalizeProviderName(provider.provider_name || provider.provider || 'unknown'),
   model: provider.model || '',
   priority: provider.priority,
   is_active: !!provider.is_active,
@@ -182,18 +184,20 @@ const loadProviders = async (
   if (error) throw error
 
   const byId = new Map((data || []).map((provider) => [provider.id, provider]))
-  const byName = new Map((data || []).map((provider) => [provider.provider_name, provider]))
+  const byName = new Map((data || []).map((provider) => [normalizeProviderName(provider.provider_name), provider]))
 
   const ordered = requestedProviders.length
     ? requestedProviders
-      .map((requested) => byId.get(requested.id) || byName.get(requested.provider_name))
+      .map((requested) => byId.get(requested.id) || byName.get(normalizeProviderName(requested.provider_name)))
       .filter(Boolean)
     : (data || [])
 
   return ordered
     .filter((provider) => provider?.is_active && String(provider.api_key || '').trim())
     .map((provider) => {
-      const requested = requestedProviders.find((item) => item.id === provider.id || item.provider_name === provider.provider_name) || {}
+      const requested = requestedProviders.find(
+        (item) => item.id === provider.id || normalizeProviderName(item.provider_name) === normalizeProviderName(provider.provider_name)
+      ) || {}
       return {
         ...provider,
         model: requested.model || provider.model,

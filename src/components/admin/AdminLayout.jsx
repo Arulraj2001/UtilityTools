@@ -6,7 +6,7 @@ import {
   Settings, LinkIcon, Megaphone, Download, Sparkles,
   ChevronLeft, ChevronRight, Menu, LogOut, FileUp,
   Brain, Search, Shield, Copy, BarChart3, Activity,
-  GitCompare, Globe, ChevronDown,
+  GitCompare, Globe, ChevronDown, ServerCog,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -41,6 +41,7 @@ const aiNavItems = [
   { to: '/admin/ai-settings',     label: 'AI Settings',        icon: Settings },
   { to: '/admin/ai-prompts',      label: 'Prompt Management',  icon: BookOpen },
   { to: '/admin/ai-reports',      label: 'Quality Reports',    icon: BarChart3 },
+  { to: '/admin/ai-scale-ops',    label: 'Scale Operations',   icon: ServerCog },
 ];
 
 export default function AdminLayout() {

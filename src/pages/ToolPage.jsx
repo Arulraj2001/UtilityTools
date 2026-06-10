@@ -464,6 +464,11 @@ export default function ToolPage() {
               </div>
             </div>
 
+            {/* Value proposition blurb for E-E-A-T - shown for all tools above the main educational content */}
+            <div className="text-xs text-muted-foreground px-1">
+              This tool is free, private where possible, and includes detailed guidance below so you understand the results and limitations before using them for official submissions or important decisions.
+            </div>
+
             {tool?.long_description && (
               <Suspense fallback={null}>
                 <SanitizedHtmlBlock

@@ -189,6 +189,25 @@ export default function About() {
           </div>
         </section>
 
+        {/* Built for India's competitive exam aspirants */}
+        <section className="rounded-xl border border-border/60 border-l-4 border-l-primary/40 bg-card/80 p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-3">Built for India's government exam aspirants</h2>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p>
+              A large part of QuickUtils is designed specifically for students and job seekers preparing applications for SSC (CGL, CHSL, MTS), IBPS (PO, Clerk), RRB (NTPC, Group D, ALP), SBI, RBI, NABARD, TNPSC, UPSC, and various state PSCs.
+            </p>
+            <p>
+              We track official notification specifications for photo dimensions (e.g. 100×120 px, 200×230 px, 35×45 mm), signature sizes (140×60 px), and file size limits (20 KB, 50 KB, 80 KB for PAN/Aadhaar, 200 KB for certificates, 300 KB for marksheets). Tools like the SSC Photo Resizer, Railway Photo Resizer, Bank Exam Photo Tool, Photo KB Reducer, Exam Document PDF Compressor, and Image to Exam PDF are built to hit those exact targets using quality-optimization algorithms while keeping everything in your browser for privacy.
+            </p>
+            <p>
+              Every such tool page includes: step-by-step instructions, real notification examples, "when the portal rejects it anyway" troubleshooting, limitations, and a clear reminder to always re-verify against the latest official notice PDF.
+            </p>
+          </div>
+          <div className="mt-4 text-sm">
+            <Link to="/tools" className="text-primary hover:underline font-medium">Browse government exam tools →</Link>
+          </div>
+        </section>
+
         <section className="rounded-xl border border-border/60 border-l-4 border-l-primary/40 bg-card/80 p-6 mb-8">
           <h2 className="text-xl font-semibold mb-3">Trust, review, and transparency</h2>
           <p className="text-muted-foreground leading-relaxed mb-5">

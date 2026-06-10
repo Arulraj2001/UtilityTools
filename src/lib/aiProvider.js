@@ -5,11 +5,14 @@ export const DEFAULT_PROVIDER_TIMEOUT_MS = 45_000
 export const DEFAULT_PROVIDER_PRIORITY = {
   deepseek: 1,
   gemini: 2,
-  groq: 3,
-  openrouter: 4,
-  huggingface: 5,
-  cerebras: 6,
+  openai: 3,
+  groq: 4,
+  openrouter: 5,
+  huggingface: 6,
+  cerebras: 7,
 }
+
+const normalizeProviderName = (providerName) => String(providerName || '').trim().toLowerCase()
 
 export const PROVIDER_MODELS = {
   gemini: [
@@ -29,6 +32,12 @@ export const PROVIDER_MODELS = {
   deepseek: [
     { value: 'deepseek-chat', label: 'DeepSeek Chat V3 (recommended)' },
     { value: 'deepseek-reasoner', label: 'DeepSeek Reasoner R1' },
+  ],
+  openai: [
+    { value: 'gpt-4o-mini', label: 'OpenAI GPT-4o Mini (fast)' },
+    { value: 'gpt-4o', label: 'OpenAI GPT-4o' },
+    { value: 'gpt-4.1', label: 'OpenAI GPT-4.1' },
+    { value: 'gpt-3.5-turbo', label: 'OpenAI GPT-3.5 Turbo' },
   ],
   openrouter: [
     { value: 'openrouter/free', label: 'OpenRouter Free Router (auto-select)' },
@@ -62,6 +71,7 @@ export const PROVIDER_MODEL_PREFERENCES = {
   gemini: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'],
   groq: ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile', 'openai/gpt-oss-20b'],
   openrouter: ['openrouter/free', 'deepseek/deepseek-v4-flash:free', 'meta-llama/llama-3.3-70b-instruct:free', 'qwen/qwen3-coder:free'],
+  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-3.5-turbo'],
   huggingface: ['mistralai/Mistral-7B-Instruct-v0.2', 'HuggingFaceH4/zephyr-7b-beta'],
   cerebras: ['llama-3.3-70b', 'gpt-oss-120b', 'zai-glm-4.7'],
 }
@@ -70,7 +80,7 @@ const hasStoredKey = (provider = {}) => Boolean(provider.has_api_key || provider
 
 const safeProviderPayload = (provider = {}) => ({
   id: provider.id || null,
-  provider_name: provider.provider_name,
+  provider_name: getProviderName(provider),
   model: provider.model || '',
   priority: provider.priority,
   is_active: provider.is_active,
@@ -85,12 +95,15 @@ const getAvailableModelIds = (provider) => (
     : []
 )
 
+const getProviderName = (provider = {}) => normalizeProviderName(provider.provider_name)
+
 export const chooseProviderModel = (provider = {}) => {
   const configured = provider.model || ''
   const available = getAvailableModelIds(provider)
   const availableSet = new Set(available)
-  const preferences = PROVIDER_MODEL_PREFERENCES[provider.provider_name] || []
-  const staticModels = (PROVIDER_MODELS[provider.provider_name] || []).map((model) => model.value)
+  const providerName = normalizeProviderName(provider.provider_name)
+  const preferences = PROVIDER_MODEL_PREFERENCES[providerName] || []
+  const staticModels = (PROVIDER_MODELS[providerName] || []).map((model) => model.value)
   const candidates = [...preferences, ...staticModels].filter(Boolean)
   const lastError = String(provider.stats?.last_error || '').toLowerCase()
   const shouldBypassConfigured =
@@ -130,8 +143,8 @@ export const sortProvidersForFallback = (providers = []) => (
     .sort((a, b) => {
       const healthDelta = providerHealthPenalty(a) - providerHealthPenalty(b)
       if (healthDelta !== 0) return healthDelta
-      const aPriority = Number.isFinite(a.priority) ? a.priority : DEFAULT_PROVIDER_PRIORITY[a.provider_name] || 99
-      const bPriority = Number.isFinite(b.priority) ? b.priority : DEFAULT_PROVIDER_PRIORITY[b.provider_name] || 99
+      const aPriority = Number.isFinite(a.priority) ? a.priority : DEFAULT_PROVIDER_PRIORITY[normalizeProviderName(a.provider_name)] || 99
+      const bPriority = Number.isFinite(b.priority) ? b.priority : DEFAULT_PROVIDER_PRIORITY[normalizeProviderName(b.provider_name)] || 99
       return aPriority - bPriority
     })
 )
@@ -193,8 +206,9 @@ const replayAttempts = async (attempts = [], onAttempt) => {
 }
 
 export const fetchProviderModels = async (provider, { signal } = {}) => {
+  const providerName = getProviderName(provider)
   if (!hasStoredKey(provider) && !provider.transientKey) {
-    return PROVIDER_MODELS[provider.provider_name] || []
+    return PROVIDER_MODELS[providerName] || []
   }
 
   const payload = await invokeProviderProxy({
@@ -203,7 +217,7 @@ export const fetchProviderModels = async (provider, { signal } = {}) => {
     transientKey: provider.transientKey || null,
   }, { signal })
 
-  return Array.isArray(payload.models) ? payload.models : (PROVIDER_MODELS[provider.provider_name] || [])
+  return Array.isArray(payload.models) ? payload.models : (PROVIDER_MODELS[providerName] || [])
 }
 
 export const callAI = async (providers, prompt, { signal, timeoutMs = DEFAULT_PROVIDER_TIMEOUT_MS, onAttempt } = {}) => {

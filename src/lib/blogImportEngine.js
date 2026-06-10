@@ -222,7 +222,9 @@ const generateFields = (row, categories) => {
 
 // ── Validation ───────────────────────────────────────────────────────────────
 
-const validateRow = (row, existingSlugsSet, batchSlugsSet) => {
+const normalizeDescription = (value) => String(value ?? '').trim().toLowerCase()
+
+const validateRow = (row, existingSlugsSet, batchSlugsSet, existingSeoDescriptionsSet, existingExcerptsSet, batchSeoDescriptionsSet, batchExcerptsSet) => {
   const errors = []
   const warnings = []
 
@@ -232,6 +234,31 @@ const validateRow = (row, existingSlugsSet, batchSlugsSet) => {
 
   if (row.slug) {
     if (batchSlugsSet.has(row.slug)) errors.push(`Duplicate slug in file: "${row.slug}"`)
+  }
+
+  // Check SEO description duplicates (exact match against other SEO descriptions only)
+  if (row.seo_description?.trim()) {
+    const normalizedSeoDesc = normalizeDescription(row.seo_description)
+    if (batchSeoDescriptionsSet.has(normalizedSeoDesc)) {
+      warnings.push('Duplicate SEO description found in file.')
+    }
+    if (existingSeoDescriptionsSet.has(normalizedSeoDesc)) {
+      warnings.push('SEO description duplicates an existing post.')
+    }
+    batchSeoDescriptionsSet.add(normalizedSeoDesc)
+  } else {
+    // Check excerpt duplicates against other excerpts only when no seo_description
+    const excerpt = row.excerpt || row.description || ''
+    if (excerpt.trim()) {
+      const normalizedExcerpt = normalizeDescription(excerpt)
+      if (batchExcerptsSet.has(normalizedExcerpt)) {
+        warnings.push('Duplicate excerpt found in file.')
+      }
+      if (existingExcerptsSet.has(normalizedExcerpt)) {
+        warnings.push('Excerpt duplicates an existing post.')
+      }
+      batchExcerptsSet.add(normalizedExcerpt)
+    }
   }
 
   ;['featured_image', 'og_image', 'canonical_url'].forEach((field) => {
@@ -249,13 +276,34 @@ const validateRow = (row, existingSlugsSet, batchSlugsSet) => {
 
 // ── Main entry point ─────────────────────────────────────────────────────────
 
-export const processImportData = (rawRows, categories, existingSlugsList = []) => {
+export const processImportData = (rawRows, categories, existingSlugsList = [], existingItems = []) => {
   const existingSlugsSet = new Set(existingSlugsList)
+  // Separate sets for SEO descriptions and excerpts to avoid false cross-matching
+  const existingSeoDescriptionsSet = new Set(
+    existingItems
+      .map((item) => normalizeDescription(item.seo_description))
+      .filter(Boolean)
+  )
+  const existingExcerptsSet = new Set(
+    existingItems
+      .map((item) => normalizeDescription(item.excerpt))
+      .filter(Boolean)
+  )
   const batchSlugsSet = new Set()
+  const batchSeoDescriptionsSet = new Set()
+  const batchExcerptsSet = new Set()
 
   const rows = rawRows.map((raw, idx) => {
     const row = generateFields(raw, categories)
-    const { errors, warnings, isValid } = validateRow(row, existingSlugsSet, batchSlugsSet)
+    const { errors, warnings, isValid } = validateRow(
+      row,
+      existingSlugsSet,
+      batchSlugsSet,
+      existingSeoDescriptionsSet,
+      existingExcerptsSet,
+      batchSeoDescriptionsSet,
+      batchExcerptsSet
+    )
 
     if (row.slug) batchSlugsSet.add(row.slug)
 

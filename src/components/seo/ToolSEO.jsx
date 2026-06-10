@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Helmet } from 'react-helmet-async';
 import { DEFAULT_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
+import { buildHowToSchema, buildWebApplicationSchema } from '@/lib/pageSchemas';
 
 /**
  * Production-grade SEO component
@@ -99,26 +100,30 @@ export default function ToolSEO({
       : null;
 
   /**
-   * SoftwareApplication Schema (upgraded from WebApplication)
+   * Primary WebApplication / SoftwareApplication Schema (stronger for utility tools)
    */
-
-  const softwareAppSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
+  const webAppSchema = buildWebApplicationSchema({
     name: tool.name,
     description,
     url: canonical,
     applicationCategory: tool.application_category || 'UtilitiesApplication',
-    operatingSystem: tool.operating_system || 'Any',
-    browserRequirements: tool.browser_requirements || 'Requires JavaScript',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD'
-    },
-    ...(tool.aggregate_rating && { aggregateRating: tool.aggregate_rating }),
-    ...(tool.features?.length > 0 && { featureList: tool.features })
-  };
+    features: tool.features || [],
+    aggregateRating: tool.aggregate_rating || null,
+  });
+
+  /**
+   * Optional HowTo Schema (if tool provides howto_steps array or we can derive from content later)
+   * Example in DB: tool.howto_steps = [{name: "Step 1", text: "..."}, ...]
+   */
+  const howtoSteps = Array.isArray(tool.howto_steps) ? tool.howto_steps : null;
+  const howToSchema = howtoSteps
+    ? buildHowToSchema({
+        name: `${tool.name} - Step by Step Guide`,
+        description,
+        url: canonical,
+        steps: howtoSteps,
+      })
+    : null;
 
   /**
    * Breadcrumb Schema
@@ -215,21 +220,23 @@ export default function ToolSEO({
       <meta name="twitter:image" content={image} />
       <meta name="twitter:url" content={canonical} />
 
-      {/* JSON-LD */}
-      <script type="application/ld+json">{JSON.stringify(softwareAppSchema)}</script>
+      {/* JSON-LD - Primary schemas for E-E-A-T and rich results */}
+      <script type="application/ld+json">{JSON.stringify(webAppSchema)}</script>
 
       {faqSchema && (
         <script type="application/ld+json">
-          {JSON.stringify(
-            faqSchema
-          )}
+          {JSON.stringify(faqSchema)}
+        </script>
+      )}
+
+      {howToSchema && (
+        <script type="application/ld+json">
+          {JSON.stringify(howToSchema)}
         </script>
       )}
 
       <script type="application/ld+json">
-        {JSON.stringify(
-          breadcrumbSchema
-        )}
+        {JSON.stringify(breadcrumbSchema)}
       </script>
 
     </Helmet>

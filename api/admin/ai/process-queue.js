@@ -8,6 +8,22 @@ import {
   sendJson,
 } from '../../_lib/fetchApi.js';
 
+const MAX_AI_QUEUE_BATCH_SIZE = 25;
+
+const queueLimit = (value) => {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) return 5;
+  return Math.min(parsed, MAX_AI_QUEUE_BATCH_SIZE);
+};
+
+const queueItemIds = (value) => {
+  if (!Array.isArray(value)) return null;
+  return value
+    .map((item) => String(item || '').trim())
+    .filter(Boolean)
+    .slice(0, MAX_AI_QUEUE_BATCH_SIZE);
+};
+
 export default async function handler(req, res) {
   if (!requireMethod(req, res, 'POST')) return;
 
@@ -18,10 +34,11 @@ export default async function handler(req, res) {
     const worker = new QueueWorker(supabase, {
       logger: console,
     });
+    const itemIds = queueItemIds(body.itemIds);
     const result = await worker.processQueue({
       adminId: admin.id,
-      limit: Number.isInteger(body.limit) ? body.limit : 5,
-      itemIds: Array.isArray(body.itemIds) ? body.itemIds : null,
+      limit: queueLimit(body.limit),
+      itemIds,
       force: Boolean(body.force),
     });
     sendJson(res, 200, result);

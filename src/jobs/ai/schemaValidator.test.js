@@ -46,10 +46,28 @@ test('rejects hallucinated links', () => {
   assert.match(result.errors.join(' '), /hallucinated/);
 });
 
+test('rejects fabricated same-host application links', () => {
+  const result = validateExtraction({
+    ...validExtraction,
+    application_link: 'https://ssc.gov.in/fabricated-apply-path',
+  }, baseContext);
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(' '), /application_link/);
+});
+
 test('rejects invalid dates', () => {
   const result = validateExtraction({
     ...validExtraction,
     important_dates: [{ event: 'Last date', date: 'soon-ish' }],
+  }, baseContext);
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(' '), /valid date/);
+});
+
+test('rejects impossible numeric dates', () => {
+  const result = validateExtraction({
+    ...validExtraction,
+    important_dates: [{ event: 'Last date', date: '31/02/2026' }],
   }, baseContext);
   assert.equal(result.ok, false);
   assert.match(result.errors.join(' '), /valid date/);
@@ -62,4 +80,13 @@ test('rejects ungrounded numeric vacancy data', () => {
   }, baseContext);
   assert.equal(result.ok, false);
   assert.match(result.errors.join(' '), /vacancies/);
+});
+
+test('rejects partially ungrounded salary data', () => {
+  const result = validateExtraction({
+    ...validExtraction,
+    salary: '35400 to 99999',
+  }, baseContext);
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(' '), /salary/);
 });

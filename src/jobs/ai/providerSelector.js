@@ -3,6 +3,7 @@ import { callAI, classifyProviderError } from '../../../server/ai/providerCore.j
 export const PHASE2_PROVIDER_ORDER = [
   'cerebras',
   'openrouter',
+  'openai',
   'groq',
   'gemini',
   'deepseek',
@@ -197,7 +198,7 @@ export default class ProviderSelector {
         signal: options.signal,
         onAttempt: async (attempt) => {
           const normalized = {
-            provider: attempt.provider,
+            providerId: attempt.provider?.id || null,
             providerName: attempt.providerName || attempt.provider?.provider_name || 'unknown',
             model: attempt.model || null,
             ok: Boolean(attempt.ok),

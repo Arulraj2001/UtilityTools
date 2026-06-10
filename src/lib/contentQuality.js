@@ -20,6 +20,13 @@ const contentByType = (item, type) => {
 
 const getTitle = (item, type) => item.seo_title || item.title || item.name || (type === 'job' ? item.title : '')
 const getDescription = (item) => item.seo_description || item.excerpt || item.description || item.short_description || ''
+const getDescriptionSource = (item) => (
+  item.seo_description ? 'SEO description'
+    : item.excerpt ? 'Excerpt'
+    : item.description ? 'Description'
+    : item.short_description ? 'Short description'
+    : 'Description'
+)
 
 const thresholds = {
   tool: 90,
@@ -56,13 +63,39 @@ export const validateContentQuality = (item = {}, { type = 'page', existingItems
     warnings.push('No practical example detected in the main content.')
   }
 
-  const normalizedDescription = description.trim().toLowerCase()
-  const duplicate = existingItems.find((other) => (
-    other?.id !== item?.id &&
-    normalizedDescription &&
-    (other.seo_description || other.excerpt || other.description || '').trim().toLowerCase() === normalizedDescription
-  ))
-  if (duplicate) blockers.push(`Duplicate SEO description detected: ${duplicate.title || duplicate.name || duplicate.slug}.`)
+  const descriptionSource = getDescriptionSource(item)
+
+  // Check SEO description against OTHER posts' SEO descriptions (warning only, not a blocker)
+  // This allows editors to save while being informed of potential duplicate metadata
+  if (item.seo_description?.trim()) {
+    const normalizedSeoDesc = item.seo_description.trim().toLowerCase()
+    const duplicate = existingItems.find((other) => (
+      other?.id !== item?.id &&
+      other?.id !== item?.id_old &&
+      normalizedSeoDesc &&
+      other.seo_description?.trim().toLowerCase() === normalizedSeoDesc
+    ))
+
+    if (duplicate) {
+      warnings.push(`Duplicate SEO description detected: "${item.seo_description}" matches post "${duplicate.title || duplicate.name || duplicate.slug}". Use a unique SEO description.`)
+    }
+  } else {
+    // If no explicit SEO description, check excerpt against other posts' excerpts (warning only)
+    const fallbackDesc = (item.excerpt || item.description || '').trim()
+    if (fallbackDesc) {
+      const normalizedFallback = fallbackDesc.toLowerCase()
+      const fallbackDuplicate = existingItems.find((other) => (
+        other?.id !== item?.id &&
+        other?.id !== item?.id_old &&
+        normalizedFallback &&
+        (other.excerpt || other.description || '').trim().toLowerCase() === normalizedFallback
+      ))
+
+      if (fallbackDuplicate) {
+        warnings.push(`Duplicate ${descriptionSource.toLowerCase()} detected with ${fallbackDuplicate.title || fallbackDuplicate.name || fallbackDuplicate.slug}. Add a unique SEO description to avoid duplicate metadata.`)
+      }
+    }
+  }
 
   return {
     ok: blockers.length === 0,

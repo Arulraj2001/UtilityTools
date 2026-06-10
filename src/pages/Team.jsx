@@ -90,21 +90,22 @@ export default function Team() {
             <p className="text-foreground font-semibold text-lg">{FOUNDER_NAME}</p>
 
             <p>
-              {FOUNDER_NAME} is the founder of {ORGANIZATION_NAME} and leads QuickUtils as a
-              practical online tools project for students, creators, developers, job applicants,
-              sellers, and everyday web users.
+              {FOUNDER_NAME} is the founder of {ORGANIZATION_NAME} and leads QuickUtils. He created the platform after observing thousands of Indian competitive exam aspirants lose time and face rejections because of incorrect photo sizes, signature dimensions, and oversized certificate PDFs for portals like SSC, IBPS, RRB, TNPSC, and state PSCs.
             </p>
 
             <p>
-              His work focuses on educational tools, software development, AI tools, and web
-              applications that make common digital tasks easier to complete and easier to verify.
+              The focus is on two things: (1) accurate, private, browser-based tools that match official specifications exactly, and (2) educational content that explains the requirements, the math behind calculators, limitations, and verification steps so users understand results instead of blindly trusting them.
+            </p>
+
+            <p className="text-sm">
+              <strong className="text-foreground">Key focus areas:</strong> Government exam document tools (photo resizers, PDF compressors with exact KB targets), India-specific financial calculators (EMI, PF, Gratuity, In-Hand Salary, GST), education calculators (CGPA, SGPA, attendance, percentage), and seller/logistics utilities.
             </p>
 
             <Link
               to="/author/arulraj-s"
               className="inline-flex items-center text-sm font-medium text-primary hover:underline"
             >
-              View author profile →
+              View author profile and full bio →
             </Link>
           </div>
         </section>
@@ -134,9 +135,16 @@ export default function Team() {
         <section className="rounded-2xl border border-border/60 bg-card/80 p-7 shadow-sm">
           <h2 className="text-2xl font-semibold mb-4">About the Team</h2>
           <p className="text-muted-foreground leading-relaxed">
-            QuickUtils is built around small, focused utilities and supporting guides. The team
-            prioritizes clear instructions, practical examples, privacy-aware file handling, and
-            visible policies so users can understand how a tool works before relying on the result.
+            QuickUtils is built around small, focused utilities and supporting educational content. The team prioritizes:
+          </p>
+          <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
+            <li>• Clear, human-written explanations and real exam / real-life examples (especially for SSC, IBPS, RRB, TNPSC, UPSC aspirants)</li>
+            <li>• Privacy-first browser processing for sensitive documents (photos, signatures, certificates, mark sheets)</li>
+            <li>• Accurate formulas with visible assumptions and "verify with official source" reminders</li>
+            <li>• Visible trust pages (Methodology, Editorial Policy, Corrections, full legal set)</li>
+          </ul>
+          <p className="mt-3 text-muted-foreground leading-relaxed text-sm">
+            Every major tool page aims for 400–800+ words of original, useful content beyond the widget itself.
           </p>
         </section>
 

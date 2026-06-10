@@ -155,9 +155,10 @@ const normalizeUrlForCompare = (url = '') => {
   }
 };
 
-const hostOf = (url = '') => {
+const originForCompare = (url = '') => {
   try {
-    return new URL(url).hostname.replace(/^www\./, '').toLowerCase();
+    const parsed = new URL(url);
+    return parsed.origin.toLowerCase();
   } catch (_error) {
     return '';
   }
@@ -191,13 +192,12 @@ const assertTrustedUrl = (field, value, context, errors) => {
 
   const normalized = normalizeUrlForCompare(value);
   const knownUrls = knownUrlsFromContext(context);
-  const knownHosts = new Set(knownUrls.map(hostOf).filter(Boolean));
-  const host = hostOf(normalized);
+  const knownOrigins = new Set(knownUrls.map(originForCompare).filter(Boolean));
 
   if (knownUrls.includes(normalized)) return;
-  if (host && knownHosts.has(host)) return;
+  if (field === 'official_website' && knownOrigins.has(normalized)) return;
 
-  errors.push(`${field} appears hallucinated because it is not present in or aligned with the official source URLs.`);
+  errors.push(`${field} appears hallucinated because it does not match an official source URL.`);
 };
 
 const validDateText = (value = '') => {
@@ -205,21 +205,66 @@ const validDateText = (value = '') => {
   if (!text || isUnknown(text)) return true;
   if (/^(to be announced|tba|will be updated|as per notification)$/i.test(text)) return true;
   if (/\b(not specified|not mentioned|not available|not released|to be notified|will be notified|will be announced|will be intimated|announced later|not yet announced)\b/i.test(text)) return true;
-  if (/\b\d{1,2}\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+\d{4}\b/i.test(text)) return true;
-  if (/\b\d{4}-\d{2}-\d{2}\b/.test(text)) return !Number.isNaN(Date.parse(text));
-  if (/\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b/.test(text)) return true;
-  return Number.isNaN(Date.parse(text)) ? false : true;
+
+  const isRealDate = (year, month, day) => {
+    const fullYear = Number(year) < 100 ? 2000 + Number(year) : Number(year);
+    const date = new Date(Date.UTC(fullYear, Number(month) - 1, Number(day)));
+    return date.getUTCFullYear() === fullYear &&
+      date.getUTCMonth() === Number(month) - 1 &&
+      date.getUTCDate() === Number(day);
+  };
+
+  const isoDates = [...text.matchAll(/\b(\d{4})-(\d{2})-(\d{2})\b/g)];
+  if (isoDates.length) {
+    return isoDates.every((match) => isRealDate(match[1], match[2], match[3]));
+  }
+
+  const numericDates = [...text.matchAll(/\b(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})\b/g)];
+  if (numericDates.length) {
+    return numericDates.every((match) => isRealDate(match[3], match[2], match[1]));
+  }
+
+  const monthNames = {
+    jan: 1, january: 1,
+    feb: 2, february: 2,
+    mar: 3, march: 3,
+    apr: 4, april: 4,
+    may: 5,
+    jun: 6, june: 6,
+    jul: 7, july: 7,
+    aug: 8, august: 8,
+    sep: 9, sept: 9, september: 9,
+    oct: 10, october: 10,
+    nov: 11, november: 11,
+    dec: 12, december: 12,
+  };
+  const monthPattern = Object.keys(monthNames).join('|');
+  const dayMonthDates = [...text.matchAll(new RegExp(`\\b(\\d{1,2})\\s+(${monthPattern})[a-z]*\\s+(\\d{4})\\b`, 'gi'))];
+  if (dayMonthDates.length) {
+    return dayMonthDates.every((match) => isRealDate(match[3], monthNames[match[2].toLowerCase()], match[1]));
+  }
+
+  const monthDayDates = [...text.matchAll(new RegExp(`\\b(${monthPattern})[a-z]*\\s+(\\d{1,2}),?\\s+(\\d{4})\\b`, 'gi'))];
+  if (monthDayDates.length) {
+    return monthDayDates.every((match) => isRealDate(match[3], monthNames[match[1].toLowerCase()], match[2]));
+  }
+
+  if (new RegExp(`\\b(${monthPattern})[a-z]*\\s+\\d{4}\\b`, 'i').test(text)) return true;
+  return false;
 };
 
-const digitsIn = (value = '') => (String(value || '').match(/\d+/g) || []);
+const digitsIn = (value = '') => (
+  String(value || '')
+    .match(/\d[\d,.-]*\d|\d/g) || []
+).map((token) => token.replace(/\D/g, '')).filter(Boolean);
 
 const assertGroundedNumber = (field, value, rawText, errors) => {
   if (!value || isUnknown(value)) return;
-  const digits = digitsIn(value).filter((item) => item.length >= 2);
+  const digits = digitsIn(value);
   if (!digits.length) return;
-  const source = String(rawText || '');
-  const missing = digits.filter((item) => !source.includes(item));
-  if (missing.length === digits.length) {
+  const sourceDigits = new Set(digitsIn(rawText));
+  const missing = digits.filter((item) => !sourceDigits.has(item));
+  if (missing.length > 0) {
     errors.push(`${field} contains numeric data not found in the official source text.`);
   }
 };

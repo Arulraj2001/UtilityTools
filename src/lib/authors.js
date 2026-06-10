@@ -14,13 +14,16 @@ export const AUTHORS = [
     url: buildAbsoluteUrl(`/author/${FOUNDER_SLUG}`),
     expertise: [
       'educational tools',
-      'software development',
-      'AI tools',
-      'web applications',
-      'utility workflows',
+      'government exam document preparation (SSC, IBPS, RRB, UPSC, TNPSC)',
+      'browser-based PDF & image processing',
+      'calculator formula implementation & validation',
+      'technical SEO and content systems for utility sites',
+      'AI-assisted tool development',
+      'web applications for Indian competitive exam aspirants',
     ],
     bio:
-      'Arulraj S is the founder of Learnithm and leads QuickUtils content, tool direction, and review standards. His work focuses on practical educational tools, browser-based utilities, AI-assisted workflows, and web applications that help users complete everyday digital tasks with clarity.',
+      'Arulraj S is the founder of Learnithm and leads QuickUtils. He built the platform to solve a real pain point he saw repeatedly: students and job applicants struggling with exact photo dimensions, signature specs, certificate PDF size limits (often 50-300 KB), and form-filling calculations for SSC CGL/CHSL, IBPS, RRB NTPC, TNPSC, UPSC, and state PSC applications. His focus is on accurate, private, browser-first tools plus clear educational content that explains the "why" behind every requirement, formula, and limitation.',
+    credentials: 'Practical expertise in exam portal specifications, client-side file processing (pdf-lib, PDF.js, Canvas), formula accuracy for EMI/SIP/GST/PF/education calculators, and building sustainable free utility platforms that pass quality and trust reviews.',
   },
 ]
 

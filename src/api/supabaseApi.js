@@ -536,6 +536,14 @@ export const getBlogPosts = async ({ published = true, orderBy = 'created_at', a
   return handleResponse(await query)
 };
 
+export const getBlogPostSeoMetadata = async ({ published = true, orderBy = 'created_at', ascending = false, limit = 200 } = {}) => {
+  let query = supabase.from('blog_posts').select('id,slug,title,seo_description,excerpt')
+  if (published) query = query.eq('status', 'published')
+  query = sortParams(query, orderBy, ascending)
+  if (limit) query = query.limit(limit)
+  return handleResponse(await query)
+};
+
 export const getBlogCategories = async ({ orderBy = 'sort_order', ascending = true, limit = 200 } = {}) => {
   let query = supabase.from('blog_categories').select('*')
   query = sortParams(query, orderBy, ascending)
@@ -1317,6 +1325,50 @@ export const getAiSources = async ({ onlyActive = false } = {}) => {
   return res.data ?? [];
 };
 
+export const getJobFetchLogs = async ({ limit = 1000 } = {}) => {
+  const safeLimit = Math.min(Math.max(Number(limit) || 1000, 1), 5000);
+  const res = await supabase
+    .from('job_fetch_logs')
+    .select('*, ai_job_sources(name,tier,category)')
+    .order('started_at', { ascending: false })
+    .limit(safeLimit);
+  if (res.error) { console.warn('getJobFetchLogs:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const getFetchFailures = async ({ limit = 1000 } = {}) => {
+  const safeLimit = Math.min(Math.max(Number(limit) || 1000, 1), 5000);
+  const res = await supabase
+    .from('fetch_failures')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(safeLimit);
+  if (res.error) { console.warn('getFetchFailures:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const getJobFetchDuplicates = async ({ limit = 1000 } = {}) => {
+  const safeLimit = Math.min(Math.max(Number(limit) || 1000, 1), 5000);
+  const res = await supabase
+    .from('job_fetch_duplicates')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(safeLimit);
+  if (res.error) { console.warn('getJobFetchDuplicates:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const getRawJobNotifications = async ({ limit = 5000 } = {}) => {
+  const safeLimit = Math.min(Math.max(Number(limit) || 5000, 1), 10000);
+  const res = await supabase
+    .from('raw_job_notifications')
+    .select('id,source_id,queue_item_id,status,fetched_at,created_at,updated_at')
+    .order('fetched_at', { ascending: false })
+    .limit(safeLimit);
+  if (res.error) { console.warn('getRawJobNotifications:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
 export const createAiSource = async (data) => {
   const res = await supabase.from('ai_job_sources').insert([{ ...data }]).select();
   if (res.error) { logSupabaseError('createAiSource', res.error); throw res.error; }
@@ -1370,6 +1422,52 @@ export const getAiDrafts = async ({ status = null, limit = 100 } = {}) => {
   if (status) q = q.eq('status', status);
   const res = await q;
   if (res.error) { console.warn('getAiDrafts:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const getAiReviewResults = async ({ limit = 1000, onlyCurrent = true } = {}) => {
+  const safeLimit = Math.min(Math.max(Number(limit) || 1000, 1), 5000);
+  let q = supabase
+    .from('ai_review_results')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(safeLimit);
+  if (onlyCurrent) q = q.eq('is_stale', false);
+  const res = await q;
+  if (res.error) { console.warn('getAiReviewResults:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const getAiModerationActions = async ({ limit = 2000 } = {}) => {
+  const safeLimit = Math.min(Math.max(Number(limit) || 2000, 1), 5000);
+  const res = await supabase
+    .from('ai_moderation_actions')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(safeLimit);
+  if (res.error) { console.warn('getAiModerationActions:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const getAiGenerationUsage = async ({ limit = 1000 } = {}) => {
+  const safeLimit = Math.min(Math.max(Number(limit) || 1000, 1), 5000);
+  const res = await supabase
+    .from('ai_generation_usage')
+    .select('*')
+    .order('usage_date', { ascending: false })
+    .limit(safeLimit);
+  if (res.error) { console.warn('getAiGenerationUsage:', res.error.message); return []; }
+  return res.data ?? [];
+};
+
+export const getMonitoringMetricSnapshots = async ({ limit = 1000 } = {}) => {
+  const safeLimit = Math.min(Math.max(Number(limit) || 1000, 1), 5000);
+  const res = await supabase
+    .from('monitoring_metrics_snapshots')
+    .select('id,snapshot_type,captured_at,created_at')
+    .order('captured_at', { ascending: false })
+    .limit(safeLimit);
+  if (res.error) { console.warn('getMonitoringMetricSnapshots:', res.error.message); return []; }
   return res.data ?? [];
 };
 
@@ -1500,7 +1598,11 @@ export const upsertAiProvider = async (providerName, defaults = {}) => {
     is_active: false,
     base_url: defaults.base_url || null,
   }]).select(AI_PROVIDER_SAFE_FIELDS);
-  if (res.error) { logSupabaseError('upsertAiProvider', res.error); return null; }
+  if (res.error) {
+    const errMsg = `Failed to create ${providerName}: ${res.error.message || res.error.code}`;
+    logSupabaseError('upsertAiProvider', res.error);
+    throw new Error(errMsg);
+  }
   return res.data?.[0] ?? null;
 };
 
