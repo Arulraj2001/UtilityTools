@@ -57,8 +57,13 @@ export const getHomepageSummary = async (req, res) => {
       featuredWorkflows: dataOrThrow(workflowsResult),
       featuredJobs: dataOrThrow(jobsResult),
       generatedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     }, {
-      'Cache-Control': 'public,max-age=300,s-maxage=300',
+      // 1-hour public cache + stale-while-revalidate:
+      //   CDN/Vercel edge serves the cached response while fetching a fresh one.
+      //   stale-if-error: serve stale data for 24 hours if Render is down.
+      'Cache-Control': 'public,max-age=3600,s-maxage=3600,stale-while-revalidate=3600,stale-if-error=86400',
+      'Vary': 'Accept',
     });
   } catch (error) {
     sendJson(res, 500, {

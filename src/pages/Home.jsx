@@ -1,6 +1,6 @@
-import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import React, { lazy, Suspense, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useHomepageData } from '@/hooks/useHomepageData'
 import HeroSection from '../components/home/HeroSection'
 import StatsBar from '../components/home/StatsBar'
 const CategoriesGrid = lazy(() => import('../components/home/CategoriesGrid'))
@@ -13,8 +13,6 @@ import { FEATURED_STATIC_BLOG_POSTS } from '@/lib/staticBlogPosts'
 
 const homepageDescription =
   'QuickUtils is a free online tools website for everyday PDF, image, calculator, text, developer, SEO, student, and business tasks.'
-
-const loadHomepageApi = () => import('@/api/homepageApi')
 
 const categoryHighlights = [
   {
@@ -513,30 +511,10 @@ function WorkflowsSectionSkeleton() {
 }
 
 export default function Home() {
-  const [deferHomepageQueries, setDeferHomepageQueries] = useState(false)
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    if ('requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(() => setDeferHomepageQueries(true), { timeout: 1500 })
-      return () => window.cancelIdleCallback?.(id)
-    }
-    const timer = window.setTimeout(() => setDeferHomepageQueries(true), 800)
-    return () => window.clearTimeout(timer)
-  }, [])
-
-  const {
-    data: homepageSummary = {},
-    isLoading: isLoadingHomepageSummary,
-    isFetching: isFetchingHomepageSummary,
-  } = useQuery({
-    queryKey: ['homepage-summary'],
-    queryFn: async () => (await loadHomepageApi()).getHomepageSummary(),
-    enabled: deferHomepageQueries,
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    retry: false,
-  })
+  // useHomepageData: reads build-time static snapshot instantly,
+  // then revalidates from Render API in the background via requestIdleCallback.
+  // No defer gate — data is available on first render.
+  const { data: homepageSummary, isLoading: isLoadingHomepageSummary } = useHomepageData()
 
   const categories = homepageSummary.categories || []
   const homepageTools = homepageSummary.tools || []
@@ -561,11 +539,12 @@ export default function Home() {
     [homepageTools]
   )
 
-  const showCategoriesSectionSkeleton = !deferHomepageQueries || isLoadingHomepageSummary
-  const showFeaturedSectionSkeleton = !deferHomepageQueries || isLoadingHomepageSummary || isFetchingHomepageSummary
-  const showTrendingSectionSkeleton = !deferHomepageQueries || isLoadingHomepageSummary || isFetchingHomepageSummary
-  const showRecentSectionSkeleton = !deferHomepageQueries || isLoadingHomepageSummary || isFetchingHomepageSummary
-  const showWorkflowsSectionSkeleton = !deferHomepageQueries || isLoadingHomepageSummary || isFetchingHomepageSummary
+  // Skeletons only show when the static snapshot is truly empty (first cold deploy)
+  const showCategoriesSectionSkeleton = isLoadingHomepageSummary && !categories.length
+  const showFeaturedSectionSkeleton = isLoadingHomepageSummary && !homepageTools.length
+  const showTrendingSectionSkeleton = showFeaturedSectionSkeleton
+  const showRecentSectionSkeleton = showFeaturedSectionSkeleton
+  const showWorkflowsSectionSkeleton = isLoadingHomepageSummary && !featuredWorkflows.length
 
   return (
     <div>
@@ -625,8 +604,8 @@ export default function Home() {
         )
       )}
 
-      {/* Featured Jobs (deferred) */}
-      {deferHomepageQueries && featuredJobs && featuredJobs.length > 0 && (
+      {/* Featured Jobs */}
+      {featuredJobs && featuredJobs.length > 0 && (
         <section className="py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <h2 className="text-xl font-semibold mb-4">Latest Government Jobs</h2>

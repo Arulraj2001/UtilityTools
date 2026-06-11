@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "setup-pdf-worker": "node scripts/setup-pdf-worker.js",
+    "generate-homepage-data": "node scripts/generate-homepage-data.js",
     "dev": "npm run setup-pdf-worker && vite",
-    "build": "npm run setup-pdf-worker && vite build && npm run generate-sitemap",
+    "build": "npm run setup-pdf-worker && node scripts/generate-homepage-data.js || true && vite build && npm run generate-sitemap",
     "generate-sitemap": "node scripts/generate-sitemap.js",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",

@@ -1,6 +1,19 @@
 {
   "headers": [
     {
+      "source": "/homepage-data.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public,s-maxage=3600,stale-while-revalidate=3600,stale-if-error=86400"
+        }
+      ]
+    },
+    {
       "source": "/ads.txt",
       "headers": [
         {
