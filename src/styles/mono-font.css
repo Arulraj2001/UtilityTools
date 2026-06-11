@@ -1,0 +1,28 @@
+/**
+ * mono-font.css
+ *
+ * JetBrains Mono font declarations — loaded lazily only by components
+ * that render code blocks (developer tools, JSON formatter, etc).
+ *
+ * Import this file in components that use font-mono:
+ *   import '@/styles/mono-font.css'
+ *
+ * Do NOT import this from index.css — it adds ~32KB to the critical parse
+ * path for every page, even those that never show code output.
+ */
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-latin-600-normal.woff2') format('woff2');
+}

@@ -8,15 +8,16 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext'
 import { useSupabaseRealtime } from '@/lib/useSupabaseRealtime'
 import UserNotRegisteredError from '@/components/UserNotRegisteredError'
 import ProtectedRoute from '@/components/ProtectedRoute'
-import SplashScreen from '@/components/SplashScreen'
 
-// Layouts
+// Layouts (structural — must stay eager)
 import PublicLayout from './components/layout/PublicLayout'
 import ScrollToTop from './components/layout/ScrollToTop'
 import { SiteThemeSettings } from '@/lib/useSiteThemeSettings'
 
-// Public pages
-import Home from './pages/Home'
+// SplashScreen: only shows on first visit — lazy is safe
+const SplashScreen = lazy(() => import('@/components/SplashScreen'))
+// Home: largest page — lazy to remove lucide-react icons from critical chunk
+const Home = lazy(() => import('./pages/Home'))
 const ToolsList = lazy(() => import('./pages/ToolsList'))
 const ToolPage = lazy(() => import('./pages/ToolPage'))
 const CategoriesList = lazy(() => import('./pages/CategoriesList'))
@@ -199,7 +200,9 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <SplashScreen duration={300} />
+        <Suspense fallback={null}>
+          <SplashScreen duration={300} />
+        </Suspense>
         <SiteThemeSettings />
         <Router>
           {showBackgroundLighting && (
