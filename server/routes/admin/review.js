@@ -14,48 +14,32 @@ import {
 import { asyncRoute } from '../../middleware/asyncRoute.js';
 import { rateLimit } from '../../middleware/rateLimit.js';
 import { requireAdmin } from '../../middleware/requireAdmin.js';
-import { requireMethod } from '../../middleware/requireMethod.js';
 
 const router = Router();
 
-router.route('/review-queue')
-  .get(requireAdmin, asyncRoute(getReviewQueue))
-  .all(requireMethod('GET'));
+// NOTE: Do NOT use .all() here — it intercepts OPTIONS preflight requests
+// and returns 405 before the global CORS handler in app.js can respond.
+// The global app.options('*') + cors() middleware handles all preflights.
 
-router.route('/review-queue/bulk-approve')
-  .post(rateLimit(), requireAdmin, asyncRoute(bulkApproveReviewItems))
-  .all(requireMethod('POST'));
+router.get('/review-queue', requireAdmin, asyncRoute(getReviewQueue));
 
-router.route('/review-queue/bulk-reject')
-  .post(rateLimit(), requireAdmin, asyncRoute(bulkRejectReviewItems))
-  .all(requireMethod('POST'));
+router.post('/review-queue/bulk-approve', rateLimit(), requireAdmin, asyncRoute(bulkApproveReviewItems));
 
-router.route('/review-item/:id')
-  .get(requireAdmin, asyncRoute(getReviewItem))
-  .all(requireMethod('GET'));
+router.post('/review-queue/bulk-reject', rateLimit(), requireAdmin, asyncRoute(bulkRejectReviewItems));
 
-router.route('/review-item/:id/run-review')
-  .post(requireAdmin, asyncRoute(runReview))
-  .all(requireMethod('POST'));
+router.get('/review-item/:id', requireAdmin, asyncRoute(getReviewItem));
 
-router.route('/review-item/:id/needs-revision')
-  .post(requireAdmin, asyncRoute(markReviewNeedsRevision))
-  .all(requireMethod('POST'));
+router.post('/review-item/:id/run-review', requireAdmin, asyncRoute(runReview));
 
-router.route('/review-item/:id/convert-to-job-draft')
-  .post(requireAdmin, asyncRoute(convertReviewItemToJobDraft))
-  .all(requireMethod('POST'));
+router.post('/review-item/:id/needs-revision', requireAdmin, asyncRoute(markReviewNeedsRevision));
 
-router.route('/approve/:id')
-  .post(requireAdmin, asyncRoute(approveReviewItem))
-  .all(requireMethod('POST'));
+router.post('/review-item/:id/convert-to-job-draft', requireAdmin, asyncRoute(convertReviewItemToJobDraft));
 
-router.route('/reject/:id')
-  .post(requireAdmin, asyncRoute(rejectReviewItem))
-  .all(requireMethod('POST'));
+router.post('/approve/:id', requireAdmin, asyncRoute(approveReviewItem));
 
-router.route('/publish/:id')
-  .post(rateLimit(), requireAdmin, asyncRoute(publishJob))
-  .all(requireMethod('POST'));
+router.post('/reject/:id', requireAdmin, asyncRoute(rejectReviewItem));
+
+router.post('/publish/:id', rateLimit(), requireAdmin, asyncRoute(publishJob));
 
 export default router;
+

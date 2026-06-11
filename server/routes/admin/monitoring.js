@@ -11,40 +11,27 @@ import {
 } from '../../controllers/adminMonitoringController.js';
 import { asyncRoute } from '../../middleware/asyncRoute.js';
 import { requireAdmin } from '../../middleware/requireAdmin.js';
-import { requireMethod } from '../../middleware/requireMethod.js';
 
 const router = Router();
 
-router.route('/providers')
-  .get(requireAdmin, asyncRoute(getProviderHealth))
-  .all(requireMethod('GET'));
+// NOTE: Do NOT use .all() here — it intercepts OPTIONS preflight requests.
+// The global app.options('*') + cors() middleware handles all preflights.
 
-router.route('/queue')
-  .get(requireAdmin, asyncRoute(getQueueHealth))
-  .all(requireMethod('GET'));
+router.get('/providers', requireAdmin, asyncRoute(getProviderHealth));
 
-router.route('/quality')
-  .get(requireAdmin, asyncRoute(getQualityMetrics))
-  .all(requireMethod('GET'));
+router.get('/queue', requireAdmin, asyncRoute(getQueueHealth));
 
-router.route('/moderation')
-  .get(requireAdmin, asyncRoute(getModerationMetrics))
-  .all(requireMethod('GET'));
+router.get('/quality', requireAdmin, asyncRoute(getQualityMetrics));
 
-router.route('/costs')
-  .get(requireAdmin, asyncRoute(getCostAnalytics))
-  .all(requireMethod('GET'));
+router.get('/moderation', requireAdmin, asyncRoute(getModerationMetrics));
 
-router.route('/alerts')
-  .get(requireAdmin, asyncRoute(getAlerts))
-  .all(requireMethod('GET'));
+router.get('/costs', requireAdmin, asyncRoute(getCostAnalytics));
 
-router.route('/overview')
-  .get(requireAdmin, asyncRoute(getOverview))
-  .all(requireMethod('GET'));
+router.get('/alerts', requireAdmin, asyncRoute(getAlerts));
 
-router.route('/scale-ops')
-  .get(requireAdmin, asyncRoute(getScaleOperations))
-  .all(requireMethod('GET'));
+router.get('/overview', requireAdmin, asyncRoute(getOverview));
+
+router.get('/scale-ops', requireAdmin, asyncRoute(getScaleOperations));
 
 export default router;
+

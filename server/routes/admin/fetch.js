@@ -8,24 +8,19 @@ import {
 import { asyncRoute } from '../../middleware/asyncRoute.js';
 import { rateLimit } from '../../middleware/rateLimit.js';
 import { requireAdmin } from '../../middleware/requireAdmin.js';
-import { requireMethod } from '../../middleware/requireMethod.js';
 
 const router = Router();
 
-router.route('/run')
-  .post(rateLimit({ maxRequests: 20 }), requireAdmin, asyncRoute(runFetchAll))
-  .all(requireMethod('POST'));
+// NOTE: Do NOT use .all() here — it intercepts OPTIONS preflight requests.
+// The global app.options('*') + cors() middleware handles all preflights.
 
-router.route('/status')
-  .get(requireAdmin, asyncRoute(getFetchStatus))
-  .all(requireMethod('GET'));
+router.post('/run', rateLimit({ maxRequests: 20 }), requireAdmin, asyncRoute(runFetchAll));
 
-router.route('/logs')
-  .get(requireAdmin, asyncRoute(getFetchLogs))
-  .all(requireMethod('GET'));
+router.get('/status', requireAdmin, asyncRoute(getFetchStatus));
 
-router.route('/source/:id')
-  .post(requireAdmin, asyncRoute(runFetchSource))
-  .all(requireMethod('POST'));
+router.get('/logs', requireAdmin, asyncRoute(getFetchLogs));
+
+router.post('/source/:id', requireAdmin, asyncRoute(runFetchSource));
 
 export default router;
+
