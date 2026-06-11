@@ -19,6 +19,8 @@ import { getSiteSettings, createSiteSetting, updateSiteSetting } from '@/api/sup
 import { getSiteSetting, parseSiteSettingValue } from '@/lib/siteSettings'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
+import { publishJob, isDevMode, isDevModeError } from '@/api/adminOperationsApi'
+import { toast } from 'sonner'
 
 import {
   Plus,
@@ -27,10 +29,158 @@ import {
   BriefcaseBusiness,
   Sparkles,
   X,
+  Send,
+  AlertTriangle,
+  CheckCircle2,
+  Loader2,
+  Shield,
 } from 'lucide-react'
+
+// ─── Audited Publish Dialog ────────────────────────────────────────────────────
+
+function PublishDialog({ job, onClose, onPublished }) {
+  const [notes, setNotes] = useState('')
+  const [overrideBlocker, setOverrideBlocker] = useState(false)
+  const [result, setResult] = useState(null)
+  const [publishing, setPublishing] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handlePublish = async () => {
+    setError(null)
+    setPublishing(true)
+    try {
+      const data = await publishJob(job.id, {
+        confirm: true,
+        overrideBlocker,
+        reasonCode: 'admin_manual_publish',
+        notes: notes.trim() || null,
+      })
+      setResult(data)
+      toast.success(`"${job.title}" published successfully`)
+      onPublished?.()
+    } catch (err) {
+      if (isDevModeError(err)) {
+        setError('Publish requires Vercel deployment — not available in local dev. On Vercel, this will publish the job and record the audit trail.')
+      } else if (err.payload?.qualityGateErrors?.length) {
+        setError(`Quality gate: ${err.payload.qualityGateErrors.join(', ')}`)
+      } else {
+        setError(err.message || 'Publish failed')
+      }
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  if (result) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <button onClick={onClose} className="absolute inset-0 bg-black/50" />
+        <div className="relative z-10 w-full max-w-md rounded-[24px] border border-border bg-card p-6 shadow-2xl">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">Published!</h3>
+              <p className="text-xs text-muted-foreground">Audit trail recorded</p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/30 p-3 text-sm space-y-1 mb-4">
+            <p><span className="text-muted-foreground">Job ID:</span> <span className="font-mono">{result.jobId || job.id}</span></p>
+            {result.publishedAt && <p><span className="text-muted-foreground">Published at:</span> {new Date(result.publishedAt).toLocaleString()}</p>}
+            {result.auditActionId && <p><span className="text-muted-foreground">Audit ID:</span> <span className="font-mono text-xs">{result.auditActionId}</span></p>}
+          </div>
+          <button onClick={onClose} className="w-full h-10 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all">
+            Close
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <button onClick={onClose} className="absolute inset-0 bg-black/50" />
+      <div className="relative z-10 w-full max-w-md rounded-[24px] border border-border bg-card p-6 shadow-2xl">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <Send className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-bold text-lg">Publish Job</h3>
+            <p className="text-xs text-muted-foreground">This uses the audited publish API and records a moderation action.</p>
+          </div>
+          <button onClick={onClose} className="ml-auto h-8 w-8 rounded-xl border border-border flex items-center justify-center hover:bg-muted/50">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="rounded-xl border border-border bg-muted/30 p-3 text-sm mb-4">
+          <p className="font-semibold line-clamp-2">{job.title}</p>
+          <p className="text-muted-foreground text-xs mt-0.5">{job.organization}</p>
+          <div className="mt-2 flex gap-2">
+            <JobStatusBadge status={job.status} />
+          </div>
+        </div>
+
+        {error && (
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
+
+        <div className="mb-4">
+          <label className="text-xs font-medium mb-1 block">Publish Notes (optional)</label>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            rows={3}
+            placeholder="Any notes for the moderation audit trail…"
+            className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+          />
+        </div>
+
+        {error && (
+          <label className="flex items-center gap-2 mb-4 cursor-pointer text-sm">
+            <input
+              type="checkbox"
+              checked={overrideBlocker}
+              onChange={e => setOverrideBlocker(e.target.checked)}
+              className="w-4 h-4 rounded border-border"
+            />
+            <div>
+              <span className="font-medium text-amber-700">Override quality gate blocker</span>
+              <p className="text-xs text-muted-foreground">Check this if you have reviewed the errors above and want to publish anyway.</p>
+            </div>
+          </label>
+        )}
+
+        <div className="flex gap-2">
+          <button
+            id={`publish-job-${job.id}`}
+            onClick={handlePublish}
+            disabled={publishing}
+            className="flex-1 h-11 rounded-xl bg-emerald-600 text-white font-semibold text-sm hover:opacity-90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+          >
+            {publishing
+              ? <><Loader2 className="w-4 h-4 animate-spin" />Publishing…</>
+              : <><Shield className="w-4 h-4" />Confirm & Publish</>}
+          </button>
+          <button onClick={onClose} className="h-11 px-4 rounded-xl border border-border text-sm font-medium hover:bg-muted/50 transition-all">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Main Component ────────────────────────────────────────────────────────────
 
 export default function AdminJobs() {
   const { data: jobs = [], isLoading } = useAdminJobs()
+  const queryClient = useQueryClient()
 
   const { data: settings = [] } = useQuery({
     queryKey: ['settings'],
@@ -38,7 +188,10 @@ export default function AdminJobs() {
   })
 
   const [jobsEnabled, setJobsEnabled] = useState(true)
-  const queryClient = useQueryClient()
+  const [editing, setEditing] = useState(null)
+  const [filter, setFilter] = useState('all')
+  const [search, setSearch] = useState('')
+  const [publishingJob, setPublishingJob] = useState(null)
 
   const settingEntry = getSiteSetting(settings, 'jobs_enabled')
   const parsedJobsEnabled = parseSiteSettingValue(settingEntry, true)
@@ -70,13 +223,8 @@ export default function AdminJobs() {
   const updateMutation = useUpdateJob()
   const deleteMutation = useDeleteJob()
 
-  const [editing, setEditing] = useState(null)
-  const [filter, setFilter] = useState('all')
-  const [search, setSearch] = useState('')
-
   const filteredJobs = useMemo(() => {
     const query = search.trim().toLowerCase()
-
     return jobs.filter((job) => {
       const matchesFilter =
         filter === 'all'
@@ -84,13 +232,11 @@ export default function AdminJobs() {
           : filter === 'featured'
             ? job.featured
             : job.status === filter
-
       const matchesSearch =
         query === '' ||
         job.title?.toLowerCase().includes(query) ||
         job.organization?.toLowerCase().includes(query) ||
         job.category?.toLowerCase().includes(query)
-
       return matchesFilter && matchesSearch
     })
   }, [jobs, filter, search])
@@ -162,9 +308,8 @@ export default function AdminJobs() {
                 <h2 className="text-2xl font-bold tracking-tight">
                   All Jobs
                 </h2>
-
                 <p className="text-sm text-muted-foreground mt-1">
-                  Manage published, draft, and featured job posts.
+                  Manage published, draft, and featured job posts. Use the audited Publish button to record moderation trail.
                 </p>
               </div>
 
@@ -200,7 +345,6 @@ export default function AdminJobs() {
                         <h3 className="text-base font-bold tracking-tight line-clamp-1">
                           {job.title}
                         </h3>
-
                         <p className="text-xs text-muted-foreground mt-1.5">
                           {job.organization}
                         </p>
@@ -209,6 +353,18 @@ export default function AdminJobs() {
                       {/* RIGHT */}
                       <div className="flex flex-wrap items-center gap-2">
                         <JobStatusBadge status={job.status} />
+
+                        {/* Audited Publish Button — only for draft/pending jobs */}
+                        {(job.status === 'draft' || job.status === 'pending' || job.status === 'pending_review') && (
+                          <button
+                            id={`publish-btn-${job.id}`}
+                            onClick={() => setPublishingJob(job)}
+                            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-emerald-500/30 text-emerald-700 text-xs font-medium hover:bg-emerald-500/10 transition-all"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Publish</span>
+                          </button>
+                        )}
 
                         <button
                           onClick={() => setEditing(job)}
@@ -241,6 +397,18 @@ export default function AdminJobs() {
           </div>
         </section>
       </div>
+
+      {/* AUDITED PUBLISH DIALOG */}
+      {publishingJob && (
+        <PublishDialog
+          job={publishingJob}
+          onClose={() => setPublishingJob(null)}
+          onPublished={() => {
+            queryClient.invalidateQueries({ queryKey: ['admin-jobs'] })
+            setPublishingJob(null)
+          }}
+        />
+      )}
 
       {/* DRAWER MODAL */}
       <AnimatePresence>

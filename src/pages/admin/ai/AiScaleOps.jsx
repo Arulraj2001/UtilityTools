@@ -17,7 +17,7 @@ import {
   ShieldCheck,
   TrendingUp,
 } from 'lucide-react';
-import { getScaleOperations } from '@/api/adminOperationsApi';
+import { getScaleOperations, devSafeQuery, isDevMode } from '@/api/adminOperationsApi';
 
 const numberFmt = new Intl.NumberFormat('en-IN');
 const usdFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 6 });
@@ -137,7 +137,7 @@ export default function AiScaleOps() {
 
   const query = useQuery({
     queryKey: ['phase5c-scale-ops', days, budget, strategy],
-    queryFn: () => getScaleOperations({ days, monthlyBudgetUsd: budget, strategy }),
+    queryFn: devSafeQuery(() => getScaleOperations({ days, monthlyBudgetUsd: budget, strategy })),
     retry: false,
     staleTime: 60_000,
   });
@@ -236,6 +236,12 @@ export default function AiScaleOps() {
       ) : query.isError ? (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {query.error?.message || 'Scale operations data could not be loaded.'}
+        </div>
+      ) : !query.data ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          {isDevMode()
+            ? 'Scale Operations requires Vercel deployment. Data is not available in local dev.'
+            : 'No scale operations data available. Try refreshing.'}
         </div>
       ) : (
         <>

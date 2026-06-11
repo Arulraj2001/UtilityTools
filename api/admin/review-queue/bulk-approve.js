@@ -1,13 +1,18 @@
 import {
   handleApiError,
+  rateLimit,
   readJsonBody,
   requireMethod,
   sendJson,
+  setCorsHeaders,
 } from '../../_lib/fetchApi.js';
 import { createAdminReviewContext } from '../../_lib/reviewApi.js';
 
 export default async function handler(req, res) {
+  setCorsHeaders(res);
+  if (req.method === 'OPTIONS') return sendJson(res, 204, null);
   if (!requireMethod(req, res, 'POST')) return;
+  if (rateLimit(req, res)) return;
 
   try {
     const { service, admin } = await createAdminReviewContext(req);

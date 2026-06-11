@@ -104,6 +104,12 @@ const toJobPayload = async (supabase, draft, rawNotification = null, adminId = n
     suffix += 1;
   }
 
+  // Safety fallback: if all 25 suffixes are taken, append a UUID fragment
+  // This eliminates the race condition where two concurrent inserts pass the check
+  if (suffix > 25) {
+    slug = `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`;
+  }
+
   const importantDates = Array.isArray(data.important_dates) ? data.important_dates : [];
   const lastDate = parseIsoDate(data.last_date || '') ||
     extractDateByEvent(importantDates, [/last/, /closing/, /end date/, /submission/]);
@@ -393,9 +399,13 @@ export class AdminReviewService {
   }
 
   async getReviewQueue({ limit = 50, decisionBand = null } = {}) {
+    // Only load non-terminal drafts to prevent O(N) at scale
+    // Excludes 'published' and 'rejected' drafts which don't need review
+    const reviewableStatuses = ['pending_review', 'approved', 'needs_revision'];
     let query = this.supabase
       .from('ai_job_drafts')
       .select('*')
+      .in('status', reviewableStatuses)
       .order('readiness_score', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
       .limit(Math.min(Math.max(Number(limit) || 50, 1), 100));
@@ -478,6 +488,10 @@ export class AdminReviewService {
     if (status === 'approved') {
       for (const draftId of ids) {
         const draft = await this.loadDraft(draftId);
+        // H10: Block needs_revision items from bulk approve — they need individual admin review
+        if (draft.status === 'needs_revision') {
+          throw statusError(`Bulk approve blocked: draft ${draftId} has status 'needs_revision' and requires individual review.`);
+        }
         let review = await this.latestReview(draft);
         if (!review) review = (await this.runReview(draftId, { adminId })).review;
         if (review.decision_band === DECISION_BANDS.blocked) {

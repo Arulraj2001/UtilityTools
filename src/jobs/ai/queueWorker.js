@@ -362,11 +362,25 @@ export default class QueueWorker {
       return this.recoverExistingDraft(queueItem, rawNotification, existingDraft);
     }
 
-    await this.updateQueue(queueItem.id, { status: 'processing' });
-    const activeQueueItem = {
-      ...queueItem,
-      status: 'processing',
-    };
+    // Optimistic locking: only claim if still pending (prevents race conditions)
+    const claimed = await this.supabase
+      .from('ai_research_queue')
+      .update({ status: 'processing', updated_at: new Date().toISOString() })
+      .eq('id', queueItem.id)
+      .eq('status', 'pending')
+      .select()
+      .maybeSingle();
+
+    if (!claimed.data) {
+      // Another worker already claimed this item
+      return {
+        id: queueItem.id,
+        status: 'skipped',
+        reason: 'Queue item was claimed by another worker.',
+      };
+    }
+
+    const activeQueueItem = claimed.data;
 
     let rawNotification = null;
 
@@ -475,20 +489,25 @@ export default class QueueWorker {
   }
 
   async getStatus() {
-    const [queue, drafts, failures] = await Promise.all([
-      this.supabase.from('ai_research_queue').select('status', { count: 'exact', head: false }),
-      this.supabase.from('ai_job_drafts').select('status', { count: 'exact', head: false }),
+    // Use individual count queries instead of fetching all rows
+    // This is O(1) per status instead of O(N) for the entire table
+    const countByStatus = async (table, statusValues) => {
+      const counts = {};
+      for (const status of statusValues) {
+        const { count, error } = await this.supabase
+          .from(table)
+          .select('*', { count: 'exact', head: true })
+          .eq('status', status);
+        if (!error) counts[status] = count || 0;
+      }
+      return counts;
+    };
+
+    const [queueCounts, draftCounts, failures] = await Promise.all([
+      countByStatus('ai_research_queue', ['pending', 'processing', 'drafted', 'rejected']),
+      countByStatus('ai_job_drafts', ['pending_review', 'approved', 'rejected', 'published']),
       this.supabase.from('ai_provider_failures').select('id', { count: 'exact', head: true }),
     ]);
-
-    const queueCounts = {};
-    (queue.data || []).forEach((item) => {
-      queueCounts[item.status] = (queueCounts[item.status] || 0) + 1;
-    });
-    const draftCounts = {};
-    (drafts.data || []).forEach((item) => {
-      draftCounts[item.status] = (draftCounts[item.status] || 0) + 1;
-    });
 
     return {
       queue: queueCounts,

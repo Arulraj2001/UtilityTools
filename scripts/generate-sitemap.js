@@ -149,14 +149,17 @@ async function main() {
 
   const urls = new Map()
 
-  // Static pages
+  // Static pages — lastmod set to a reasonable baseline for policy pages
+  // For dynamic listing pages, lastmod is omitted (changes on every deploy)
+  const POLICY_LASTMOD = '2026-06-01T00:00:00Z' // Project launch baseline
+
   urls.set('/', {
     changefreq: 'daily',
     priority: '1.0',
   })
 
   urls.set('/tools', {
-    changefreq: 'weekly',
+    changefreq: 'daily',
     priority: '0.9',
   })
 
@@ -166,78 +169,91 @@ async function main() {
   })
 
   urls.set('/blog', {
-    changefreq: 'weekly',
+    changefreq: 'daily',
     priority: '0.7',
   })
 
   urls.set('/jobs', {
-    changefreq: 'weekly',
+    changefreq: 'daily',
     priority: '0.8',
   })
 
   urls.set('/about', {
     changefreq: 'monthly',
     priority: '0.6',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/contact', {
     changefreq: 'monthly',
     priority: '0.6',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/privacy', {
-    changefreq: 'monthly',
-    priority: '0.5',
+    changefreq: 'yearly',
+    priority: '0.4',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/terms', {
-    changefreq: 'monthly',
-    priority: '0.5',
+    changefreq: 'yearly',
+    priority: '0.4',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/disclaimer', {
-    changefreq: 'monthly',
-    priority: '0.5',
+    changefreq: 'yearly',
+    priority: '0.4',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/editorial-policy', {
-    changefreq: 'monthly',
+    changefreq: 'yearly',
     priority: '0.5',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/cookie-policy', {
-    changefreq: 'monthly',
-    priority: '0.5',
+    changefreq: 'yearly',
+    priority: '0.4',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/team', {
     changefreq: 'monthly',
     priority: '0.6',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/author/arulraj-s', {
     changefreq: 'monthly',
     priority: '0.6',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/methodology', {
     changefreq: 'monthly',
     priority: '0.6',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/corrections-policy', {
-    changefreq: 'monthly',
-    priority: '0.5',
+    changefreq: 'yearly',
+    priority: '0.4',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/accessibility', {
-    changefreq: 'monthly',
-    priority: '0.5',
+    changefreq: 'yearly',
+    priority: '0.4',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/job-sources-policy', {
-    changefreq: 'monthly',
+    changefreq: 'yearly',
     priority: '0.5',
+    lastmod: POLICY_LASTMOD,
   })
 
   urls.set('/workflow', {
@@ -310,9 +326,19 @@ async function main() {
     })
   }
 
-  // Jobs (with enhanced priority logic)
+  // Jobs (with enhanced priority logic — skip expired jobs >90 days)
   for (const j of jobs) {
     if (!j?.slug) continue
+
+    // Skip expired jobs from sitemap to save crawl budget
+    // These pages still exist but get noindex via the JobSEO component
+    if (j.last_date) {
+      const deadline = new Date(j.last_date)
+      if (!Number.isNaN(deadline.getTime())) {
+        const daysSinceExpiry = Math.floor((Date.now() - deadline.getTime()) / (1000 * 60 * 60 * 24))
+        if (daysSinceExpiry > 90) continue
+      }
+    }
 
     const loc = `/jobs/${encodeURIComponent(j.slug)}`
 

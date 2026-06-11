@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -9,6 +9,9 @@ import {
   BriefcaseBusiness,
   ArrowLeft,
   Sparkles,
+  AlertTriangle,
+  ShieldCheck,
+  Clock,
 } from 'lucide-react'
 
 import { useJob } from '@/hooks/jobs/useJobs'
@@ -20,7 +23,7 @@ import RelatedJobs from '@/components/jobs/RelatedJobs'
 import JobSEOLinking from '@/components/jobs/JobSEOLinking'
 import { JobDetailSkeleton } from '@/components/jobs/skeletons'
 
-import JobSEO from '@/utils/jobs/jobSeo'
+import JobSEO, { isExpired } from '@/utils/jobs/jobSeo'
 
 import {
   matchRelatedTools,
@@ -35,6 +38,19 @@ import PageNotFound from '@/lib/PageNotFound'
 
 import ToolCard from '@/components/shared/ToolCard'
 import BlogCard from '@/components/blog/BlogCard'
+
+// ── Application status helpers ──────────────────────────────────────────────
+const getApplicationStatus = (lastDate) => {
+  if (!lastDate) return { open: true, label: 'Applications Open', days: null }
+  const deadline = new Date(lastDate)
+  if (Number.isNaN(deadline.getTime())) return { open: true, label: 'Applications Open', days: null }
+  const now = new Date()
+  const diffMs = deadline.getTime() - now.getTime()
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+  if (diffDays < 0) return { open: false, label: 'Applications Closed', days: Math.abs(diffDays) }
+  if (diffDays <= 7) return { open: true, label: `${diffDays} day${diffDays === 1 ? '' : 's'} left`, days: diffDays }
+  return { open: true, label: 'Applications Open', days: diffDays }
+}
 
 export default function JobDetailPage() {
   const { slug } = useParams()
@@ -54,6 +70,12 @@ export default function JobDetailPage() {
       trackJobView(job.id)
     }
   }, [job?.id])
+
+  // Application status
+  const appStatus = useMemo(
+    () => getApplicationStatus(job?.last_date),
+    [job?.last_date]
+  )
 
   const {
     data: relatedTools = [],
@@ -164,10 +186,17 @@ export default function JobDetailPage() {
               </div>
             )}
 
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-green-500/10 text-green-600 border border-green-500/20 text-xs">
-              <Sparkles className="w-3 h-3" />
-              Applications Open
-            </div>
+            {appStatus.open ? (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-green-500/10 text-green-600 border border-green-500/20 text-xs">
+                <Sparkles className="w-3 h-3" />
+                {appStatus.label}
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-600 border border-red-500/20 text-xs">
+                <AlertTriangle className="w-3 h-3" />
+                {appStatus.label}
+              </div>
+            )}
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight max-w-4xl">
@@ -201,6 +230,41 @@ export default function JobDetailPage() {
                 <CalendarDays className="w-4 h-4" />
                 <span>Last Date: {job.last_date}</span>
               </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* AI CONTENT DISCLOSURE — Required for AdSense approval & Google Helpful Content */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+        <div className="rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/80 dark:bg-blue-950/20 px-4 py-3 flex items-start gap-3">
+          <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+          <div className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+            <p className="font-medium mb-1">Content transparency</p>
+            <p>
+              This job listing was compiled from official government notifications using AI-assisted
+              extraction and reviewed by the QuickUtils editorial team. Always verify eligibility,
+              dates, fees, and application details on the{' '}
+              {job.official_website ? (
+                <a
+                  href={job.official_website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-medium"
+                >
+                  official source
+                </a>
+              ) : (
+                'official source'
+              )}{' '}
+              before applying.
+            </p>
+            {job.published_at && (
+              <p className="mt-1 text-blue-600/80 dark:text-blue-400/80">
+                <Clock className="w-3 h-3 inline mr-1" />
+                Published {new Date(job.published_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}
+                {' · '}QuickUtils Editorial Team
+              </p>
             )}
           </div>
         </div>

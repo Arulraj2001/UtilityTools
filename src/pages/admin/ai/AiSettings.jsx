@@ -12,6 +12,7 @@ import {
   recordProviderCall, saveProviderModels, getProviderAnalytics, getProviderFailures,
 } from '@/api/supabaseApi'
 import { testProvider, fetchProviderModels, PROVIDER_MODELS } from '@/lib/aiProvider'
+import { isDevMode } from '@/api/adminOperationsApi'
 
 // ── Provider metadata ─────────────────────────────────────────────────────────
 
@@ -96,23 +97,37 @@ function HealthDot({ status }) {
 
 // ── Provider Card ─────────────────────────────────────────────────────────────
 
+const CUSTOM_MODEL_SENTINEL = '__custom__'
+
 function ProviderCard({ provider, onUpdate, onCreate, index, dragHandleProps = {} }) {
-  const [showKey, setShowKey]       = useState(false)
-  const [localKey, setLocalKey]     = useState('')
-  const [localModel, setLocalModel] = useState(provider.model || '')
-  const [localBase, setLocalBase]   = useState(provider.base_url || '')
-  const [dirty, setDirty]           = useState(false)
-  const [keyDirty, setKeyDirty]     = useState(false)
-  const [testing, setTesting]       = useState(false)
-  const [testResult, setTestResult] = useState(null)
-  const [refreshing, setRefreshing] = useState(false)
-  const [saving, setSaving]         = useState(false)
-  const [expanded, setExpanded]     = useState(false)
-  const [liveModels, setLiveModels] = useState(
-    // Prefer DB-stored dynamic models, then static fallback
+  const savedModel = provider.model || ''
+  const [showKey, setShowKey]         = useState(false)
+  const [localKey, setLocalKey]       = useState('')
+  const [localModel, setLocalModel]   = useState(savedModel)
+  const [customModel, setCustomModel] = useState('')
+  const [localBase, setLocalBase]     = useState(provider.base_url || '')
+  const [dirty, setDirty]             = useState(false)
+  const [keyDirty, setKeyDirty]       = useState(false)
+  const [testing, setTesting]         = useState(false)
+  const [testResult, setTestResult]   = useState(null)
+  const [refreshing, setRefreshing]   = useState(false)
+  const [saving, setSaving]           = useState(false)
+  const [expanded, setExpanded]       = useState(false)
+  const [liveModels, setLiveModels]   = useState(
     provider.available_models?.length ? provider.available_models : (PROVIDER_MODELS[provider.provider_name] || [])
   )
   const isMissing = !provider.id || String(provider.id).startsWith('missing-')
+
+  // Effective model: if custom sentinel selected, use text field value
+  const effectiveModel = localModel === CUSTOM_MODEL_SENTINEL
+    ? customModel.trim()
+    : localModel
+
+  // Ensure saved model appears in dropdown even if not in the model list
+  const savedModelInList = liveModels.some(m => (m.value || m) === savedModel)
+  const dropdownModels = savedModel && !savedModelInList
+    ? [{ value: savedModel, label: `${savedModel} (saved)` }, ...liveModels]
+    : liveModels
 
   const meta = PROVIDER_META[provider.provider_name] || {}
   const stats = provider.stats || { requests: 0, successes: 0, failures: 0, avg_latency_ms: 0 }
@@ -124,9 +139,12 @@ function ProviderCard({ provider, onUpdate, onCreate, index, dragHandleProps = {
 
   const handleTest = async () => {
     if (!localKey && !hasSavedKey) { toast.error('Enter an API key first'); return }
+    if (localModel === CUSTOM_MODEL_SENTINEL && !customModel.trim()) {
+      toast.error('Enter a custom model ID first'); return
+    }
     setTesting(true)
     setTestResult(null)
-    const p = { ...provider, transientKey: localKey || null, model: localModel || meta.defaultModel, base_url: localBase || meta.defaultBaseUrl || null }
+    const p = { ...provider, transientKey: localKey || null, model: effectiveModel || meta.defaultModel, base_url: localBase || meta.defaultBaseUrl || null }
     const result = await testProvider(p)
     setTestResult(result)
     setTesting(false)
@@ -156,8 +174,11 @@ function ProviderCard({ provider, onUpdate, onCreate, index, dragHandleProps = {
   }
 
   const handleSave = async () => {
+    if (localModel === CUSTOM_MODEL_SENTINEL && !customModel.trim()) {
+      toast.error('Enter a custom model ID'); return
+    }
     const payload = {
-      model: localModel || meta.defaultModel,
+      model: effectiveModel || meta.defaultModel,
       base_url: localBase || meta.defaultBaseUrl || null,
     }
     if (keyDirty) payload.providerSecret = localKey
@@ -304,7 +325,8 @@ function ProviderCard({ provider, onUpdate, onCreate, index, dragHandleProps = {
               <label className="text-xs font-medium text-muted-foreground">Model</label>
               <button
                 onClick={handleRefreshModels}
-                disabled={refreshing || (!localKey && !hasSavedKey)}
+                disabled={refreshing || (!localKey && !hasSavedKey) || isDevMode()}
+                title={isDevMode() ? 'Model refresh requires Vercel deployment' : 'Fetch available models from provider API'}
                 className="flex items-center gap-1 text-xs text-primary hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <RefreshCw className={`w-3 h-3 ${refreshing ? 'animate-spin' : ''}`} />
@@ -316,11 +338,25 @@ function ProviderCard({ provider, onUpdate, onCreate, index, dragHandleProps = {
               onChange={e => { setLocalModel(e.target.value); mark(e.target.value) }}
               className="w-full py-2 px-3 text-sm rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
-              {liveModels.length > 0
-                ? liveModels.map(m => <option key={m.value} value={m.value}>{m.label}</option>)
+              {dropdownModels.length > 0
+                ? dropdownModels.map(m => <option key={m.value || m} value={m.value || m}>{m.label || m.value || m}</option>)
                 : <option value="">— no models loaded —</option>
               }
+              <option value={CUSTOM_MODEL_SENTINEL}>— type custom model ID —</option>
             </select>
+            {localModel === CUSTOM_MODEL_SENTINEL && (
+              <input
+                type="text"
+                value={customModel}
+                onChange={e => { setCustomModel(e.target.value); mark(e.target.value) }}
+                placeholder={`e.g. ${meta.defaultModel || 'model-id'}`}
+                className="mt-2 w-full px-3 py-2 text-sm rounded-xl border border-primary/40 bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono"
+                autoFocus
+              />
+            )}
+            {localModel === CUSTOM_MODEL_SENTINEL && (
+              <p className="text-xs text-muted-foreground mt-1">Enter any valid model ID from {meta.label}. Check the provider docs for available IDs.</p>
+            )}
           </div>
 
           {/* Test result */}

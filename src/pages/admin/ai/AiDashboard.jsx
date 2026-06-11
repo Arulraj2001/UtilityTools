@@ -1,5 +1,5 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
   Activity,
@@ -19,16 +19,28 @@ import {
   Shield,
   Timer,
   TrendingUp,
+  Zap,
+  Play,
+  Loader2,
+  ChevronRight,
 } from 'lucide-react';
 import {
   getMonitoringAlerts,
   getMonitoringOverview,
   getReviewQueue,
+  runFetchAll,
+  processAiQueue,
+  getAiQueueStatus,
+  getFetchStatus,
+  devSafeQuery,
+  isDevMode,
+  isDevModeError,
 } from '@/api/adminOperationsApi';
 import {
   ageLabel,
   computeOperationsDashboard,
 } from '@/lib/phase5aAdminMetrics';
+import { toast } from 'sonner';
 
 const numberFmt = new Intl.NumberFormat('en-IN');
 
@@ -137,22 +149,259 @@ function ReportTable({ rows, valueLabel = 'Count' }) {
   );
 }
 
+// ─── Operations Guidance Panel ─────────────────────────────────────────────
+
+function OperationsGuidancePanel({ overview, reviewQueue, dashboard, alerts, workerStatus, fetchStatus }) {
+  const queryClient = useQueryClient();
+  const [fetchResult, setFetchResult] = useState(null);
+  const [processResult, setProcessResult] = useState(null);
+
+  const runFetchMutation = useMutation({
+    mutationFn: () => runFetchAll({}),
+    onSuccess: (data) => {
+      setFetchResult(data);
+      queryClient.invalidateQueries({ queryKey: ['fetch-status'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-monitoring-overview'] });
+      toast.success('Fetch completed');
+    },
+    onError: (err) => {
+      if (isDevModeError(err)) toast.info('Run Fetch requires Vercel deployment — not available in local dev.');
+      else toast.error(err.message || 'Fetch failed');
+    },
+  });
+
+  const processQueueMutation = useMutation({
+    mutationFn: () => processAiQueue({ limit: 10 }),
+    onSuccess: (data) => {
+      setProcessResult(data);
+      queryClient.invalidateQueries({ queryKey: ['admin-monitoring-overview'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-review-queue'] });
+      toast.success('Queue processing complete');
+    },
+    onError: (err) => {
+      if (isDevModeError(err)) toast.info('Process Queue requires Vercel deployment — not available in local dev.');
+      else toast.error(err.message || 'Processing failed');
+    },
+  });
+
+  // Build recommendations from existing metrics
+  const recommendations = [];
+  const pendingQ = dashboard?.queue?.pending || 0;
+  const processingQ = dashboard?.queue?.processing || 0;
+  const approvedDrafts = dashboard?.drafts?.approved || 0;
+  const reviewItems = dashboard?.review?.queueItems || 0;
+  const criticalAlerts = dashboard?.alerts?.critical || 0;
+  const blockedDrafts = dashboard?.drafts?.blocked || 0;
+
+  if (criticalAlerts > 0) {
+    recommendations.push({
+      priority: 1,
+      label: 'Resolve Critical Alerts',
+      desc: `${criticalAlerts} critical alert${criticalAlerts !== 1 ? 's' : ''} require immediate attention.`,
+      tone: 'border-red-200 bg-red-50 text-red-800',
+      action: null,
+      link: '/admin/ai-monitoring',
+      linkLabel: 'View Alerts →',
+      icon: AlertTriangle,
+    });
+  }
+
+  const fetchNeeded = !fetchStatus?.lastRunAt || (Date.now() - new Date(fetchStatus.lastRunAt).getTime()) > 3 * 60 * 60 * 1000;
+  if (fetchNeeded) {
+    recommendations.push({
+      priority: 2,
+      label: 'Run Fetch',
+      desc: 'Fetch all active sources to pull latest official notifications.',
+      tone: 'border-blue-200 bg-blue-50 text-blue-800',
+      action: () => runFetchMutation.mutate(),
+      actionLabel: 'Run Now',
+      actionLoading: runFetchMutation.isPending,
+      link: '/admin/ai-sources',
+      linkLabel: 'View Sources →',
+      icon: Play,
+    });
+  }
+
+  if (pendingQ > 0 && !processingQ) {
+    recommendations.push({
+      priority: 3,
+      label: 'Process Queue',
+      desc: `${pendingQ} pending item${pendingQ !== 1 ? 's' : ''} waiting for AI processing.`,
+      tone: 'border-amber-200 bg-amber-50 text-amber-800',
+      action: () => processQueueMutation.mutate(),
+      actionLabel: 'Process Now',
+      actionLoading: processQueueMutation.isPending,
+      link: '/admin/ai-research',
+      linkLabel: 'View Queue →',
+      icon: Server,
+    });
+  }
+
+  if (reviewItems > 0) {
+    recommendations.push({
+      priority: 4,
+      label: 'Review Drafts',
+      desc: `${reviewItems} AI draft${reviewItems !== 1 ? 's' : ''} in the review queue.`,
+      tone: 'border-indigo-200 bg-indigo-50 text-indigo-800',
+      action: null,
+      link: '/admin/ai-moderation',
+      linkLabel: 'Open Review Queue →',
+      icon: ListChecks,
+    });
+  }
+
+  if (approvedDrafts > 0) {
+    recommendations.push({
+      priority: 5,
+      label: 'Convert Approved Drafts',
+      desc: `${approvedDrafts} approved draft${approvedDrafts !== 1 ? 's' : ''} ready to convert to job drafts.`,
+      tone: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+      action: null,
+      link: '/admin/ai-moderation',
+      linkLabel: 'Open Moderation →',
+      icon: FileText,
+    });
+  }
+
+  const draftJobs = overview?.drafts?.jobDraftCount || 0;
+  if (draftJobs > 0) {
+    recommendations.push({
+      priority: 6,
+      label: 'Publish Draft Jobs',
+      desc: `${draftJobs} job draft${draftJobs !== 1 ? 's' : ''} ready for audited publish.`,
+      tone: 'border-emerald-300 bg-emerald-50 text-emerald-900',
+      action: null,
+      link: '/admin/jobs',
+      linkLabel: 'Go to Jobs →',
+      icon: CheckCircle2,
+    });
+  }
+
+  if (blockedDrafts > 0) {
+    recommendations.push({
+      priority: 7,
+      label: 'Resolve Blocked Drafts',
+      desc: `${blockedDrafts} draft${blockedDrafts !== 1 ? 's' : ''} are blocked by quality gate issues.`,
+      tone: 'border-orange-200 bg-orange-50 text-orange-800',
+      action: null,
+      link: '/admin/ai-moderation',
+      linkLabel: 'Review Blockers →',
+      icon: Shield,
+    });
+  }
+
+  if (recommendations.length === 0) {
+    recommendations.push({
+      priority: 99,
+      label: 'All Clear',
+      desc: 'Pipeline is healthy. No immediate actions needed.',
+      tone: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+      action: null,
+      link: null,
+      icon: CheckCircle2,
+    });
+  }
+
+  return (
+    <section className="rounded-lg border border-border bg-card">
+      <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Zap className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold">What Should I Do Next?</h2>
+        </div>
+        <div className="flex items-center gap-3">
+          {isDevMode() && (
+            <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">Local dev — actions require Vercel</span>
+          )}
+          <span className="text-xs text-muted-foreground">{recommendations.length} recommendation{recommendations.length !== 1 ? 's' : ''}</span>
+        </div>
+      </div>
+      <div className="divide-y divide-border">
+        {recommendations.map((rec, i) => {
+          const Icon = rec.icon;
+          return (
+            <div key={i} className={`px-4 py-3 rounded-md m-2 border ${rec.tone}`}>
+              <div className="flex items-start gap-3">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-white/60">
+                  <Icon className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold">{rec.label}</p>
+                  <p className="text-xs opacity-80 mt-0.5">{rec.desc}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {rec.action && (
+                    <button
+                      id={`guidance-action-${i}`}
+                      onClick={rec.action}
+                      disabled={rec.actionLoading || isDevMode()}
+                      title={isDevMode() ? 'Requires Vercel deployment' : undefined}
+                      className="h-7 px-2.5 rounded-md bg-white/70 border border-current/20 text-xs font-semibold hover:bg-white transition-all disabled:opacity-60 flex items-center gap-1"
+                    >
+                      {rec.actionLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
+                      {rec.actionLabel}
+                    </button>
+                  )}
+                  {rec.link && (
+                    <Link
+                      to={rec.link}
+                      className="h-7 px-2.5 rounded-md bg-white/50 border border-current/20 text-xs font-semibold hover:bg-white transition-all flex items-center gap-1"
+                    >
+                      {rec.linkLabel || 'Go →'}
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {/* Last fetch / process results */}
+      {(fetchResult || processResult) && (
+        <div className="border-t border-border px-4 py-3 text-xs text-muted-foreground">
+          {fetchResult && (
+            <p>Last fetch: {fetchResult.summary?.totalFound ?? 0} found, {fetchResult.summary?.totalSaved ?? 0} saved, {fetchResult.summary?.totalFailures ?? 0} failures</p>
+          )}
+          {processResult && (
+            <p>Last process: {processResult.processed ?? 0} processed, {processResult.succeeded ?? 0} succeeded</p>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ─── Main Dashboard ───────────────────────────────────────────────────────────
+
 export default function AiDashboard() {
+  const queryClient = useQueryClient();
   const overviewQuery = useQuery({
     queryKey: ['admin-monitoring-overview', 30],
-    queryFn: () => getMonitoringOverview({ days: 30 }),
+    queryFn: devSafeQuery(() => getMonitoringOverview({ days: 30 })),
     retry: false,
     refetchInterval: 60_000,
   });
   const reviewQueueQuery = useQuery({
     queryKey: ['admin-review-queue', 'phase5a', 100],
-    queryFn: () => getReviewQueue({ limit: 100 }),
+    queryFn: devSafeQuery(() => getReviewQueue({ limit: 100 })),
     retry: false,
     refetchInterval: 60_000,
   });
   const alertsQuery = useQuery({
     queryKey: ['admin-monitoring-alerts', 30],
-    queryFn: () => getMonitoringAlerts({ days: 30, limit: 25 }),
+    queryFn: devSafeQuery(() => getMonitoringAlerts({ days: 30, limit: 25 })),
+    retry: false,
+    refetchInterval: 60_000,
+  });
+  const workerStatusQuery = useQuery({
+    queryKey: ['ai-queue-status'],
+    queryFn: devSafeQuery(getAiQueueStatus),
+    retry: false,
+    refetchInterval: 30_000,
+  });
+  const fetchStatusQuery = useQuery({
+    queryKey: ['fetch-status'],
+    queryFn: devSafeQuery(getFetchStatus),
     retry: false,
     refetchInterval: 60_000,
   });
@@ -193,8 +442,10 @@ export default function AiDashboard() {
       </div>
 
       {(overviewQuery.error || reviewQueueQuery.error) && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {overviewQuery.error?.message || reviewQueueQuery.error?.message}
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          {isDevMode()
+            ? 'Dashboard metrics require Vercel deployment — not available in local dev. Data will load normally when deployed.'
+            : (overviewQuery.error?.message || reviewQueueQuery.error?.message)}
         </div>
       )}
 
@@ -292,6 +543,15 @@ export default function AiDashboard() {
           </div>
 
           <div className="space-y-4 xl:col-span-4">
+            <OperationsGuidancePanel
+              overview={overview}
+              reviewQueue={reviewQueue}
+              dashboard={dashboard}
+              alerts={alerts}
+              workerStatus={workerStatusQuery.data}
+              fetchStatus={fetchStatusQuery.data}
+            />
+
             <Section title="Provider Health" icon={Server}>
               <div className="mb-3 grid grid-cols-3 gap-2">
                 <MetricTile label="Active" value={dashboard.providers.active || 0} icon={Server} tone="text-emerald-600" />

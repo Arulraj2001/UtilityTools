@@ -88,10 +88,38 @@ const getSessionId = () => {
 }
 
 /**
- * Track job page view
+ * Track job page view — deduplicated per session.
+ * Prevents inflated counts from page refreshes, back-nav, and SPA re-renders.
  */
+const VIEWED_JOBS_KEY = 'job_views_dedup';
+
+const getViewedJobs = () => {
+  if (typeof sessionStorage === 'undefined') return new Set();
+  try {
+    const raw = sessionStorage.getItem(VIEWED_JOBS_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set();
+  }
+};
+
+const markViewed = (jobId) => {
+  if (typeof sessionStorage === 'undefined') return;
+  try {
+    const set = getViewedJobs();
+    set.add(jobId);
+    // Cap at 200 entries to avoid storage overflow
+    const arr = [...set].slice(-200);
+    sessionStorage.setItem(VIEWED_JOBS_KEY, JSON.stringify(arr));
+  } catch { /* quota exceeded — ignore */ }
+};
+
 export const trackJobView = (jobId) => {
-  return trackJobEvent(jobId, 'view')
+  if (!jobId) return Promise.resolve();
+  const viewed = getViewedJobs();
+  if (viewed.has(jobId)) return Promise.resolve(); // Already counted this session
+  markViewed(jobId);
+  return trackJobEvent(jobId, 'view');
 }
 
 /**

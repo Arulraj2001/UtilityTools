@@ -38,11 +38,25 @@ export default function PageNotFound({
           </Link>
           <span className="hidden sm:inline text-muted-foreground/40">|</span>
           <Link
+            to="/jobs"
+            className="text-primary hover:underline font-medium"
+          >
+            Browse Jobs
+          </Link>
+          <span className="hidden sm:inline text-muted-foreground/40">|</span>
+          <Link
             to="/categories"
             className="text-primary hover:underline font-medium"
           >
             Browse by Category
           </Link>
+          <span className="hidden sm:inline text-muted-foreground/40">|</span>
+          <a
+            href="/sitemap.xml"
+            className="text-primary hover:underline font-medium"
+          >
+            Sitemap
+          </a>
         </div>
       </div>
     </>
