@@ -1,3 +1,5 @@
+import { buildApiUrl } from './apiBase.js';
+
 const jsonHeaders = { 'Content-Type': 'application/json' };
 
 // ─── Dev-mode detection ───────────────────────────────────────────────────────
@@ -32,7 +34,7 @@ export const adminApiRequest = async (path, {
 
   let response;
   try {
-    response = await fetchImpl(path, {
+    response = await fetchImpl(buildApiUrl(path), {
       method,
       headers: {
         ...(body ? jsonHeaders : {}),
@@ -49,7 +51,7 @@ export const adminApiRequest = async (path, {
   const text = await response.text().catch(() => '');
 
   // ── Detect non-JSON responses (e.g. Vite dev-server returning index.html) ──
-  const contentType = response.headers.get('content-type') || '';
+  const contentType = response.headers?.get?.('content-type') || '';
   const looksLikeHtml = text.trimStart().startsWith('<!') || text.trimStart().startsWith('<html') || contentType.includes('text/html');
 
   if (looksLikeHtml || (!text && response.status === 404)) {

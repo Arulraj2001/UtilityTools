@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { buildApiUrl } from './apiBase.js'
 
 const RETIRED_TOOL_SLUGS = ['pdf-to-word']
 
@@ -63,7 +64,7 @@ export const getHomepageFeaturedJobs = async ({ limit = 6 } = {}) => {
 
 const fetchCachedHomepageSummary = async () => {
   if (typeof window === 'undefined') return null
-  const response = await fetch('/api/homepage', {
+  const response = await fetch(buildApiUrl('/api/homepage'), {
     headers: { Accept: 'application/json' },
     cache: 'force-cache',
   })

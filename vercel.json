@@ -43,6 +43,18 @@
       "destination": "https://quickutils-conversion.onrender.com/api/convert/:path*"
     },
     {
+      "source": "/api/admin/:path*",
+      "destination": "https://quickutils-api.onrender.com/api/admin/:path*"
+    },
+    {
+      "source": "/api/cron/:path*",
+      "destination": "https://quickutils-api.onrender.com/api/cron/:path*"
+    },
+    {
+      "source": "/api/homepage",
+      "destination": "https://quickutils-api.onrender.com/api/homepage"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
