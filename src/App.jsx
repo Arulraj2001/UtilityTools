@@ -57,6 +57,7 @@ const AdminRedirects = lazy(() => import('./pages/admin/AdminRedirects'))
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
 const AdminToolSeeder = lazy(() => import('./pages/admin/AdminToolSeeder'))
 const AdminWorkflowPages = lazy(() => import('./pages/admin/AdminWorkflowPages'))
+const AdminSupport = lazy(() => import('./pages/admin/AdminSupport'))
 const AdminJobs = lazy(() => import('./pages/admin/jobs/AdminJobs'))
 // AI Job Intelligence
 const AiDashboard  = lazy(() => import('./pages/admin/ai/AiDashboard'))
@@ -176,6 +177,7 @@ const AuthenticatedApp = () => {
           <Route path="ai-scale-ops"    element={wrap(<AiScaleOps />)} />
           <Route path="settings" element={wrap(<AdminSettings />)} />
           <Route path="seeder" element={wrap(<AdminToolSeeder />)} />
+          <Route path="support" element={wrap(<AdminSupport />)} />
         </Route>
       </Route>
 

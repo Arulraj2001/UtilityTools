@@ -2,6 +2,7 @@ import React, { Suspense, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import { usePageAnalytics } from '@/lib/analytics';
+import { BmacFloatingButton } from '@/components/shared/BuyMeCoffee';
 
 const SearchModal = React.lazy(() => import('../shared/SearchModal'));
 const Footer = React.lazy(() => import('./Footer'));
@@ -45,7 +46,10 @@ export default function PublicLayout() {
           <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
         </Suspense>
       )}
+      {/* Floating Buy Me a Coffee button — shown when enabled in Admin → Support */}
+      <BmacFloatingButton />
     </div>);
 
 }
+
 

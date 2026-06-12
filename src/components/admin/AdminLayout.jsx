@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
+import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, Wrench, BookOpen, FolderOpen,
   Settings, LinkIcon, Megaphone, Download, Sparkles,
   ChevronLeft, ChevronRight, Menu, LogOut, FileUp,
   Brain, Search, Shield, Copy, BarChart3, Activity,
-  GitCompare, Globe, ChevronDown, ServerCog,
+  GitCompare, Globe, ChevronDown, ServerCog, Coffee,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getSiteSettings } from '@/api/supabaseApi';
 
-// Existing nav items — unchanged
+// Existing nav items
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { to: '/admin/tools', label: 'Tools', icon: Wrench },
@@ -26,6 +28,7 @@ const navItems = [
   { to: '/admin/ads', label: 'Ads', icon: Megaphone },
   { to: '/admin/redirects', label: 'Redirects', icon: LinkIcon },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
+  { to: '/admin/support', label: 'Support / BMAC', icon: Coffee },
 ];
 
 // AI Job Intelligence sub-nav
@@ -50,6 +53,28 @@ export default function AdminLayout() {
   const [aiExpanded, setAiExpanded] = useState(false);
   const location = useLocation();
   const { logout } = useAuth();
+
+  const { data: siteSettings = [] } = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => getSiteSettings(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const getSetting = (key, fallback) => {
+    const s = siteSettings.find(x => x.key === key);
+    if (!s) return fallback;
+    if (s.type === 'boolean') return String(s.value) === 'true';
+    return s.value || fallback;
+  };
+
+  const bmacEnabled = getSetting('bmac_enabled', false);
+  const bmacSidebarEnabled = getSetting('bmac_sidebar_enabled', true);
+  const bmacUsername = getSetting('bmac_username', '');
+  const bmacEmoji = getSetting('bmac_emoji', '☕');
+  const bmacText = getSetting('bmac_text', 'Buy me a coffee');
+  const bmacColor = getSetting('bmac_color', '#FFDD00');
+
+  const showBmacSidebar = bmacEnabled && bmacSidebarEnabled && bmacUsername;
 
   const isActive = (item) => {
     if (item.exact) return location.pathname === item.to;
@@ -177,6 +202,21 @@ export default function AdminLayout() {
         </nav>
 
         <div className="p-3 border-t border-border space-y-2">
+          {/* Buy Me a Coffee sidebar button */}
+          {showBmacSidebar && (
+            <a
+              href={`https://www.buymeacoffee.com/${bmacUsername}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={bmacText}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90 hover:scale-[1.02] active:scale-95 ${collapsed ? 'justify-center' : ''}`}
+              style={{ backgroundColor: bmacColor, color: '#000' }}
+            >
+              <span className="text-base shrink-0">{bmacEmoji}</span>
+              {!collapsed && <span className="truncate">{bmacText}</span>}
+            </a>
+          )}
+
           <Link
             to="/"
             className={`flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors ${collapsed ? 'justify-center' : ''}`}

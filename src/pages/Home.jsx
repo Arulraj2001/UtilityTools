@@ -9,7 +9,6 @@ const PopularWorkflows = lazy(() => import('../components/home/PopularWorkflows'
 const AdBanner = lazy(() => import('../components/shared/AdBanner'))
 import StaticPageSEO from '@/components/seo/StaticPageSEO'
 import { organizationSchema, websiteSchema } from '@/config/site'
-import { FEATURED_STATIC_BLOG_POSTS } from '@/lib/staticBlogPosts'
 
 const homepageDescription =
   'QuickUtils is a free online tools website for everyday PDF, image, calculator, text, developer, SEO, student, and business tasks.'
@@ -403,23 +402,23 @@ function HelpfulGuidesSection() {
           </Link>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {FEATURED_STATIC_BLOG_POSTS.map((post) => (
-            <Link
-              key={post.slug}
-              to={`/blog/${post.slug}`}
-              className="block rounded-lg border border-border/60 bg-card/80 p-5 transition-colors hover:border-primary/40"
-            >
-              <p className="text-xs font-medium text-primary mb-2">{post.blog_categories?.name}</p>
-              <h3 className="font-semibold mb-2 leading-snug">{post.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{post.excerpt}</p>
-            </Link>
-          ))}
+        <div className="rounded-lg border border-border/60 bg-card/80 p-6 sm:p-8 text-center">
+          <p className="text-muted-foreground mb-4">
+            Browse our collection of practical guides for calculators, PDF tools, image tools,
+            text tools, developer utilities, and more.
+          </p>
+          <Link
+            to="/blog"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            Explore All Guides
+          </Link>
         </div>
       </div>
     </section>
   )
 }
+
 
 function HomeFAQSection() {
   return (

@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { getCategories, createTool, updateTool } from '@/api/supabaseApi'
 import { sanitizeHtmlFields } from '@/lib/sanitizeHtml'
-import { formatQualityIssues, validateContentQuality } from '@/lib/contentQuality'
+import { validateContentQuality } from '@/lib/contentQuality'
 
 export default function ToolEditor({ tool, onSave, onCancel }) {
   const [form, setForm] = useState({
@@ -61,12 +61,23 @@ export default function ToolEditor({ tool, onSave, onCancel }) {
       const payload = sanitizeHtmlFields(form, ['long_description', 'seo_content'])
       if (payload.status === 'published') {
         const quality = validateContentQuality(payload, { type: 'tool' })
-        if (!quality.ok) {
-          toast.error(formatQualityIssues(quality))
+        // Only hard-block on critical missing fields (title, slug, description)
+        // Thin content and missing examples are warnings — allow saving with notice
+        const hardBlockers = quality.blockers.filter(b =>
+          /missing seo title|missing slug|missing seo description|missing main content/i.test(b)
+        )
+        if (hardBlockers.length > 0) {
+          toast.error(hardBlockers.join(' '))
+          setSaving(false)
           return
         }
+        // Show soft blockers (thin content, missing FAQ) as warnings but allow save
+        const softBlockers = quality.blockers.filter(b => !hardBlockers.includes(b))
+        if (softBlockers.length > 0) {
+          softBlockers.forEach(w => toast.warning(`Quality warning: ${w}`))
+        }
         if (quality.warnings.length) {
-          toast.warning(formatQualityIssues({ ...quality, blockers: [] }))
+          quality.warnings.forEach(w => toast.warning(`Tip: ${w}`))
         }
       }
       if (tool?.id) {

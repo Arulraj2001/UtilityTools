@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Zap, Mail, ArrowRight } from 'lucide-react'
 import { CONTACT_EMAIL } from '@/config/site'
+import { BmacFooterCard } from '@/components/shared/BuyMeCoffee'
 
 const TOOL_LINKS = [
   { to: '/tool/photo-kb-reducer', label: 'Photo KB Reducer' },
@@ -66,6 +67,9 @@ export default function Footer() {
             >
               {CONTACT_EMAIL}
             </a>
+
+            {/* Buy Me a Coffee support card */}
+            <BmacFooterCard />
           </div>
 
           <div>
