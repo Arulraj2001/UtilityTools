@@ -1,118 +1,87 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Primary SEO -->
-    <title>
-      QuickUtils - Free Online Tools for PDFs, Images, Calculators and More
-    </title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <meta
-      data-rh="true"
-      name="description"
-      content="QuickUtils is a free online tools website for PDF, image, calculator, text, developer, SEO, student, seller, and shipping tasks."
-    />
+  <!-- Primary SEO -->
+  <title>
+    QuickUtils - Free PDF, Image, Calculator, SEO & Developer Tools
+  </title>
 
-    <meta
-      data-rh="true"
-      name="keywords"
-      content="online tools,pdf tools,image tools,calculators,text tools,developer tools,seo tools,quickutils"
-    />
+  <meta data-rh="true" name="description"
+    content="QuickUtils is a free online tools website for PDF, image, calculator, text, developer, SEO, student, seller, and shipping tasks." />
 
-    <meta name="author" content="QuickUtils" />
-    <meta data-rh="true" name="robots" content="index, follow" />
+  <meta data-rh="true" name="keywords"
+    content="online tools,pdf tools,image tools,calculators,text tools,developer tools,seo tools,quickutils" />
 
-    <!-- Canonical -->
-    <link data-rh="true" rel="canonical" href="https://www.quickutils.page/" />
+  <meta name="author" content="QuickUtils" />
+  <meta data-rh="true" name="robots" content="index, follow" />
 
-    <!-- Open Graph -->
-    <meta data-rh="true" property="og:type" content="website" />
-    <meta data-rh="true" property="og:url" content="https://www.quickutils.page/" />
+  <!-- Canonical -->
+  <link data-rh="true" rel="canonical" href="https://www.quickutils.page/" />
 
-    <meta
-      data-rh="true"
-      property="og:title"
-      content="QuickUtils - Free Online Utility Tools"
-    />
+  <!-- Open Graph -->
+  <meta data-rh="true" property="og:type" content="website" />
+  <meta data-rh="true" property="og:url" content="https://www.quickutils.page/" />
 
-    <meta
-      data-rh="true"
-      property="og:description"
-      content="Use practical online tools for PDFs, images, calculators, text, developer, SEO, student, seller, and shipping tasks."
-    />
+  <meta data-rh="true" property="og:title" content="QuickUtils - Free Online Utility Tools" />
 
-    <meta
-      data-rh="true"
-      property="og:image"
-      content="https://www.quickutils.page/preview.png"
-    />
+  <meta data-rh="true" property="og:description"
+    content="Use practical online tools for PDFs, images, calculators, text, developer, SEO, student, seller, and shipping tasks." />
 
-    <!-- Twitter -->
-    <meta data-rh="true" name="twitter:card" content="summary_large_image" />
+  <meta data-rh="true" property="og:image" content="https://www.quickutils.page/preview.png" />
 
-    <meta
-      data-rh="true"
-      name="twitter:title"
-      content="QuickUtils - Free Online Utility Tools"
-    />
+  <!-- Twitter -->
+  <meta data-rh="true" name="twitter:card" content="summary_large_image" />
 
-    <meta
-      data-rh="true"
-      name="twitter:description"
-      content="Free online tools for PDF, image, calculator, text, developer, SEO, student, seller, and shipping tasks."
-    />
+  <meta data-rh="true" name="twitter:title" content="QuickUtils - Free Online Utility Tools" />
 
-    <meta
-      data-rh="true"
-      name="twitter:image"
-      content="https://www.quickutils.page/preview.png"
-    />
+  <meta data-rh="true" name="twitter:description"
+    content="Free online tools for PDF, image, calculator, text, developer, SEO, student, seller, and shipping tasks." />
 
-    <!-- Theme -->
-    <meta name="theme-color" content="#0f172a" />
+  <meta data-rh="true" name="twitter:image" content="https://www.quickutils.page/preview.png" />
 
-    <!-- Favicons -->
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png" />
+  <!-- Theme -->
+  <meta name="theme-color" content="#0f172a" />
 
-    <!-- Manifest -->
-    <link rel="manifest" href="/manifest.json" />
+  <!-- Favicons -->
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png" />
 
-    <!-- Preconnect to critical third-party origins -->
-    <!-- Supabase: database + auth queries -->
-    <link rel="preconnect" href="https://usgenkubqxskurtmvxaz.supabase.co" crossorigin />
-    <!-- Render API: admin + homepage API calls -->
-    <link rel="preconnect" href="https://quickutils-api.onrender.com" crossorigin />
-    <link rel="dns-prefetch" href="https://quickutils-api.onrender.com" />
-    <!-- Analytics (low priority) -->
-    <link rel="dns-prefetch" href="https://analytics.ahrefs.com" />
-    <link rel="preload" href="/logo.avif" as="image" type="image/avif" fetchpriority="high" />
+  <!-- Manifest -->
+  <link rel="manifest" href="/manifest.json" />
 
-    <!-- Preload only above-the-fold fonts (Inter — used on every page) -->
-    <!-- JetBrains Mono is deferred: only loaded by developer tool components -->
-    <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/inter-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/inter-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <!-- Preconnect to critical third-party origins -->
+  <!-- Supabase: database + auth queries -->
+  <link rel="preconnect" href="https://usgenkubqxskurtmvxaz.supabase.co" crossorigin />
+  <!-- Render API: admin + homepage API calls -->
+  <link rel="preconnect" href="https://quickutils-api.onrender.com" crossorigin />
+  <link rel="dns-prefetch" href="https://quickutils-api.onrender.com" />
+  <!-- Analytics (low priority) -->
+  <link rel="dns-prefetch" href="https://analytics.ahrefs.com" />
+  <link rel="preload" href="/logo.avif" as="image" type="image/avif" fetchpriority="high" />
 
-    <!-- Google Verification -->
-    <meta
-      name="google-site-verification"
-      content="m8GlcWW56jbrY438cEneNp0L7mvnjYJO28V5pSDF5AM"
-    />
+  <!-- Preload only above-the-fold fonts (Inter — used on every page) -->
+  <!-- JetBrains Mono is deferred: only loaded by developer tool components -->
+  <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/inter-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/inter-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
 
-    <!-- Bing Verification -->
-    <meta
-      name="msvalidate.01"
-      content="0C23C03F7DB6D7739E33ADE4363403B0"
-    />
+  <!-- Google Verification -->
+  <meta name="google-site-verification" content="m8GlcWW56jbrY438cEneNp0L7mvnjYJO28V5pSDF5AM" />
 
-    <!-- Structured Data -->
-    <script type="application/ld+json">
+  <meta name="google-site-verification" content="CJBH8kAEKWD4nGQywNYthty0pQb8Z25HLagXtkdBLf8" />
+
+  <!-- Bing Verification -->
+  <meta name="msvalidate.01" content="0C23C03F7DB6D7739E33ADE4363403B0" />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -142,7 +111,7 @@
         }
       }
     </script>
-    <script type="application/ld+json">
+  <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "Organization",
@@ -168,27 +137,25 @@
       }
     </script>
 
-    <!-- Ahrefs Analytics - loaded after window load to avoid competing with LCP -->
-    <script>
-      window.addEventListener('load', function() {
-        var s = document.createElement('script');
-        s.src = 'https://analytics.ahrefs.com/analytics.js';
-        s.dataset.key = 'q3pDHUW+/jNnkJYdWniUmg';
-        s.async = true;
-        document.head.appendChild(s);
-      });
-    </script>
+  <!-- Ahrefs Analytics - loaded after window load to avoid competing with LCP -->
+  <script>
+    window.addEventListener('load', function () {
+      var s = document.createElement('script');
+      s.src = 'https://analytics.ahrefs.com/analytics.js';
+      s.dataset.key = 'q3pDHUW+/jNnkJYdWniUmg';
+      s.async = true;
+      document.head.appendChild(s);
+    });
+  </script>
 
-    <!-- AdSense -->
-    <meta
-      name="google-adsense-account"
-      content="ca-pub-1603942692726452"
-    />
-  </head>
+  <!-- AdSense -->
+  <meta name="google-adsense-account" content="ca-pub-1603942692726452" />
+</head>
 
-  <body>
-    <div id="root"></div>
+<body>
+  <div id="root"></div>
 
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>
