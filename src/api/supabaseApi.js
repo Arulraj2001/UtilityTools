@@ -164,34 +164,35 @@ const redactForLog = (value) => {
 };
 
 const logSupabaseError = (operation, error, payload = null, context = null) => {
-  const safePayload = redactForLog(payload);
-  const safeContext = redactForLog(context);
-  const errorLog = {
-    timestamp: new Date().toISOString(),
-    operation,
-    payload: safePayload,
-    error: {
-      message: error?.message || 'Unknown error',
-      details: error?.details || null,
-      hint: error?.hint || null,
-      code: error?.code || null,
-      status: error?.status || null,
-    },
-    context: safeContext,
-    fullError: error,
-  };
-
-  console.error('❌ SUPABASE ERROR', errorLog);
-  
-  // Log to browser console with styling for visibility
-  console.group(`🔴 SUPABASE ERROR: ${operation}`);
-  console.error('Message:', error?.message);
-  console.error('Code:', error?.code);
-  console.error('Details:', error?.details);
-  console.error('Hint:', error?.hint);
-  if (safePayload) console.error('Payload:', safePayload);
-  console.error('Full error:', error);
-  console.groupEnd();
+  if (import.meta.env.DEV) {
+    // Full verbose logging in development only
+    const safePayload = redactForLog(payload);
+    const safeContext = redactForLog(context);
+    const errorLog = {
+      timestamp: new Date().toISOString(),
+      operation,
+      payload: safePayload,
+      error: {
+        message: error?.message || 'Unknown error',
+        details: error?.details || null,
+        hint: error?.hint || null,
+        code: error?.code || null,
+        status: error?.status || null,
+      },
+      context: safeContext,
+    };
+    console.group(`🔴 SUPABASE ERROR: ${operation}`);
+    console.error('Message:', error?.message);
+    console.error('Code:', error?.code);
+    console.error('Details:', error?.details);
+    console.error('Hint:', error?.hint);
+    if (safePayload) console.error('Payload:', safePayload);
+    console.error('Full log:', errorLog);
+    console.groupEnd();
+  } else {
+    // Production: emit only a minimal, non-revealing error marker
+    console.error(`[QuickUtils] Operation failed: ${error?.code || 'UNKNOWN'}`);
+  }
 };
 
 /**

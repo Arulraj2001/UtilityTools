@@ -13,6 +13,7 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import PublicLayout from './components/layout/PublicLayout'
 import ScrollToTop from './components/layout/ScrollToTop'
 import { SiteThemeSettings } from '@/lib/useSiteThemeSettings'
+import { SiteSettingsProvider } from '@/lib/SiteSettingsProvider'
 
 // SplashScreen: only shows on first visit — lazy is safe
 const SplashScreen = lazy(() => import('@/components/SplashScreen'))
@@ -59,6 +60,7 @@ const AdminToolSeeder = lazy(() => import('./pages/admin/AdminToolSeeder'))
 const AdminWorkflowPages = lazy(() => import('./pages/admin/AdminWorkflowPages'))
 const AdminSupport = lazy(() => import('./pages/admin/AdminSupport'))
 const AdminJobs = lazy(() => import('./pages/admin/jobs/AdminJobs'))
+const AdminSiteSettings = lazy(() => import('./pages/admin/AdminSiteSettings'))
 // AI Job Intelligence
 const AiDashboard  = lazy(() => import('./pages/admin/ai/AiDashboard'))
 const AiResearch   = lazy(() => import('./pages/admin/ai/AiResearchQueue'))
@@ -176,6 +178,7 @@ const AuthenticatedApp = () => {
           <Route path="ai-reports"      element={wrap(<AiReports />)} />
           <Route path="ai-scale-ops"    element={wrap(<AiScaleOps />)} />
           <Route path="settings" element={wrap(<AdminSettings />)} />
+          <Route path="site-settings" element={wrap(<AdminSiteSettings />)} />
           <Route path="seeder" element={wrap(<AdminToolSeeder />)} />
           <Route path="support" element={wrap(<AdminSupport />)} />
         </Route>
@@ -206,6 +209,7 @@ function App() {
           <SplashScreen duration={300} />
         </Suspense>
         <SiteThemeSettings />
+        <SiteSettingsProvider />
         <Router>
           {showBackgroundLighting && (
             <Suspense fallback={null}>

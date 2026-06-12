@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import { usePageAnalytics } from '@/lib/analytics';
 import { BmacFloatingButton } from '@/components/shared/BuyMeCoffee';
+import CookieConsent from '@/components/shared/CookieConsent';
 
 const SearchModal = React.lazy(() => import('../shared/SearchModal'));
 const Footer = React.lazy(() => import('./Footer'));
@@ -48,6 +49,8 @@ export default function PublicLayout() {
       )}
       {/* Floating Buy Me a Coffee button — shown when enabled in Admin → Support */}
       <BmacFloatingButton />
+      {/* GDPR-compliant cookie consent banner */}
+      <CookieConsent />
     </div>);
 
 }

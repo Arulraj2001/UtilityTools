@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
@@ -161,10 +161,27 @@ export default function BlogList() {
                     <BlogCard key={post.id} post={post} index={i} />
                   ))}
                 </motion.div>
-              ) : (
+              ) : posts.length === 0 ? (
+                /* No posts in DB at all */
                 <div className="flex flex-col items-center justify-center py-24 text-center">
-                  <h3 className="text-lg font-semibold mb-2">No blog posts found</h3>
-                  <p className="text-muted-foreground">Try adjusting your filters to find what you're looking for.</p>
+                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                    <span className="text-3xl">📝</span>
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">Guides coming soon</h3>
+                  <p className="text-muted-foreground max-w-sm mb-6">
+                    Practical guides for all QuickUtils tools are being prepared. Check back soon,
+                    or browse our tools directly below.
+                  </p>
+                  <div className="flex flex-wrap gap-3 justify-center">
+                    <a href="/tools" className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">Browse All Tools</a>
+                    <a href="/categories" className="px-4 py-2 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors">View Categories</a>
+                  </div>
+                </div>
+              ) : (
+                /* Has posts but active filter shows no results */
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                  <h3 className="text-lg font-semibold mb-2">No guides match this filter</h3>
+                  <p className="text-muted-foreground">Try a different category or clear the tag filter.</p>
                 </div>
               )}
             </div>

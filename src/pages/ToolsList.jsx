@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Search } from 'lucide-react'
@@ -28,6 +28,24 @@ export default function ToolsList() {
   const [searchParams] = useSearchParams()
   const [search, setSearch] = useState(() => searchParams.get('q') || '')
   const [selectedCategory, setSelectedCategory] = useState('all')
+
+  // Restore scroll position when user navigates back from a tool page
+  const scrollKey = 'toolslist_scroll'
+  const didRestoreRef = useRef(false)
+  useEffect(() => {
+    if (!didRestoreRef.current) {
+      didRestoreRef.current = true
+      const saved = sessionStorage.getItem(scrollKey)
+      if (saved) {
+        const y = parseInt(saved, 10)
+        if (!isNaN(y) && y > 0) {
+          // Short timeout lets the list render before restoring
+          setTimeout(() => window.scrollTo({ top: y, behavior: 'auto' }), 60)
+          sessionStorage.removeItem(scrollKey)
+        }
+      }
+    }
+  }, [])
 
   const { data: tools = [], isLoading } = useQuery({
     queryKey: ['tools-published'],

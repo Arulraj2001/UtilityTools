@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Zap, Mail, ArrowRight } from 'lucide-react'
 import { CONTACT_EMAIL } from '@/config/site'
 import { BmacFooterCard } from '@/components/shared/BuyMeCoffee'
+import { reopenCookieConsent } from '@/components/shared/CookieConsent'
 
 const TOOL_LINKS = [
   { to: '/tool/photo-kb-reducer', label: 'Photo KB Reducer' },
@@ -131,9 +132,18 @@ export default function Footer() {
             <p className="text-sm text-muted-foreground">
               Copyright {new Date().getFullYear()} QuickUtils. All rights reserved.
             </p>
-            <p className="text-xs text-muted-foreground">
-              Built for useful, everyday web work.
-            </p>
+            <div className="flex items-center gap-4">
+              <p className="text-xs text-muted-foreground">
+                Built for useful, everyday web work.
+              </p>
+              <button
+                id="footer-cookie-settings"
+                onClick={reopenCookieConsent}
+                className="text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-2"
+              >
+                Cookie Settings
+              </button>
+            </div>
           </div>
         </div>
       </div>

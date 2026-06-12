@@ -16,7 +16,7 @@ import {
   getToolPageCategories,
   getToolPageRelatedTools,
   getToolPageWorkflows,
-  updateToolPageUsage,
+  incrementToolPageUsage,
 } from '@/api/toolPageApi'
 import { trackToolEvent } from '@/lib/analytics'
 
@@ -127,15 +127,16 @@ export default function ToolPage() {
     queryKey: ['tool-by-slug', slug],
     queryFn: () => getToolPageBySlug(slug, { published: true }),
     enabled: !!slug,
-    staleTime: 0,
-    cacheTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: true,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
   })
 
   const { data: tools = [] } = useQuery({
-    queryKey: ['tools-published'],
-    queryFn: () => getToolPageRelatedTools({ limit: 200 }),
-    // keep previous data to avoid clearing UI during background refetches
+    queryKey: ['tools-by-category', tool?.category_id],
+    queryFn: () => getToolPageRelatedTools({ limit: 20, categoryId: tool?.category_id }),
+    // Only fetch once we know the category — avoids loading all 200 tools
+    enabled: !!tool?.category_id,
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -210,10 +211,8 @@ export default function ToolPage() {
   const isLogisticsTool = tool ? LOGISTICS_TOOLS.includes(tool.slug) : false
   const isSellerTool = tool ? SELLER_TOOLS.includes(tool.slug) : false
 
-  // Scroll to top when navigating to a new tool
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [slug])
+  // Global <ScrollToTop /> in App.jsx handles scroll-to-top on route change.
+  // No duplicate call needed here — it caused double-scroll jank between tools.
 
   // Only reset inputs when the route `slug` actually changes to a new tool.
   const prevSlugRef = useRef(slug)
@@ -240,10 +239,11 @@ export default function ToolPage() {
       return [tool.id, ...filtered].slice(0, 10)
     })
 
-    if (tool?.id) {
-      updateToolPageUsage(tool.id, (tool.usage_count || 0) + 1).catch(() => {})
-      trackToolEvent(tool, 'tool_open').catch(() => {})
-    }
+      // Atomic increment — eliminates read-then-write race condition
+      if (tool?.id) {
+        incrementToolPageUsage(tool.id).catch(() => {})
+        trackToolEvent(tool, 'tool_open').catch(() => {})
+      }
   }, [tool?.id])
 
   const runToolDynamic = useCallback(async (activeTool, activeInputs) => {

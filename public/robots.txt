@@ -1,7 +1,5 @@
 User-agent: *
 Allow: /
-
-# Block admin and API routes from crawlers
 Disallow: /admin/
 Disallow: /api/
 

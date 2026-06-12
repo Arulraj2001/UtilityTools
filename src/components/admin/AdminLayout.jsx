@@ -8,6 +8,7 @@ import {
   ChevronLeft, ChevronRight, Menu, LogOut, FileUp,
   Brain, Search, Shield, Copy, BarChart3, Activity,
   GitCompare, Globe, ChevronDown, ServerCog, Coffee,
+  ScanSearch,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getSiteSettings } from '@/api/supabaseApi';
@@ -28,6 +29,7 @@ const navItems = [
   { to: '/admin/ads', label: 'Ads', icon: Megaphone },
   { to: '/admin/redirects', label: 'Redirects', icon: LinkIcon },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
+  { to: '/admin/site-settings', label: 'SEO & Verification', icon: ScanSearch },
   { to: '/admin/support', label: 'Support / BMAC', icon: Coffee },
 ];
 

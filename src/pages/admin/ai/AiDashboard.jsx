@@ -23,6 +23,7 @@ import {
   Play,
   Loader2,
   ChevronRight,
+  ScanSearch,
 } from 'lucide-react';
 import {
   getMonitoringAlerts,
@@ -41,6 +42,7 @@ import {
   computeOperationsDashboard,
 } from '@/lib/phase5aAdminMetrics';
 import { toast } from 'sonner';
+import { getSeoSettings } from '@/api/siteSettingsApi';
 
 const numberFmt = new Intl.NumberFormat('en-IN');
 
@@ -371,6 +373,81 @@ function OperationsGuidancePanel({ overview, reviewQueue, dashboard, alerts, wor
   );
 }
 
+// ─── Site Settings Status Widget (Phase 5E) ─────────────────────────────────
+
+const SEO_CHECKS = [
+  { key: 'google_site_verification', label: 'Google Verification' },
+  { key: 'google_adsense_client',    label: 'AdSense' },
+  { key: 'google_analytics_id',      label: 'Analytics' },
+  { key: 'google_tag_manager_id',    label: 'Tag Manager' },
+  { key: 'microsoft_clarity_id',     label: 'Clarity' },
+  { key: 'bing_site_verification',   label: 'Bing Verification' },
+]
+
+function SiteSettingsWidget() {
+  const { data: rows = [], isLoading } = useQuery({
+    queryKey: ['seo-settings'],
+    queryFn: getSeoSettings,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  })
+
+  const lookup = rows.reduce((acc, r) => { acc[r.key] = r; return acc }, {})
+  const activeCount = SEO_CHECKS.filter(({ key }) => {
+    const row = lookup[key]
+    return row?.is_active !== false && !!row?.value
+  }).length
+
+  return (
+    <section className="rounded-lg border border-border bg-card">
+      <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <div className="flex items-center gap-2">
+          <ScanSearch className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold">SEO & Verification</h2>
+        </div>
+        <Link
+          to="/admin/site-settings"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
+        >
+          Manage <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
+      <div className="p-4">
+        {isLoading ? (
+          <div className="h-16 animate-pulse rounded-lg bg-muted/50" />
+        ) : (
+          <>
+            <p className="text-xs text-muted-foreground mb-3">
+              {activeCount}/{SEO_CHECKS.length} integrations active
+            </p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {SEO_CHECKS.map(({ key, label }) => {
+                const row = lookup[key]
+                const active = row?.is_active !== false && !!row?.value
+                return (
+                  <div
+                    key={key}
+                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium ${
+                      active
+                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
+                        : 'bg-muted/50 text-muted-foreground'
+                    }`}
+                  >
+                    <CheckCircle2
+                      className={`h-3 w-3 shrink-0 ${active ? 'text-emerald-500' : 'opacity-30'}`}
+                    />
+                    {label}
+                  </div>
+                )
+              })}
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+  )
+}
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 export default function AiDashboard() {
@@ -551,6 +628,9 @@ export default function AiDashboard() {
               workerStatus={workerStatusQuery.data}
               fetchStatus={fetchStatusQuery.data}
             />
+
+            {/* ── Site Settings Status Widget (Phase 5E) ── */}
+            <SiteSettingsWidget />
 
             <Section title="Provider Health" icon={Server}>
               <div className="mb-3 grid grid-cols-3 gap-2">

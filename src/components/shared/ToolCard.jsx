@@ -26,6 +26,7 @@ export default function ToolCard({ tool, index = 0, categoryName }) {
       <Link
         to={`/tool/${encodeURIComponent(tool.slug)}`}
         className="group block h-full rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+        onClick={() => sessionStorage.setItem('toolslist_scroll', String(window.scrollY))}
       >
         <div className="relative h-full p-5 rounded-3xl bg-card border border-border/50 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden premium-card panel-highlight">
           {/* Hover gradient */}
