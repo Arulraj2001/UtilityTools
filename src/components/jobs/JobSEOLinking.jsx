@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
   BookOpen,
@@ -78,7 +79,7 @@ export default function JobSEOLinking({ job }) {
           ) : relatedBlogs && relatedBlogs.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {relatedBlogs.map(blog => (
-                <BlogCard key={blog.id} blog={blog} compact />
+                <BlogCard key={blog.id} post={blog} compact />
               ))}
             </div>
           ) : (
@@ -130,9 +131,9 @@ export default function JobSEOLinking({ job }) {
           ) : relatedWorkflows && relatedWorkflows.length > 0 ? (
             <div className="space-y-3">
               {relatedWorkflows.map(workflow => (
-                <a
+                <Link
                   key={workflow.id}
-                  href={workflow.url || `#`}
+                  to={workflow.slug ? `/workflow/${encodeURIComponent(workflow.slug)}` : '/workflow'}
                   className="group block p-4 rounded-xl border border-border/50 bg-background/50 hover:border-primary/30 hover:bg-primary/5 transition-all"
                 >
                   <div className="flex items-start gap-3">
@@ -150,7 +151,7 @@ export default function JobSEOLinking({ job }) {
                       )}
                     </div>
                   </div>
-                </a>
+                </Link>
               ))}
             </div>
           ) : (

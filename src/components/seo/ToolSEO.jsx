@@ -3,6 +3,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { DEFAULT_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
 import { buildHowToSchema, buildWebApplicationSchema } from '@/lib/pageSchemas';
+import { buildToolFaqItems } from '@/lib/toolContentFallbacks';
 
 /**
  * Production-grade SEO component
@@ -11,7 +12,8 @@ import { buildHowToSchema, buildWebApplicationSchema } from '@/lib/pageSchemas';
 
 export default function ToolSEO({
   tool,
-  canonicalBase = SITE_URL
+  canonicalBase = SITE_URL,
+  categoryName = ''
 }) {
 
   if (!tool) return null;
@@ -24,6 +26,7 @@ export default function ToolSEO({
   const description =
     tool.seo_description ||
     tool.description ||
+    `Use ${tool.name} online with QuickUtils. Enter the required inputs, review the result, and verify important outputs before relying on them.` ||
     '';
 
   const ogTitle =
@@ -60,8 +63,11 @@ export default function ToolSEO({
 
   const keywords = allKeywords || ''
 
-  const faqItems =
+  const storedFaqItems =
     Array.isArray(tool.faq) ? tool.faq : [];
+  const fallbackFaqItems =
+    storedFaqItems.length >= 2 ? [] : buildToolFaqItems(tool, categoryName);
+  const faqItems = [...storedFaqItems, ...fallbackFaqItems].slice(0, 6);
 
   /**
    * FAQ Schema

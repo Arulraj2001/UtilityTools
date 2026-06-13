@@ -352,7 +352,7 @@ export default function ToolPage() {
 
   return (
     <>
-      {tool && <ToolSEO tool={tool} />}
+      {tool && <ToolSEO tool={tool} categoryName={category?.name} />}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-6 flex-wrap">
           <Link to="/" className="hover:text-foreground flex items-center gap-1"><Home className="w-3.5 h-3.5" /> Home</Link>
@@ -480,7 +480,7 @@ export default function ToolPage() {
 
             {/* NEW SEO CONTENT */}
             <Suspense fallback={null}>
-              <ToolContentSections tool={tool} />
+              <ToolContentSections tool={tool} categoryName={category?.name} />
             </Suspense>
 
             {tool?.faq?.length > 0 && (

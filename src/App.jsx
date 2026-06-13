@@ -79,6 +79,8 @@ const WorkflowListPage = lazy(() => import('./pages/WorkflowListPage'))
 const PageNotFound = lazy(() => import('./lib/PageNotFound'))
 const BackgroundLighting = lazy(() => import('./components/layout/BackgroundLighting'))
 
+const routerFuture = { v7_startTransition: true }
+
 const RouteFallback = () => (
   <div className="min-h-[55vh] flex items-center justify-center bg-background">
     <p className="text-sm text-muted-foreground">Loading page…</p>
@@ -121,7 +123,7 @@ const AuthenticatedApp = () => {
     <Routes>
       {/* Public routes */}
       <Route element={<PublicLayout />}>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={wrap(<Home />)} />
         <Route path="/tools" element={wrap(<ToolsList />)} />
         <Route path="/tool/:slug" element={wrap(<ToolPage />)} />
         <Route path="/categories" element={wrap(<CategoriesList />)} />
@@ -210,7 +212,7 @@ function App() {
         </Suspense>
         <SiteThemeSettings />
         <SiteSettingsProvider />
-        <Router>
+        <Router future={routerFuture}>
           {showBackgroundLighting && (
             <Suspense fallback={null}>
               <BackgroundLighting />

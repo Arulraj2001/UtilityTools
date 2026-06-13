@@ -551,7 +551,7 @@ export default function JobsListPage() {
                     </span>
                   </Link>
 
-                  <Link to="/workflow/compress-pdf-below-200kb" className="flex items-start gap-2 hover:text-primary">
+                  <Link to="/workflow?q=compress%20pdf" className="flex items-start gap-2 hover:text-primary">
                     <span className="mt-1 h-2.5 w-2.5 rounded-full bg-primary" />
                     <span>
                       Compress PDF Below 200KB

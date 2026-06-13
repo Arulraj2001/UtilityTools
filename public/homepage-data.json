@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-06-12T12:00:00.000Z",
+  "categories": [
+    { "id": 1, "name": "Category A" },
+    { "id": 2, "name": "Category B" }
+  ],
+  "tools": [
+    { "id": 1, "name": "Tool A" },
+    { "id": 2, "name": "Tool B" }
+  ],
+  "totalUsage": 1250,
+  "featuredWorkflows": [
+    { "id": 1, "title": "Workflow A" }
+  ],
+  "featuredJobs": [
+    { "id": 1, "title": "Job A" }
+  ]
+}

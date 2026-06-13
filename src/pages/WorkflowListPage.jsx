@@ -328,7 +328,7 @@ export default function WorkflowListPage() {
             </div>
 
             {/* Workflow Grid */}
-            {otherWorkflows.length > 0 || !search ? (
+            {otherWorkflows.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {otherWorkflows.map((workflow, i) => (
                   <React.Fragment key={workflow.id}>
@@ -365,18 +365,35 @@ export default function WorkflowListPage() {
                   </React.Fragment>
                 ))}
               </div>
-            ) : (
-              <div className="text-center py-16 text-muted-foreground">
-                <p className="mb-2">No workflows found for "{search}"</p>
-                <button
-                  onClick={() => {
-                    setSearch('')
-                    setCategoryFilter('')
-                  }}
-                  className="text-sm text-primary hover:underline"
-                >
-                  View all workflows
-                </button>
+            ) : featuredWorkflows.length > 0 ? null : (
+              <div className="rounded-3xl border border-border/70 bg-card p-8 text-center">
+                <h2 className="text-xl font-semibold text-foreground">
+                  {search || categoryFilter ? 'No workflows match this filter' : 'Workflows coming soon'}
+                </h2>
+                <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground leading-relaxed">
+                  {search || categoryFilter
+                    ? 'Try a broader search, or start from the main tool categories while workflow pages are being expanded.'
+                    : 'Workflow pages are ready in the app, but no public workflow content is live yet. Start from tools or categories while guided workflows are prepared.'}
+                </p>
+                <div className="mt-6 flex flex-wrap justify-center gap-3">
+                  {(search || categoryFilter) && (
+                    <button
+                      onClick={() => {
+                        setSearch('')
+                        setCategoryFilter('')
+                      }}
+                      className="inline-flex h-10 items-center rounded-xl border border-border px-4 text-sm font-medium hover:bg-muted"
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                  <Link to="/tools" className="inline-flex h-10 items-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                    Browse tools
+                  </Link>
+                  <Link to="/categories" className="inline-flex h-10 items-center rounded-xl border border-border px-4 text-sm font-medium hover:bg-muted">
+                    View categories
+                  </Link>
+                </div>
               </div>
             )}
           </>

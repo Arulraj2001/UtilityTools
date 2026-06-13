@@ -115,7 +115,7 @@ export default function JobsCategoryPage() {
               <div className="mt-4 grid gap-3 text-sm">
                 <Link to="/tool/passport-size-photo-maker" className="text-muted-foreground hover:text-primary">Passport photo maker</Link>
                 <Link to="/tool/ssc-signature-resizer" className="text-muted-foreground hover:text-primary">Signature resize tool</Link>
-                <Link to="/workflow/compress-pdf-below-200kb" className="text-muted-foreground hover:text-primary">Compress PDF below 200KB</Link>
+                <Link to="/workflow?q=compress%20pdf" className="text-muted-foreground hover:text-primary">Compress PDF below 200KB</Link>
                 <Link to="/job-sources-policy" className="text-muted-foreground hover:text-primary">Job sources policy</Link>
               </div>
             </div>

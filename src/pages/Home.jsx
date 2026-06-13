@@ -42,7 +42,7 @@ const categoryHighlights = [
   {
     title: 'Seller and logistics tools',
     description: 'Estimate fees, shipping costs, product pricing, parcel dimensions, and business margins.',
-    to: '/category/ecommerce-seller-tools',
+    to: '/tools?q=seller',
   },
 ]
 
@@ -611,11 +611,11 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {featuredJobs.map((j) => (
                 <div key={j.id} className="p-4 rounded-lg border bg-card hover:shadow-md transition">
-                  <a href={`/jobs/${encodeURIComponent(j.slug)}`} className="no-underline">
+                  <Link to={`/jobs/${encodeURIComponent(j.slug)}`} className="no-underline">
                     <h3 className="font-semibold">{j.title}</h3>
                     <p className="text-sm text-muted-foreground">{j.organization} • {j.location}</p>
                     <p className="text-sm mt-2 line-clamp-2">{j.short_description}</p>
-                  </a>
+                  </Link>
                 </div>
               ))}
             </div>

@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
+import { BookOpen } from 'lucide-react'
 import { getBlogPosts, getBlogCategories } from '@/api/supabaseApi'
 import { filterPosts } from '@/lib/blogFilterUtils'
 import BlogSidebar from '@/components/blog/BlogSidebar'
@@ -38,6 +39,57 @@ const blogQuickLinks = [
   { to: '/category/pdf-tools', label: 'PDF Tools' },
   { to: '/category/image-tools', label: 'Image Tools' },
 ]
+
+const upcomingGuideLinks = [
+  { to: '/category/pdf-tools', title: 'PDF workflows', text: 'Compression, merging, page extraction, and upload-ready documents.' },
+  { to: '/category/image-tools', title: 'Image preparation', text: 'Resize, compress, crop, convert, and inspect image files.' },
+  { to: '/category/government-exam-tools', title: 'Exam documents', text: 'Photo, signature, and PDF preparation for application portals.' },
+  { to: '/category/developer-tools', title: 'Developer utilities', text: 'JSON, URL, Base64, UUID, password, and formatting helpers.' },
+]
+
+function BlogEmptyState() {
+  return (
+    <div className="py-16">
+      <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+          <BookOpen className="w-8 h-8 text-primary" />
+        </div>
+        <h3 className="text-xl font-semibold mb-2">Guides coming soon</h3>
+        <p className="text-muted-foreground mb-6 leading-relaxed">
+          The blog is ready for publishing, but no articles are live yet. Until then,
+          these core tool hubs give users practical routes into the same workflows the
+          guides will support.
+        </p>
+        <div className="flex flex-wrap gap-3 justify-center">
+          <Link to="/tools" className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">Browse All Tools</Link>
+          <Link to="/categories" className="px-4 py-2 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors">View Categories</Link>
+        </div>
+      </div>
+
+      <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        {upcomingGuideLinks.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            className="rounded-2xl border border-border/70 bg-card p-5 text-left transition-colors hover:border-primary/50"
+          >
+            <h4 className="font-semibold mb-2">{link.title}</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">{link.text}</p>
+          </Link>
+        ))}
+      </div>
+
+      <div className="mt-8 rounded-2xl border border-border/70 bg-muted/30 p-5 text-sm text-muted-foreground">
+        <p>
+          Planning to publish articles? Start with one guide per high-value tool hub:
+          PDF tools, image tools, government exam tools, calculators, developer tools,
+          seller tools, and logistics tools. Each article should link to its primary
+          tool, the matching category, and one supporting workflow.
+        </p>
+      </div>
+    </div>
+  )
+}
 
 export default function BlogList() {
   const [searchParams] = useSearchParams()
@@ -162,6 +214,8 @@ export default function BlogList() {
                   ))}
                 </motion.div>
               ) : posts.length === 0 ? (
+                <BlogEmptyState />
+              ) : posts.length < 0 ? (
                 /* No posts in DB at all */
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                   <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
