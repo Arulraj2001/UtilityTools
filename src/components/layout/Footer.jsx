@@ -18,6 +18,7 @@ const EXPLORE_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/tools', label: 'All Tools' },
   { to: '/categories', label: 'Categories' },
+  { to: '/workflow', label: 'Workflows' },
   { to: '/blog', label: 'Blog' },
   { to: '/jobs', label: 'Jobs' },
 ]

@@ -13,8 +13,10 @@ import { fileURLToPath } from 'url'
 import { createClient } from '@supabase/supabase-js'
 import ws from 'ws'
 import { STATIC_BLOG_POSTS } from '../src/lib/staticBlogPosts.js'
+import { PREBUILT_TOOLS } from '../src/lib/toolsData.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const HOMEPAGE_DATA_PATH = path.resolve(__dirname, '..', 'public', 'homepage-data.json')
 
 const SUPABASE_URL =
   process.env.SUPABASE_URL ||
@@ -60,6 +62,60 @@ function buildUrl(loc) {
   return `${SITE_URL}${loc.startsWith('/') ? '' : '/'}${loc}`
 }
 
+function buildPrebuiltFallbackContent() {
+  const tools = PREBUILT_TOOLS
+    .filter((tool) => tool?.status === 'published' && !RETIRED_TOOL_SLUGS.has(tool.slug))
+    .map((tool) => ({
+      slug: tool.slug,
+      updated_at: tool.updated_at || tool.created_at || null,
+      is_featured: Boolean(tool.is_featured),
+      status: tool.status,
+      category_slug: tool.category_slug,
+    }))
+
+  const categories = [...new Set(tools.map((tool) => tool.category_slug).filter(Boolean))]
+    .map((slug) => ({ slug, updated_at: null }))
+
+  return { tools, categories }
+}
+
+function loadLocalFallbackContent() {
+  const prebuilt = buildPrebuiltFallbackContent()
+
+  if (!fs.existsSync(HOMEPAGE_DATA_PATH)) return prebuilt
+
+  try {
+    const snapshot = JSON.parse(fs.readFileSync(HOMEPAGE_DATA_PATH, 'utf8'))
+    const tools = Array.isArray(snapshot.tools)
+      ? snapshot.tools
+        .filter((tool) => tool?.slug && !RETIRED_TOOL_SLUGS.has(tool.slug))
+        .map((tool) => ({
+          slug: tool.slug,
+          updated_at: tool.updated_at || tool.created_at || null,
+          is_featured: Boolean(tool.is_featured),
+          status: tool.status || 'published',
+          category_slug: tool.category_slug || tool.category_id || null,
+        }))
+      : []
+    const categories = Array.isArray(snapshot.categories)
+      ? snapshot.categories
+        .filter((category) => category?.slug)
+        .map((category) => ({
+          slug: category.slug,
+          updated_at: category.updated_at || null,
+        }))
+      : []
+
+    return {
+      tools: tools.length ? tools : prebuilt.tools,
+      categories: categories.length ? categories : prebuilt.categories,
+    }
+  } catch (err) {
+    console.warn('Could not read homepage-data fallback:', err.message || err)
+    return prebuilt
+  }
+}
+
 function toXmlUrl({
   loc,
   lastmod,
@@ -84,14 +140,19 @@ function toXmlUrl({
 async function main() {
   console.log('Generating sitemap...')
 
+  let tools = []
+  let categories = []
+  let posts = []
+  let workflows = []
+  let jobs = []
+
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.error(
       'Supabase credentials not found in env. Set SUPABASE_URL and SUPABASE_ANON_KEY (or VITE_ equivalents).'
     )
 
-    console.warn('Skipping sitemap generation — credentials not provided.')
-    return
-  }
+    console.warn('Supabase credentials not found; generating sitemap from local fallback content.')
+  } else {
 
   console.log('Using Supabase URL:', SUPABASE_URL)
   console.log('Using Site URL:', SITE_URL)
@@ -103,7 +164,7 @@ async function main() {
   })
 
   // Fetch content
-  const [tools, categories, posts] = await Promise.all([
+  ;[tools, categories, posts] = await Promise.all([
     fetchTable(
       supabase,
       'tools',
@@ -126,7 +187,7 @@ async function main() {
   ])
 
   // Optional workflows
-  const workflows = await fetchTable(
+  workflows = await fetchTable(
     supabase,
     'workflow_pages',
     'slug, updated_at',
@@ -134,12 +195,25 @@ async function main() {
   )
 
   // Jobs (published only)
-  const jobs = await fetchTable(
+  jobs = await fetchTable(
     supabase,
     'jobs',
     'slug, updated_at, status, last_date',
     (q) => q.eq('status', 'published')
   )
+  }
+
+  const fallbackContent = loadLocalFallbackContent()
+
+  if (!tools.length && fallbackContent.tools.length) {
+    console.warn(`Using local fallback tools for sitemap (${fallbackContent.tools.length} tools).`)
+    tools = fallbackContent.tools
+  }
+
+  if (!categories.length && fallbackContent.categories.length) {
+    console.warn(`Using local fallback categories for sitemap (${fallbackContent.categories.length} categories).`)
+    categories = fallbackContent.categories
+  }
 
   console.log('Tools loaded:', tools.length)
   console.log('Categories loaded:', categories.length)

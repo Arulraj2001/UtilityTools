@@ -227,8 +227,8 @@ export default function BlogList() {
                     or browse our tools directly below.
                   </p>
                   <div className="flex flex-wrap gap-3 justify-center">
-                    <a href="/tools" className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">Browse All Tools</a>
-                    <a href="/categories" className="px-4 py-2 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors">View Categories</a>
+                    <Link to="/tools" className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">Browse All Tools</Link>
+                    <Link to="/categories" className="px-4 py-2 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors">View Categories</Link>
                   </div>
                 </div>
               ) : (
