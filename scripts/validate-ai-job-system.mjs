@@ -143,7 +143,8 @@ const testStaticWiring = () => {
   const aiProvider = read('src/lib/aiProvider.js')
   const providerCore = read('server/ai/providerCore.js')
   const providerProxy = read('supabase/functions/ai-provider-proxy/index.ts')
-  const queue = read('src/pages/admin/ai/AiResearchQueue.jsx')
+  const jobWritingFramework = read('src/lib/jobWritingFramework.js')
+  const providerSelector = read('src/jobs/ai/providerSelector.js')
   const api = read('src/api/supabaseApi.js')
   const settings = read('src/pages/admin/ai/AiSettings.jsx')
   const dashboard = read('src/pages/admin/ai/AiDashboard.jsx')
@@ -165,21 +166,21 @@ const testStaticWiring = () => {
     assert.ok(providerCore.includes(providerName))
   }
 
-  assert.ok(queue.includes('buildLocalFallbackJobDraft'))
-  assert.ok(queue.includes('recordProviderCall'))
-  assert.ok(queue.includes('logProviderFailure'))
-  assert.ok(queue.includes('AbortController'))
+  assert.ok(jobWritingFramework.includes('buildLocalFallbackJobDraft'))
+  assert.ok(api.includes('recordProviderCall'))
+  assert.ok(providerSelector.includes('logProviderFailure'))
+  assert.ok(providerCore.includes('AbortController'))
 
   assert.ok(api.includes('redactForLog'))
   assert.ok(api.includes('provider_name: payload.provider_name'))
   assert.ok(api.includes('stripOptionalJobExtensionFields'))
 
-  assert.ok(settings.includes("['deepseek', 'gemini', 'groq', 'openrouter', 'huggingface', 'cerebras']"))
+  assert.ok(settings.includes("['deepseek', 'gemini', 'openai', 'groq', 'openrouter', 'huggingface', 'cerebras']"))
   assert.ok(settings.includes('f.provider_name'))
   assert.ok(settings.includes('has_api_key'))
 
-  assert.ok(dashboard.includes('pendingDrafts.length > 0'))
-  assert.ok(dashboard.includes('pendingQueue.length > 5'))
+  assert.ok(dashboard.includes('pendingQ > 0'))
+  assert.ok(dashboard.includes('dashboard.queue.pending'))
 }
 
 const run = async () => {

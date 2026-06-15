@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { getLocalCategories, getLocalToolBySlug, getLocalTools } from '@/lib/localCatalogFallback'
 
 const RETIRED_TOOL_SLUGS = ['pdf-to-word']
 
@@ -50,9 +51,9 @@ export const getToolPageBySlug = async (slug, { published = true } = {}) => {
   const result = await query.maybeSingle()
   if (result.error) {
     console.error('getToolPageBySlug error:', result.error)
-    return null
+    return getLocalToolBySlug(slug, { published })
   }
-  return result.data || null
+  return result.data || getLocalToolBySlug(slug, { published })
 }
 
 export const getToolPageRelatedTools = async ({ limit = 20, categoryId = null } = {}) => {
@@ -64,7 +65,18 @@ export const getToolPageRelatedTools = async ({ limit = 20, categoryId = null } 
   // When a categoryId is provided, scope to that category for related tools (much more efficient)
   if (categoryId) query = query.eq('category_id', categoryId)
   if (limit) query = query.limit(Math.min(limit, 50))
-  return handleResponse(await query)
+  const result = await query
+  if (result.error) {
+    console.error('getToolPageRelatedTools error:', result.error)
+    return getLocalTools({ limit, filters: categoryId ? { category_id: categoryId } : {} })
+  }
+
+  const rows = result.data || []
+  if (rows.length === 0) {
+    return getLocalTools({ limit, filters: categoryId ? { category_id: categoryId } : {} })
+  }
+
+  return rows
 }
 
 export const getToolPageCategories = async () => {
@@ -73,7 +85,18 @@ export const getToolPageCategories = async () => {
     .select('id,name,slug')
     .order('sort_order', { ascending: true })
     .limit(200)
-  return handleResponse(result)
+
+  if (result.error) {
+    console.error('getToolPageCategories error:', result.error)
+    return getLocalCategories({ limit: 200 })
+  }
+
+  const rows = result.data || []
+  if (rows.length === 0) {
+    return getLocalCategories({ limit: 200 })
+  }
+
+  return rows
 }
 
 export const getToolPageBlogPosts = async ({ limit = 50 } = {}) => {

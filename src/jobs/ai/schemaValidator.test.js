@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateExtraction } from './schemaValidator.js';
+import { validateExtraction, isTrustedGovernmentDomain } from './schemaValidator.js';
 
 const baseContext = {
   source_url: 'https://ssc.gov.in/ssc-calender',
@@ -89,4 +89,21 @@ test('rejects partially ungrounded salary data', () => {
   }, baseContext);
   assert.equal(result.ok, false);
   assert.match(result.errors.join(' '), /salary/);
+});
+
+test('identifies trusted government domains correctly', () => {
+  assert.equal(isTrustedGovernmentDomain('https://ssc.nic.in'), true);
+  assert.equal(isTrustedGovernmentDomain('https://upsc.gov.in/notice'), true);
+  assert.equal(isTrustedGovernmentDomain('http://iitd.ac.in'), true);
+  assert.equal(isTrustedGovernmentDomain('https://iisc.res.in/careers'), true);
+  assert.equal(isTrustedGovernmentDomain('https://google.com'), false);
+  assert.equal(isTrustedGovernmentDomain('invalid-url'), false);
+});
+
+test('allows trusted government domains even if not in context', () => {
+  const result = validateExtraction({
+    ...validExtraction,
+    application_link: 'https://opsconline.gov.in/apply',
+  }, baseContext);
+  assert.equal(result.ok, true);
 });

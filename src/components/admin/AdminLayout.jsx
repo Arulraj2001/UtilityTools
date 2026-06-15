@@ -8,7 +8,7 @@ import {
   ChevronLeft, ChevronRight, Menu, LogOut, FileUp,
   Brain, Search, Shield, Copy, BarChart3, Activity,
   GitCompare, Globe, ChevronDown, ServerCog, Coffee,
-  ScanSearch,
+  ScanSearch, Image,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getSiteSettings } from '@/api/supabaseApi';
@@ -21,6 +21,7 @@ const navItems = [
   { to: '/admin/tool-seo-import', label: 'Tool SEO Import', icon: FileUp },
   { to: '/admin/blog', label: 'Blog Posts', icon: BookOpen },
   { to: '/admin/blog-import', label: 'Blog Import', icon: FileUp },
+  { to: '/admin/media', label: 'Media Library', icon: Image },
   { to: '/admin/jobs', label: 'Jobs', icon: FolderOpen },
   { to: '/admin/job-categories', label: 'Job Categories', icon: FolderOpen },
   { to: '/admin/blog-categories', label: 'Blog Categories', icon: FolderOpen },

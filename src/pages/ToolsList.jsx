@@ -59,13 +59,20 @@ export default function ToolsList() {
 
   const filtered = useMemo(() => {
     return tools.filter(tool => {
+      const selectedCategoryRow = categories.find((category) => (
+        category.id === selectedCategory || category.slug === selectedCategory
+      ))
       const matchesSearch = !search ||
         tool.name?.toLowerCase().includes(search.toLowerCase()) ||
         tool.description?.toLowerCase().includes(search.toLowerCase())
-      const matchesCat = selectedCategory === 'all' || tool.category_id === selectedCategory
+      const matchesCat = selectedCategory === 'all' ||
+        tool.category_id === selectedCategory ||
+        tool.category_slug === selectedCategory ||
+        tool.category_id === selectedCategoryRow?.slug ||
+        tool.category_slug === selectedCategoryRow?.slug
       return matchesSearch && matchesCat
     })
-  }, [tools, search, selectedCategory])
+  }, [tools, categories, search, selectedCategory])
 
   const priorityCategories = useMemo(() => (
     priorityCategorySlugs
@@ -173,7 +180,11 @@ export default function ToolsList() {
           <p className="text-sm text-muted-foreground mb-5">{filtered.length} tools found</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filtered.map((tool, i) => {
-              const cat = categories.find(c => c.id === tool.category_id)
+              const cat = categories.find(c => (
+                c.id === tool.category_id ||
+                c.slug === tool.category_id ||
+                c.slug === tool.category_slug
+              ))
               return (
                 <React.Fragment key={tool.id}>
                   <ToolCard tool={tool} index={i} categoryName={cat?.name} />

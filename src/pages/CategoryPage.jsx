@@ -16,6 +16,53 @@ import {
   getCategoryRelatedWorkflows,
 } from '@/lib/categoryHubContent'
 
+function CategoryGuideSection({ category, categoryHub, tools }) {
+  const exampleTools = tools.slice(0, 5)
+  const exampleNames = exampleTools.map((tool) => tool.name).filter(Boolean)
+  const categoryName = category.name
+
+  return (
+    <section className="mb-8">
+      <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <div>
+          <p className="text-sm font-semibold text-primary mb-3">Category guide</p>
+          <h2 className="text-2xl font-semibold tracking-tight mb-3">
+            How to use {categoryName} on QuickUtils
+          </h2>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p>
+              {categoryHub.intro}
+            </p>
+            <p>
+              This category is organized so you can move from a broad task to the exact
+              utility you need. Start with the tool name that matches your input or required
+              output, then review the instructions on the tool page before copying,
+              downloading, submitting, or relying on the result.
+            </p>
+            {exampleNames.length > 0 && (
+              <p>
+                Common starting points in this category include {exampleNames.join(', ')}.
+                Use the full list below when you need a more specific calculator, converter,
+                document helper, or preparation tool.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-border/60 bg-background p-5">
+          <h3 className="font-semibold mb-3">Choose the right tool</h3>
+          <ul className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+            {categoryHub.highlights.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+            <li>Check the output against official instructions when the task affects forms, money, health, studies, or business decisions.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function CategoryPage() {
   const { slug } = useParams()
 
@@ -42,7 +89,14 @@ export default function CategoryPage() {
   })
 
   const category = useMemo(() => categories.find(c => c.slug === slug), [categories, slug])
-  const categoryTools = useMemo(() => tools.filter(t => t.category_id === category?.id), [tools, category])
+  const categoryTools = useMemo(() => {
+    if (!category) return []
+    return tools.filter((tool) => (
+      tool.category_id === category.id ||
+      tool.category_id === category.slug ||
+      tool.category_slug === category.slug
+    ))
+  }, [tools, category])
   const categoryHub = useMemo(() => getCategoryHub(slug, category), [slug, category])
   const posts = useMemo(() => mergeBlogPosts(remotePosts), [remotePosts])
 
@@ -127,7 +181,7 @@ export default function CategoryPage() {
           </div>
         </div>
 
-        <section className="mb-8 rounded-2xl border border-border/70 bg-card p-6">
+        <section className="mb-8 rounded-xl border border-border/70 bg-card p-6">
           <h2 className="text-xl font-semibold mb-3">About {category.name}</h2>
           <p className="text-muted-foreground leading-relaxed max-w-4xl">{categoryHub.intro}</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -143,6 +197,8 @@ export default function CategoryPage() {
             <Link to="/workflow" className="text-primary hover:underline">Workflows</Link>
           </div>
         </section>
+
+        <CategoryGuideSection category={category} categoryHub={categoryHub} tools={categoryTools} />
 
         {/* Featured Tools */}
         {featuredTools.length > 0 && (
@@ -237,16 +293,36 @@ export default function CategoryPage() {
           </section>
         )}
 
-        {/* Existing tool grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {categoryTools.map((tool, i) => (
-            <ToolCard key={tool.id} tool={tool} index={i} categoryName={category.name} />
-          ))}
-        </div>
+        <section className="mt-8">
+          <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight">All {category.name} tools</h2>
+              <p className="text-sm text-muted-foreground mt-2">
+                Browse every published tool in this category. Each tool page includes usage guidance,
+                accuracy notes, and related links where available.
+              </p>
+            </div>
+            <span className="text-sm text-muted-foreground">{categoryTools.length} tools</span>
+          </div>
 
-        {categoryTools.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground">No tools in this category yet.</div>
-        )}
+          {categoryTools.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {categoryTools.map((tool, i) => (
+                <ToolCard key={tool.id} tool={tool} index={i} categoryName={category.name} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-border/70 bg-card p-8 text-center">
+              <h2 className="text-lg font-semibold mb-2">Tools are being prepared</h2>
+              <p className="text-muted-foreground mb-5">
+                This category is available, but no published tools are attached yet.
+              </p>
+              <Link to="/tools" className="text-sm font-medium text-primary hover:underline">
+                Browse all tools
+              </Link>
+            </div>
+          )}
+        </section>
 
         {/* Featured Workflows */}
         {relatedWorkflows.length > 0 && (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { ArrowLeft, Save, Eye, Edit2, Plus, Trash2, Code } from 'lucide-react'
+import { ArrowLeft, Save, Eye, Edit2, Plus, Trash2, Code, Upload } from 'lucide-react'
+import { supabase } from '@/api/supabaseClient'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -235,6 +236,42 @@ export default function BlogEditor({ post, onSave, onCancel }) {
   const [slugTouched, setSlugTouched] = useState(Boolean(post?.slug))
   const [htmlValidation, setHtmlValidation] = useState({ isValid: true, errors: [], warnings: [] })
   const [lastEditor, setLastEditor] = useState('quill') // Track which editor last modified content
+  const [uploadingField, setUploadingField] = useState(null)
+
+  const handleUploadClick = (fieldName) => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
+    input.onchange = async (e) => {
+      const file = e.target?.files?.[0]
+      if (!file) return
+
+      try {
+        setUploadingField(fieldName)
+        const cleanName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+        const { error } = await supabase.storage
+          .from('media')
+          .upload(cleanName, file, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (error) throw error
+
+        const { data: publicUrlData } = supabase.storage
+          .from('media')
+          .getPublicUrl(cleanName)
+
+        update(fieldName, publicUrlData.publicUrl)
+        toast.success('Image uploaded successfully!')
+      } catch (err) {
+        toast.error(`Upload failed: ${err.message}`)
+      } finally {
+        setUploadingField(null)
+      }
+    }
+    input.click()
+  }
 
   const { data: categories = [] } = useQuery({
     queryKey: ['blog-categories'],
@@ -615,12 +652,24 @@ export default function BlogEditor({ post, onSave, onCancel }) {
 
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700">Author Image URL</Label>
-                  <Input
-                    value={form.author_image}
-                    onChange={e => update('author_image', e.target.value)}
-                    placeholder="https://example.com/author.jpg"
-                    className="rounded-lg font-mono text-sm"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      value={form.author_image}
+                      onChange={e => update('author_image', e.target.value)}
+                      placeholder="https://example.com/author.jpg"
+                      className="rounded-lg font-mono text-sm flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleUploadClick('author_image')}
+                      disabled={uploadingField === 'author_image'}
+                      className="rounded-lg shrink-0"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {uploadingField === 'author_image' ? 'Uploading...' : 'Upload'}
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -793,12 +842,24 @@ export default function BlogEditor({ post, onSave, onCancel }) {
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-700">Open Graph image</Label>
-                <Input
-                  value={form.og_image}
-                  onChange={(e) => update('og_image', e.target.value)}
-                  placeholder="https://.../og-image.jpg"
-                  className="rounded-lg"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    value={form.og_image}
+                    onChange={(e) => update('og_image', e.target.value)}
+                    placeholder="https://.../og-image.jpg"
+                    className="rounded-lg flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleUploadClick('og_image')}
+                    disabled={uploadingField === 'og_image'}
+                    className="rounded-lg shrink-0"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploadingField === 'og_image' ? 'Uploading...' : 'Upload'}
+                  </Button>
+                </div>
               </div>
             </div>
 
@@ -1028,17 +1089,29 @@ export default function BlogEditor({ post, onSave, onCancel }) {
             
             <div className="space-y-2">
               <Label className="text-sm font-medium text-gray-700">Featured Image URL</Label>
-              <Input
-                value={form.featured_image}
-                onChange={e =>
-                  update(
-                    'featured_image',
-                    e.target.value
-                  )
-                }
-                placeholder="https://example.com/image.jpg"
-                className="rounded-lg font-mono text-sm"
-              />
+              <div className="flex gap-2">
+                <Input
+                  value={form.featured_image}
+                  onChange={e =>
+                    update(
+                      'featured_image',
+                      e.target.value
+                    )
+                  }
+                  placeholder="https://example.com/image.jpg"
+                  className="rounded-lg font-mono text-sm flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleUploadClick('featured_image')}
+                  disabled={uploadingField === 'featured_image'}
+                  className="rounded-lg shrink-0"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {uploadingField === 'featured_image' ? 'Uploading...' : 'Upload'}
+                </Button>
+              </div>
               {form.featured_image && (
                 <div className="mt-2">
                   <img 

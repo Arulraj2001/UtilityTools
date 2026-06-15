@@ -10,6 +10,7 @@ class Query {
     this.patch = null;
     this.rowsToInsert = null;
     this.max = null;
+    this.orFilter = null;
   }
 
   select() { return this; }
@@ -30,6 +31,11 @@ class Query {
     return this;
   }
 
+  or(filter) {
+    this.orFilter = filter;
+    return this;
+  }
+
   _rows() {
     let rows = this.db[this.table] || [];
     this.filters.forEach(({ column, value, op }) => {
@@ -39,6 +45,18 @@ class Query {
       }
       rows = rows.filter((row) => row[column] === value);
     });
+
+    if (this.orFilter) {
+      const match = this.orFilter.match(/\.lte\.(.*)$/);
+      if (match) {
+        const cutoff = match[1];
+        rows = rows.filter((row) => {
+          const runAfter = row.extracted_data?.run_after;
+          return !runAfter || String(runAfter) <= String(cutoff);
+        });
+      }
+    }
+
     if (Number.isInteger(this.max)) rows = rows.slice(0, this.max);
     return rows;
   }
@@ -273,4 +291,27 @@ test('QueueWorker reclaims stale processing items without duplicating saved draf
   assert.equal(supabase.db.ai_job_drafts.length, 1);
   assert.equal(supabase.db.ai_research_queue[0].status, 'drafted');
   assert.equal(supabase.db.raw_job_notifications[0].metadata.phase2_draft_id, 'draft-after-crash');
+});
+
+test('QueueWorker schedules retry with backoff on failure', async () => {
+  const supabase = createSupabaseMock();
+  const worker = new QueueWorker(supabase, {
+    maxRetries: 3,
+    extractor: {
+      async extract() {
+        throw new Error('AI extraction failed transiently');
+      },
+    },
+  });
+
+  const result = await worker.processItem(supabase.db.ai_research_queue[0]);
+
+  assert.equal(result.status, 'retry_scheduled');
+  assert.equal(supabase.db.ai_research_queue[0].status, 'pending');
+  assert.ok(supabase.db.ai_research_queue[0].extracted_data.run_after);
+
+  // Verify that loadPending skips this because run_after is in the future
+  const pendingItems = await worker.loadPending(5);
+  const found = pendingItems.some(item => item.id === 'queue-1');
+  assert.equal(found, false);
 });

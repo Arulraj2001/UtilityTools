@@ -64,3 +64,20 @@ test('quality gate rejects incomplete/high-duplicate drafts', () => {
   assert.equal(result.queueStatus, 'rejected');
   assert.ok(result.issues.length > 0);
 });
+
+test('quality gate forces pending_review if critical link verification fails', () => {
+  const draft = generateDraft({ extraction });
+  const result = runQualityGate({
+    extraction,
+    draft,
+    duplicateAnalysis: { duplicateRisk: 5, evidence: [] },
+    linkVerification: {
+      notification_pdf: { ok: false, error: 'HTTP 404' },
+      official_website: { ok: true },
+      application_link: { ok: true },
+    },
+  });
+
+  assert.equal(result.status, 'pending_review');
+  assert.ok(result.issues.some((issue) => issue.includes('Link verification failed for notification pdf')));
+});

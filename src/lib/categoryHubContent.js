@@ -188,6 +188,28 @@ const hubs = {
     workflowKeywords: ['seller', 'ecommerce', 'shipping', 'pricing'],
     relatedCategorySlugs: ['finance', 'logistics-shipping', 'seo-tools'],
   },
+  'seller-tools': {
+    intro:
+      'Seller tools help online sellers understand marketplace fees, profit, pricing, COD risk, GST invoices, stock planning, shipping labels, ROI, and business performance. This hub is built for practical seller decisions before listing products, running ads, buying inventory, or shipping orders.',
+    highlights: ['Marketplace fee and profit analysis', 'Pricing, invoice, stock, and ROI planning', 'Seller dashboards for operational decisions'],
+    blogKeywords: ['seller', 'amazon', 'flipkart', 'marketplace', 'profit', 'pricing'],
+    workflowKeywords: ['seller', 'ecommerce', 'pricing', 'shipping'],
+    relatedCategorySlugs: ['ecommerce-seller-tools', 'logistics-shipping', 'finance'],
+    faqs: [
+      {
+        question: 'Which seller tool should I use first?',
+        answer: 'Start with the marketplace fee or profit tool for the platform you sell on, then use pricing, GST invoice, inventory, and ROI tools to plan the next operational step.',
+      },
+      {
+        question: 'Are seller tool results final business advice?',
+        answer: 'No. They are planning estimates based on your inputs. Verify current marketplace fees, taxes, ad costs, shipping charges, and return rates before making business decisions.',
+      },
+      {
+        question: 'How do seller tools connect with logistics tools?',
+        answer: 'Seller profitability often depends on shipping cost and parcel weight. Use logistics tools with seller calculators when shipping, packaging, or courier charges affect margins.',
+      },
+    ],
+  },
   'logistics-shipping': {
     intro:
       'Logistics and shipping tools help estimate courier charges, volumetric weight, CBM, delivery timelines, chargeable weight, parcel dimensions, and packaging costs. This hub focuses on shipment planning and cost clarity.',

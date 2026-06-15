@@ -2,6 +2,7 @@ import { supabase } from './supabaseClient';
 import { sanitizeHtml, sanitizeHtmlFields } from '@/lib/sanitizeHtml';
 import { scoreJob } from '@/lib/jobQualityScorer';
 import { validateJobQualityGate } from '@/lib/jobQualityGate';
+import { getLocalCategories, getLocalTools } from '@/lib/localCatalogFallback';
 
 const RETIRED_TOOL_SLUGS = ['pdf-to-word'];
 
@@ -480,7 +481,18 @@ export const getTools = async ({ published = true, orderBy = 'sort_order', ascen
   if (Array.isArray(filters?.categoryIds) && filters.categoryIds.length > 0) query = query.in('category_id', filters.categoryIds);
   query = sortParams(query, orderBy, ascending);
   if (limit) query = query.limit(limit);
-  return handleResponse(await query);
+  const result = await query;
+  if (result.error) {
+    logSupabaseError('getTools', result.error, null, { published, filters });
+    return getLocalTools({ published, orderBy, ascending, limit, filters });
+  }
+
+  const rows = result.data || [];
+  if (published && rows.length === 0) {
+    return getLocalTools({ published, orderBy, ascending, limit, filters });
+  }
+
+  return rows;
 };
 
 export const getToolsAll = async ({ orderBy = 'created_at', ascending = false, limit = 200 } = {}) => {
@@ -506,7 +518,18 @@ export const getCategories = async ({ orderBy = 'sort_order', ascending = true, 
   let query = supabase.from('categories').select('*');
   query = sortParams(query, orderBy, ascending);
   if (limit) query = query.limit(limit);
-  return handleResponse(await query);
+  const result = await query;
+  if (result.error) {
+    logSupabaseError('getCategories', result.error);
+    return getLocalCategories({ orderBy, ascending, limit });
+  }
+
+  const rows = result.data || [];
+  if (rows.length === 0) {
+    return getLocalCategories({ orderBy, ascending, limit });
+  }
+
+  return rows;
 };
 
 // Lightweight per-category counts without fetching whole tool records.

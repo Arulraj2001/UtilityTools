@@ -54,6 +54,10 @@ export const sortPhase2Providers = (providers = []) => (
     .sort((a, b) => {
       const penaltyDelta = healthPenalty(a) - healthPenalty(b);
       if (penaltyDelta !== 0) return penaltyDelta;
+      const aPriority = Number.isFinite(a.priority) ? a.priority : 99;
+      const bPriority = Number.isFinite(b.priority) ? b.priority : 99;
+      const priorityDelta = aPriority - bPriority;
+      if (priorityDelta !== 0) return priorityDelta;
       return providerRank(a.provider_name) - providerRank(b.provider_name);
     })
     .map((provider, index) => ({

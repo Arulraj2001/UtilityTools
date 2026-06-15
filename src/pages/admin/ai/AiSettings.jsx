@@ -542,12 +542,16 @@ export default function AiSettings() {
     if (source.index === destination.index) return
 
     const sorted = [...providers].sort((a, b) => a.priority - b.priority)
-    const moved = sorted[source.index]
-    const target = sorted[destination.index]
+    const [moved] = sorted.splice(source.index, 1)
+    sorted.splice(destination.index, 0, moved)
 
-    // Swap priorities
-    handleUpdate(moved.id, { priority: target.priority })
-    handleUpdate(target.id, { priority: moved.priority })
+    // Update priorities sequentially
+    sorted.forEach((provider, idx) => {
+      const newPriority = idx + 1
+      if (provider.priority !== newPriority) {
+        handleUpdate(provider.id, { priority: newPriority })
+      }
+    })
   }
 
   // Test all active providers sequentially

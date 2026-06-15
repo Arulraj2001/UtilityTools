@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import ToolCard from '../shared/ToolCard';
 
-export default function FeaturedTools({ tools = [], categories = [], title = "Featured Tools", subtitle, viewAllLink = '/tools' }) {
-  const getCategoryName = (catId) => categories.find((c) => c.id === catId)?.name || '';
+export default function FeaturedTools({ tools = [], categories = [], title = "Featured Tools", subtitle, viewAllLink = '/tools', compact = false }) {
+  const getCategoryName = (catId, categorySlug) => (
+    categories.find((c) => c.id === catId || c.slug === catId || c.slug === categorySlug)?.name || ''
+  );
   if (tools.length === 0) return null;
 
   return (
@@ -31,7 +33,8 @@ export default function FeaturedTools({ tools = [], categories = [], title = "Fe
             key={tool.id}
             tool={tool}
             index={i}
-            categoryName={getCategoryName(tool.category_id)} />
+            categoryName={getCategoryName(tool.category_id, tool.category_slug)}
+            compact={compact} />
 
           )}
         </div>

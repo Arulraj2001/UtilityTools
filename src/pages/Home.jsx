@@ -13,37 +13,12 @@ import { organizationSchema, websiteSchema } from '@/config/site'
 const homepageDescription =
   'QuickUtils is a free online tools website for everyday PDF, image, calculator, text, developer, SEO, student, and business tasks.'
 
-const categoryHighlights = [
-  {
-    title: 'PDF tools',
-    description: 'Compress, merge, split, convert, and prepare PDF files for sharing, forms, and uploads.',
-    to: '/category/pdf-tools',
-  },
-  {
-    title: 'Image tools',
-    description: 'Resize, compress, crop, convert, watermark, and inspect images from your browser.',
-    to: '/category/image-tools',
-  },
-  {
-    title: 'Calculators',
-    description: 'Use finance, health, study, date, math, shipping, and everyday calculators for quick estimates.',
-    to: '/tools?q=calculator',
-  },
-  {
-    title: 'Government exam tools',
-    description: 'Prepare photos, signatures, documents, and PDFs for common exam and application requirements.',
-    to: '/category/government-exam-tools',
-  },
-  {
-    title: 'Developer and SEO tools',
-    description: 'Format JSON, encode URLs, generate meta tags, create sitemaps, and handle common web tasks.',
-    to: '/category/developer-tools',
-  },
-  {
-    title: 'Seller and logistics tools',
-    description: 'Estimate fees, shipping costs, product pricing, parcel dimensions, and business margins.',
-    to: '/tools?q=seller',
-  },
+const homepagePriorityCategorySlugs = [
+  'pdf-tools',
+  'image-tools',
+  'government-exam-tools',
+  'finance',
+  'developer-tools',
 ]
 
 const popularToolLinks = [
@@ -218,38 +193,6 @@ function TrustResourcesSection() {
             >
               <h3 className="font-semibold mb-2">{link.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{link.text}</p>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function CategoryHighlightsSection() {
-  return (
-    <section className="py-12 sm:py-16 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="max-w-3xl mb-8">
-          <p className="text-sm font-semibold text-primary mb-3">Main tool categories</p>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
-            Find tools by the kind of task you need to finish
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            These category links point to the most important parts of QuickUtils and help users
-            move from the homepage to a useful tool quickly.
-          </p>
-        </div>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categoryHighlights.map((category) => (
-            <Link
-              key={category.to}
-              to={category.to}
-              className="block rounded-lg border border-border/60 bg-background p-5 transition-colors hover:border-primary/40"
-            >
-              <h3 className="font-semibold mb-2">{category.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{category.description}</p>
             </Link>
           ))}
         </div>
@@ -457,9 +400,9 @@ function CategoriesSectionSkeleton() {
     <section className="sm:py-20 rounded">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHeaderSkeleton titleWidth="w-56 sm:w-64" subtitleWidth="w-72 sm:w-80" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 12 }).map((_, index) => (
-            <div key={index} className="h-36 rounded-3xl bg-muted animate-pulse" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="h-48 rounded-xl bg-muted animate-pulse" />
           ))}
         </div>
       </div>
@@ -528,13 +471,26 @@ export default function Home() {
     [homepageTools]
   )
 
+  const priorityCategories = useMemo(() => {
+    const selected = homepagePriorityCategorySlugs
+      .map((slug) => categories.find((category) => category.slug === slug))
+      .filter(Boolean)
+    const selectedSlugs = new Set(selected.map((category) => category.slug))
+    const fallback = categories.filter((category) => !selectedSlugs.has(category.slug))
+
+    return [...selected, ...fallback].slice(0, 5)
+  }, [categories])
+
   const trendingTools = useMemo(
     () => homepageTools.filter((tool) => tool.is_trending).slice(0, 6),
     [homepageTools]
   )
 
   const recentTools = useMemo(
-    () => homepageTools.slice(0, 6),
+    () => homepageTools
+      .slice()
+      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+      .slice(0, 6),
     [homepageTools]
   )
 
@@ -558,14 +514,19 @@ export default function Home() {
       <HeroSection toolCount={toolCount} />
       <StatsBar toolCount={toolCount} userCount={totalUsage} />
       <HomeIntroSection />
-      <CategoryHighlightsSection />
-      <PopularToolsFoundationSection />
 
       {showCategoriesSectionSkeleton ? (
         <CategoriesSectionSkeleton />
       ) : (
         <Suspense fallback={<CategoriesSectionSkeleton />}>
-          <CategoriesGrid categories={categories} hideCounts />
+          <CategoriesGrid
+            categories={priorityCategories}
+            tools={homepageTools}
+            title="Start with the most useful tool categories"
+            subtitle="These core QuickUtils categories cover the highest-intent tasks: documents, images, exam uploads, finance calculations, and developer utilities."
+            maxItems={5}
+            viewAllLabel="Browse all categories"
+          />
         </Suspense>
       )}
 
@@ -579,10 +540,13 @@ export default function Home() {
               categories={categories}
               title="Featured Tools"
               subtitle="Our most popular and highly rated tools"
+              compact
             />
           </Suspense>
         )
       )}
+
+      <PopularToolsFoundationSection />
 
       <Suspense fallback={null}>
         <AdBanner placement="in_content" pageType="home" className="py-6" />
@@ -633,6 +597,7 @@ export default function Home() {
               categories={categories}
               title="Trending Now"
               subtitle="Tools gaining popularity this week"
+              compact
             />
           </Suspense>
         )
@@ -647,6 +612,7 @@ export default function Home() {
             categories={categories}
             title="Recently Added"
             subtitle="Fresh tools just added to the platform"
+            compact
           />
         </Suspense>
       )}

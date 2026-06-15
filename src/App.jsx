@@ -61,6 +61,7 @@ const AdminWorkflowPages = lazy(() => import('./pages/admin/AdminWorkflowPages')
 const AdminSupport = lazy(() => import('./pages/admin/AdminSupport'))
 const AdminJobs = lazy(() => import('./pages/admin/jobs/AdminJobs'))
 const AdminSiteSettings = lazy(() => import('./pages/admin/AdminSiteSettings'))
+const AdminMedia = lazy(() => import('./pages/admin/AdminMedia'))
 // AI Job Intelligence
 const AiDashboard  = lazy(() => import('./pages/admin/ai/AiDashboard'))
 const AiResearch   = lazy(() => import('./pages/admin/ai/AiResearchQueue'))
@@ -166,6 +167,7 @@ const AuthenticatedApp = () => {
           <Route path="workflow-pages" element={wrap(<AdminWorkflowPages />)} />
           <Route path="ads" element={wrap(<AdminAds />)} />
           <Route path="redirects" element={wrap(<AdminRedirects />)} />
+          <Route path="media" element={wrap(<AdminMedia />)} />
           {/* AI Job Intelligence */}
           <Route path="ai-intelligence" element={wrap(<AiDashboard />)} />
           <Route path="ai-research"     element={wrap(<AiResearch />)} />

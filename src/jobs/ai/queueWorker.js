@@ -2,6 +2,7 @@ import NotificationExtractor from './notificationExtractor.js';
 import { generateDraft } from './draftGenerator.js';
 import DuplicateAnalyzer from './duplicateAnalyzer.js';
 import { runQualityGate } from './qualityGate.js';
+import { verifyUrls } from './linkVerifier.js';
 
 const noopLogger = {
   info: () => {},
@@ -57,6 +58,13 @@ const sanitizeProviderAttempts = (attempts = []) => (
   }))
 );
 
+const calculateBackoffDelay = (retryCount, baseDelayMs = 15_000, maxDelayMs = 300_000) => {
+  const exponent = Math.min(retryCount, 6);
+  const rawDelay = baseDelayMs * Math.pow(2, exponent);
+  const jitter = (Math.random() * 0.4 - 0.2) * rawDelay; // +/- 20% jitter
+  return Math.min(Math.round(rawDelay + jitter), maxDelayMs);
+};
+
 export default class QueueWorker {
   constructor(supabase, options = {}) {
     if (!supabase) throw new Error('QueueWorker requires a Supabase client.');
@@ -72,10 +80,12 @@ export default class QueueWorker {
   }
 
   async loadPending(limit = 5) {
+    const now = new Date().toISOString();
     const result = await this.supabase
       .from('ai_research_queue')
       .select('*')
       .eq('status', 'pending')
+      .or(`extracted_data->>run_after.is.null,extracted_data->>run_after.lte.${now}`)
       .order('priority', { ascending: false })
       .order('created_at', { ascending: true })
       .limit(limit);
@@ -316,6 +326,8 @@ export default class QueueWorker {
     const retries = previous + 1;
     const finalFailure = retries > this.maxRetries;
     const serialized = serializeError(error);
+    const delayMs = calculateBackoffDelay(retries);
+    const runAfter = new Date(Date.now() + delayMs).toISOString();
 
     await this.updateQueue(queueItem.id, {
       status: finalFailure ? 'rejected' : 'pending',
@@ -323,10 +335,11 @@ export default class QueueWorker {
         ...(queueItem.extracted_data || {}),
         phase2_retries: retries,
         phase2_last_error: serialized,
+        run_after: finalFailure ? null : runAfter,
       },
       notes: finalFailure
         ? `Phase 2 failed after ${retries} attempt(s): ${serialized.message}`
-        : `Phase 2 retry scheduled: ${serialized.message}`,
+        : `Phase 2 retry scheduled (running after ${runAfter}): ${serialized.message}`,
     });
 
     if (finalFailure) {
@@ -404,10 +417,22 @@ export default class QueueWorker {
       const duplicateAnalysis = await this.duplicateAnalyzer.analyze(draft, {
         rawNotificationId: rawNotification?.id || null,
       });
+
+      // Verify URLs asynchronously
+      const linkVerification = await verifyUrls({
+        notification_pdf: draft.notification_pdf,
+        official_website: draft.official_website,
+        application_link: draft.application_link,
+      }, options.linkTimeoutMs || 5000).catch((err) => {
+        this.logger.warn?.(`Link verification failed: ${err.message}`);
+        return {};
+      });
+
       const qualityScores = this.qualityGate({
         extraction: extractionResult.extraction,
         draft,
         duplicateAnalysis,
+        linkVerification,
       });
 
       const savedDraft = await this.saveDraft({

@@ -156,6 +156,39 @@ export const scoreSpamRisk = (draft = {}) => {
 
 // ── Freshness scoring ──────────────────────────────────────────────────────────
 
+const parseFlexibleDate = (value) => {
+  const text = String(value || '').trim();
+  if (!text) return null;
+
+  // Check ISO format YYYY-MM-DD
+  const isoMatch = text.match(/^\s*(\d{4})[-/](\d{1,2})[-/](\d{1,2})\s*$/);
+  if (isoMatch) {
+    const year = parseInt(isoMatch[1], 10);
+    const month = parseInt(isoMatch[2], 10) - 1;
+    const day = parseInt(isoMatch[3], 10);
+    const date = new Date(Date.UTC(year, month, day));
+    if (!Number.isNaN(date.getTime())) return date;
+  }
+
+  // Check Indian format DD/MM/YYYY or DD-MM-YYYY
+  const indMatch = text.match(/^\s*(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})\s*$/);
+  if (indMatch) {
+    const day = parseInt(indMatch[1], 10);
+    const month = parseInt(indMatch[2], 10) - 1;
+    let year = parseInt(indMatch[3], 10);
+    if (year < 100) year += 2000;
+    const date = new Date(Date.UTC(year, month, day));
+    if (!Number.isNaN(date.getTime())) return date;
+  }
+
+  // Fallback to native parsing
+  const cleanedText = text.replace(/,/g, ' ').replace(/\s+/g, ' ');
+  const dateObj = new Date(cleanedText);
+  if (!Number.isNaN(dateObj.getTime())) return dateObj;
+
+  return null;
+};
+
 /**
  * Scores freshness from 0 (stale) to 100 (very fresh).
  * Uses last_date, important_dates, and created_at to determine freshness.
@@ -166,18 +199,18 @@ export const scoreFreshness = (draft = {}) => {
 
   // Gather all available date signals
   if (draft.last_date) {
-    const d = new Date(draft.last_date);
-    if (!Number.isNaN(d.getTime())) dates.push(d.getTime());
+    const d = parseFlexibleDate(draft.last_date);
+    if (d) dates.push(d.getTime());
   }
   if (draft.application_start_date) {
-    const d = new Date(draft.application_start_date);
-    if (!Number.isNaN(d.getTime())) dates.push(d.getTime());
+    const d = parseFlexibleDate(draft.application_start_date);
+    if (d) dates.push(d.getTime());
   }
   if (Array.isArray(draft.important_dates)) {
     for (const item of draft.important_dates) {
       if (item?.date) {
-        const d = new Date(item.date);
-        if (!Number.isNaN(d.getTime())) dates.push(d.getTime());
+        const d = parseFlexibleDate(item.date);
+        if (d) dates.push(d.getTime());
       }
     }
   }
@@ -204,7 +237,7 @@ export const scoreFreshness = (draft = {}) => {
 
 // ── Main quality gate ──────────────────────────────────────────────────────────
 
-export const runQualityGate = ({ extraction = {}, draft = {}, duplicateAnalysis = {} } = {}) => {
+export const runQualityGate = ({ extraction = {}, draft = {}, duplicateAnalysis = {}, linkVerification = {} } = {}) => {
   const extractionScore = scoreExtraction(extraction);
   const seoScore = scoreSeo(draft);
   const completenessScore = scoreCompleteness(draft);
@@ -234,6 +267,15 @@ export const runQualityGate = ({ extraction = {}, draft = {}, duplicateAnalysis 
     status = 'pending_review';
   }
 
+  // Force to pending_review if critical links are verified as invalid/broken
+  const linkFailures = Object.entries(linkVerification || {}).filter(([field, result]) => {
+    return ['notification_pdf', 'application_link'].includes(field) && result && !result.ok && !result.skipped;
+  });
+
+  if (status === 'approved' && linkFailures.length > 0) {
+    status = 'pending_review';
+  }
+
   const queueStatus = finalScore < 60 ? 'rejected' : 'drafted';
   const issues = [];
   if (extractionScore < 60) issues.push('Extraction is missing important required fields.');
@@ -242,6 +284,11 @@ export const runQualityGate = ({ extraction = {}, draft = {}, duplicateAnalysis 
   if (duplicateRisk >= 80) issues.push('High duplicate risk detected.');
   if (spamRisk >= 40) issues.push('Content contains banned phrases or keyword stuffing patterns.');
   if (freshness < 30) issues.push('Job dates appear stale — verify dates are current.');
+
+  linkFailures.forEach(([field, result]) => {
+    issues.push(`Link verification failed for ${field.replace('_', ' ')}: ${result.error || 'Broken Link'}.`);
+  });
+
   if (finalScore < 60) issues.push('Final Phase 2 score is below the rejection threshold.');
 
   return {
@@ -263,6 +310,7 @@ export const runQualityGate = ({ extraction = {}, draft = {}, duplicateAnalysis 
     eeat: extractionScore,
     adsense: finalScore >= 60 && spamRisk < 30 ? 90 : finalScore >= 60 ? 75 : 50,
     overall: finalScore,
+    linkVerification,
   };
 };
 

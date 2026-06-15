@@ -183,6 +183,16 @@ const knownUrlsFromContext = (context = {}) => {
     .filter(Boolean);
 };
 
+export const isTrustedGovernmentDomain = (urlText) => {
+  try {
+    const parsed = new URL(urlText.trim());
+    const hostname = parsed.hostname.toLowerCase();
+    return /(?:^|\.)(?:gov\.in|nic\.in|edu\.in|res\.in|ac\.in)$/i.test(hostname);
+  } catch (_err) {
+    return false;
+  }
+};
+
 const assertTrustedUrl = (field, value, context, errors) => {
   if (!value || isUnknown(value)) return;
   if (!isHttpUrl(value)) {
@@ -196,6 +206,11 @@ const assertTrustedUrl = (field, value, context, errors) => {
 
   if (knownUrls.includes(normalized)) return;
   if (field === 'official_website' && knownOrigins.has(normalized)) return;
+
+  const urlHost = (() => { try { return new URL(value).hostname.toLowerCase(); } catch { return ''; } })();
+  const sourceHost = (() => { try { return new URL(context.source_url || '').hostname.toLowerCase(); } catch { return ''; } })();
+
+  if (isTrustedGovernmentDomain(value) && urlHost && urlHost !== sourceHost) return;
 
   errors.push(`${field} appears hallucinated because it does not match an official source URL.`);
 };

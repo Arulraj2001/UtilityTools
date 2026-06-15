@@ -162,10 +162,25 @@ export default function ToolPage() {
     enabled: !!slug,
   })
 
-  const category = useMemo(() => categories.find(c => c.id === tool?.category_id), [categories, tool])
+  const category = useMemo(() => (
+    categories.find((c) => (
+      c.id === tool?.category_id ||
+      c.slug === tool?.category_id ||
+      c.slug === tool?.category_slug
+    ))
+  ), [categories, tool])
   const relatedTools = useMemo(() => {
     if (!tool) return []
-    return tools.filter(t => t.id !== tool.id && t.category_id === tool.category_id).slice(0, 4)
+    return tools
+      .filter((t) => (
+        t.id !== tool.id && (
+          t.category_id === tool.category_id ||
+          t.category_id === tool.category_slug ||
+          t.category_slug === tool.category_slug ||
+          t.category_slug === tool.category_id
+        )
+      ))
+      .slice(0, 4)
   }, [tools, tool])
 
   const relatedArticles = useMemo(() => {

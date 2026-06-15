@@ -89,12 +89,23 @@ ${renderDates(extraction.important_dates)}
 ${renderOfficialLinks(extraction)}
 `.trim();
 
+  const importantDates = extraction.important_dates || [];
+  const findDateByPattern = (pattern) => {
+    const found = importantDates.find(item => pattern.test(String(item?.event || '')));
+    return found ? compact(found.date) : '';
+  };
+
+  const lastDate = findDateByPattern(/last\s*date|deadline|close|end/i) || rawNotification.last_date || '';
+  const applicationStartDate = findDateByPattern(/start|commence|open/i) || rawNotification.published_date || '';
+
   return {
     title,
     slug: seo.canonical_slug,
     organization,
     short_description: shortDescription,
     full_description: fullDescription,
+    last_date: lastDate,
+    application_start_date: applicationStartDate,
     eligibility: {
       education: asText(extraction.qualification),
       age: asText(extraction.age_limit),

@@ -24,7 +24,7 @@ export const DEFAULT_PROVIDER_PRIORITY = {
 
 const normalizeProviderName = (providerName) => String(providerName || '').trim().toLowerCase()
 
-const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash'
+const GEMINI_DEFAULT_MODEL = 'gemini-2.0-flash'
 
 const redactSensitive = (value) => {
   if (value === null || value === undefined) return ''
@@ -504,10 +504,9 @@ export const CALLERS = {
 
 export const PROVIDER_MODELS = {
   gemini: [
-    { value: 'gemini-2.5-flash',                    label: 'Gemini 2.5 Flash (recommended)' },
-    { value: 'gemini-2.0-flash',                    label: 'Gemini 2.0 Flash' },
+    { value: 'gemini-2.0-flash',                    label: 'Gemini 2.0 Flash (recommended)' },
+    { value: 'gemini-1.5-flash',                    label: 'Gemini 1.5 Flash' },
     { value: 'gemini-2.0-flash-lite',               label: 'Gemini 2.0 Flash Lite (fast)' },
-    { value: 'gemini-2.5-flash-preview-04-17',      label: 'Gemini 2.5 Flash Preview' },
   ],
   groq: [
     { value: 'llama-3.1-8b-instant',               label: 'Llama 3.1 8B Instant (fast, free)' },
@@ -524,12 +523,10 @@ export const PROVIDER_MODELS = {
   openai: [
     { value: 'gpt-4o-mini', label: 'OpenAI GPT-4o Mini (fast)' },
     { value: 'gpt-4o', label: 'OpenAI GPT-4o' },
-    { value: 'gpt-4.1', label: 'OpenAI GPT-4.1' },
     { value: 'gpt-3.5-turbo', label: 'OpenAI GPT-3.5 Turbo' },
   ],
   openrouter: [
     { value: 'openrouter/free',                            label: 'OpenRouter Free Router (auto-select)' },
-    { value: 'deepseek/deepseek-v4-flash:free',            label: 'DeepSeek V4 Flash (free)' },
     { value: 'meta-llama/llama-3.3-70b-instruct:free',     label: 'Llama 3.3 70B (free)' },
     { value: 'qwen/qwen3-coder:free',                      label: 'Qwen3 Coder (free)' },
     { value: 'meta-llama/llama-3.1-8b-instruct:free',    label: 'Llama 3.1 8B (free)' },
@@ -544,7 +541,6 @@ export const PROVIDER_MODELS = {
   cerebras: [
     { value: 'llama-3.3-70b',                      label: 'Llama 3.3 70B (fast, free)' },
     { value: 'llama-3.1-8b',                       label: 'Llama 3.1 8B (fastest, free)' },
-    { value: 'llama-4-scout-17b-16e-instruct',     label: 'Llama 4 Scout 17B (free)' },
   ],
   huggingface: [
     { value: 'mistralai/Mistral-7B-Instruct-v0.2', label: 'Mistral 7B Instruct v0.2' },
@@ -561,13 +557,13 @@ export const PROVIDER_MODELS = {
  * Returns [{ value, label }] or falls back to PROVIDER_MODELS static list on error.
  */
 export const PROVIDER_MODEL_PREFERENCES = {
-  deepseek: ['deepseek-v4-flash', 'deepseek-chat', 'deepseek-v4-pro', 'deepseek-reasoner'],
-  gemini: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'],
-  groq: ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile', 'openai/gpt-oss-20b'],
-  openrouter: ['openrouter/free', 'deepseek/deepseek-v4-flash:free', 'meta-llama/llama-3.3-70b-instruct:free', 'qwen/qwen3-coder:free'],
-  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-3.5-turbo'],
+  deepseek: ['deepseek-chat', 'deepseek-reasoner'],
+  gemini: ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite'],
+  groq: ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile'],
+  openrouter: ['openrouter/free', 'meta-llama/llama-3.3-70b-instruct:free', 'qwen/qwen3-coder:free'],
+  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'],
   huggingface: ['mistralai/Mistral-7B-Instruct-v0.2', 'HuggingFaceH4/zephyr-7b-beta'],
-  cerebras: ['llama-3.3-70b', 'gpt-oss-120b', 'zai-glm-4.7'],
+  cerebras: ['llama-3.3-70b', 'llama-3.1-8b'],
 }
 
 const getAvailableModelIds = (provider) => (
@@ -595,6 +591,11 @@ export const chooseProviderModel = (provider = {}) => {
 
   const availablePreferred = candidates.find((model) => availableSet.has(model))
   if (availablePreferred) return availablePreferred
+
+  if (shouldBypassConfigured) {
+    const alternative = candidates.find((model) => model !== configured)
+    if (alternative) return alternative
+  }
 
   if (configured) return configured
   return candidates[0] || ''
@@ -762,55 +763,81 @@ export const callAI = async (providers, prompt, { signal, timeoutMs = DEFAULT_PR
     if (!caller) continue
 
     const model = chooseProviderModel(provider)
-    const attemptSignal = createAttemptSignal(signal, timeoutMs)
-    const t0 = Date.now()
-    try {
-      const result = await caller(
-        provider.api_key,
-        model,
-        prompt,
-        provider.base_url || null,
-        { signal: attemptSignal.signal, provider }
-      )
-      const durationMs = Date.now() - t0
-      if (typeof onAttempt === 'function') {
-        await Promise.resolve(onAttempt({
-          provider,
-          providerName,
+    let attemptsCount = 0
+    const maxAttempts = 3 // 1 initial + 2 retries
+    let success = false
+    let result = null
+
+    while (attemptsCount < maxAttempts && !success) {
+      if (signal?.aborted) throw new Error('Cancelled')
+      attemptsCount++
+
+      const attemptSignal = createAttemptSignal(signal, timeoutMs)
+      const t0 = Date.now()
+      try {
+        result = await caller(
+          provider.api_key,
           model,
-          ok: true,
-          durationMs,
-          tokensUsed: result.tokensUsed || 0,
-          error: null,
-          errorType: null,
-        })).catch(() => {})
-      }
-      return {
-        ...result,
-        provider: providerName,
-        model,
-        durationMs,
-      }
-    } catch (err) {
-      const durationMs = Date.now() - t0
-      const error = normalizeErrorMessage(err)
-      const errorType = classifyProviderError(err)
-      console.warn(`[AI] ${providerName} failed (${errorType}):`, error)
-      errors.push({ provider: providerName, model, error, errorType, durationMs })
-      if (typeof onAttempt === 'function') {
-        await Promise.resolve(onAttempt({
-          provider,
-          providerName,
+          prompt,
+          provider.base_url || null,
+          { signal: attemptSignal.signal, provider }
+        )
+        const durationMs = Date.now() - t0
+        success = true
+
+        if (typeof onAttempt === 'function') {
+          await Promise.resolve(onAttempt({
+            provider,
+            providerName,
+            model,
+            ok: true,
+            durationMs,
+            tokensUsed: result.tokensUsed || 0,
+            error: null,
+            errorType: null,
+          })).catch(() => {})
+        }
+        return {
+          ...result,
+          provider: providerName,
           model,
-          ok: false,
           durationMs,
-          tokensUsed: 0,
-          error,
-          errorType,
-        })).catch(() => {})
+        }
+      } catch (err) {
+        const durationMs = Date.now() - t0
+        const error = normalizeErrorMessage(err)
+        const errorType = classifyProviderError(err)
+        const isTransient = ['rate_limit', 'timeout', 'network'].includes(errorType)
+
+        console.warn(
+          `[AI] ${providerName} attempt ${attemptsCount} failed (${errorType}):`,
+          error
+        )
+
+        if (attemptsCount >= maxAttempts || !isTransient || signal?.aborted) {
+          // Record final failure of this provider
+          errors.push({ provider: providerName, model, error, errorType, durationMs })
+          if (typeof onAttempt === 'function') {
+            await Promise.resolve(onAttempt({
+              provider,
+              providerName,
+              model,
+              ok: false,
+              durationMs,
+              tokensUsed: 0,
+              error,
+              errorType,
+            })).catch(() => {})
+          }
+          break // break the retry loop, fall through to next provider
+        }
+
+        // Wait before retrying (exponential delay: 1s, 2s)
+        const delayMs = Math.pow(2, attemptsCount - 1) * 1000
+        await new Promise((resolve) => setTimeout(resolve, delayMs))
+      } finally {
+        attemptSignal.cleanup()
       }
-    } finally {
-      attemptSignal.cleanup()
     }
   }
 
