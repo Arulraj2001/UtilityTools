@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Image Cropper</title>
+  <rect width="128" height="128" rx="28" fill="#ecfeff"/>
+  <rect x="31" y="31" width="66" height="66" rx="10" fill="#ffffff" stroke="#0891b2" stroke-width="6"/>
+  <path d="M39 84 52 67l11 12 9-11 18 22H41a2 2 0 0 1-2-2z" fill="#67e8f9"/>
+  <circle cx="79" cy="48" r="7" fill="#22d3ee"/>
+  <path d="M24 46h58a8 8 0 0 1 8 8v50M44 24v58a8 8 0 0 0 8 8h52" fill="none" stroke="#0f172a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

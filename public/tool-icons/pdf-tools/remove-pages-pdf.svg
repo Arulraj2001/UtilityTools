@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Remove PDF Pages</title>
+  <rect width="128" height="128" rx="28" fill="#fef2f2"/>
+  <path d="M39 22h43l14 14v70a8 8 0 0 1-8 8H39a8 8 0 0 1-8-8V30a8 8 0 0 1 8-8z" fill="#ffffff" stroke="#dc2626" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M81 24v15h15" fill="none" stroke="#dc2626" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M48 51h32M48 66h32M48 81h22" stroke="#fecaca" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="82" cy="84" r="21" fill="#ffffff" stroke="#0f172a" stroke-width="6"/>
+  <path d="M72 84h20" stroke="#dc2626" stroke-width="7" stroke-linecap="round"/>
+</svg>

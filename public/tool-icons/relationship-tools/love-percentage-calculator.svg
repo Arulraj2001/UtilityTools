@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Love Percentage Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fdf2f8"/>
+  <path d="M64 100c-2-2-36-24-36-50c0-15 11-26 25-26c9 0 11 8 11 8s2-8 11-8c14 0 25 11 25 26c0 26-34 48-36 50z" fill="#fbcfe8" stroke="#db2777" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Percentage Sign inside the heart -->
+  <line x1="72" y1="42" x2="56" y2="58" stroke="#be185d" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="56" cy="42" r="5" fill="none" stroke="#be185d" stroke-width="4"/>
+  <circle cx="72" cy="58" r="5" fill="none" stroke="#be185d" stroke-width="4"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Image to PDF</title>
+  <rect width="128" height="128" rx="28" fill="#fef2f2"/>
+  <rect x="20" y="34" width="42" height="40" rx="8" fill="#ffffff" stroke="#dc2626" stroke-width="5"/>
+  <path d="M27 66 37 55l8 8 6-6 7 10H29a2 2 0 0 1-2-2z" fill="#fca5a5"/>
+  <path d="M60 64h15m0 0-7-7m7 7-7 7" fill="none" stroke="#0f172a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M78 26h22l12 12v58a8 8 0 0 1-8 8H78a8 8 0 0 1-8-8V34a8 8 0 0 1 8-8z" fill="#ffffff" stroke="#dc2626" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M99 27v13h13" fill="none" stroke="#dc2626" stroke-width="6" stroke-linejoin="round"/>
+  <text x="91" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#0f172a">PDF</text>
+</svg>

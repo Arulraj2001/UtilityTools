@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Helmet } from 'react-helmet-async';
-import { DEFAULT_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
+import { DEFAULT_IMAGE, SITE_NAME, SITE_URL, buildAbsoluteUrl } from '@/config/site';
 import { buildHowToSchema, buildWebApplicationSchema } from '@/lib/pageSchemas';
 import { buildToolFaqItems } from '@/lib/toolContentFallbacks';
 
@@ -44,9 +44,10 @@ export default function ToolSEO({
   const canonical =
     `${canonicalBase}/tool/${encodeURIComponent(tool.slug)}`;
 
-  const image =
+  const image = buildAbsoluteUrl(
     tool.featured_image ||
-    DEFAULT_IMAGE;
+    DEFAULT_IMAGE
+  );
 
   // Build keywords: primary + secondary + legacy seo_keywords
   const primaryKeywords = (tool.primary_keywords || '').trim()

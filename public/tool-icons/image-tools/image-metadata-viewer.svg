@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Image Metadata Viewer</title>
+  <rect width="128" height="128" rx="28" fill="#f8fafc"/>
+  <rect x="22" y="31" width="52" height="48" rx="9" fill="#ffffff" stroke="#475569" stroke-width="5"/>
+  <path d="M30 70 41 57l8 9 6-7 14 16H32a2 2 0 0 1-2-2z" fill="#cbd5e1"/>
+  <circle cx="59" cy="44" r="5" fill="#94a3b8"/>
+  <circle cx="91" cy="40" r="11" fill="#ffffff" stroke="#2563eb" stroke-width="5"/>
+  <path d="M91 57v33M78 69h26M78 84h26" stroke="#0f172a" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="91" cy="40" r="2.5" fill="#2563eb"/>
+</svg>

@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   distDir: 'dist',
+  allowedDevOrigins: ['10.229.244.158'],
   experimental: {
     workerThreads: false,
     cpus: 1,

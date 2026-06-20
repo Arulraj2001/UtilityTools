@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient'
 import { getLocalCategories, getLocalToolBySlug, getLocalTools } from '@/lib/localCatalogFallback'
+import { withDefaultToolFeaturedImage, withDefaultToolFeaturedImages } from '@/lib/toolFeaturedImages'
 
 const RETIRED_TOOL_SLUGS = ['pdf-to-word']
 
@@ -53,13 +54,14 @@ export const getToolPageBySlug = async (slug, { published = true } = {}) => {
     console.error('getToolPageBySlug error:', result.error)
     return getLocalToolBySlug(slug, { published })
   }
-  return result.data || getLocalToolBySlug(slug, { published })
+  if (result.data) return withDefaultToolFeaturedImage(result.data)
+  return getLocalToolBySlug(slug, { published })
 }
 
 export const getToolPageRelatedTools = async ({ limit = 20, categoryId = null } = {}) => {
   let query = excludeRetiredTools(supabase
     .from('tools')
-    .select('id,name,slug,description,icon,category_id,is_featured,is_trending,usage_count,sort_order')
+    .select('id,name,slug,description,icon,category_id,featured_image,is_featured,is_trending,usage_count,sort_order')
     .eq('status', 'published')
     .order('sort_order', { ascending: true }))
   // When a categoryId is provided, scope to that category for related tools (much more efficient)
@@ -76,7 +78,7 @@ export const getToolPageRelatedTools = async ({ limit = 20, categoryId = null } 
     return getLocalTools({ limit, filters: categoryId ? { category_id: categoryId } : {} })
   }
 
-  return rows
+  return withDefaultToolFeaturedImages(rows)
 }
 
 export const getToolPageCategories = async () => {

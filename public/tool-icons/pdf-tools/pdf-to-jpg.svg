@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">PDF to JPG</title>
+  <rect width="128" height="128" rx="28" fill="#eef2ff"/>
+  <path d="M24 26h32l12 12v50a8 8 0 0 1-8 8H24a8 8 0 0 1-8-8V34a8 8 0 0 1 8-8z" fill="#ffffff" stroke="#dc2626" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M56 27v13h12" fill="none" stroke="#dc2626" stroke-width="5" stroke-linejoin="round"/>
+  <text x="42" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0f172a">PDF</text>
+  <path d="M66 64h18m0 0-8-8m8 8-8 8" fill="none" stroke="#0f172a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="80" y="43" width="34" height="34" rx="7" fill="#ffffff" stroke="#2563eb" stroke-width="5"/>
+  <path d="M86 70 94 60l6 7 5-5 6 9H88a2 2 0 0 1-2-2z" fill="#93c5fd"/>
+  <circle cx="105" cy="53" r="4" fill="#38bdf8"/>
+</svg>

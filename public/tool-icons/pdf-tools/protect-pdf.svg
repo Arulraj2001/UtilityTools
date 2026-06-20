@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Protect PDF</title>
+  <rect width="128" height="128" rx="28" fill="#f8fafc"/>
+  <path d="M38 19h41l14 14v78a8 8 0 0 1-8 8H38a8 8 0 0 1-8-8V27a8 8 0 0 1 8-8z" fill="#ffffff" stroke="#475569" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M78 20v15h15" fill="none" stroke="#475569" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M48 69v-9a16 16 0 0 1 32 0v9" fill="none" stroke="#0f172a" stroke-width="6" stroke-linecap="round"/>
+  <rect x="42" y="68" width="44" height="33" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="6"/>
+  <circle cx="64" cy="84" r="4" fill="#0f172a"/>
+  <path d="M64 88v6" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+</svg>

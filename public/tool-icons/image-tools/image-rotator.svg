@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Image Rotator</title>
+  <rect width="128" height="128" rx="28" fill="#eef2ff"/>
+  <rect x="35" y="38" width="58" height="52" rx="9" fill="#ffffff" stroke="#4f46e5" stroke-width="6"/>
+  <path d="M43 80 54 66l10 11 8-9 14 17H45a2 2 0 0 1-2-2z" fill="#a5b4fc"/>
+  <circle cx="75" cy="53" r="6" fill="#818cf8"/>
+  <path d="M34 31a42 42 0 0 1 60 4l6 7M100 42H79m21 0V21M94 97a42 42 0 0 1-60-4l-6-7M28 86h21M28 86v21" fill="none" stroke="#0f172a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

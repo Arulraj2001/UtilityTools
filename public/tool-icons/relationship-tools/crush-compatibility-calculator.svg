@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Crush Compatibility Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fff1f2"/>
+  <!-- Left Heart -->
+  <path d="M46 84c-2-2-25-17-25-35c0-10 8-18 17-18c6 0 8 6 8 6s2-6 8-6c10 0 18 8 18 18c0 18-24 33-26 35z" fill="#fecdd3" stroke="#f43f5e" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Right Heart -->
+  <path d="M82 84c-2-2-25-17-25-35c0-10 8-18 17-18c6 0 8 6 8 6s2-6 8-6c10 0 18 8 18 18c0 18-24 33-26 35z" fill="#fecdd3" opacity="0.85" stroke="#f43f5e" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Compatibility Lightning Bolt -->
+  <path d="M68 30L56 50h14L58 74" fill="none" stroke="#e11d48" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

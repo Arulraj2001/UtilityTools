@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Image Watermark</title>
+  <rect width="128" height="128" rx="28" fill="#fdf2f8"/>
+  <rect x="27" y="29" width="74" height="66" rx="11" fill="#ffffff" stroke="#db2777" stroke-width="6"/>
+  <path d="M36 83 51 65l12 13 9-10 21 25H38a2 2 0 0 1-2-2z" fill="#f9a8d4"/>
+  <circle cx="81" cy="48" r="7" fill="#fb7185"/>
+  <circle cx="78" cy="77" r="20" fill="#ffffff" fill-opacity=".82" stroke="#0f172a" stroke-width="5"/>
+  <path d="m66 69 6 17 6-11 6 11 6-17" fill="none" stroke="#db2777" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Baby Name Numerology</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- Rattle Handle -->
+  <line x1="64" y1="56" x2="64" y2="98" stroke="#0d9488" stroke-width="6" stroke-linecap="round"/>
+  <!-- Bottom Knob -->
+  <circle cx="64" cy="102" r="10" fill="#99f6e4" stroke="#0d9488" stroke-width="5"/>
+  <!-- Top Rattle Globe -->
+  <circle cx="64" cy="42" r="22" fill="#99f6e4" stroke="#0d9488" stroke-width="5"/>
+  <!-- Star details on Rattle -->
+  <path d="M64 30l2 5l5 2l-5 2l-2 5l-2-5l-5-2l5-2z" fill="#0d9488"/>
+  <!-- Numerology Letter 'A' -->
+  <path d="M24 74l8-22 8 22M26 66h12" fill="none" stroke="#0d9488" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Numerology Number '3' -->
+  <path d="M88 44h12l-6 10a8 8 0 1 1-6 8" fill="none" stroke="#0d9488" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Numerology Number '7' -->
+  <path d="M88 74h12l-8 20" fill="none" stroke="#0d9488" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

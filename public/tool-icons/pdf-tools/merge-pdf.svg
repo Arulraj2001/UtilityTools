@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Merge PDF</title>
+  <rect width="128" height="128" rx="28" fill="#fef2f2"/>
+  <path d="M28 26h34l12 12v54a8 8 0 0 1-8 8H28a8 8 0 0 1-8-8V34a8 8 0 0 1 8-8z" fill="#ffffff" stroke="#dc2626" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M62 27v13h12" fill="none" stroke="#dc2626" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M64 34h28l16 16v44a8 8 0 0 1-8 8H64a8 8 0 0 1-8-8V42a8 8 0 0 1 8-8z" fill="#ffffff" stroke="#ef4444" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M92 35v17h16" fill="none" stroke="#ef4444" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M33 66h34m0 0-10-10m10 10-10 10" fill="none" stroke="#0f172a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M74 76h20" stroke="#dc2626" stroke-width="6" stroke-linecap="round"/>
+</svg>

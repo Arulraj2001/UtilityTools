@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Friendship Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#faf5ff"/>
+  <!-- Left Friend Profile -->
+  <circle cx="44" cy="46" r="11" fill="#e9d5ff" stroke="#7c3aed" stroke-width="5"/>
+  <path d="M24 84c0-10 8-18 18-18h4c10 0 18 8 18 18v6H24v-6z" fill="#e9d5ff" stroke="#7c3aed" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Right Friend Profile -->
+  <circle cx="84" cy="46" r="11" fill="#e9d5ff" stroke="#7c3aed" stroke-width="5"/>
+  <path d="M64 84c0-10 8-18 18-18h4c10 0 18 8 18 18v6H64v-6z" fill="#e9d5ff" stroke="#7c3aed" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Connecting Heart in between -->
+  <path d="M64 66c-1-1-8-6-8-12c0-3.5 2.5-6 6-6c2 0 2.5 2 2.5 2s.5-2 2.5-2c3.5 0 6 2.5 6 6c0 6-7 11-7 12z" fill="#d8b4fe" stroke="#6d28d9" stroke-width="4" stroke-linejoin="round"/>
+</svg>

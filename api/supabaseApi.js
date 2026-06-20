@@ -3,6 +3,7 @@ import { sanitizeHtml, sanitizeHtmlFields } from '@/lib/sanitizeHtml';
 import { scoreJob } from '@/lib/jobQualityScorer';
 import { validateJobQualityGate } from '@/lib/jobQualityGate';
 import { getLocalCategories, getLocalTools } from '@/lib/localCatalogFallback';
+import { withDefaultToolFeaturedImage, withDefaultToolFeaturedImages } from '@/lib/toolFeaturedImages';
 
 const RETIRED_TOOL_SLUGS = ['pdf-to-word'];
 
@@ -493,14 +494,14 @@ export const getTools = async ({ published = true, orderBy = 'sort_order', ascen
     return getLocalTools({ published, orderBy, ascending, limit, filters });
   }
 
-  return rows;
+  return withDefaultToolFeaturedImages(rows);
 };
 
 export const getToolsAll = async ({ orderBy = 'created_at', ascending = false, limit = 200 } = {}) => {
   let query = excludeRetiredTools(supabase.from('tools').select('*'));
   query = sortParams(query, orderBy, ascending);
   if (limit) query = query.limit(limit);
-  return handleResponse(await query);
+  return withDefaultToolFeaturedImages(handleResponse(await query));
 };
 
 export const getToolsWithCategories = async ({ published = true, orderBy = 'sort_order', ascending = true, limit = 200, filters = {} } = {}) => {
@@ -512,7 +513,7 @@ export const getToolsWithCategories = async ({ published = true, orderBy = 'sort
   if (Array.isArray(filters?.categoryIds) && filters.categoryIds.length > 0) query = query.in('category_id', filters.categoryIds);
   query = sortParams(query, orderBy, ascending);
   if (limit) query = query.limit(limit);
-  return handleResponse(await query);
+  return withDefaultToolFeaturedImages(handleResponse(await query));
 };
 
 export const getCategories = async ({ orderBy = 'sort_order', ascending = true, limit = 200 } = {}) => {
@@ -905,7 +906,7 @@ export const getToolBySlug = async (slug, { published = false } = {}) => {
     console.error('getToolBySlug error:', result.error)
     return null
   }
-  return result.data || null
+  return withDefaultToolFeaturedImage(result.data) || null
 };
 
 export const getBlogPostBySlug = async (slug) => {

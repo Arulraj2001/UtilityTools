@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Split PDF</title>
+  <rect width="128" height="128" rx="28" fill="#fff7ed"/>
+  <path d="M38 24h45l15 15v66a8 8 0 0 1-8 8H38a8 8 0 0 1-8-8V32a8 8 0 0 1 8-8z" fill="#ffffff" stroke="#f97316" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M82 25v16h16" fill="none" stroke="#f97316" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M64 42v62" stroke="#fdba74" stroke-width="5" stroke-linecap="round" stroke-dasharray="8 8"/>
+  <path d="M21 68h31m0 0-9-9m9 9-9 9M107 68H76m0 0 9-9m-9 9 9 9" fill="none" stroke="#0f172a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M42 52h13M73 52h13M42 88h13M73 88h13" stroke="#f97316" stroke-width="5" stroke-linecap="round"/>
+</svg>

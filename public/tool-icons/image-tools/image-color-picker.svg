@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Image Color Picker</title>
+  <rect width="128" height="128" rx="28" fill="#faf5ff"/>
+  <rect x="24" y="32" width="50" height="46" rx="9" fill="#ffffff" stroke="#9333ea" stroke-width="5"/>
+  <path d="M31 69 41 57l8 9 6-7 13 15H33a2 2 0 0 1-2-2z" fill="#d8b4fe"/>
+  <circle cx="59" cy="44" r="5" fill="#c084fc"/>
+  <path d="m88 33 9 9-32 32-13 4 4-13z" fill="#ffffff" stroke="#0f172a" stroke-width="5" stroke-linejoin="round"/>
+  <path d="m82 39 9 9" stroke="#9333ea" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="50" cy="95" r="8" fill="#ef4444"/>
+  <circle cx="70" cy="95" r="8" fill="#22c55e"/>
+  <circle cx="90" cy="95" r="8" fill="#3b82f6"/>
+</svg>

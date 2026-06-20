@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Zodiac Compatibility</title>
+  <rect width="128" height="128" rx="28" fill="#f5f3ff"/>
+  <!-- Constellation/Zodiac Wheel -->
+  <circle cx="64" cy="64" r="38" fill="none" stroke="#6366f1" stroke-width="5" stroke-dasharray="4 6"/>
+  <!-- Crescent Moon -->
+  <path d="M72 36a24 24 0 0 0 24 48a24 24 0 1 1-24-48z" fill="#e0e7ff" stroke="#4f46e5" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Star Details -->
+  <path d="M44 80l4-4M38 72h6M44 64l4 4M52 72v6" fill="none" stroke="#6366f1" stroke-width="4" stroke-linecap="round"/>
+  <!-- Shining Stars -->
+  <path d="M88 78l2 6l6 2l-6 2l-2 6l-2-6l-6-2l6-2z" fill="#fbbf24" stroke="#d97706" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M96 52l1.5 4l4 1.5l-4 1.5l-1.5 4l-1.5-4l-4-1.5l4-1.5z" fill="#fbbf24" stroke="#d97706" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>

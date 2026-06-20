@@ -24,7 +24,9 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
   "include": [
@@ -33,7 +35,9 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "dist/types/**/*.ts",
+    "dist/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
