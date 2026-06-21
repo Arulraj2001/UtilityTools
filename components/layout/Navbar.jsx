@@ -82,9 +82,11 @@ export default function Navbar({ onSearchOpen }) {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" aria-label="QuickUtils home" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg group-hover:shadow-primary/30 transition-shadow">
-                <Wrench className="w-5 h-5 text-white" />
-              </div>
+              <img
+                src="/icon.png"
+                alt="QuickUtils Logo"
+                className="w-9 h-9 rounded-xl shadow-lg group-hover:shadow-primary/30 transition-all duration-300 object-cover"
+              />
 
               <span className="font-bold text-xl tracking-tight transition-opacity group-hover:opacity-90">
                 <span className="gradient-text">Quick</span>

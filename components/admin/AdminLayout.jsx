@@ -112,9 +112,11 @@ export default function AdminLayout({ children }) {
         <div className="p-4 flex items-center justify-between border-b border-border">
           {!collapsed && (
             <Link href="/admin" className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Wrench className="w-3.5 h-3.5 text-white" />
-              </div>
+              <img
+                src="/icon.png"
+                alt="QuickUtils Logo"
+                className="w-7 h-7 rounded-lg object-cover"
+              />
               <span className="font-bold text-sm">Admin</span>
             </Link>
           )}

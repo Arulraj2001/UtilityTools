@@ -63,7 +63,7 @@ export default function SplashScreen({ duration = 800 }) {
           <source srcSet="/logo.avif" type="image/avif" />
           <source srcSet="/logo.webp" type="image/webp" />
           <img
-            src="/logo.svg"
+            src="/logo.png"
             alt="Utility Tools Logo"
             width="160"
             height="160"
