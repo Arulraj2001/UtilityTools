@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { buildApiUrl } from './apiBase';
 import { sanitizeHtml, sanitizeHtmlFields } from '@/lib/sanitizeHtml';
 import { scoreJob } from '@/lib/jobQualityScorer';
 import { validateJobQualityGate } from '@/lib/jobQualityGate';
@@ -1263,6 +1264,7 @@ export const rollbackImport = async (importId, importedIds = []) => {
 
 // ── AI Provider Settings ──────────────────────────────────────────────────────
 
+// Keep provider secrets out of browser-side Supabase responses.
 const AI_PROVIDER_SAFE_FIELDS = [
   'id',
   'provider_name',
@@ -1278,15 +1280,35 @@ const AI_PROVIDER_SAFE_FIELDS = [
   'updated_at',
 ].join(',');
 
-const normalizeSafeAiProvider = (provider = {}) => ({
-  ...provider,
-  has_api_key: Boolean(provider.has_api_key),
-});
+const normalizeSafeAiProvider = (provider = {}) => {
+  const hasApiKey = Boolean(provider.has_api_key);
+  // Strip api_key from the public-facing object — never expose it to the client
+  const { api_key, ...safe } = provider;
+  return { ...safe, has_api_key: hasApiKey };
+};
 
 const invokeAiProviderProxy = async (body) => {
-  const { data, error } = await supabase.functions.invoke('ai-provider-proxy', { body });
-  if (error) throw error;
-  if (data?.error) throw new Error(data.error);
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
+
+  const token = sessionData?.session?.access_token;
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const response = await fetch(buildApiUrl('/api/ai-provider-proxy'), {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data?.error) {
+    const error = new Error(data?.error || `AI provider proxy failed with ${response.status}`);
+    error.status = response.status;
+    error.code = data?.code;
+    error.payload = data;
+    throw error;
+  }
   return data || {};
 };
 

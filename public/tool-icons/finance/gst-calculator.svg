@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">GST Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#eff6ff"/>
+  <!-- Invoice/Receipt Card -->
+  <rect x="32" y="26" width="64" height="76" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="6"/>
+  <!-- Text lines representing tax detail -->
+  <line x1="44" y1="44" x2="84" y2="44" stroke="#93c5fd" stroke-width="5" stroke-linecap="round"/>
+  <line x1="44" y1="58" x2="68" y2="58" stroke="#93c5fd" stroke-width="5" stroke-linecap="round"/>
+  <!-- TAX stamp or label -->
+  <rect x="44" y="70" width="40" height="20" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="4"/>
+  <path d="M52 80h4M60 76h6M63 76v8M72 80h4" fill="none" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round"/>
+</svg>

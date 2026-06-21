@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Simple Interest Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fef2f2"/>
+  <!-- Circular percent symbol -->
+  <circle cx="64" cy="64" r="32" fill="#fee2e2" stroke="#dc2626" stroke-width="6"/>
+  <!-- Linear trend line over the percentage -->
+  <path d="M38 90 L90 38" fill="none" stroke="#b91c1c" stroke-width="6" stroke-linecap="round"/>
+  <path d="M78 38h12v12" fill="none" stroke="#b91c1c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Percent Symbol Detail -->
+  <circle cx="52" cy="52" r="5" fill="none" stroke="#dc2626" stroke-width="3"/>
+  <circle cx="76" cy="76" r="5" fill="none" stroke="#dc2626" stroke-width="3"/>
+</svg>

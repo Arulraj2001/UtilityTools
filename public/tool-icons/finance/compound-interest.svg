@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Compound Interest Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fff7ed"/>
+  <!-- Compounding Exponential Curve -->
+  <path d="M30 94c25-2 42-20 62-62" fill="none" stroke="#ea580c" stroke-width="6" stroke-linecap="round"/>
+  <path d="M80 32h12v12" fill="none" stroke="#ea580c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Stacks of growing coins -->
+  <!-- Stack 1 -->
+  <ellipse cx="38" cy="86" rx="10" ry="4" fill="#ffedd5" stroke="#f97316" stroke-width="3"/>
+  <!-- Stack 2 -->
+  <ellipse cx="60" cy="86" rx="10" ry="4" fill="#ffedd5" stroke="#f97316" stroke-width="3"/>
+  <ellipse cx="60" cy="80" rx="10" ry="4" fill="#ffedd5" stroke="#f97316" stroke-width="3"/>
+  <!-- Stack 3 -->
+  <ellipse cx="82" cy="86" rx="10" ry="4" fill="#ffedd5" stroke="#f97316" stroke-width="3"/>
+  <ellipse cx="82" cy="80" rx="10" ry="4" fill="#ffedd5" stroke="#f97316" stroke-width="3"/>
+  <ellipse cx="82" cy="74" rx="10" ry="4" fill="#ffedd5" stroke="#f97316" stroke-width="3"/>
+</svg>

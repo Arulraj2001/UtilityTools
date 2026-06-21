@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">SIP Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#e8f5e9"/>
+  <!-- Growth Path/Bar Chart -->
+  <rect x="32" y="74" width="14" height="20" rx="3" fill="#a5d6a7" stroke="#388e3c" stroke-width="4"/>
+  <rect x="52" y="60" width="14" height="34" rx="3" fill="#a5d6a7" stroke="#388e3c" stroke-width="4"/>
+  <rect x="72" y="44" width="14" height="50" rx="3" fill="#a5d6a7" stroke="#388e3c" stroke-width="4"/>
+  <!-- Curved line with Arrow showing growth -->
+  <path d="M30 82c20-2 40-20 54-44" fill="none" stroke="#2e7d32" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M74 38h12v12" fill="none" stroke="#2e7d32" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Coins at the bottom -->
+  <circle cx="94" cy="84" r="8" fill="#ffb74d" stroke="#f57c00" stroke-width="3"/>
+  <circle cx="94" cy="74" r="8" fill="#ffb74d" stroke="#f57c00" stroke-width="3"/>
+</svg>
