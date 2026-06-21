@@ -188,7 +188,42 @@ export default function ToolPageClient({ tool, categoryName }) {
   }
 
   const share = () => {
-    navigator.clipboard.writeText(window.location.href).then(() => toast.success('Link copied!'))
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    if (!url) return;
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url)
+        .then(() => toast.success('Link copied!'))
+        .catch((err) => {
+          console.error('Clipboard write failed:', err);
+          fallbackCopyText(url);
+        });
+    } else {
+      fallbackCopyText(url);
+    }
+  }
+
+  const fallbackCopyText = (text) => {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.top = '0';
+      textArea.style.left = '0';
+      textArea.style.position = 'fixed';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      if (successful) {
+        toast.success('Link copied!');
+      } else {
+        toast.error('Failed to copy link');
+      }
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+      toast.error('Failed to copy link');
+    }
   }
 
   if (!tool) return null;
