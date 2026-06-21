@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Attendance Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#eff6ff"/>
+  <!-- Calendar or checklist grid -->
+  <rect x="28" y="28" width="72" height="72" rx="12" fill="#dbeafe" stroke="#3b82f6" stroke-width="6"/>
+  <!-- Checklist grid pattern -->
+  <circle cx="46" cy="46" r="6" fill="#60a5fa"/>
+  <circle cx="46" cy="64" r="6" fill="#60a5fa"/>
+  <circle cx="46" cy="82" r="6" fill="#60a5fa"/>
+  <!-- Checkmark 1 -->
+  <path d="M64 46 l6 6 l14-14" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Checkmark 2 -->
+  <path d="M64 64 l6 6 l14-14" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Checkmark 3 -->
+  <path d="M64 82 l6 6 l14-14" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

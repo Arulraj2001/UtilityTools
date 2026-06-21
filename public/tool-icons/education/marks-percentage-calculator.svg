@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Marks Percentage Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdf4"/>
+  <!-- Document with Marks -->
+  <rect x="30" y="26" width="68" height="76" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="6"/>
+  <!-- A+ text in red-ish circle -->
+  <circle cx="76" cy="52" r="16" fill="#fffee0" stroke="#dc2626" stroke-width="4"/>
+  <path d="M72 60 L76 44 L80 60" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/>
+  <line x1="73" y1="54" x2="79" y2="54" stroke="#dc2626" stroke-width="2.5"/>
+  <!-- Mock text lines -->
+  <line x1="42" y1="44" x2="54" y2="44" stroke="#16a34a" stroke-width="5" stroke-linecap="round"/>
+  <line x1="42" y1="56" x2="54" y2="56" stroke="#16a34a" stroke-width="5" stroke-linecap="round"/>
+  <line x1="42" y1="68" x2="86" y2="68" stroke="#16a34a" stroke-width="5" stroke-linecap="round"/>
+  <line x1="42" y1="82" x2="86" y2="82" stroke="#16a34a" stroke-width="5" stroke-linecap="round"/>
+</svg>

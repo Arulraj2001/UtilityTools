@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Slug Generator</title>
+  <rect width="128" height="128" rx="28" fill="#faf5ff"/>
+  <!-- Link Icon at Top -->
+  <g transform="translate(64,42) rotate(-30) translate(-32,-12)">
+    <!-- Left Loop -->
+    <rect x="10" y="4" width="24" height="16" rx="8" fill="none" stroke="#9333ea" stroke-width="5"/>
+    <!-- Center link line -->
+    <line x1="28" y1="12" x2="38" y2="12" stroke="#9333ea" stroke-width="5"/>
+    <!-- Right Loop -->
+    <rect x="32" y="4" width="24" height="16" rx="8" fill="none" stroke="#9333ea" stroke-width="5"/>
+  </g>
+  <!-- SEO URL Slug display field -->
+  <rect x="28" y="70" width="72" height="26" rx="13" fill="#f3e8ff" stroke="#6b21a8" stroke-width="4.5"/>
+  <text x="64" y="87" font-family="system-ui, sans-serif" font-weight="bold" font-size="12" fill="#6b21a8" text-anchor="middle">url-slug</text>
+</svg>

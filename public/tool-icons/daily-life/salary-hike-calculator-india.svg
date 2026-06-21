@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Salary Hike Calculator India</title>
+  <rect width="128" height="128" rx="28" fill="#fff7ed"/>
+  <!-- Rupee Symbol -->
+  <path d="M42 34 h24 M42 42 h24 M46 34 v16 c0 4 5 7 10 7 M48 57 L68 76" fill="none" stroke="#c2410c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Rising Bar Chart -->
+  <rect x="72" y="68" width="14" height="26" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="5"/>
+  <rect x="92" y="48" width="14" height="46" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="5"/>
+  <!-- Upward Trend Arrow -->
+  <path d="M36 86 C 56 86, 76 66, 102 36" fill="none" stroke="#c2410c" stroke-width="5" stroke-linecap="round"/>
+  <path d="M92 36 h10 v10" fill="none" stroke="#c2410c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

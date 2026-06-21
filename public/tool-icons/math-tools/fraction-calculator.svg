@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Fraction Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0f9ff"/>
+  <!-- Division Bar -->
+  <line x1="38" y1="64" x2="90" y2="64" stroke="#0ea5e9" stroke-width="7.5" stroke-linecap="round"/>
+  <!-- Numerator (1) -->
+  <path d="M64 32 V48 M60 36 L64 32" fill="none" stroke="#0ea5e9" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Denominator (2) -->
+  <path d="M58 82 C58 74, 70 74, 70 82 C70 88, 58 92, 58 96 H70" fill="none" stroke="#0ea5e9" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">ROI Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0f9ff"/>
+  <!-- Chart Axes -->
+  <path d="M28 92 H96 M28 92 V36" fill="none" stroke="#0ea5e9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Bar 1 -->
+  <rect x="38" y="72" width="12" height="20" rx="2.5" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="4.5"/>
+  <!-- Bar 2 -->
+  <rect x="56" y="56" width="12" height="36" rx="2.5" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="4.5"/>
+  <!-- Bar 3 -->
+  <rect x="74" y="42" width="12" height="50" rx="2.5" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="4.5"/>
+  <!-- Rising Trend Line -->
+  <path d="M32 86 C 48 86, 68 62, 94 36" fill="none" stroke="#0369a1" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M84 36 h10 v10" fill="none" stroke="#0369a1" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- ROI Badge (Bottom Right) -->
+  <circle cx="86" cy="84" r="18" fill="#f0f9ff" stroke="#0369a1" stroke-width="4.5"/>
+  <text x="86" y="88" font-family="system-ui, sans-serif" font-weight="bold" font-size="10" fill="#0369a1" text-anchor="middle">ROI</text>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Case Converter</title>
+  <rect width="128" height="128" rx="28" fill="#faf5ff"/>
+  <!-- Capital letter 'A' -->
+  <path d="M34 82 L48 46 L62 82 M38 72 H58" fill="none" stroke="#9333ea" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Lowercase letter 'a' -->
+  <circle cx="82" cy="71" r="11" fill="none" stroke="#9333ea" stroke-width="6"/>
+  <path d="M93 60 V82" fill="none" stroke="#9333ea" stroke-width="6" stroke-linecap="round"/>
+  <!-- Conversion Arrows -->
+  <path d="M46 34 C 56 24, 72 24, 82 34" fill="none" stroke="#6b21a8" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M76 34 h6 v-6" fill="none" stroke="#6b21a8" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M82 94 C 72 104, 56 104, 46 94" fill="none" stroke="#6b21a8" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M52 94 h-6 v6" fill="none" stroke="#6b21a8" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

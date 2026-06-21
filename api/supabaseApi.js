@@ -502,7 +502,7 @@ export const getToolsAll = async ({ orderBy = 'created_at', ascending = false, l
   let query = excludeRetiredTools(supabase.from('tools').select('*'));
   query = sortParams(query, orderBy, ascending);
   if (limit) query = query.limit(limit);
-  return withDefaultToolFeaturedImages(handleResponse(await query));
+  return handleResponse(await query);
 };
 
 export const getToolsWithCategories = async ({ published = true, orderBy = 'sort_order', ascending = true, limit = 200, filters = {} } = {}) => {
@@ -514,7 +514,7 @@ export const getToolsWithCategories = async ({ published = true, orderBy = 'sort
   if (Array.isArray(filters?.categoryIds) && filters.categoryIds.length > 0) query = query.in('category_id', filters.categoryIds);
   query = sortParams(query, orderBy, ascending);
   if (limit) query = query.limit(limit);
-  return withDefaultToolFeaturedImages(handleResponse(await query));
+  return handleResponse(await query);
 };
 
 export const getCategories = async ({ orderBy = 'sort_order', ascending = true, limit = 200 } = {}) => {

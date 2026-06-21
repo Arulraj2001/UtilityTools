@@ -506,6 +506,8 @@ export default function Home() {
       />
       <HeroSection toolCount={toolCount} />
       
+      <FeaturesBar />
+
       {showCategoriesSectionSkeleton ? (
         <CategoriesSectionSkeleton />
       ) : (
@@ -514,7 +516,6 @@ export default function Home() {
         </Suspense>
       )}
 
-      <FeaturesBar />
       <HomeIntroSection />
 
       {showFeaturedSectionSkeleton ? (

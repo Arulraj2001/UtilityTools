@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Final Grade Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fef2f2"/>
+  <!-- Target circles -->
+  <circle cx="64" cy="64" r="36" fill="#fee2e2" stroke="#ef4444" stroke-width="6"/>
+  <circle cx="64" cy="64" r="22" fill="#fca5a5" stroke="#ef4444" stroke-width="4"/>
+  <circle cx="64" cy="64" r="8" fill="#dc2626"/>
+  <!-- Arrow hitting center -->
+  <path d="M96 32 L68 60" fill="none" stroke="#451a03" stroke-width="5" stroke-linecap="round"/>
+  <path d="M64 64 L72 58 M64 64 L70 66" fill="none" stroke="#451a03" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Fletching on arrow -->
+  <path d="M92 28 L98 34" fill="none" stroke="#451a03" stroke-width="4" stroke-linecap="round"/>
+</svg>

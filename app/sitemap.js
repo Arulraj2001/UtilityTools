@@ -1,6 +1,7 @@
 import { supabase } from '@/api/supabaseClient';
 import { STATIC_BLOG_POSTS } from '@/lib/staticBlogPosts';
 import { PREBUILT_TOOLS } from '@/lib/toolsData';
+import { isToolIndexable } from '@/lib/toolSeoCompleteness';
 
 const POLICY_LASTMOD = '2026-06-01T00:00:00Z';
 const RETIRED_TOOL_SLUGS = new Set(['pdf-to-word']);
@@ -42,7 +43,7 @@ export default async function sitemap() {
 
   try {
     const [toolsData, categoriesData, postsData, workflowsData, jobsData] = await Promise.all([
-      fetchTable('tools', 'slug, updated_at, is_featured, status', (q) => q.eq('status', 'published')),
+      fetchTable('tools', 'slug, updated_at, is_featured, status, seo_content, seo_title, seo_description, description, faq', (q) => q.eq('status', 'published')),
       fetchTable('categories', 'slug, updated_at'),
       fetchTable('blog_posts', 'slug, updated_at, status', (q) => q.eq('status', 'published')),
       fetchTable('workflow_pages', 'slug, updated_at', (q) => q.eq('status', 'published')),
@@ -67,6 +68,11 @@ export default async function sitemap() {
         updated_at: tool.updated_at || tool.created_at || null,
         is_featured: Boolean(tool.is_featured),
         status: tool.status,
+        seo_content: tool.seo_content,
+        seo_title: tool.seo_title,
+        seo_description: tool.seo_description,
+        description: tool.description,
+        faq: tool.faq,
       }));
   }
 
@@ -109,10 +115,13 @@ export default async function sitemap() {
     });
   }
 
-  // 2. Tools
+  // 2. Tools — only include indexable tools with sufficient SEO content
   for (const t of tools) {
     if (!t?.slug) continue;
     if (RETIRED_TOOL_SLUGS.has(t.slug)) continue;
+
+    // Skip tools with missing SEO content (noindex)
+    if (!isToolIndexable(t)) continue;
 
     sitemapEntries.push({
       url: buildUrl(`/tool/${encodeURIComponent(t.slug)}`),

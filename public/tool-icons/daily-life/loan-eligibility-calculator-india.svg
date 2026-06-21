@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Loan Eligibility Calculator India</title>
+  <rect width="128" height="128" rx="28" fill="#fff7ed"/>
+  <!-- Clipboard Board -->
+  <rect x="36" y="32" width="56" height="74" rx="8" fill="#ffedd5" stroke="#ea580c" stroke-width="6"/>
+  <!-- Clipboard Clip -->
+  <rect x="50" y="22" width="28" height="14" rx="3" fill="#ffedd5" stroke="#c2410c" stroke-width="4"/>
+  <!-- Checklist Lines and Checkmarks -->
+  <g transform="translate(46, 48)">
+    <path d="M0 6 l3 3 l6 -7" fill="none" stroke="#c2410c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="16" y1="6" x2="36" y2="6" stroke="#ea580c" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(46, 66)">
+    <path d="M0 6 l3 3 l6 -7" fill="none" stroke="#c2410c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="16" y1="6" x2="36" y2="6" stroke="#ea580c" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <!-- Rupee Seal (Approved/Eligible stamp) -->
+  <circle cx="86" cy="86" r="18" fill="#ffedd5" stroke="#c2410c" stroke-width="4"/>
+  <path d="M80 81 h12 M80 86 h12 M83 81 v9 c0 2 2 3 5 3 M84 92 l 6 6" fill="none" stroke="#c2410c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

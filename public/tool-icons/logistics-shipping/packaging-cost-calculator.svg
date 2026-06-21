@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Packaging Cost Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- Unfolded Cardboard Box Layout -->
+  <!-- Top Flap -->
+  <path d="M50 48 L54 26 H74 L78 48 Z" fill="#ccfbf1" stroke="#0f766e" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Bottom Flap -->
+  <path d="M50 80 L54 102 H74 L78 80 Z" fill="#ccfbf1" stroke="#0f766e" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Left Flap -->
+  <path d="M50 48 L28 52 V76 L50 80 Z" fill="#ccfbf1" stroke="#0f766e" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Right Flap -->
+  <path d="M78 48 L100 52 V76 L78 80 Z" fill="#ccfbf1" stroke="#0f766e" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Center Base -->
+  <rect x="50" y="48" width="28" height="32" fill="#f0fdfa" stroke="#0f766e" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Fold marks (dashed line inside center base) -->
+  <line x1="50" y1="48" x2="78" y2="48" stroke="#115e59" stroke-width="2.5" stroke-dasharray="3 3"/>
+  <line x1="50" y1="80" x2="78" y2="80" stroke="#115e59" stroke-width="2.5" stroke-dasharray="3 3"/>
+  <!-- Rupee Symbol for Cost representation -->
+  <g transform="translate(86, 22) rotate(15)">
+    <rect width="20" height="28" rx="4" fill="#f0fdfa" stroke="#ea580c" stroke-width="3"/>
+    <circle cx="10" cy="6" r="1.5" fill="#ea580c"/>
+    <path d="M6 13 h8 M6 16 h8 M8 13 v6 c0 1.5 2 1.5 2 1.5" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

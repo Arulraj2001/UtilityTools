@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">HCF Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0f9ff"/>
+  <!-- Triple Venn Diagram -->
+  <circle cx="64" cy="48" r="24" fill="#e0f2fe" fill-opacity="0.5" stroke="#0ea5e9" stroke-width="4.5"/>
+  <circle cx="48" cy="76" r="24" fill="#e0f2fe" fill-opacity="0.5" stroke="#0ea5e9" stroke-width="4.5"/>
+  <circle cx="80" cy="76" r="24" fill="#e0f2fe" fill-opacity="0.5" stroke="#0ea5e9" stroke-width="4.5"/>
+  <!-- HCF Intersection Highlight -->
+  <circle cx="64" cy="67" r="15" fill="#f0f9ff" stroke="#0369a1" stroke-width="3.5"/>
+  <text x="64" y="71" font-family="system-ui, sans-serif" font-weight="bold" font-size="8.5" fill="#0369a1" text-anchor="middle">HCF</text>
+</svg>

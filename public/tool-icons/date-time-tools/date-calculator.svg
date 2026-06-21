@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Date Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- Calendar Page -->
+  <rect x="34" y="32" width="60" height="66" rx="8" fill="#ccfbf1" stroke="#0d9488" stroke-width="6"/>
+  <!-- Binder Rings -->
+  <rect x="46" y="24" width="8" height="14" rx="3" fill="#f0fdfa" stroke="#115e59" stroke-width="3"/>
+  <rect x="74" y="24" width="8" height="14" rx="3" fill="#f0fdfa" stroke="#115e59" stroke-width="3"/>
+  <!-- Lines representing grids -->
+  <line x1="34" y1="52" x2="94" y2="52" stroke="#0d9488" stroke-width="4"/>
+  <!-- Calculation Plus/Minus Badge (Bottom Right) -->
+  <circle cx="86" cy="84" r="18" fill="#f0fdfa" stroke="#ea580c" stroke-width="4.5"/>
+  <path d="M80 80 H92 M86 74 V86 M80 90 H92" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round"/>
+</svg>

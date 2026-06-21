@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Exam Photo Cropper</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- Photo behind -->
+  <rect x="38" y="38" width="52" height="52" rx="6" fill="#e6fffa" stroke="#99f6e4" stroke-width="4"/>
+  <path d="M42 84 L54 68 L64 78 L78 58 L86 84 Z" fill="#99f6e4" stroke="#99f6e4"/>
+  <!-- Crop handles -->
+  <path d="M26 38 H90 M38 26 V90 M38 90 H102 M90 38 V102" fill="none" stroke="#0d9488" stroke-width="6" stroke-linecap="round"/>
+</svg>

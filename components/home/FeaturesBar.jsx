@@ -35,7 +35,7 @@ export default function FeaturesBar() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-10 relative z-10 mb-12 sm:mb-16">
       <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4 division-x-slate">
           {FEATURES.map((feature, idx) => (

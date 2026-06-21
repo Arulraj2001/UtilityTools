@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Percentage to CGPA Converter</title>
+  <rect width="128" height="128" rx="28" fill="#eff6ff"/>
+  <!-- Percentage icon on left -->
+  <line x1="46" y1="42" x2="26" y2="62" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="28" cy="44" r="5" fill="none" stroke="#2563eb" stroke-width="4"/>
+  <circle cx="44" cy="60" r="5" fill="none" stroke="#2563eb" stroke-width="4"/>
+  <!-- GPA graduation cap icon on right -->
+  <path d="M66 52 L86 44 L106 52 L86 60 Z" fill="#93c5fd" stroke="#2563eb" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="78" y="56" width="16" height="10" fill="#93c5fd" stroke="#2563eb" stroke-width="4"/>
+  <!-- Direction arrows in center -->
+  <path d="M50 78 h28 M78 78 l-8-8 M78 78 l-8 8" fill="none" stroke="#1d4ed8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

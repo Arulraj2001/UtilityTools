@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Keyword Density Checker</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdf4"/>
+  <!-- Document with words -->
+  <rect x="34" y="26" width="60" height="76" rx="8" fill="#ffffff" stroke="#059669" stroke-width="5"/>
+  <line x1="46" y1="42" x2="82" y2="42" stroke="#a7f3d0" stroke-width="4" stroke-linecap="round"/>
+  <line x1="46" y1="54" x2="68" y2="54" stroke="#a7f3d0" stroke-width="4" stroke-linecap="round"/>
+  <line x1="46" y1="66" x2="82" y2="66" stroke="#a7f3d0" stroke-width="4" stroke-linecap="round"/>
+  <!-- Search Lens focusing on a dense spot -->
+  <circle cx="76" cy="68" r="16" fill="#f0fdf4" stroke="#047857" stroke-width="5"/>
+  <line x1="88" y1="80" x2="100" y2="92" stroke="#047857" stroke-width="5" stroke-linecap="round"/>
+</svg>

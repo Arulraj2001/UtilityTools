@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Seller Profit Estimator</title>
+  <rect width="128" height="128" rx="28" fill="#f0f9ff"/>
+  <!-- Business Dashboard Monitor -->
+  <rect x="28" y="32" width="72" height="56" rx="8" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="6"/>
+  <!-- Stand -->
+  <path d="M52 88 H76 M64 88 V96" fill="none" stroke="#0ea5e9" stroke-width="6" stroke-linecap="round"/>
+  <!-- Graph inside monitor -->
+  <path d="M38 72 L48 54 L62 62 L78 46 L90 58" fill="none" stroke="#0369a1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="48" cy="54" r="3" fill="#0369a1"/>
+  <circle cx="78" cy="46" r="3" fill="#0369a1"/>
+  <!-- Rupee Coin overlay (Bottom Right) -->
+  <circle cx="86" cy="84" r="18" fill="#f0f9ff" stroke="#ea580c" stroke-width="4.5"/>
+  <path d="M80 79 h12 M80 84 h12 M83 79 v9 c0 2 3 3 5 3 M84 92 l 6 6" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

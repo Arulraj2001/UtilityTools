@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Base64 Decoder</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdf4"/>
+  <!-- Encoded Block (Input) -->
+  <rect x="26" y="44" width="32" height="46" rx="4" fill="#dcfce7" stroke="#047857" stroke-width="5"/>
+  <rect x="30" y="58" width="24" height="18" rx="3" fill="#f0fdf4" stroke="#065f46" stroke-width="3"/>
+  <text x="42" y="72" font-family="system-ui, sans-serif" font-weight="bold" font-size="11" fill="#065f46" text-anchor="middle">64</text>
+  <!-- Arrow (Process direction) -->
+  <path d="M64 67 H74 M70 62 L75 67 L70 72" fill="none" stroke="#065f46" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Text Block (Output) -->
+  <rect x="70" y="38" width="32" height="46" rx="4" fill="#dcfce7" stroke="#047857" stroke-width="5"/>
+  <text x="86" y="67" font-family="system-ui, sans-serif" font-weight="bold" font-size="22" fill="#047857" text-anchor="middle">A</text>
+</svg>

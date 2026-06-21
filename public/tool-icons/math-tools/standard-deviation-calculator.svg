@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Standard Deviation Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0f9ff"/>
+  <!-- Base X-Axis -->
+  <line x1="20" y1="94" x2="108" y2="94" stroke="#0ea5e9" stroke-width="5.5" stroke-linecap="round"/>
+  <!-- Bell Curve (Normal Distribution) -->
+  <path d="M22 94 C 40 94, 46 32, 64 32 C 82 32, 88 94, 106 94" fill="none" stroke="#0ea5e9" stroke-width="6.5" stroke-linecap="round"/>
+  <!-- Mean Line (Center) -->
+  <line x1="64" y1="32" x2="64" y2="94" stroke="#0369a1" stroke-width="3" stroke-dasharray="4 4"/>
+  <!-- Deviation Boundaries (Sigma / Standard Deviation) -->
+  <line x1="48" y1="58" x2="48" y2="94" stroke="#ea580c" stroke-width="4" stroke-linecap="round"/>
+  <line x1="80" y1="58" x2="80" y2="94" stroke="#ea580c" stroke-width="4" stroke-linecap="round"/>
+  <!-- Dimension arrow between boundaries -->
+  <path d="M48 76 H80" fill="none" stroke="#ea580c" stroke-width="2.5"/>
+  <path d="M53 73 L48 76 L53 79 M75 73 L80 76 L75 79" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

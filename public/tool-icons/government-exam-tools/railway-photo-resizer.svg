@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Railway Photo Resizer</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- Train front view -->
+  <rect x="36" y="38" width="56" height="52" rx="14" fill="#ccfbf1" stroke="#0d9488" stroke-width="6"/>
+  <!-- Train windshield -->
+  <rect x="44" y="46" width="40" height="16" rx="4" fill="#ffffff" stroke="#0f766e" stroke-width="4"/>
+  <!-- Train headlights -->
+  <circle cx="48" cy="74" r="5" fill="#f59e0b"/>
+  <circle cx="80" cy="74" r="5" fill="#f59e0b"/>
+  <!-- Rails/Lines at bottom -->
+  <line x1="32" y1="96" x2="96" y2="96" stroke="#0d9488" stroke-width="6" stroke-linecap="round"/>
+  <!-- Resizing bracket corners -->
+  <path d="M26 38 H38 M26 38 V50 M102 38 H90 M102 38 V50 M26 90 H38 M26 90 V78 M102 90 H90 M102 90 V78" fill="none" stroke="#0f766e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

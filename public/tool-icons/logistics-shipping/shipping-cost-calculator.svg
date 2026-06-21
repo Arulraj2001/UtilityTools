@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Shipping Cost Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- Delivery Truck -->
+  <!-- Cargo Area -->
+  <rect x="26" y="38" width="52" height="42" rx="4" fill="#ccfbf1" stroke="#0f766e" stroke-width="6"/>
+  <!-- Cabin -->
+  <path d="M78 48 H92 L102 62 V80 H78 Z" fill="#f0fdfa" stroke="#0f766e" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Cabin Window -->
+  <polygon points="82,54 90,54 96,62 82,62" fill="#ffffff" stroke="#115e59" stroke-width="3"/>
+  <!-- Wheels -->
+  <circle cx="44" cy="86" r="11" fill="#ccfbf1" stroke="#0f766e" stroke-width="5"/>
+  <circle cx="44" cy="86" r="4" fill="#0f766e"/>
+  <circle cx="84" cy="86" r="11" fill="#ccfbf1" stroke="#0f766e" stroke-width="5"/>
+  <circle cx="84" cy="86" r="4" fill="#0f766e"/>
+  <!-- Rupee Symbol on Cargo Box -->
+  <path d="M46 51 h12 M46 56 h12 M49 51 v10 c0 2 2 3 5 3 M50 64 l 6 6" fill="none" stroke="#115e59" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

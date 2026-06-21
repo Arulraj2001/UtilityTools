@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">YouTube Money Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fef2f2"/>
+  <!-- Play Button Container -->
+  <rect x="30" y="36" width="68" height="52" rx="14" fill="#fee2e2" stroke="#dc2626" stroke-width="6"/>
+  <polygon points="58,52 58,72 76,62" fill="#dc2626" stroke="#dc2626" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Rupee Badge (Bottom Right) -->
+  <circle cx="86" cy="84" r="18" fill="#fef2f2" stroke="#991b1b" stroke-width="4.5"/>
+  <path d="M80 79 h12 M80 84 h12 M83 79 v9 c0 2 3 3 5 3 M84 92 l 6 6" fill="none" stroke="#991b1b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

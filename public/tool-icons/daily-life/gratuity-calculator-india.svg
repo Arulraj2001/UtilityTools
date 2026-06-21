@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Gratuity Calculator India</title>
+  <rect width="128" height="128" rx="28" fill="#fff7ed"/>
+  <!-- Gift Box Body -->
+  <rect x="38" y="52" width="52" height="48" rx="6" fill="#ffedd5" stroke="#ea580c" stroke-width="6"/>
+  <!-- Gift Box Lid -->
+  <rect x="32" y="42" width="64" height="14" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="6"/>
+  <!-- Ribbon Vertical -->
+  <line x1="64" y1="42" x2="64" y2="100" stroke="#c2410c" stroke-width="6"/>
+  <!-- Bow -->
+  <path d="M64 42 C 54 28, 44 36, 64 42 C 74 28, 84 36, 64 42" fill="none" stroke="#c2410c" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Tag String -->
+  <line x1="64" y1="42" x2="76" y2="56" stroke="#c2410c" stroke-width="3"/>
+  <!-- Hanging Rupee Tag -->
+  <g transform="translate(72,50) rotate(15)">
+    <rect width="24" height="34" rx="4" fill="#fff7ed" stroke="#ea580c" stroke-width="3"/>
+    <circle cx="12" cy="6" r="2" fill="#c2410c"/>
+    <!-- Rupee symbol on tag -->
+    <path d="M8 14 h8 M8 18 h8 M10 14 v8 M10 22 C 12 22 14 22 14 20" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

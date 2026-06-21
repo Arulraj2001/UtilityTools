@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Word Counter</title>
+  <rect width="128" height="128" rx="28" fill="#faf5ff"/>
+  <!-- Document Sheet -->
+  <rect x="36" y="28" width="56" height="72" rx="6" fill="#f3e8ff" stroke="#9333ea" stroke-width="6"/>
+  <!-- Text lines inside document -->
+  <line x1="56" y1="44" x2="80" y2="44" stroke="#9333ea" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="56" y1="56" x2="80" y2="56" stroke="#9333ea" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="56" y1="68" x2="80" y2="68" stroke="#9333ea" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="56" y1="80" x2="74" y2="80" stroke="#9333ea" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- Count Indicators (1, 2, 3) on Left Margin -->
+  <circle cx="46" cy="44" r="3.5" fill="#6b21a8"/>
+  <circle cx="46" cy="56" r="3.5" fill="#6b21a8"/>
+  <circle cx="46" cy="68" r="3.5" fill="#6b21a8"/>
+  <circle cx="46" cy="80" r="3.5" fill="#6b21a8"/>
+  <!-- Analytical count badge at bottom right -->
+  <circle cx="86" cy="84" r="18" fill="#faf5ff" stroke="#6b21a8" stroke-width="4.5"/>
+  <text x="86" y="89" font-family="system-ui, sans-serif" font-weight="bold" font-size="14" fill="#6b21a8" text-anchor="middle">123</text>
+</svg>

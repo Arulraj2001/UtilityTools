@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Product Pricing Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0f9ff"/>
+  <!-- Price Tag -->
+  <g transform="translate(64,60) rotate(-25) translate(-28,-40)">
+    <path d="M10 0 L40 0 L56 22 L56 76 L10 76 Z" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="6.5" stroke-linejoin="round"/>
+    <circle cx="24" cy="14" r="5" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="4"/>
+    <!-- Rupee symbol on tag -->
+    <path d="M20 38 h16 M20 44 h16 M24 38 v12 c0 3 4 5 7 5 M24 57 L36 68" fill="none" stroke="#0ea5e9" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- Calculator Badge (Bottom Right) -->
+  <rect x="74" y="72" width="26" height="26" rx="5" fill="#f0f9ff" stroke="#ea580c" stroke-width="4.5"/>
+  <rect x="80" y="78" width="14" height="6" fill="#ffffff" stroke="#ea580c" stroke-width="2"/>
+  <circle cx="82" cy="90" r="1.5" fill="#ea580c"/>
+  <circle cx="87" cy="90" r="1.5" fill="#ea580c"/>
+  <circle cx="92" cy="90" r="1.5" fill="#ea580c"/>
+</svg>

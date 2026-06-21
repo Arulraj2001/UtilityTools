@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">COD Charge Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0f9ff"/>
+  <!-- Cash Stack (COD aspect) -->
+  <g transform="translate(30, 56) rotate(-12)">
+    <rect x="0" y="0" width="52" height="28" rx="4" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="5"/>
+    <circle cx="26" cy="14" r="6" fill="none" stroke="#0ea5e9" stroke-width="2.5"/>
+  </g>
+  <g transform="translate(38, 52) rotate(6)">
+    <rect x="0" y="0" width="52" height="28" rx="4" fill="#ffffff" stroke="#0ea5e9" stroke-width="5"/>
+    <circle cx="26" cy="14" r="6" fill="none" stroke="#0ea5e9" stroke-width="2.5"/>
+    <!-- Rupee symbol in cash center -->
+    <path d="M23 11 h6 M23 14 h6 M25 11 v5" fill="none" stroke="#0369a1" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <!-- Delivery Package (Delivery aspect) -->
+  <rect x="68" y="32" width="34" height="32" rx="4" fill="#e0f2fe" stroke="#0369a1" stroke-width="5"/>
+  <!-- Tape -->
+  <path d="M85 32 V64 M68 48 H102" fill="none" stroke="#0369a1" stroke-width="3.5"/>
+</svg>

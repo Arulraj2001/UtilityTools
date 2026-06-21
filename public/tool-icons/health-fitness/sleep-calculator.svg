@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Sleep Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fff5f5"/>
+  <!-- Crescent Moon -->
+  <path d="M42 36 A36 36 0 0 0 84 92 A36 36 0 1 1 42 36 Z" fill="#fee2e2" stroke="#ef4444" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Little stars -->
+  <path d="M92 34 L94 40 L100 42 L94 44 L92 50 L90 44 L84 42 L90 40 Z" fill="#dc2626"/>
+  <path d="M102 62 L103 65 L106 66 L103 67 L102 70 L101 67 L98 66 L101 65 Z" fill="#dc2626"/>
+</svg>

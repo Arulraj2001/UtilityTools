@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Signature Maker</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- Signature -->
+  <path d="M28 82 C44 74 54 44 68 76 C82 108 94 62 104 68" fill="none" stroke="#0d9488" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Fountain pen tip -->
+  <path d="M84 28 L94 38 L74 58 L62 60 L64 48 Z" fill="#ccfbf1" stroke="#0f766e" stroke-width="4" stroke-linejoin="round"/>
+  <line x1="68" y1="54" x2="79" y2="43" stroke="#0f766e" stroke-width="3"/>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Semester Planner</title>
+  <rect width="128" height="128" rx="28" fill="#faf5ff"/>
+  <!-- Planner sheet -->
+  <rect x="28" y="28" width="72" height="72" rx="14" fill="#f3e8ff" stroke="#a855f7" stroke-width="6"/>
+  <!-- Header rings -->
+  <circle cx="46" cy="24" r="4" fill="#7e22ce"/>
+  <circle cx="64" cy="24" r="4" fill="#7e22ce"/>
+  <circle cx="82" cy="24" r="4" fill="#7e22ce"/>
+  <!-- Spiral bindings -->
+  <path d="M46 20 v12 M64 20 v12 M82 20 v12" fill="none" stroke="#7e22ce" stroke-width="4" stroke-linecap="round"/>
+  <!-- Workload cards -->
+  <rect x="38" y="46" width="52" height="14" rx="4" fill="#e9d5ff" stroke="#7e22ce" stroke-width="3"/>
+  <rect x="38" y="68" width="52" height="14" rx="4" fill="#e9d5ff" stroke="#7e22ce" stroke-width="3"/>
+</svg>

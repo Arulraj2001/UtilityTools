@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Passport Size Photo Maker</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <rect x="32" y="26" width="64" height="76" rx="8" fill="#ccfbf1" stroke="#0d9488" stroke-width="6"/>
+  <!-- Silhouette -->
+  <circle cx="64" cy="52" r="16" fill="#99f6e4" stroke="#0d9488" stroke-width="5"/>
+  <path d="M42 90 C42 74 50 72 64 72 S86 74 86 90" fill="#99f6e4" stroke="#0d9488" stroke-width="5" stroke-linejoin="round"/>
+</svg>

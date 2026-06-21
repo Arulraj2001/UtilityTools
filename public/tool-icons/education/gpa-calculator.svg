@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">GPA Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#faf5ff"/>
+  <!-- Report Card -->
+  <rect x="30" y="28" width="68" height="72" rx="10" fill="#f3e8ff" stroke="#8b5cf6" stroke-width="6"/>
+  <!-- Lines representing subjects -->
+  <line x1="42" y1="44" x2="68" y2="44" stroke="#8b5cf6" stroke-width="5" stroke-linecap="round"/>
+  <line x1="42" y1="58" x2="68" y2="58" stroke="#8b5cf6" stroke-width="5" stroke-linecap="round"/>
+  <line x1="42" y1="72" x2="68" y2="72" stroke="#8b5cf6" stroke-width="5" stroke-linecap="round"/>
+  <!-- GPA text or "A+" sign -->
+  <path d="M78 40 L88 64 M88 64 L92 72 M78 40 L74 72" fill="none" stroke="#6d28d9" stroke-width="5" stroke-linecap="round"/>
+  <line x1="77" y1="58" x2="87" y2="58" stroke="#6d28d9" stroke-width="4"/>
+</svg>

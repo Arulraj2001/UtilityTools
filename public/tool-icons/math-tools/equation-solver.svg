@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Equation Solver</title>
+  <rect width="128" height="128" rx="28" fill="#f0f9ff"/>
+  <!-- Equation representation -->
+  <text x="64" y="58" font-family="system-ui, sans-serif" font-weight="bold" font-size="20" fill="#0ea5e9" text-anchor="middle">2x + 5 = 9</text>
+  <!-- Arrow indicating calculation -->
+  <path d="M42 78 H74 M68 73 L74 78 L68 83" fill="none" stroke="#ea580c" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Result -->
+  <text x="92" y="84" font-family="system-ui, sans-serif" font-weight="bold" font-size="18" fill="#ea580c" text-anchor="middle">x=2</text>
+</svg>

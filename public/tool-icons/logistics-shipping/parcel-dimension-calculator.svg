@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Parcel Dimension Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- Cardboard Box -->
+  <rect x="36" y="38" width="56" height="52" rx="6" fill="#ccfbf1" stroke="#0f766e" stroke-width="6"/>
+  <!-- Box Lid/Flaps details -->
+  <path d="M36 52 H92 M64 38 V52" fill="none" stroke="#0f766e" stroke-width="4"/>
+  <!-- Measuring Tape wrapped around -->
+  <!-- Outer Tape body -->
+  <path d="M24 74 C 44 86, 84 86, 104 74" fill="none" stroke="#ea580c" stroke-width="12" stroke-linecap="round"/>
+  <path d="M24 74 C 44 86, 84 86, 104 74" fill="none" stroke="#fbbf24" stroke-width="8" stroke-linecap="round"/>
+  <!-- Tape Ticks -->
+  <path d="M36 78 l1 3 M46 80 l1 3 M56 81 l1 3 M66 81 l1 3 M76 80 l1 3 M86 78 l1 3 M96 75 l1 3" fill="none" stroke="#ea580c" stroke-width="2"/>
+  <!-- Tape Loop Tip -->
+  <path d="M24 74 L18 78" fill="none" stroke="#ea580c" stroke-width="4" stroke-linecap="round"/>
+</svg>

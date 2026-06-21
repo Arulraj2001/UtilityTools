@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">TikTok Money Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fef2f2"/>
+  <!-- TikTok Note Motif -->
+  <!-- Note Base -->
+  <circle cx="50" cy="76" r="14" fill="#fee2e2" stroke="#dc2626" stroke-width="6"/>
+  <!-- Stem -->
+  <path d="M64 76 V36" fill="none" stroke="#dc2626" stroke-width="6" stroke-linecap="round"/>
+  <!-- Flag hook -->
+  <path d="M64 36 C 76 36, 84 44, 84 50" fill="none" stroke="#dc2626" stroke-width="6" stroke-linecap="round"/>
+  <!-- Rupee Coin (Money theme) -->
+  <circle cx="86" cy="84" r="18" fill="#fef2f2" stroke="#991b1b" stroke-width="4.5"/>
+  <path d="M80 79 h12 M80 84 h12 M83 79 v9 c0 2 3 3 5 3 M84 92 l 6 6" fill="none" stroke="#991b1b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

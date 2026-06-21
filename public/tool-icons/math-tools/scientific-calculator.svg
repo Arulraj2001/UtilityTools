@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Scientific Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0f9ff"/>
+  <!-- Calculator Body -->
+  <rect x="34" y="24" width="60" height="80" rx="8" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="6"/>
+  <!-- Display screen -->
+  <rect x="42" y="32" width="44" height="18" rx="4" fill="#ffffff" stroke="#0369a1" stroke-width="3"/>
+  <text x="80" y="45" font-family="system-ui, sans-serif" font-weight="bold" font-size="12" fill="#0369a1" text-anchor="end">sin(x)</text>
+  <!-- Buttons grid -->
+  <circle cx="48" cy="62" r="3.5" fill="#0ea5e9"/>
+  <circle cx="64" cy="62" r="3.5" fill="#0ea5e9"/>
+  <circle cx="80" cy="62" r="3.5" fill="#0ea5e9"/>
+  
+  <circle cx="48" cy="74" r="3.5" fill="#0ea5e9"/>
+  <circle cx="64" cy="74" r="3.5" fill="#0ea5e9"/>
+  <circle cx="80" cy="74" r="3.5" fill="#0ea5e9"/>
+  
+  <circle cx="48" cy="86" r="3.5" fill="#0ea5e9"/>
+  <circle cx="64" cy="86" r="3.5" fill="#0ea5e9"/>
+  <circle cx="80" cy="86" r="3.5" fill="#0369a1"/>
+</svg>

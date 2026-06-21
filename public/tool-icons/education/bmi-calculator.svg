@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">BMI Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#ecfdf5"/>
+  <!-- Weight Scale base -->
+  <rect x="28" y="32" width="72" height="64" rx="12" fill="#d1fae5" stroke="#10b981" stroke-width="6"/>
+  <!-- Scale screen -->
+  <rect x="44" y="44" width="40" height="20" rx="4" fill="#ffffff" stroke="#047857" stroke-width="4"/>
+  <!-- Weight text mock or lines -->
+  <line x1="52" y1="54" x2="76" y2="54" stroke="#065f46" stroke-width="4" stroke-linecap="round"/>
+  <!-- Heart beat curve at the bottom -->
+  <path d="M38 82h12l6-12 6 20 6-14 6 6h16" fill="none" stroke="#059669" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

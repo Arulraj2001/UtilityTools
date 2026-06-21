@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Flipkart Seller Earnings Analyzer</title>
+  <rect width="128" height="128" rx="28" fill="#f5f3ff"/>
+  <!-- Shopping Bag -->
+  <path d="M48 46 C48 30, 80 30, 80 46" fill="none" stroke="#4f46e5" stroke-width="6" stroke-linecap="round"/>
+  <path d="M34 46 H94 L100 92 H28 Z" fill="#e0e7ff" stroke="#4f46e5" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M44 68 C 54 78, 70 78, 80 68" fill="none" stroke="#eab308" stroke-width="6" stroke-linecap="round"/>
+  <!-- Analytical Graph Overlay (Bottom Right) -->
+  <circle cx="86" cy="84" r="18" fill="#f5f3ff" stroke="#3730a3" stroke-width="4.5"/>
+  <path d="M76 90 L82 82 L88 86 L94 76" fill="none" stroke="#3730a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="94" cy="76" r="2.5" fill="#3730a3"/>
+</svg>

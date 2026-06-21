@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Body Fat Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fff5f5"/>
+  <!-- Silhouette of person -->
+  <circle cx="64" cy="46" r="14" fill="#fca5a5" stroke="#ef4444" stroke-width="5"/>
+  <path d="M44 94 C44 76 50 74 64 74 S84 76 84 94" fill="#fca5a5" stroke="#ef4444" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Tape measure around waist -->
+  <path d="M34 76 Q64 88 94 76" fill="none" stroke="#dc2626" stroke-width="5" stroke-dasharray="6 4" stroke-linecap="round"/>
+  <rect x="28" y="72" width="10" height="8" rx="2" fill="#ef4444"/>
+  <rect x="90" y="72" width="10" height="8" rx="2" fill="#ef4444"/>
+</svg>

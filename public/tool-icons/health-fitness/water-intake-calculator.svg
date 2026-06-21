@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Water Intake Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fff5f5"/>
+  <!-- Water Glass -->
+  <path d="M38 32 L46 94 A8 8 0 0 0 54 102 H74 A8 8 0 0 0 82 94 L90 32 Z" fill="#fee2e2" stroke="#ef4444" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Liquid level -->
+  <path d="M43 72 L46 94 A4 4 0 0 0 50 98 H78 A4 4 0 0 0 82 94 L85 72 Z" fill="#fca5a5" stroke="#ef4444" stroke-width="3"/>
+  <!-- Droplets -->
+  <path d="M64 16 C64 16 68 24 68 28 A4 4 0 0 1 60 28 C60 24 64 16 64 16 Z" fill="#b91c1c"/>
+  <path d="M52 24 C52 24 55 30 55 33 A3 3 0 0 1 49 33 C49 30 52 24 52 24 Z" fill="#b91c1c"/>
+</svg>

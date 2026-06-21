@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Backlog Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fff5f5"/>
+  <!-- Shield outline -->
+  <path d="M64 26 C82 26 96 34 96 52 C96 74 64 96 64 96 S32 74 32 52 C32 34 46 26 64 26 Z" fill="#fee2e2" stroke="#ef4444" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Warning exclamation point inside shield -->
+  <line x1="64" y1="44" x2="64" y2="64" stroke="#dc2626" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="64" cy="78" r="4.5" fill="#dc2626"/>
+</svg>

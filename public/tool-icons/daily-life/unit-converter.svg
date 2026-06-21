@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Unit Converter</title>
+  <rect width="128" height="128" rx="28" fill="#fff7ed"/>
+  <!-- Ruler (horizontal, angled slightly) -->
+  <g transform="translate(64,64) rotate(-20) translate(-36,-10)">
+    <rect x="0" y="0" width="72" height="20" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="5"/>
+    <line x1="12" y1="0" x2="12" y2="8" stroke="#ea580c" stroke-width="3"/>
+    <line x1="24" y1="0" x2="24" y2="8" stroke="#ea580c" stroke-width="3"/>
+    <line x1="36" y1="0" x2="36" y2="12" stroke="#ea580c" stroke-width="3"/>
+    <line x1="48" y1="0" x2="48" y2="8" stroke="#ea580c" stroke-width="3"/>
+    <line x1="60" y1="0" x2="60" y2="8" stroke="#ea580c" stroke-width="3"/>
+  </g>
+  <!-- Calibration Weight (kilogram) -->
+  <path d="M44 88 L48 64 H64 L68 88 Z" fill="#ffedd5" stroke="#ea580c" stroke-width="5" stroke-linejoin="round"/>
+  <circle cx="56" cy="59" r="4.5" fill="#ea580c"/>
+  <!-- Circular Arrow (Convert indicator) -->
+  <path d="M78 44 A 28 28 0 0 1 92 76" fill="none" stroke="#c2410c" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M88 40 l4 4 l-6 4" fill="none" stroke="#c2410c" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M50 84 A 28 28 0 0 1 36 52" fill="none" stroke="#c2410c" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M40 88 l-4-4 l 6-4" fill="none" stroke="#c2410c" stroke-width="4.5" stroke-linejoin="round"/>
+</svg>

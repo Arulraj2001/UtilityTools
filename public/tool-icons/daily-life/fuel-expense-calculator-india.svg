@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Fuel Expense Calculator India</title>
+  <rect width="128" height="128" rx="28" fill="#fff7ed"/>
+  <!-- Fuel Nozzle Body -->
+  <g transform="translate(30, 50) rotate(-15)">
+    <rect x="0" y="0" width="30" height="42" rx="6" fill="#ffedd5" stroke="#ea580c" stroke-width="6"/>
+    <!-- Handle/Lever -->
+    <path d="M-6 10 C-14 10, -14 30, -6 32" fill="none" stroke="#ea580c" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <!-- Nozzle Spout -->
+  <path d="M52 46 L76 34 L88 36" fill="none" stroke="#ea580c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Dispensing Tip Guard -->
+  <rect x="84" y="34" width="6" height="10" rx="1" fill="#c2410c" stroke="#c2410c" stroke-width="2"/>
+  <!-- Droplet -->
+  <path d="M96 52 C 96 52, 108 66, 108 76 A 12 12 0 0 1 84 76 C 84 66, 96 52, 96 52 Z" fill="#ffedd5" stroke="#c2410c" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Rupee inside droplet -->
+  <path d="M91 70 h10 M91 74 h10 M93 70 v7 C 93 79, 95 79, 95 79" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round"/>
+</svg>

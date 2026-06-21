@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Tamil Nadu EB Bill Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fff7ed"/>
+  <!-- Electric Meter Housing -->
+  <rect x="34" y="28" width="60" height="76" rx="10" fill="#ffedd5" stroke="#ea580c" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Digital Screen -->
+  <rect x="44" y="38" width="40" height="24" rx="4" fill="#ffffff" stroke="#c2410c" stroke-width="4"/>
+  <!-- Digital Reading Representation -->
+  <path d="M50 50h4 M58 50h4 M66 50h4 M74 50h4" fill="none" stroke="#c2410c" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="78" cy="46" r="1.5" fill="#dc2626"/>
+  <!-- Spinning Disk / Pulse LED -->
+  <line x1="44" y1="74" x2="84" y2="74" stroke="#ea580c" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="64" cy="74" r="5" fill="#c2410c"/>
+  <!-- Lightning Symbol on Meter -->
+  <path d="M64 82l-4 8h7l-3 8" fill="none" stroke="#ea580c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

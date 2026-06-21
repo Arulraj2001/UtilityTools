@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Meta Tag Generator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdf4"/>
+  <!-- Code brackets -->
+  <path d="M42 42 L24 64 L42 86 M86 42 L104 64 L86 86" fill="none" stroke="#059669" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Tag in center -->
+  <path d="M50 48 H66 L78 60 V76 H50 Z" fill="#a7f3d0" stroke="#047857" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Tag string hole -->
+  <circle cx="58" cy="58" r="3" fill="#047857"/>
+</svg>

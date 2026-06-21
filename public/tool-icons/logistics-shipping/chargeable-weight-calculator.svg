@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Chargeable Weight Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- Central Scale Stand -->
+  <path d="M64 42 V94 M48 94 H80" fill="none" stroke="#0f766e" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Pivot point -->
+  <circle cx="64" cy="42" r="5" fill="#115e59"/>
+  <!-- Balance Beam -->
+  <path d="M32 42 H96" fill="none" stroke="#0f766e" stroke-width="6" stroke-linecap="round"/>
+  <!-- Left Pan (Actual Weight) -->
+  <path d="M32 42 L20 74 H44 Z" fill="none" stroke="#115e59" stroke-width="4.5" stroke-linejoin="round"/>
+  <!-- Iron Weight -->
+  <path d="M26 74 L29 60 H35 L38 74 Z" fill="#ccfbf1" stroke="#0f766e" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Right Pan (Volumetric/Dashed Box) -->
+  <path d="M96 42 L84 74 H108 Z" fill="none" stroke="#115e59" stroke-width="4.5" stroke-linejoin="round"/>
+  <!-- Dashed Box -->
+  <rect x="90" y="60" width="12" height="12" rx="2" fill="none" stroke="#0f766e" stroke-width="3.5" stroke-dasharray="3,3"/>
+</svg>

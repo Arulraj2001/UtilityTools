@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">UUID Generator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdf4"/>
+  <!-- ID Badge Card -->
+  <rect x="26" y="34" width="76" height="50" rx="8" fill="#dcfce7" stroke="#047857" stroke-width="6"/>
+  <!-- Subdivisions of UUID -->
+  <text x="64" y="66" font-family="system-ui, sans-serif" font-weight="bold" font-size="14" fill="#047857" text-anchor="middle">UUID v4</text>
+  <!-- Generator/Sparkle badge (Bottom Right) -->
+  <circle cx="86" cy="84" r="18" fill="#f0fdf4" stroke="#065f46" stroke-width="4.5"/>
+  <path d="M86 74 V94 M76 84 H96" fill="none" stroke="#065f46" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="86" cy="84" r="4.5" fill="#f0fdf4" stroke="#065f46" stroke-width="2.5"/>
+</svg>

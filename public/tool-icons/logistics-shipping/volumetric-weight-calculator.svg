@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Volumetric Weight Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- 3D Box -->
+  <!-- Top Face -->
+  <polygon points="64,30 96,44 64,58 32,44" fill="#ccfbf1" stroke="#0f766e" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Left Face -->
+  <polygon points="32,44 64,58 64,96 32,82" fill="#f0fdfa" stroke="#0f766e" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Right Face -->
+  <polygon points="64,58 96,44 96,82 64,96" fill="#ccfbf1" stroke="#0f766e" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Dimension arrows/indicators -->
+  <!-- Width Arrow -->
+  <path d="M24,54 L24,90" fill="none" stroke="#115e59" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M21,59 L24,54 L27,59 M21,85 L24,90 L27,85" fill="none" stroke="#115e59" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Length Arrow -->
+  <path d="M36,104 L92,104" fill="none" stroke="#115e59" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M41,101 L36,104 L41,107 M87,101 L92,104 L87,107" fill="none" stroke="#115e59" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

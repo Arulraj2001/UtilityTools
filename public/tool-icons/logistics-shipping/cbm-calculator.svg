@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">CBM Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- 3D Crate -->
+  <!-- Top Face -->
+  <polygon points="64,26 98,38 64,50 30,38" fill="#ccfbf1" stroke="#0f766e" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Left Face -->
+  <polygon points="30,38 64,50 64,92 30,80" fill="#f0fdfa" stroke="#0f766e" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Right Face -->
+  <polygon points="64,50 98,38 98,80 64,92" fill="#ccfbf1" stroke="#0f766e" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Crate Slats (aesthetic lines) -->
+  <line x1="38" y1="46" x2="38" y2="82" stroke="#0f766e" stroke-width="3" stroke-dasharray="4 4"/>
+  <line x1="90" y1="46" x2="90" y2="82" stroke="#0f766e" stroke-width="3" stroke-dasharray="4 4"/>
+  <!-- Custom Drawn "m³" on the Right face -->
+  <g transform="translate(68, 54)">
+    <!-- Letter 'm' -->
+    <path d="M4 14 V24 M4 17 Q7 13 10 17 V24 M10 17 Q13 13 16 17 V24" fill="none" stroke="#115e59" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Number '3' (Exponent) -->
+    <path d="M20 12 H24 L21 15 C23 15 25 16 25 18 C25 20 23 21 21 21" fill="none" stroke="#115e59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

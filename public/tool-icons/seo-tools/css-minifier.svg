@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">CSS Minifier</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdf4"/>
+  <!-- Compressed palette/code -->
+  <rect x="32" y="32" width="64" height="64" rx="14" fill="#a7f3d0" stroke="#059669" stroke-width="6"/>
+  <!-- Color circles -->
+  <circle cx="50" cy="52" r="8" fill="#047857"/>
+  <circle cx="78" cy="52" r="8" fill="#10b981"/>
+  <circle cx="64" cy="76" r="8" fill="#34d399"/>
+</svg>

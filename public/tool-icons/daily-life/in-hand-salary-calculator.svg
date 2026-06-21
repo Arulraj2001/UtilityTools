@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">In Hand Salary Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fff7ed"/>
+  <!-- Banknotes sticking out -->
+  <g transform="translate(42, 28) rotate(-12)">
+    <rect x="0" y="0" width="44" height="26" rx="3" fill="#ffedd5" stroke="#c2410c" stroke-width="4"/>
+    <circle cx="22" cy="13" r="5" fill="none" stroke="#c2410c" stroke-width="2.5"/>
+  </g>
+  <g transform="translate(56, 26) rotate(8)">
+    <rect x="0" y="0" width="44" height="26" rx="3" fill="#ffffff" stroke="#ea580c" stroke-width="4"/>
+    <circle cx="22" cy="13" r="5" fill="none" stroke="#ea580c" stroke-width="2.5"/>
+  </g>
+  <!-- Wallet Body -->
+  <rect x="32" y="48" width="64" height="48" rx="10" fill="#ffedd5" stroke="#ea580c" stroke-width="6"/>
+  <!-- Wallet Flap/Design line -->
+  <path d="M32 72 H96" fill="none" stroke="#ea580c" stroke-width="4"/>
+  <!-- Wallet Clasp -->
+  <rect x="82" y="60" width="16" height="16" rx="4" fill="#ffedd5" stroke="#c2410c" stroke-width="4"/>
+  <circle cx="90" cy="68" r="3" fill="#ffffff"/>
+  <!-- Rupee Symbol on Wallet Front -->
+  <path d="M46 58 h12 M46 63 h12 M49 58 v10 c0 3 3 5 6 5 M50 72 l 8 8" fill="none" stroke="#c2410c" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

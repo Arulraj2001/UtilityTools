@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Document Scanner</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdf4"/>
+  <!-- Document page -->
+  <rect x="34" y="26" width="60" height="76" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="6"/>
+  <!-- Lines on page -->
+  <line x1="46" y1="42" x2="82" y2="42" stroke="#dcfce7" stroke-width="5" stroke-linecap="round"/>
+  <line x1="46" y1="58" x2="82" y2="58" stroke="#dcfce7" stroke-width="5" stroke-linecap="round"/>
+  <line x1="46" y1="74" x2="82" y2="74" stroke="#dcfce7" stroke-width="5" stroke-linecap="round"/>
+  <!-- Scan line -->
+  <line x1="22" y1="60" x2="106" y2="60" stroke="#dc2626" stroke-width="6" stroke-linecap="round"/>
+  <path d="M22 52 v16 M106 52 v16" fill="none" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/>
+</svg>

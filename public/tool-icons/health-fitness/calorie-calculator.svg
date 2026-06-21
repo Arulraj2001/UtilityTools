@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Calorie Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fff5f5"/>
+  <!-- Burning Flame -->
+  <path d="M64 22 C64 22 84 46 84 70 A20 20 0 0 1 44 70 C44 46 64 22 64 22 Z" fill="#fca5a5" stroke="#ef4444" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Inner Flame core -->
+  <path d="M64 46 C64 46 74 60 74 74 A10 10 0 0 1 54 74 C54 60 64 46 64 46 Z" fill="#fee2e2" stroke="#ef4444" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Bottom circular track / calorie count gauge -->
+  <path d="M30 94 A42 42 0 0 1 98 94" fill="none" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/>
+</svg>

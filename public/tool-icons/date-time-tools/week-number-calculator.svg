@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Week Number Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- Calendar Page -->
+  <rect x="34" y="32" width="60" height="66" rx="8" fill="#ccfbf1" stroke="#0d9488" stroke-width="6"/>
+  <!-- Binder Rings -->
+  <rect x="46" y="24" width="8" height="14" rx="3" fill="#f0fdfa" stroke="#115e59" stroke-width="3"/>
+  <rect x="74" y="24" width="8" height="14" rx="3" fill="#f0fdfa" stroke="#115e59" stroke-width="3"/>
+  <!-- Header line -->
+  <line x1="34" y1="52" x2="94" y2="52" stroke="#0d9488" stroke-width="4"/>
+  <!-- Highlighted Week row -->
+  <rect x="40" y="60" width="48" height="10" rx="2" fill="#115e59" fill-opacity="0.3" stroke="#115e59" stroke-width="2.5"/>
+  <!-- Week Number Badge "W52" (Bottom Right) -->
+  <circle cx="86" cy="84" r="18" fill="#f0fdfa" stroke="#ea580c" stroke-width="4.5"/>
+  <text x="86" y="89" font-family="system-ui, sans-serif" font-weight="bold" font-size="10" fill="#ea580c" text-anchor="middle">W52</text>
+</svg>

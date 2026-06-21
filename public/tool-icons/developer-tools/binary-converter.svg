@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Binary Converter</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdf4"/>
+  <!-- Binary Block (01) -->
+  <rect x="26" y="38" width="32" height="46" rx="4" fill="#dcfce7" stroke="#047857" stroke-width="5"/>
+  <text x="42" y="66" font-family="system-ui, sans-serif" font-weight="bold" font-size="14" fill="#047857" text-anchor="middle">01</text>
+  <!-- Converter Arrow -->
+  <path d="M64 56 H74 M70 51 L75 56 L70 61" fill="none" stroke="#065f46" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Hexadecimal Block (A9) -->
+  <rect x="70" y="44" width="32" height="46" rx="4" fill="#dcfce7" stroke="#047857" stroke-width="5"/>
+  <text x="86" y="72" font-family="system-ui, sans-serif" font-weight="bold" font-size="14" fill="#065f46" text-anchor="middle">A9</text>
+</svg>

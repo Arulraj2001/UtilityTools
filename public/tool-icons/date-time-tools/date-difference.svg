@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Date Difference</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- Calendar Page -->
+  <rect x="34" y="32" width="60" height="66" rx="8" fill="#ccfbf1" stroke="#0d9488" stroke-width="6"/>
+  <!-- Binder Rings -->
+  <rect x="46" y="24" width="8" height="14" rx="3" fill="#f0fdfa" stroke="#115e59" stroke-width="3"/>
+  <rect x="74" y="24" width="8" height="14" rx="3" fill="#f0fdfa" stroke="#115e59" stroke-width="3"/>
+  <!-- Grid Lines -->
+  <line x1="34" y1="52" x2="94" y2="52" stroke="#0d9488" stroke-width="4"/>
+  <line x1="54" y1="52" x2="54" y2="98" stroke="#0d9488" stroke-width="3"/>
+  <line x1="74" y1="52" x2="74" y2="98" stroke="#0d9488" stroke-width="3"/>
+  <!-- Date Highlights (two circles) -->
+  <circle cx="44" cy="66" r="6" fill="#115e59" stroke="#115e59" stroke-width="1"/>
+  <circle cx="84" cy="82" r="6" fill="#ea580c" stroke="#ea580c" stroke-width="1"/>
+  <!-- Connection Curve/Arrow -->
+  <path d="M50 68 C 64 74, 68 76, 78 80" fill="none" stroke="#115e59" stroke-width="3" stroke-linecap="round"/>
+  <path d="M72 80 h6 v-6" fill="none" stroke="#115e59" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

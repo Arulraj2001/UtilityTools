@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">College Fees Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- College building/facade -->
+  <path d="M26 88 v-36 l38-20 38 20 v36 Z" fill="#ccfbf1" stroke="#0d9488" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Pillars -->
+  <line x1="42" y1="62" x2="42" y2="88" stroke="#0d9488" stroke-width="5"/>
+  <line x1="64" y1="62" x2="64" y2="88" stroke="#0d9488" stroke-width="5"/>
+  <line x1="86" y1="62" x2="86" y2="88" stroke="#0d9488" stroke-width="5"/>
+  <!-- Pediment bottom line -->
+  <line x1="24" y1="52" x2="104" y2="52" stroke="#0d9488" stroke-width="6" stroke-linecap="round"/>
+  <!-- Rupee Coin on top or in front -->
+  <circle cx="64" cy="74" r="16" fill="#ffedd5" stroke="#ea580c" stroke-width="4"/>
+  <path d="M58 70 h12 M58 76 h12 M61 70 v8c0 0 0 3 4 3 M61 78c0 0 3 0 7 7" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round"/>
+</svg>

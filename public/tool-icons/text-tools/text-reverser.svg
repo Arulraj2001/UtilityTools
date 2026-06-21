@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Text Reverser</title>
+  <rect width="128" height="128" rx="28" fill="#faf5ff"/>
+  <!-- Document Sheet -->
+  <rect x="36" y="28" width="56" height="72" rx="6" fill="#f3e8ff" stroke="#9333ea" stroke-width="6"/>
+  <!-- Text Lines -->
+  <line x1="46" y1="44" x2="82" y2="44" stroke="#9333ea" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="46" y1="56" x2="82" y2="56" stroke="#9333ea" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="46" y1="68" x2="82" y2="68" stroke="#9333ea" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="46" y1="80" x2="72" y2="80" stroke="#9333ea" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- Reverser Arrow Loop -->
+  <path d="M78 48 H98 C 108 48, 108 80, 98 80 H20" fill="none" stroke="#6b21a8" stroke-width="5" stroke-linecap="round"/>
+  <path d="M26 86 L18 80 L26 74" fill="none" stroke="#6b21a8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

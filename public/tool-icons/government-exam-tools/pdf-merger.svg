@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">PDF Merger</title>
+  <rect width="128" height="128" rx="28" fill="#eff6ff"/>
+  <!-- Document 1 -->
+  <rect x="24" y="24" width="34" height="44" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="4"/>
+  <!-- Document 2 -->
+  <rect x="70" y="24" width="34" height="44" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="4"/>
+  <!-- Combined Doc at bottom -->
+  <rect x="44" y="70" width="40" height="46" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="5"/>
+  <!-- Arrows pointing to merger -->
+  <path d="M38 52 Q44 64 50 74 M90 52 Q84 64 78 74" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+  <path d="M50 74 l-5-2 M50 74 l-1-6 M78 74 l 5-2 M78 74 l 1-6" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

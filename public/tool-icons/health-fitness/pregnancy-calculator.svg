@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Pregnancy Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#fff5f5"/>
+  <!-- Baby Footprints -->
+  <!-- Left Foot -->
+  <path d="M48 58 C42 58 38 68 38 78 C38 86 44 90 48 90 C54 90 56 82 56 78 C56 68 52 58 48 58 Z" fill="#fca5a5" stroke="#ef4444" stroke-width="4"/>
+  <circle cx="40" cy="46" r="3.5" fill="#ef4444"/>
+  <circle cx="47" cy="44" r="3.5" fill="#ef4444"/>
+  <circle cx="54" cy="47" r="3" fill="#ef4444"/>
+  <circle cx="59" cy="52" r="2.5" fill="#ef4444"/>
+  <!-- Right Foot -->
+  <path d="M78 50 C72 50 68 60 68 70 C68 78 74 82 78 82 C84 82 86 74 86 70 C86 60 82 50 78 50 Z" fill="#fca5a5" stroke="#ef4444" stroke-width="4"/>
+  <circle cx="70" cy="38" r="3.5" fill="#ef4444"/>
+  <circle cx="77" cy="36" r="3.5" fill="#ef4444"/>
+  <circle cx="84" cy="39" r="3" fill="#ef4444"/>
+  <circle cx="89" cy="44" r="2.5" fill="#ef4444"/>
+</svg>

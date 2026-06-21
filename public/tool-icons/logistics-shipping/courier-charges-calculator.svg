@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Courier Charges Calculator</title>
+  <rect width="128" height="128" rx="28" fill="#f0fdfa"/>
+  <!-- Courier Package -->
+  <rect x="32" y="38" width="64" height="52" rx="6" fill="#ccfbf1" stroke="#0f766e" stroke-width="6"/>
+  <!-- Lid Flaps -->
+  <path d="M32 52 H96 M64 38 V52" fill="none" stroke="#0f766e" stroke-width="4"/>
+  <!-- Shipping Label / Barcode sticker -->
+  <rect x="40" y="60" width="24" height="20" rx="2" fill="#ffffff" stroke="#115e59" stroke-width="3"/>
+  <line x1="46" y1="66" x2="58" y2="66" stroke="#115e59" stroke-width="2"/>
+  <line x1="46" y1="71" x2="54" y2="71" stroke="#115e59" stroke-width="2"/>
+  <line x1="46" y1="75" x2="56" y2="75" stroke="#115e59" stroke-width="2"/>
+  <!-- Rupee Charge Badge / Seal -->
+  <circle cx="84" cy="74" r="15" fill="#f0fdfa" stroke="#ea580c" stroke-width="4"/>
+  <path d="M79 70 h10 M79 74 h10 M82 70 v6 c0 2 2 2 2 2" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

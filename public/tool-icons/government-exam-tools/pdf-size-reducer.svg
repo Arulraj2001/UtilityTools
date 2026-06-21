@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">PDF Size Reducer</title>
+  <rect width="128" height="128" rx="28" fill="#eff6ff"/>
+  <rect x="34" y="28" width="60" height="72" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="6"/>
+  <!-- Folded corner mock -->
+  <path d="M80 28 L94 42 H80 Z" fill="#3b82f6" stroke="#2563eb" stroke-width="4" stroke-linejoin="round"/>
+  <!-- PDF Text -->
+  <path d="M46 54 h8 M46 64 h8 M46 54 v10 M58 54 v10 h6 M68 54 v10" fill="none" stroke="#1d4ed8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Reducer arrows -->
+  <path d="M64 12 v12 M64 24 l-4-4 M64 24 l 4-4 M64 116 v-12 M64 104 l-4 4 M64 104 l 4 4" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
