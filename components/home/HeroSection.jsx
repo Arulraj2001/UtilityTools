@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search, Sparkles, ArrowRight, FileText, Image as ImageIcon, Camera, Calculator, Code2 } from 'lucide-react';
 
 const QUICK_LINKS = [
@@ -125,9 +126,13 @@ export default function HeroSection({ toolCount }) {
           {/* Right Column - Hero Graphic */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end w-full">
             <div className="relative w-full max-w-[480px] lg:max-w-none rounded-[1.75rem] overflow-hidden border border-border shadow-xl animate-float">
-              <img
+              <Image
                 src="/Home.png"
-                alt="QuickUtils Hero Graphics"
+                alt="QuickUtils online tools dashboard preview"
+                width={1536}
+                height={1024}
+                sizes="(max-width: 1024px) min(100vw, 480px), 480px"
+                preload
                 className="w-full h-auto object-contain bg-transparent"
               />
             </div>

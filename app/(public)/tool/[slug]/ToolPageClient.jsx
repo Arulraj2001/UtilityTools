@@ -22,6 +22,8 @@ const PDFTool = lazy(() => import('@/components/tools/PDFTool'))
 const GovToolRouter = lazy(() => import('@/components/tools/gov/GovToolRouter'))
 const LogisticsToolRouter = lazy(() => import('@/components/tools/logistics/LogisticsToolRouter'))
 const SellerToolRouter = lazy(() => import('@/components/tools/seller/SellerToolRouter'))
+const SeoToolRouter = lazy(() => import('@/components/tools/seo/SeoToolRouter'))
+const TextToolRouter = lazy(() => import('@/components/tools/text/TextToolRouter'))
 
 const IMAGE_TOOLS = [
   'image-compressor', 'image-resizer', 'image-converter', 'image-cropper',
@@ -59,6 +61,19 @@ const SELLER_TOOLS = [
   'product-pricing-calculator', 'roi-calculator', 'seller-profit-estimator',
 ];
 
+const SEO_TOOLS = [
+  'meta-tag-generator', 'open-graph-generator', 'robots-txt-generator',
+  'sitemap-generator', 'schema-generator', 'utm-builder',
+  'keyword-density-checker', 'word-density-checker',
+  'html-minifier', 'css-minifier', 'javascript-minifier',
+];
+
+const TEXT_TOOLS = [
+  'word-counter', 'case-converter', 'text-compare', 'find-replace',
+  'slug-generator', 'lorem-ipsum', 'text-reverser', 'line-sorter',
+  'duplicate-remover', 'whitespace-remover',
+];
+
 export default function ToolPageClient({ tool, categoryName }) {
   const [inputs, setInputs] = useState({})
   const [result, setResult] = useState(null)
@@ -72,6 +87,8 @@ export default function ToolPageClient({ tool, categoryName }) {
   const isGovTool = tool ? GOV_TOOLS.includes(tool.slug) : false
   const isLogisticsTool = tool ? LOGISTICS_TOOLS.includes(tool.slug) : false
   const isSellerTool = tool ? SELLER_TOOLS.includes(tool.slug) : false
+  const isSeoTool = tool ? SEO_TOOLS.includes(tool.slug) : false
+  const isTextTool = tool ? TEXT_TOOLS.includes(tool.slug) : false
   const isBookmarked = tool ? bookmarks.includes(tool.id) : false
 
   const prevSlugRef = useRef(tool?.slug)
@@ -283,6 +300,14 @@ export default function ToolPageClient({ tool, categoryName }) {
       ) : isSellerTool ? (
         <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading seller tool…</div>}>
           <SellerToolRouter tool={tool} />
+        </Suspense>
+      ) : isSeoTool ? (
+        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading SEO tool…</div>}>
+          <SeoToolRouter tool={tool} />
+        </Suspense>
+      ) : isTextTool ? (
+        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading text tool…</div>}>
+          <TextToolRouter tool={tool} />
         </Suspense>
       ) : (
         <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading tool form…</div>}>

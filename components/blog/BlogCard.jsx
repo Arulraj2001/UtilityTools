@@ -6,12 +6,23 @@ import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 
+const formatDate = (value, pattern = 'MMM d, yyyy') => {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return format(date, pattern)
+}
+
 function BlogCard({ post, index = 0, compact = false }) {
   const [previewOpen, setPreviewOpen] = useState(false)
 
   if (!post) return null
 
   const imageUrl = post.featured_image || post.og_image
+  const publishedDate = formatDate(post.published_at || post.created_at)
+  const updatedDate = formatDate(post.updated_at)
+  const compactDate = formatDate(post.published_at || post.created_at, 'MMM d')
+  const authorName = post.author_name || post.author || 'QuickUtils Editorial Team'
 
   const handlePreviewOpen = (event) => {
     event.preventDefault()
@@ -69,7 +80,7 @@ function BlogCard({ post, index = 0, compact = false }) {
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1.5 border-t border-border/30">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3 opacity-70" />
-                    {format(new Date(post.created_at), 'MMM d')}
+                    {compactDate || 'Updated'}
                   </span>
                   {post.reading_time && (
                     <span>{post.reading_time} min read</span>
@@ -145,8 +156,14 @@ function BlogCard({ post, index = 0, compact = false }) {
                   <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 opacity-70" />
-                      {format(new Date(post.created_at), 'MMM d, yyyy')}
+                      {publishedDate || 'Date reviewed'}
                     </span>
+
+                    <span>By {authorName}</span>
+
+                    {updatedDate && updatedDate !== publishedDate && (
+                      <span>Updated {updatedDate}</span>
+                    )}
                     
                     {post.reading_time && (
                       <span className="flex items-center gap-1.5">

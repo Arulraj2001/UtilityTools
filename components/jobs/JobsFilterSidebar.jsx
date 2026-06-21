@@ -1,6 +1,6 @@
 'use client';
 import React, { useMemo } from 'react'
-import { useSearchParams as useNextSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useJobCategories } from '@/hooks/jobs/useJobCategories'
 import { Button } from '@/components/ui/button'
 
@@ -14,14 +14,19 @@ const quickFilters = [
   { key: 'tech', label: 'Tech' },
 ]
 
-export default function JobsFilterSidebar({ onClear = () => {} }) {
-  const { data: categories = [] } = useJobCategories()
+export default function JobsFilterSidebar({
+  onClear = () => {},
+  initialCategories = [],
+  queryString = '',
+  pathname = '/jobs',
+}) {
+  const { data: categories = [] } = useJobCategories({ initialData: initialCategories })
   const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useNextSearchParams()
+  const searchParams = useMemo(() => new URLSearchParams(queryString), [queryString])
 
   const setSearchParams = (newParams) => {
-    router.push(`${pathname}?${newParams.toString()}`)
+    const nextQuery = newParams.toString()
+    router.push(nextQuery ? `${pathname}?${nextQuery}` : pathname)
   }
 
   const selectedCategory = searchParams.get('category') || ''

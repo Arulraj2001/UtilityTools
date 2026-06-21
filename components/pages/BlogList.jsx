@@ -1,7 +1,7 @@
 'use client';
 import React, { useMemo, useState, useEffect } from 'react'
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { 
@@ -15,7 +15,6 @@ import { filterPosts } from '@/lib/blogFilterUtils'
 import { mergeBlogCategories, mergeBlogPosts } from '@/lib/staticBlogPosts'
 import BlogCard from '@/components/blog/BlogCard'
 import StaticPageSEO, { SITE_URL, buildBreadcrumbSchema } from '@/components/seo/StaticPageSEO'
-import { robotsForSearchParams } from '@/lib/indexation'
 import { toast } from 'sonner'
 
 const blogDescription =
@@ -83,8 +82,11 @@ function BlogEmptyState() {
   )
 }
 
-export default function BlogList() {
-  const searchParams = useSearchParams()
+export default function BlogList({
+  initialPosts = [],
+  initialCategories = [],
+  initialSearchParams = {},
+}) {
   const router = useRouter()
 
   // State for search and sorting
@@ -94,19 +96,22 @@ export default function BlogList() {
   const [email, setEmail] = useState('')
 
   // Get active filters from URL
-  const activeCategory = useMemo(() => searchParams.get('category') || '', [searchParams.toString()])
-  const activeTags = useMemo(() => searchParams.getAll('tag') || [], [searchParams.toString()])
+  const activeCategory = initialSearchParams.category || ''
+  const activeTags = Array.isArray(initialSearchParams.tags) ? initialSearchParams.tags : []
   const activeTagsKey = useMemo(() => activeTags.join(','), [activeTags])
+  const queryString = initialSearchParams.queryString || ''
 
   const { data: remotePosts = [], isLoading } = useQuery({
     queryKey: ['blog-published'],
     queryFn: () => getBlogPosts({ published: true, orderBy: 'created_at', ascending: false, limit: 100 }),
+    initialData: initialPosts,
     retry: false,
   })
 
   const { data: remoteCategories = [] } = useQuery({
     queryKey: ['blog-categories'],
     queryFn: () => getBlogCategories({ orderBy: 'sort_order', ascending: true, limit: 100 }),
+    initialData: initialCategories,
     retry: false,
   })
 
@@ -149,7 +154,7 @@ export default function BlogList() {
 
   // Navigation handlers
   const handleCategoryChange = (categorySlug) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(queryString)
     if (categorySlug === 'all') {
       params.delete('category')
     } else {
@@ -159,7 +164,7 @@ export default function BlogList() {
   }
 
   const handleTagToggle = (tag) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(queryString)
     const currentTags = params.getAll('tag')
 
     if (currentTags.includes(tag)) {
@@ -228,7 +233,7 @@ export default function BlogList() {
         path="/blog"
         ogTitle="QuickUtils Blog - Tool Guides and Practical Tutorials"
         ogDescription="Learn how to use calculators, PDF tools, image tools, text tools, and developer utilities with clear examples."
-        robots={robotsForSearchParams(searchParams)}
+        robots={initialSearchParams.hasFilters || posts.length === 0 ? 'noindex, follow' : 'index, follow, max-image-preview:large'}
         jsonLd={[
           blogSchema,
           buildBreadcrumbSchema([
@@ -248,11 +253,11 @@ export default function BlogList() {
             <div className="lg:col-span-8 space-y-6">
               <div className="space-y-3">
                 <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-                  QuickUtils Blog
+                  QuickUtils Guides
                 </h1>
                 <p className="text-muted-foreground text-base sm:text-lg max-w-2xl leading-relaxed">
                   Practical guides to help you understand calculators, PDF tools, image tools,
-                  text tools, developer utilities, and everyday productivity workflows.
+                  text tools, developer utilities, and everyday productivity workflows on QuickUtils.
                 </p>
               </div>
 
@@ -496,6 +501,30 @@ export default function BlogList() {
                 <div className="flex items-center gap-2 text-[11px] text-muted-foreground/80 pt-2 border-t border-border/30">
                   <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
                   <span>No spam. Unsubscribe anytime.</span>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-2xl bg-card border border-border/50 shadow-sm space-y-4">
+                <h3 className="font-bold text-base text-foreground pb-2 border-b border-border/30">
+                  Related tools
+                </h3>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <Link href="/tool/photo-kb-reducer" className="flex items-center justify-between gap-3 hover:text-primary transition-colors">
+                    <span>Photo KB Reducer</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                  <Link href="/tool/pdf-compressor" className="flex items-center justify-between gap-3 hover:text-primary transition-colors">
+                    <span>PDF Compressor</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                  <Link href="/tool/cutoff-calculator" className="flex items-center justify-between gap-3 hover:text-primary transition-colors">
+                    <span>Cutoff Calculator</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                  <Link href="/categories" className="flex items-center justify-between gap-3 hover:text-primary transition-colors">
+                    <span>Browse tool categories</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
               </div>
 

@@ -1,7 +1,6 @@
 'use client';
 import React, { useEffect, useMemo } from 'react'
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query'
 import {
   Building2,
@@ -14,6 +13,9 @@ import {
   AlertTriangle,
   ShieldCheck,
   Clock,
+  ExternalLink,
+  FileText,
+  CheckCircle2,
 } from 'lucide-react'
 
 import { useJob } from '@/hooks/jobs/useJobs'
@@ -24,8 +26,6 @@ import JobApplyCard from '@/components/jobs/JobApplyCard'
 import RelatedJobs from '@/components/jobs/RelatedJobs'
 import JobSEOLinking from '@/components/jobs/JobSEOLinking'
 import { JobDetailSkeleton } from '@/components/jobs/skeletons'
-
-import JobSEO, { isExpired } from '@/utils/jobs/jobSeo'
 
 import {
   matchRelatedTools,
@@ -54,8 +54,51 @@ const getApplicationStatus = (lastDate) => {
   return { open: true, label: 'Applications Open', days: diffDays }
 }
 
-export default function JobDetailPage() {
-  const { slug } = useParams()
+const formatDateValue = (value) => {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value)
+  return date.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+const normalizeStructuredEntries = (value) => {
+  if (!value) return []
+  if (Array.isArray(value)) return value.map((item, index) => [`${index + 1}`, item])
+  if (typeof value === 'object') return Object.entries(value)
+  return [['Details', value]]
+}
+
+function StructuredDetails({ title, value }) {
+  const entries = normalizeStructuredEntries(value).filter(([, item]) => {
+    if (item === null || item === undefined) return false
+    if (Array.isArray(item)) return item.length > 0
+    if (typeof item === 'object') return Object.keys(item).length > 0
+    return String(item).trim().length > 0
+  })
+
+  if (entries.length === 0) return null
+
+  return (
+    <div>
+      <p className="font-medium text-foreground text-xs mb-2">{title}</p>
+      <div className="space-y-2">
+        {entries.map(([key, item]) => (
+          <div key={key} className="rounded-xl border border-border/50 bg-background/60 p-3">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+              {String(key).replace(/_/g, ' ')}
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              {typeof item === 'object' ? JSON.stringify(item) : String(item)}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export default function JobDetailPage({ slug: initialSlug, initialJob = null }) {
+  const slug = initialSlug || initialJob?.slug
 
   const { value: jobsEnabled = true } = useSiteBooleanSetting('jobs_enabled', true)
 
@@ -64,7 +107,7 @@ export default function JobDetailPage() {
     isLoading,
     isError,
     error,
-  } = useJob(slug)
+  } = useJob(slug, { initialData: initialJob })
 
   // Track job view for analytics
   useEffect(() => {
@@ -78,6 +121,11 @@ export default function JobDetailPage() {
     () => getApplicationStatus(job?.last_date),
     [job?.last_date]
   )
+
+  const publishedDate = formatDateValue(job?.published_at || job?.created_at)
+  const updatedDate = formatDateValue(job?.updated_at)
+  const applicationStartDate = formatDateValue(job?.application_start_date)
+  const lastDate = formatDateValue(job?.last_date)
 
   const {
     data: relatedTools = [],
@@ -158,8 +206,6 @@ export default function JobDetailPage() {
 
   return (
     <main className="min-h-screen">
-      <JobSEO job={job} />
-
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-border/40">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-background" />

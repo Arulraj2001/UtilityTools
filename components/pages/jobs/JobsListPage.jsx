@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   BriefcaseBusiness,
   Search,
@@ -40,23 +40,28 @@ import {
 } from '@/components/jobs/empty-states';
 import StaticPageSEO, { SITE_URL, buildBreadcrumbSchema } from '@/components/seo/StaticPageSEO';
 import { buildCollectionPageSchema } from '@/lib/pageSchemas';
-import { robotsForSearchParams } from '@/lib/indexation';
 
 const jobsDescription =
   'Browse curated QuickUtils job listings, internships, fresher opportunities, and government openings with application-support tools and source review standards.';
 
-export default function JobsListPage() {
+export default function JobsListPage({
+  initialJobs = [],
+  initialFeatured = [],
+  initialCategories = [],
+  initialSearchParams = {},
+}) {
   const [search, setSearch] = useState('');
-  const searchParams = useSearchParams();
   const router = useRouter();
   const [pageSize, setPageSize] = useState(20);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [location, setLocation] = useState('');
+  const queryString = initialSearchParams.queryString || '';
+  const searchParams = useMemo(() => new URLSearchParams(queryString), [queryString]);
 
   const { value: jobsEnabled = true } = useSiteBooleanSetting('jobs_enabled', true);
-  const { data: jobCategories = [] } = useJobCategories();
+  const { data: jobCategories = [] } = useJobCategories({ initialData: initialCategories });
 
-  const categoryParam = searchParams.get('category') || undefined;
+  const categoryParam = initialSearchParams.category || undefined;
 
   const {
     data: jobs = [],
@@ -69,13 +74,15 @@ export default function JobsListPage() {
     category: categoryParam,
     pageSize,
     enabled: jobsEnabled,
+    initialData: !search && pageSize === 20 ? initialJobs : undefined,
   });
 
-  const { data: featured = [] } = useFeaturedJobs();
+  const { data: featured = [] } = useFeaturedJobs({ initialData: initialFeatured });
 
   const { data: allJobs = [] } = useJobs({
     pageSize: 100,
     enabled: jobsEnabled,
+    initialData: initialJobs,
   });
 
   const activeQuickFilters = useMemo(
@@ -91,12 +98,12 @@ export default function JobsListPage() {
       ]
         .filter((item) => searchParams.has(item.key))
         .map((item) => item.label),
-    [searchParams]
+    [queryString]
   );
 
   useEffect(() => {
     setPageSize(20);
-  }, [search, categoryParam, searchParams.toString()]);
+  }, [search, categoryParam, queryString]);
 
   const results = useMemo(() => {
     const filters = {
@@ -207,7 +214,16 @@ export default function JobsListPage() {
 
       return true;
     });
-  }, [jobs, searchParams, location]);
+  }, [jobs, queryString, location]);
+
+  const internshipCount = useMemo(
+    () =>
+      (allJobs || []).filter((job) => {
+        const value = `${job.title || ''} ${job.category || ''} ${job.job_type || ''} ${(job.tags || []).join(' ')}`.toLowerCase();
+        return value.includes('intern');
+      }).length,
+    [allJobs]
+  );
 
   const collectionSchema = useMemo(() => buildCollectionPageSchema({
     name: 'QuickUtils Jobs',
@@ -222,6 +238,9 @@ export default function JobsListPage() {
   }), [results]);
 
   const hasMoreServerResults = jobs.length >= pageSize;
+  const robotsContent = initialSearchParams.hasFilters || (allJobs || []).length === 0
+    ? 'noindex, follow'
+    : 'index, follow, max-image-preview:large';
 
   const handleCategorySelect = (slug) => {
     const params = new URLSearchParams(searchParams);
@@ -276,7 +295,7 @@ export default function JobsListPage() {
         path="/jobs"
         ogTitle="QuickUtils Jobs"
         ogDescription={jobsDescription}
-        robots={robotsForSearchParams(searchParams)}
+        robots={robotsContent}
         jsonLd={[
           collectionSchema,
           buildBreadcrumbSchema([
@@ -427,7 +446,7 @@ export default function JobsListPage() {
                   </div>
                   <div>
                     <div className="font-extrabold text-base text-foreground leading-tight">
-                      {allJobs.length ? allJobs.length.toLocaleString() : '1,248'} Jobs Available
+                      {allJobs.length ? `${allJobs.length.toLocaleString()} Jobs Available` : 'No Live Listings'}
                     </div>
                     <div className="text-xs text-muted-foreground mt-0.5">Latest government & private openings</div>
                   </div>
@@ -442,7 +461,7 @@ export default function JobsListPage() {
                   </div>
                   <div>
                     <div className="font-extrabold text-base text-foreground leading-tight">
-                      358 Internship Openings
+                      {internshipCount ? `${internshipCount.toLocaleString()} Internship Openings` : 'Internships Under Review'}
                     </div>
                     <div className="text-xs text-muted-foreground mt-0.5">Fresh opportunities for students</div>
                   </div>
@@ -500,7 +519,11 @@ export default function JobsListPage() {
             </div>
 
             <div className="overflow-y-auto max-h-[calc(100vh-14rem)] pb-28">
-              <JobsFilterSidebar onClear={() => setIsFilterOpen(false)} />
+              <JobsFilterSidebar
+                onClear={() => setIsFilterOpen(false)}
+                initialCategories={jobCategories}
+                queryString={queryString}
+              />
             </div>
 
             <SheetFooter className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-background/95 p-4 backdrop-blur-xl">
@@ -529,7 +552,10 @@ export default function JobsListPage() {
           {/* FILTER SIDEBAR */}
           <aside className="hidden xl:block">
             <div className="sticky top-28 rounded-3xl border border-border/50 bg-card p-5 shadow-sm">
-              <JobsFilterSidebar />
+              <JobsFilterSidebar
+                initialCategories={jobCategories}
+                queryString={queryString}
+              />
             </div>
           </aside>
 
