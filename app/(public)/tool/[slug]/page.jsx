@@ -7,6 +7,7 @@ import { buildWebApplicationSchema } from '@/lib/pageSchemas';
 import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import { countWords, getToolHowToSteps, getToolUseCases, buildToolFaqItems, shouldAddToolFallbackContent } from '@/lib/toolContentFallbacks';
 import { rankTools } from '@/lib/relevance';
+import { ShieldCheck, Calendar } from 'lucide-react';
 import ToolPageClient from './ToolPageClient';
 
 const SITE_URL = (
@@ -459,16 +460,29 @@ export default async function ToolPage({ params }) {
           )}
 
           {/* Last updated + reviewer */}
-          <section className="text-xs text-muted-foreground border-t border-border/50 pt-4 mt-8">
-            {formattedDate && (
-              <p>Last updated: {formattedDate}</p>
-            )}
-            <p>Reviewed by: QuickUtils Editorial Team</p>
-            <p className="mt-1">
-              <a href="/methodology" className="underline hover:text-foreground">How tools are tested</a>
-              {' · '}
-              <a href="/corrections-policy" className="underline hover:text-foreground">Report a correction</a>
-            </p>
+          <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-border/50 pt-6 mt-10 text-sm text-muted-foreground">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/20">
+                <ShieldCheck className="h-5 w-5 shrink-0" />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground text-xs leading-none mb-1">Reviewed &amp; Verified</p>
+                <p className="text-[11px] leading-tight">By QuickUtils Editorial Team</p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:items-end gap-1.5 text-xs">
+              {formattedDate && (
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5 shrink-0 text-muted-foreground/75" />
+                  <span>Last updated: {formattedDate}</span>
+                </span>
+              )}
+              <div className="flex items-center gap-2 mt-0.5 text-muted-foreground">
+                <a href="/methodology" className="hover:text-primary transition-colors hover:underline">How tools are tested</a>
+                <span>•</span>
+                <a href="/corrections-policy" className="hover:text-primary transition-colors hover:underline">Report a correction</a>
+              </div>
+            </div>
           </section>
         </div>
       </div>
