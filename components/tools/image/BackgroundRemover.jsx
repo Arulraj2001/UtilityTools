@@ -2,28 +2,29 @@
  * Background Remover — AI-powered via MediaPipe Image Segmentation
  *
  * Pipeline:
- * 1. Load MediaPipe ImageSegmenter (selfie_multiclass model) from CDN
+ * 1. Load MediaPipe ImageSegmenter (selfie_multiclass model) from CDN dynamically via Function bypass
  * 2. Run segmentation → confidence mask for each pixel
- * 3. Apply Gaussian blur to mask edges (soft feathering)
- * 4. Apply mask to original canvas → transparent PNG
- * 5. Optional: replace background with color / blur / custom image
+ * 3. Pre-render cropped foreground with adjustable CPU edge feathering & refinement
+ * 4. Composite final output on GPU-accelerated 2D canvas with real-time sliders (Scale, Translate, Filters, Drop Shadow, Background Modes, Presets)
  *
  * Model: MediaPipe selfie_multiclass_256x256 (1.2MB WASM + tflite)
  * Quality: handles hair, soft edges, complex backgrounds
  * Privacy: 100% client-side, no server calls
  */
+'use client';
+
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Download, RefreshCw, Loader2, Sparkles,
-  Sliders, Eye, ChevronDown, ChevronUp
+  Sliders, Eye, ChevronDown, ChevronUp,
+  Move, Sun, Palette, BookOpen, Layers
 } from 'lucide-react';
 import ImageDropZone from './ImageDropZone';
 import BeforeAfter from './BeforeAfter';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { saveAs } from 'file-saver';
 import { cn } from '@/lib/utils';
-import { revokeObjectUrl } from '@/lib/fileProcessing';
 
 // ── MediaPipe loader ─────────────────────────────────────────────────────────
 let mpSegmenterPromise = null;
@@ -36,9 +37,10 @@ async function loadMediaPipe() {
   if (mpSegmenterPromise) return mpSegmenterPromise;
 
   mpSegmenterPromise = (async () => {
-    // Dynamically import the ESM bundle from CDN
-    const { ImageSegmenter, FilesetResolver } = await import(
-      /* @vite-ignore */ `${MP_CDN}/vision_bundle.mjs`
+    // Escape Next.js Turbopack compilation of CDN dynamic ESM imports
+    const importDynamic = new Function('url', 'return import(url)');
+    const { ImageSegmenter, FilesetResolver } = await importDynamic(
+      `${MP_CDN}/vision_bundle.mjs`
     );
 
     const filesetResolver = await FilesetResolver.forVisionTasks(`${MP_CDN}/wasm`);
@@ -66,7 +68,7 @@ function gaussianBlurMask(mask, w, h, radius = 3) {
   let sum = 0;
   for (let ky = -radius; ky <= radius; ky++) {
     for (let kx = -radius; kx <= radius; kx++) {
-      const v = Math.exp(-(kx*kx + ky*ky) / (2 * radius * radius));
+      const v = Math.exp(-(kx * kx + ky * ky) / (2 * radius * radius));
       kernel.push({ kx, ky, v });
       sum += v;
     }
@@ -101,7 +103,7 @@ function applyMaskToImageData(srcData, mask, w, h, feather, edgeRefine) {
         : 1 - Math.pow((1 - alpha) * 2, 1 + edgeRefine) / 2;
     }
     alpha = Math.min(1, Math.max(0, alpha));
-    out[i * 4]     = srcData[i * 4];
+    out[i * 4] = srcData[i * 4];
     out[i * 4 + 1] = srcData[i * 4 + 1];
     out[i * 4 + 2] = srcData[i * 4 + 2];
     out[i * 4 + 3] = Math.round(alpha * 255);
@@ -109,243 +111,315 @@ function applyMaskToImageData(srcData, mask, w, h, feather, edgeRefine) {
   return out;
 }
 
-// ── Merge foreground over background ─────────────────────────────────────────
-function compositeBackground(fgData, bgColor, blurBg, bgImgData, w, h) {
-  const out = new Uint8ClampedArray(fgData.length);
-  let bgR = 255, bgG = 255, bgB = 255;
-  if (bgColor) {
-    const r = parseInt(bgColor.slice(1, 3), 16);
-    const g = parseInt(bgColor.slice(3, 5), 16);
-    const b = parseInt(bgColor.slice(5, 7), 16);
-    bgR = r; bgG = g; bgB = b;
-  }
+// ── Apply Preset Gradients ───────────────────────────────────────────────────
+const BACKGROUND_PRESETS = [
+  { id: 'deep-slate', name: 'Deep Slate', gradient: ['#1e293b', '#0f172a'] },
+  { id: 'neon-sunset', name: 'Neon Sunset', gradient: ['#ec4899', '#f43f5e', '#eab308'] },
+  { id: 'ocean-breeze', name: 'Ocean Breeze', gradient: ['#06b6d4', '#3b82f6'] },
+  { id: 'warm-sand', name: 'Warm Sand', gradient: ['#ffedd5', '#fed7aa'] },
+  { id: 'royal-purple', name: 'Royal Purple', gradient: ['#6366f1', '#3b0764'] },
+  { id: 'studio-white', name: 'Studio White', color: '#ffffff' },
+];
 
-  for (let i = 0; i < w * h; i++) {
-    const alpha = fgData[i * 4 + 3] / 255;
-    let bR = bgR, bG = bgG, bB = bgB;
-    if (bgImgData) {
-      bR = bgImgData[i * 4]; bG = bgImgData[i * 4 + 1]; bB = bgImgData[i * 4 + 2];
-    }
-    out[i * 4]     = Math.round(fgData[i * 4]     * alpha + bR * (1 - alpha));
-    out[i * 4 + 1] = Math.round(fgData[i * 4 + 1] * alpha + bG * (1 - alpha));
-    out[i * 4 + 2] = Math.round(fgData[i * 4 + 2] * alpha + bB * (1 - alpha));
-    out[i * 4 + 3] = 255;
+function applyPresetBg(ctx, presetId, W, H) {
+  const preset = BACKGROUND_PRESETS.find(p => p.id === presetId);
+  if (!preset) return;
+
+  if (preset.color) {
+    ctx.fillStyle = preset.color;
+    ctx.fillRect(0, 0, W, H);
+  } else if (preset.gradient) {
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    preset.gradient.forEach((color, idx) => {
+      grad.addColorStop(idx / (preset.gradient.length - 1), color);
+    });
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
   }
-  return out;
 }
 
-// ── Simple blur for background (box blur 2 passes) ───────────────────────────
-function blurImageData(data, w, h, radius = 20) {
-  const tmp = new Uint8ClampedArray(data);
-  for (let pass = 0; pass < 2; pass++) {
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        let r=0,g=0,b=0,cnt=0;
-        for (let ky = -radius; ky <= radius; ky++) {
-          const ny = Math.min(h-1, Math.max(0, y+ky));
-          const i = (ny * w + x) * 4;
-          r += tmp[i]; g += tmp[i+1]; b += tmp[i+2]; cnt++;
-        }
-        const i = (y*w+x)*4;
-        data[i]=r/cnt; data[i+1]=g/cnt; data[i+2]=b/cnt;
-      }
-    }
-  }
-  return data;
-}
-
-// ── Core AI removal ───────────────────────────────────────────────────────────
-async function removeBackgroundAI(file, settings, onStatus) {
-  onStatus('Loading AI model…');
-  const segmenter = await loadMediaPipe();
-
-  onStatus('Preparing image…');
-  const url = URL.createObjectURL(file);
-  const img = await new Promise((res, rej) => {
-    const i = new Image();
-    i.onload = () => res(i);
-    i.onerror = rej;
-    i.src = url;
-  });
-  URL.revokeObjectURL(url);
-
-  const { width: W, height: H } = img;
-
-  // Draw original image
-  const srcCanvas = document.createElement('canvas');
-  srcCanvas.width = W; srcCanvas.height = H;
-  const srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true });
-  srcCtx.drawImage(img, 0, 0);
-  const srcData = srcCtx.getImageData(0, 0, W, H).data;
-
-  onStatus('Running AI segmentation…');
-
-  // Run segmenter — segment() is synchronous for IMAGE mode
-  const result = segmenter.segment(srcCanvas);
-
-  if (!result?.confidenceMasks?.length) {
-    throw new Error('Segmentation returned no mask. Try a different image.');
-  }
-
-  onStatus('Applying mask…');
-
-  // MediaPipe selfie_multiclass returns 6 channels:
-  // 0=background, 1=hair, 2=body, 3=face, 4=clothes, 5=others
-  // We want foreground = channels 1-5 combined
-  const masks = result.confidenceMasks;
-  const totalPixels = W * H;
-  const fgMask = new Float32Array(totalPixels);
-
-  // Combine all foreground confidence channels
-  for (let ch = 1; ch < masks.length; ch++) {
-    const chData = masks[ch].getAsFloat32Array();
-    for (let px = 0; px < totalPixels; px++) {
-      fgMask[px] = Math.min(1, fgMask[px] + chData[px]);
-    }
-  }
-
-  // Close masks to free GPU memory
-  masks.forEach(m => m.close?.());
-
-  // Apply feathering + edge refinement
-  const maskedData = applyMaskToImageData(
-    srcData, fgMask, W, H,
-    settings.feather, settings.edgeRefine
-  );
-
-  // Build transparent PNG canvas
-  const outCanvas = document.createElement('canvas');
-  outCanvas.width = W; outCanvas.height = H;
-  const outCtx = outCanvas.getContext('2d');
-  outCtx.putImageData(new ImageData(maskedData, W, H), 0, 0);
-
-  // Background compositing if needed
-  if (settings.bgMode !== 'transparent') {
-    let bgImgData = null;
-    if (settings.bgMode === 'blur') {
-      const blurCanvas = document.createElement('canvas');
-      blurCanvas.width = W; blurCanvas.height = H;
-      const blurCtx = blurCanvas.getContext('2d', { willReadFrequently: true });
-      blurCtx.drawImage(img, 0, 0);
-      const blurD = blurCtx.getImageData(0, 0, W, H);
-      blurImageData(blurD.data, W, H, Math.round(settings.blurAmount));
-      bgImgData = blurD.data;
-    } else if (settings.bgMode === 'image' && settings.bgImgData) {
-      bgImgData = settings.bgImgData;
-    }
-    const composed = compositeBackground(
-      maskedData, settings.bgMode === 'color' ? settings.bgColor : null,
-      false, bgImgData, W, H
-    );
-    const compCanvas = document.createElement('canvas');
-    compCanvas.width = W; compCanvas.height = H;
-    compCanvas.getContext('2d').putImageData(new ImageData(composed, W, H), 0, 0);
-    outCanvas.width = 0; // cleanup
-    srcCanvas.width = 0;
-    return { canvas: compCanvas, isTransparent: false };
-  }
-
-  srcCanvas.width = 0;
-  return { canvas: outCanvas, isTransparent: true };
-}
-
-// ── Checkerboard style ────────────────────────────────────────────────────────
+// ── Checkerboard style for transparency representation ───────────────────────
 const checkerStyle = {
   backgroundImage: 'linear-gradient(45deg,#d4d4d8 25%,transparent 25%),linear-gradient(-45deg,#d4d4d8 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#d4d4d8 75%),linear-gradient(-45deg,transparent 75%,#d4d4d8 75%)',
   backgroundSize: '16px 16px',
   backgroundPosition: '0 0,0 8px,8px -8px,-8px 0px',
 };
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Main Component ───────────────────────────────────────────────────────────
 export default function BackgroundRemover() {
-  const [file, setFile]       = useState(null);
+  const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [result, setResult]   = useState(null);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus]   = useState('');
-  const [error, setError]     = useState(null);
+  const [status, setStatus] = useState('');
+  const [error, setError] = useState(null);
 
-  // Settings
-  const [feather, setFeather]         = useState(2);
-  const [edgeRefine, setEdgeRefine]   = useState(0.5);
-  const [bgMode, setBgMode]           = useState('transparent'); // transparent | color | blur | image
-  const [bgColor, setBgColor]         = useState('#ffffff');
-  const [blurAmount, setBlurAmount]   = useState(18);
+  // High Resolution segmentation cache
+  const [segmentedData, setSegmentedData] = useState(null);
+  const [fgCanvas, setFgCanvas] = useState(null);
+  const [resultUrl, setResultUrl] = useState(null);
+  const [previewMode, setPreviewMode] = useState('compare'); // compare | editor
+
+  // Editor Settings
+  const [feather, setFeather] = useState(1.5);
+  const [edgeRefine, setEdgeRefine] = useState(0.2);
+
+  // Background Settings
+  const [bgMode, setBgMode] = useState('transparent'); // transparent | color | blur | image | preset
+  const [bgColor, setBgColor] = useState('#e0e7ff');
+  const [blurAmount, setBlurAmount] = useState(15);
   const [bgImageFile, setBgImageFile] = useState(null);
   const [bgImageData, setBgImageData] = useState(null);
-  const [showSettings, setShowSettings] = useState(false);
+  const [activePreset, setActivePreset] = useState('deep-slate');
+
+  // Foreground Subject Adjustments
+  const [fgScale, setFgScale] = useState(1.0);
+  const [fgOffsetX, setFgOffsetX] = useState(0); // in percentage (-50 to 50)
+  const [fgOffsetY, setFgOffsetY] = useState(0); // in percentage (-50 to 50)
+
+  // Color Enhancements
+  const [fgBrightness, setFgBrightness] = useState(100);
+  const [fgContrast, setFgContrast] = useState(100);
+  const [bgBrightness, setBgBrightness] = useState(100);
+  const [bgContrast, setBgContrast] = useState(100);
+
+  // Shadow Adjustments
+  const [shadowBlur, setShadowBlur] = useState(0);
+  const [shadowColor, setShadowColor] = useState('#000000');
+  const [shadowOffsetX, setShadowOffsetX] = useState(6);
+  const [shadowOffsetY, setShadowOffsetY] = useState(6);
+
+  // UI accordion tabs
+  const [activeAccordion, setActiveAccordion] = useState('background'); // background | subject | filters | edges | shadow
 
   const bgInputRef = useRef(null);
 
-  useEffect(() => () => revokeObjectUrl(preview), [preview]);
-  useEffect(() => () => revokeObjectUrl(result?.url), [result]);
-  useEffect(() => () => revokeObjectUrl(bgImageData), [bgImageData]);
+  // Clean up object URLs on unmount/re-processing
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
+  useEffect(() => {
+    return () => {
+      if (resultUrl && resultUrl.startsWith('blob:')) URL.revokeObjectURL(resultUrl);
+    };
+  }, [resultUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (bgImageData && bgImageData.startsWith('blob:')) URL.revokeObjectURL(bgImageData);
+    };
+  }, [bgImageData]);
 
   const onFiles = ([f]) => {
     setFile(f);
-    setResult(null);
+    setSegmentedData(null);
+    setFgCanvas(null);
+    setResultUrl(null);
     setError(null);
     setPreview(URL.createObjectURL(f));
   };
 
-  const loadBgImage = async (f) => {
+  const loadBgImage = (f) => {
     setBgImageFile(f);
     const url = URL.createObjectURL(f);
-    await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.src = url; });
-    // We'll resize bg image to match at runtime — store as blob URL
     setBgImageData(url);
   };
 
-  const getBgImgDataArray = useCallback(async (W, H) => {
-    if (!bgImageData) return null;
-    const img = await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.src = bgImageData; });
-    const c = document.createElement('canvas');
-    c.width = W; c.height = H;
-    c.getContext('2d').drawImage(img, 0, 0, W, H);
-    return c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, W, H).data;
-  }, [bgImageData]);
-
-  const process = async () => {
+  // 1. Run AI Segmenter once
+  const runAISegmentation = async () => {
     if (!file) return;
     setLoading(true);
     setError(null);
-    setResult(null);
+    setStatus('Loading AI models…');
 
     try {
-      let bgImgDataArr = null;
-      if (bgMode === 'image' && bgImageData) {
-        const fileUrl = URL.createObjectURL(file);
-        const tmpImg = await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.src = fileUrl; });
-        URL.revokeObjectURL(fileUrl);
-        bgImgDataArr = await getBgImgDataArray(tmpImg.naturalWidth, tmpImg.naturalHeight);
+      const segmenter = await loadMediaPipe();
+
+      setStatus('Decoding image…');
+      const url = URL.createObjectURL(file);
+      const img = await new Promise((res, rej) => {
+        const i = new Image();
+        i.onload = () => res(i);
+        i.onerror = rej;
+        i.src = url;
+      });
+      URL.revokeObjectURL(url);
+
+      const W = img.naturalWidth;
+      const H = img.naturalHeight;
+
+      // Draw original image to canvas for pixel analysis
+      const srcCanvas = document.createElement('canvas');
+      srcCanvas.width = W;
+      srcCanvas.height = H;
+      const srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true });
+      srcCtx.drawImage(img, 0, 0);
+      const srcData = srcCtx.getImageData(0, 0, W, H).data;
+
+      setStatus('Running AI segmentation…');
+      const result = segmenter.segment(srcCanvas);
+
+      if (!result?.confidenceMasks?.length) {
+        throw new Error('Could not identify any subject background. Try another image.');
       }
 
-      const { canvas, isTransparent } = await removeBackgroundAI(file, {
-        feather, edgeRefine, bgMode, bgColor, blurAmount,
-        bgImgData: bgImgDataArr,
-      }, setStatus);
+      // Combine foreground confidence masks (channels 1-5 represent portrait elements)
+      const masks = result.confidenceMasks;
+      const totalPixels = W * H;
+      const fgMask = new Float32Array(totalPixels);
 
-      const mimeType = isTransparent ? 'image/png' : 'image/jpeg';
-      const blob = await new Promise(r => canvas.toBlob(r, mimeType, 0.95));
-      canvas.width = 0;
-      const resultUrl = URL.createObjectURL(blob);
-      setResult({ url: resultUrl, blob, isTransparent });
+      for (let ch = 1; ch < masks.length; ch++) {
+        const chData = masks[ch].getAsFloat32Array();
+        for (let px = 0; px < totalPixels; px++) {
+          fgMask[px] = Math.min(1, fgMask[px] + chData[px]);
+        }
+      }
+
+      // Close WebGL textures to free memory
+      masks.forEach(m => m.close?.());
+
+      setSegmentedData({ fgMask, W, H, srcData, img });
     } catch (e) {
-      setError(e.message || 'AI segmentation failed. Please try again.');
+      console.error(e);
+      setError(e.message || 'AI processing failed. Please try a different photo.');
     } finally {
       setLoading(false);
       setStatus('');
     }
   };
 
-  const reset = () => {
-    setFile(null); setPreview(null); setResult(null); setError(null);
-  };
+  // 2. Pre-render cropped foreground whenever feathering or refinement changes
+  useEffect(() => {
+    if (!segmentedData) return;
+    const { fgMask, W, H, srcData } = segmentedData;
+
+    // Apply feathering + edge refinement on CPU mask
+    const maskedData = applyMaskToImageData(
+      srcData, fgMask, W, H,
+      feather, edgeRefine
+    );
+
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.putImageData(new ImageData(maskedData, W, H), 0, 0);
+
+    setFgCanvas(canvas);
+  }, [segmentedData, feather, edgeRefine]);
+
+  // 3. Fast composition loop using HTML5 Canvas GPU acceleration
+  useEffect(() => {
+    if (!segmentedData || !fgCanvas) return;
+
+    const { W, H, img } = segmentedData;
+
+    const composeAndCreateUrl = async () => {
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = W;
+      finalCanvas.height = H;
+      const ctx = finalCanvas.getContext('2d');
+
+      // ─── Phase A: Render Background ───
+      if (bgMode === 'color') {
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, W, H);
+      } else if (bgMode === 'blur') {
+        ctx.save();
+        ctx.filter = `blur(${blurAmount}px) brightness(${bgBrightness}%) contrast(${bgContrast}%)`;
+        ctx.drawImage(img, -blurAmount * 2, -blurAmount * 2, W + blurAmount * 4, H + blurAmount * 4);
+        ctx.restore();
+      } else if (bgMode === 'image' && bgImageData) {
+        ctx.save();
+        ctx.filter = `brightness(${bgBrightness}%) contrast(${bgContrast}%)`;
+        const bgImg = await new Promise(res => {
+          const i = new Image();
+          i.onload = () => res(i);
+          i.src = bgImageData;
+        });
+        const scale = Math.max(W / bgImg.width, H / bgImg.height);
+        const x = (W - bgImg.width * scale) / 2;
+        const y = (H - bgImg.height * scale) / 2;
+        ctx.drawImage(bgImg, x, y, bgImg.width * scale, bgImg.height * scale);
+        ctx.restore();
+      } else if (bgMode === 'preset') {
+        ctx.save();
+        ctx.filter = `brightness(${bgBrightness}%) contrast(${bgContrast}%)`;
+        applyPresetBg(ctx, activePreset, W, H);
+        ctx.restore();
+      }
+
+      // ─── Phase B: Render Foreground (Subject) with transforms ───
+      ctx.save();
+
+      // Shadow
+      if (shadowBlur > 0) {
+        ctx.shadowColor = shadowColor;
+        ctx.shadowBlur = shadowBlur;
+        ctx.shadowOffsetX = shadowOffsetX;
+        ctx.shadowOffsetY = shadowOffsetY;
+      }
+
+      // Color filters
+      ctx.filter = `brightness(${fgBrightness}%) contrast(${fgContrast}%)`;
+
+      // Transform translation and scaling
+      ctx.translate(W * (fgOffsetX / 100), H * (fgOffsetY / 100));
+      ctx.translate(W / 2, H / 2);
+      ctx.scale(fgScale, fgScale);
+      ctx.translate(-W / 2, -H / 2);
+
+      ctx.drawImage(fgCanvas, 0, 0);
+      ctx.restore();
+
+      // Output Mime type
+      const mimeType = bgMode === 'transparent' ? 'image/png' : 'image/jpeg';
+      finalCanvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        setResultUrl(prev => {
+          if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+          return url;
+        });
+      }, mimeType, 0.95);
+    };
+
+    // Use debounced timeout to prevent canvas lockups during dragging
+    const timer = setTimeout(composeAndCreateUrl, 80);
+    return () => clearTimeout(timer);
+  }, [
+    segmentedData, fgCanvas, bgMode, bgColor, blurAmount, bgImageData, activePreset,
+    fgScale, fgOffsetX, fgOffsetY, fgBrightness, fgContrast, bgBrightness, bgContrast,
+    shadowBlur, shadowColor, shadowOffsetX, shadowOffsetY
+  ]);
 
   const downloadResult = () => {
-    if (!result) return;
-    const ext = result.isTransparent ? 'png' : 'jpg';
-    saveAs(result.url, `nobg_${file.name.replace(/\.[^.]+$/, `.${ext}`)}`);
+    if (!resultUrl) return;
+    const ext = bgMode === 'transparent' ? 'png' : 'jpg';
+    saveAs(resultUrl, `nobg_${file.name.replace(/\.[^.]+$/, `.${ext}`)}`);
+  };
+
+  const resetAll = () => {
+    setFile(null);
+    setPreview(null);
+    setSegmentedData(null);
+    setFgCanvas(null);
+    setResultUrl(null);
+    setError(null);
+    setBgMode('transparent');
+    setFgScale(1.0);
+    setFgOffsetX(0);
+    setFgOffsetY(0);
+    setFgBrightness(100);
+    setFgContrast(100);
+    setBgBrightness(100);
+    setBgContrast(100);
+    setShadowBlur(0);
+  };
+
+  const toggleAccordion = (tab) => {
+    setActiveAccordion(prev => prev === tab ? null : tab);
   };
 
   return (
@@ -353,182 +427,523 @@ export default function BackgroundRemover() {
       {!file ? (
         <ImageDropZone
           onFiles={onFiles}
-          hint="AI-powered · handles hair, portraits, complex backgrounds · 100% private"
+          hint="Portraits, objects, products · High definition model · 100% Client-side Processing"
         />
       ) : (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-          {/* AI badge */}
-          <div className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-primary/8 to-accent/8 border border-primary/20 px-4 py-3">
-            <Sparkles className="w-4 h-4 text-primary shrink-0" />
-            <p className="text-sm">
-              <strong className="text-foreground">AI Background Remover</strong>
-              <span className="text-muted-foreground ml-1.5">· MediaPipe neural segmentation · handles hair, shadows & soft edges · 100% in-browser</span>
-            </p>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* LEFT PANEL: Canvas Preview & Modes */}
+          <div className="lg:col-span-7 space-y-4">
+            
+            {/* Segmentation status bar */}
+            {!segmentedData && !loading && (
+              <div className="rounded-2xl bg-amber-500/8 border border-amber-500/20 p-4 text-center">
+                <p className="text-sm font-semibold mb-2">Subject loaded. Ready for AI extraction.</p>
+                <Button onClick={runAISegmentation} className="rounded-xl gap-2 px-6 bg-primary hover:bg-primary/90">
+                  <Sparkles className="w-4 h-4" /> Start AI Extraction
+                </Button>
+              </div>
+            )}
 
-          {/* Preview / Result */}
-          {result ? (
-            <BeforeAfter before={preview} after={result.url} beforeLabel="Original" afterLabel="Background Removed" />
-          ) : (
-            <div className="rounded-2xl overflow-hidden border border-border/50 bg-muted/10" style={result?.isTransparent ? checkerStyle : {}}>
-              <img src={preview} alt="preview" className="w-full max-h-72 object-contain" />
-            </div>
-          )}
-
-          {/* Transparent result preview */}
-          {result?.isTransparent && (
-            <div className="rounded-2xl overflow-hidden border border-border/50" style={checkerStyle}>
-              <img src={result.url} alt="transparent" className="w-full max-h-56 object-contain" />
-            </div>
-          )}
-
-          {/* Loading state */}
-          {loading && (
-            <div className="rounded-2xl border border-primary/20 bg-card p-5 space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 border-4 border-primary/15 border-t-primary rounded-full animate-spin shrink-0" />
-                <div>
-                  <p className="text-sm font-semibold">{status || 'Processing…'}</p>
-                  <p className="text-xs text-muted-foreground">Neural segmentation in progress</p>
+            {loading && (
+              <div className="rounded-2xl border border-primary/20 bg-card p-6 space-y-4 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="w-7 h-7 text-primary animate-spin shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold">{status || 'Extracting background…'}</p>
+                    <p className="text-xs text-muted-foreground">Neural network is segmenting pixels locally</p>
+                  </div>
+                </div>
+                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-primary to-accent rounded-full animate-pulse w-4/5" />
                 </div>
               </div>
-              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-primary to-accent rounded-full animate-pulse w-3/4" />
+            )}
+
+            {error && (
+              <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+                <p className="font-semibold">AI segmenter encountered an error:</p>
+                <p className="mt-1 text-muted-foreground">{error}</p>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Error */}
-          {error && (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/8 p-3.5 text-sm text-destructive">
-              <strong>Error: </strong>{error}
-              {error.includes('model') || error.includes('AI') ? (
-                <p className="text-xs text-muted-foreground mt-1">The AI model loads from CDN — make sure you're online. Large images may take 10–15s on first load.</p>
-              ) : null}
-            </div>
-          )}
-
-          {/* Settings panel */}
-          {!loading && !result && (
-            <div className="rounded-2xl border border-border/50 overflow-hidden">
-              <button onClick={() => setShowSettings(v => !v)}
-                className="w-full flex items-center justify-between p-3.5 bg-muted/10 hover:bg-muted/20 transition-colors text-sm font-semibold">
-                <span className="flex items-center gap-2"><Sliders className="w-4 h-4 text-muted-foreground" />Settings</span>
-                {showSettings ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-              </button>
-
-              {showSettings && (
-                <div className="p-4 space-y-5 border-t border-border/50">
-                  {/* Edge feathering */}
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex justify-between">
-                      <span>Edge Feathering</span>
-                      <span className="text-foreground font-bold">{feather === 0 ? 'Off' : feather}</span>
-                    </label>
-                    <input type="range" min={0} max={8} step={0.5} value={feather}
-                      onChange={e => setFeather(Number(e.target.value))}
-                      className="w-full accent-primary h-1.5" />
-                    <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
-                      <span>Hard edges</span><span>Soft / blurred edges</span>
+            {/* Preview Window */}
+            {preview && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide">Preview Area</h3>
+                  {segmentedData && resultUrl && (
+                    <div className="flex bg-muted/40 rounded-lg p-1 border border-border/50">
+                      <button
+                        onClick={() => setPreviewMode('compare')}
+                        className={cn("px-3 py-1 text-xs font-semibold rounded-md transition-all", previewMode === 'compare' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+                      >
+                        Compare
+                      </button>
+                      <button
+                        onClick={() => setPreviewMode('editor')}
+                        className={cn("px-3 py-1 text-xs font-semibold rounded-md transition-all", previewMode === 'editor' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+                      >
+                        Solo Preview
+                      </button>
                     </div>
-                  </div>
+                  )}
+                </div>
 
-                  {/* Edge refinement */}
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex justify-between">
-                      <span>Edge Refinement</span>
-                      <span className="text-foreground font-bold">{edgeRefine.toFixed(1)}</span>
-                    </label>
-                    <input type="range" min={0} max={2} step={0.1} value={edgeRefine}
-                      onChange={e => setEdgeRefine(Number(e.target.value))}
-                      className="w-full accent-primary h-1.5" />
-                    <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
-                      <span>Natural</span><span>Sharp cutout</span>
+                {segmentedData && resultUrl ? (
+                  previewMode === 'compare' ? (
+                    <BeforeAfter before={preview} after={resultUrl} beforeLabel="Original" afterLabel="Edited Cutout" />
+                  ) : (
+                    <div className="relative rounded-2xl overflow-hidden border border-border/50 bg-muted/10 flex items-center justify-center min-h-[320px] max-h-[500px]" style={bgMode === 'transparent' ? checkerStyle : {}}>
+                      <img src={resultUrl} alt="Preview Result" className="max-w-full max-h-[480px] object-contain" />
                     </div>
+                  )
+                ) : (
+                  <div className="relative rounded-2xl overflow-hidden border border-border/50 bg-muted/10 flex items-center justify-center min-h-[320px] max-h-[500px]">
+                    <img src={preview} alt="Input Source" className="max-w-full max-h-[480px] object-contain" />
                   </div>
+                )}
+              </div>
+            )}
 
-                  {/* Background mode */}
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">Background</label>
-                    <div className="grid grid-cols-4 gap-2">
+            <div className="text-[11px] text-muted-foreground flex items-center gap-1.5 justify-center">
+              <Eye className="w-3.5 h-3.5" /> All operations run client-side. Your photo never leaves your device.
+            </div>
+          </div>
+
+          {/* RIGHT PANEL: Settings & Control Knobs */}
+          <div className="lg:col-span-5 space-y-5">
+            
+            {/* Header info card */}
+            <div className="rounded-2xl border border-border/50 bg-card p-4 space-y-1 shadow-sm">
+              <h3 className="font-bold text-sm">Fine-Tune Cutout</h3>
+              <p className="text-xs text-muted-foreground">Adjust alignment, background fill, shadows and edges in real time.</p>
+            </div>
+
+            {/* Accordion Settings panels */}
+            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden divide-y divide-border/50 shadow-sm">
+              
+              {/* ACCORDION TABS */}
+              {/* 1. Background Config */}
+              <div>
+                <button
+                  onClick={() => toggleAccordion('background')}
+                  disabled={!segmentedData}
+                  className="w-full flex items-center justify-between p-4 bg-muted/5 hover:bg-muted/10 transition-colors text-sm font-bold text-left disabled:opacity-50"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <Palette className="w-4 h-4 text-primary" /> Background Blend Mode
+                  </span>
+                  {activeAccordion === 'background' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+
+                {activeAccordion === 'background' && segmentedData && (
+                  <div className="p-4 space-y-4 bg-card animate-fade-in-up">
+                    <div className="grid grid-cols-5 gap-1.5">
                       {[
-                        { id: 'transparent', label: '⬜ Transparent', desc: 'PNG' },
-                        { id: 'color', label: '🎨 Color', desc: 'Solid fill' },
-                        { id: 'blur', label: '🔵 Blur', desc: 'Blurred orig' },
-                        { id: 'image', label: '🖼️ Image', desc: 'Custom BG' },
+                        { id: 'transparent', label: 'Trans.', desc: 'PNG' },
+                        { id: 'color', label: 'Color', desc: 'Solid' },
+                        { id: 'blur', label: 'Blur', desc: 'Background' },
+                        { id: 'image', label: 'Image', desc: 'Upload' },
+                        { id: 'preset', label: 'Presets', desc: 'Grads' },
                       ].map(m => (
-                        <button key={m.id} onClick={() => setBgMode(m.id)}
-                          className={cn('px-2 py-2.5 rounded-xl border text-xs font-medium transition-all', bgMode === m.id ? 'bg-primary/10 border-primary/50 text-primary' : 'bg-muted/10 border-border hover:border-primary/30')}>
+                        <button
+                          key={m.id}
+                          onClick={() => setBgMode(m.id)}
+                          className={cn(
+                            'p-2 rounded-xl border text-[11px] font-bold leading-tight transition-all',
+                            bgMode === m.id
+                              ? 'bg-primary/10 border-primary/50 text-primary'
+                              : 'bg-muted/10 border-border hover:border-primary/20'
+                          )}
+                        >
                           <div>{m.label}</div>
-                          <div className="text-muted-foreground text-[10px] mt-0.5">{m.desc}</div>
+                          <div className="text-[9px] text-muted-foreground mt-0.5 font-normal">{m.desc}</div>
                         </button>
                       ))}
                     </div>
 
+                    {/* Conditional Settings rendering based on bgMode */}
                     {bgMode === 'color' && (
-                      <div className="flex items-center gap-3 mt-3">
-                        <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)}
-                          className="w-10 h-10 rounded-xl border border-border cursor-pointer" />
-                        <span className="text-sm text-muted-foreground">Background color: <span className="font-mono text-foreground">{bgColor}</span></span>
+                      <div className="flex items-center gap-3 pt-2">
+                        <input
+                          type="color"
+                          value={bgColor}
+                          onChange={e => setBgColor(e.target.value)}
+                          className="w-9 h-9 rounded-lg border border-border cursor-pointer shrink-0"
+                        />
+                        <div className="text-xs">
+                          <p className="font-semibold">Background Fill</p>
+                          <p className="font-mono text-muted-foreground text-[10px]">{bgColor}</p>
+                        </div>
                       </div>
                     )}
 
                     {bgMode === 'blur' && (
-                      <div className="mt-3">
-                        <label className="text-xs text-muted-foreground flex justify-between mb-1">
-                          <span>Blur amount</span><span className="font-bold text-foreground">{blurAmount}</span>
-                        </label>
-                        <input type="range" min={5} max={40} value={blurAmount} onChange={e => setBlurAmount(Number(e.target.value))}
-                          className="w-full accent-primary h-1.5" />
+                      <div className="space-y-1.5 pt-2">
+                        <div className="flex justify-between text-xs font-semibold">
+                          <span>Blur Radius</span>
+                          <span>{blurAmount}px</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={2}
+                          max={50}
+                          value={blurAmount}
+                          onChange={e => setBlurAmount(Number(e.target.value))}
+                          className="w-full accent-primary h-1"
+                        />
                       </div>
                     )}
 
                     {bgMode === 'image' && (
-                      <div className="mt-3">
-                        <input ref={bgInputRef} type="file" accept="image/*" className="hidden"
-                          onChange={e => e.target.files[0] && loadBgImage(e.target.files[0])} />
-                        <button onClick={() => bgInputRef.current?.click()}
-                          className="px-4 py-2 rounded-xl border border-dashed border-primary/50 bg-primary/5 text-sm text-primary font-medium hover:bg-primary/10 transition-colors">
-                          {bgImageFile ? `✓ ${bgImageFile.name}` : '+ Choose background image'}
-                        </button>
+                      <div className="space-y-3 pt-2">
+                        <input
+                          ref={bgInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={e => e.target.files[0] && loadBgImage(e.target.files[0])}
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={() => bgInputRef.current?.click()}
+                          className="w-full rounded-xl border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary text-xs py-5"
+                        >
+                          {bgImageFile ? `✓ ${bgImageFile.name}` : '+ Upload Custom Background'}
+                        </Button>
+                      </div>
+                    )}
+
+                    {bgMode === 'preset' && (
+                      <div className="grid grid-cols-3 gap-2 pt-2">
+                        {BACKGROUND_PRESETS.map(p => (
+                          <button
+                            key={p.id}
+                            onClick={() => setActivePreset(p.id)}
+                            className={cn(
+                              "h-10 rounded-lg relative overflow-hidden border transition-all",
+                              activePreset === p.id ? "border-primary ring-2 ring-primary/20 scale-95" : "border-border hover:border-primary/30"
+                            )}
+                            title={p.name}
+                          >
+                            {p.color ? (
+                              <div className="absolute inset-0" style={{ backgroundColor: p.color }} />
+                            ) : (
+                              <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${p.gradient.join(',')})` }} />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Background Brightness & Contrast controls */}
+                    {bgMode !== 'transparent' && (
+                      <div className="space-y-3 border-t border-border/50 pt-3">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Background Tuning</p>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span>Background Brightness</span>
+                            <span>{bgBrightness}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={50}
+                            max={150}
+                            value={bgBrightness}
+                            onChange={e => setBgBrightness(Number(e.target.value))}
+                            className="w-full accent-primary h-1"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span>Background Contrast</span>
+                            <span>{bgContrast}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={50}
+                            max={150}
+                            value={bgContrast}
+                            onChange={e => setBgContrast(Number(e.target.value))}
+                            className="w-full accent-primary h-1"
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
 
-          {/* Actions */}
-          <div className="flex flex-wrap gap-3">
-            {!result ? (
-              <Button onClick={process} disabled={loading} className="rounded-xl gap-2 px-6">
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                {loading ? 'Processing…' : 'Remove Background'}
-              </Button>
-            ) : (
-              <>
-                <Button onClick={downloadResult} className="rounded-xl gap-2 bg-green-600 hover:bg-green-700">
-                  <Download className="w-4 h-4" />
-                  Download {result.isTransparent ? 'PNG (Transparent)' : 'Image'}
+              {/* 2. Scale & Position */}
+              <div>
+                <button
+                  onClick={() => toggleAccordion('subject')}
+                  disabled={!segmentedData}
+                  className="w-full flex items-center justify-between p-4 bg-muted/5 hover:bg-muted/10 transition-colors text-sm font-bold text-left disabled:opacity-50"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <Move className="w-4 h-4 text-primary" /> Subject Scale & Placement
+                  </span>
+                  {activeAccordion === 'subject' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+
+                {activeAccordion === 'subject' && segmentedData && (
+                  <div className="p-4 space-y-4 bg-card animate-fade-in-up">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span>Scale / Zoom</span>
+                        <span>{fgScale.toFixed(2)}x</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0.4}
+                        max={1.8}
+                        step={0.05}
+                        value={fgScale}
+                        onChange={e => setFgScale(Number(e.target.value))}
+                        className="w-full accent-primary h-1"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span>Horizontal Offset (X)</span>
+                        <span>{fgOffsetX}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={-50}
+                        max={50}
+                        value={fgOffsetX}
+                        onChange={e => setFgOffsetX(Number(e.target.value))}
+                        className="w-full accent-primary h-1"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span>Vertical Offset (Y)</span>
+                        <span>{fgOffsetY}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={-50}
+                        max={50}
+                        value={fgOffsetY}
+                        onChange={e => setFgOffsetY(Number(e.target.value))}
+                        className="w-full accent-primary h-1"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Subject Filters */}
+              <div>
+                <button
+                  onClick={() => toggleAccordion('filters')}
+                  disabled={!segmentedData}
+                  className="w-full flex items-center justify-between p-4 bg-muted/5 hover:bg-muted/10 transition-colors text-sm font-bold text-left disabled:opacity-50"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <Sliders className="w-4 h-4 text-primary" /> Subject Filters & Color Correction
+                  </span>
+                  {activeAccordion === 'filters' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+
+                {activeAccordion === 'filters' && segmentedData && (
+                  <div className="p-4 space-y-4 bg-card animate-fade-in-up">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span>Subject Brightness</span>
+                        <span>{fgBrightness}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={50}
+                        max={150}
+                        value={fgBrightness}
+                        onChange={e => setFgBrightness(Number(e.target.value))}
+                        className="w-full accent-primary h-1"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span>Subject Contrast</span>
+                        <span>{fgContrast}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={50}
+                        max={150}
+                        value={fgContrast}
+                        onChange={e => setFgContrast(Number(e.target.value))}
+                        className="w-full accent-primary h-1"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 4. Feather & Edge Options */}
+              <div>
+                <button
+                  onClick={() => toggleAccordion('edges')}
+                  disabled={!segmentedData}
+                  className="w-full flex items-center justify-between p-4 bg-muted/5 hover:bg-muted/10 transition-colors text-sm font-bold text-left disabled:opacity-50"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <BookOpen className="w-4 h-4 text-primary" /> Mask Feathering & Edges
+                  </span>
+                  {activeAccordion === 'edges' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+
+                {activeAccordion === 'edges' && segmentedData && (
+                  <div className="p-4 space-y-4 bg-card animate-fade-in-up">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span>Edge Feathering</span>
+                        <span>{feather === 0 ? 'Hard' : `${feather}px`}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={6}
+                        step={0.5}
+                        value={feather}
+                        onChange={e => setFeather(Number(e.target.value))}
+                        className="w-full accent-primary h-1"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span>Edge Refinement (Sharpness)</span>
+                        <span>{edgeRefine.toFixed(1)}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={1.5}
+                        step={0.1}
+                        value={edgeRefine}
+                        onChange={e => setEdgeRefine(Number(e.target.value))}
+                        className="w-full accent-primary h-1"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 5. Drop Shadow Options */}
+              <div>
+                <button
+                  onClick={() => toggleAccordion('shadow')}
+                  disabled={!segmentedData}
+                  className="w-full flex items-center justify-between p-4 bg-muted/5 hover:bg-muted/10 transition-colors text-sm font-bold text-left disabled:opacity-50"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <Layers className="w-4 h-4 text-primary" /> Subject Drop Shadow
+                  </span>
+                  {activeAccordion === 'shadow' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+
+                {activeAccordion === 'shadow' && segmentedData && (
+                  <div className="p-4 space-y-4 bg-card animate-fade-in-up">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span>Shadow Blur / Intensity</span>
+                        <span>{shadowBlur}px</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={30}
+                        value={shadowBlur}
+                        onChange={e => setShadowBlur(Number(e.target.value))}
+                        className="w-full accent-primary h-1"
+                      />
+                    </div>
+
+                    {shadowBlur > 0 && (
+                      <>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="color"
+                            value={shadowColor}
+                            onChange={e => setShadowColor(e.target.value)}
+                            className="w-8 h-8 rounded-lg border border-border cursor-pointer shrink-0"
+                          />
+                          <div className="text-xs">
+                            <p className="font-semibold">Shadow Color</p>
+                            <p className="font-mono text-muted-foreground text-[10px]">{shadowColor}</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span>Shadow Offset X</span>
+                            <span>{shadowOffsetX}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={-20}
+                            max={20}
+                            value={shadowOffsetX}
+                            onChange={e => setShadowOffsetX(Number(e.target.value))}
+                            className="w-full accent-primary h-1"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span>Shadow Offset Y</span>
+                            <span>{shadowOffsetY}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={-20}
+                            max={20}
+                            value={shadowOffsetY}
+                            onChange={e => setShadowOffsetY(Number(e.target.value))}
+                            className="w-full accent-primary h-1"
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+            {/* Action Bar */}
+            <div className="flex flex-col gap-3">
+              {resultUrl && (
+                <Button onClick={downloadResult} className="w-full py-6 rounded-xl font-bold bg-green-600 hover:bg-green-700 text-white shadow-md gap-2">
+                  <Download className="w-4 h-4" /> Download Complete Image
                 </Button>
-                <Button variant="outline" onClick={() => setResult(null)} className="rounded-xl">
-                  <Sliders className="w-4 h-4 mr-1.5" />Adjust Settings
+              )}
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" onClick={resetAll} className="rounded-xl font-semibold gap-1.5 py-5 text-xs">
+                  <RefreshCw className="w-3.5 h-3.5" /> Start New Image
                 </Button>
-              </>
-            )}
-            <Button variant="outline" onClick={reset} className="rounded-xl gap-2">
-              <RefreshCw className="w-4 h-4" /> New Image
-            </Button>
+                <Button
+                  variant="outline"
+                  onClick={runAISegmentation}
+                  disabled={!file || loading}
+                  className="rounded-xl font-semibold gap-1.5 py-5 text-xs bg-muted/20"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Run AI Again
+                </Button>
+              </div>
+            </div>
+
           </div>
 
-          {!loading && (
-            <p className="text-[11px] text-center text-muted-foreground flex items-center justify-center gap-1.5">
-              <Eye className="w-3 h-3" />
-              AI model loads once · all processing stays in your browser · no uploads
-            </p>
-          )}
-        </motion.div>
+        </div>
       )}
     </div>
   );
