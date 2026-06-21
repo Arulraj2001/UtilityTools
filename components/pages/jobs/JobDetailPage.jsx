@@ -275,7 +275,7 @@ export default function JobDetailPage({ slug: initialSlug, initialJob = null }) 
             {job.last_date && (
               <div className="flex items-center gap-1.5">
                 <CalendarDays className="w-4 h-4" />
-                <span>Last Date: {job.last_date}</span>
+                <span>Last Date: {lastDate || job.last_date}</span>
               </div>
             )}
           </div>
@@ -306,11 +306,10 @@ export default function JobDetailPage({ slug: initialSlug, initialJob = null }) 
               )}{' '}
               before applying.
             </p>
-            {job.published_at && (
+            {publishedDate && (
               <p className="mt-1 text-blue-600/80 dark:text-blue-400/80">
                 <Clock className="w-3 h-3 inline mr-1" />
-                Published {new Date(job.published_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}
-                {' · '}QuickUtils Editorial Team
+                Published {publishedDate}. QuickUtils Editorial Team.
               </p>
             )}
           </div>
@@ -385,7 +384,103 @@ export default function JobDetailPage({ slug: initialSlug, initialJob = null }) 
                     </div>
                   </div>
                 )}
+
+                <StructuredDetails title="Eligibility Details" value={job.eligibility} />
+                <StructuredDetails title="Selection Process" value={job.selection_process} />
               </div>
+            </div>
+
+            <div className="rounded-2xl border bg-card/80 backdrop-blur-sm p-6">
+              <h2 className="text-lg font-bold mb-4">
+                Important Dates and Official Sources
+              </h2>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {applicationStartDate && (
+                  <div className="rounded-xl border border-border/50 bg-background/60 p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Application Start</p>
+                    <p className="mt-1 text-sm font-medium">{applicationStartDate}</p>
+                  </div>
+                )}
+
+                {lastDate && (
+                  <div className="rounded-xl border border-border/50 bg-background/60 p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Application Deadline</p>
+                    <p className="mt-1 text-sm font-medium">{lastDate}</p>
+                    {!appStatus.open && (
+                      <p className="mt-1 text-xs text-red-600">This listing is marked as closed.</p>
+                    )}
+                  </div>
+                )}
+
+                {publishedDate && (
+                  <div className="rounded-xl border border-border/50 bg-background/60 p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Published</p>
+                    <p className="mt-1 text-sm font-medium">{publishedDate}</p>
+                  </div>
+                )}
+
+                {updatedDate && (
+                  <div className="rounded-xl border border-border/50 bg-background/60 p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Last Updated / Verified</p>
+                    <p className="mt-1 text-sm font-medium">{updatedDate}</p>
+                  </div>
+                )}
+              </div>
+
+              <StructuredDetails title="Important Dates From Notification" value={job.important_dates} />
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {job.official_website && (
+                  <a
+                    href={job.official_website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-between gap-3 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium hover:border-primary/40 hover:text-primary transition-colors"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <ExternalLink className="w-4 h-4" />
+                      Official Website
+                    </span>
+                    <span className="sr-only">opens in a new tab</span>
+                  </a>
+                )}
+
+                {job.notification_pdf && (
+                  <a
+                    href={job.notification_pdf}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-between gap-3 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium hover:border-primary/40 hover:text-primary transition-colors"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      Official Notification
+                    </span>
+                    <span className="sr-only">opens in a new tab</span>
+                  </a>
+                )}
+
+                {job.apply_link && (
+                  <a
+                    href={job.apply_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-between gap-3 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium hover:border-primary/40 hover:text-primary transition-colors"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Apply Link
+                    </span>
+                    <span className="sr-only">opens in a new tab</span>
+                  </a>
+                )}
+              </div>
+
+              <p className="mt-5 text-xs text-muted-foreground leading-relaxed">
+                QuickUtils summarizes job information for convenience. Confirm every eligibility,
+                fee, date, and application instruction on the official source before applying.
+              </p>
             </div>
 
             {/* RELATED WORKFLOWS */}

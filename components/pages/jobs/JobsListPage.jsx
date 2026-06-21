@@ -1,14 +1,13 @@
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   BriefcaseBusiness,
   Search,
   Sparkles,
-  TrendingUp,
   ShieldCheck,
-  SlidersHorizontal,
   MapPin,
   GraduationCap,
   ArrowRight,
@@ -98,12 +97,8 @@ export default function JobsListPage({
       ]
         .filter((item) => searchParams.has(item.key))
         .map((item) => item.label),
-    [queryString]
+    [searchParams]
   );
-
-  useEffect(() => {
-    setPageSize(20);
-  }, [search, categoryParam, queryString]);
 
   const results = useMemo(() => {
     const filters = {
@@ -214,7 +209,7 @@ export default function JobsListPage({
 
       return true;
     });
-  }, [jobs, queryString, location]);
+  }, [jobs, searchParams, location]);
 
   const internshipCount = useMemo(
     () =>
@@ -249,7 +244,9 @@ export default function JobsListPage({
     } else {
       params.set('category', slug);
     }
-    router.push(`/jobs?${params.toString()}`);
+    setPageSize(20);
+    const nextQuery = params.toString();
+    router.push(nextQuery ? `/jobs?${nextQuery}` : '/jobs');
   };
 
   if (!jobsEnabled) {
@@ -352,7 +349,10 @@ export default function JobsListPage({
                     <input
                       type="text"
                       value={search}
-                      onChange={(e) => setSearch(e.target.value)}
+                      onChange={(e) => {
+                        setSearch(e.target.value);
+                        setPageSize(20);
+                      }}
                       placeholder="Search by job title, keyword or organization"
                       className="w-full bg-transparent border-none outline-none text-foreground placeholder-muted-foreground text-sm font-medium focus:ring-0 focus:outline-none focus:ring-offset-0 p-0"
                     />
@@ -387,7 +387,10 @@ export default function JobsListPage({
                     <MapPin className="w-4 h-4 text-muted-foreground shrink-0 mr-1" />
                     <select
                       value={location}
-                      onChange={(e) => setLocation(e.target.value)}
+                      onChange={(e) => {
+                        setLocation(e.target.value);
+                        setPageSize(20);
+                      }}
                       className="w-full bg-transparent border-none outline-none text-foreground text-sm font-medium focus:ring-0 focus:outline-none appearance-none pr-8 cursor-pointer p-0 dark:bg-card [&>option]:bg-card [&>option]:text-foreground"
                     >
                       <option value="">All Locations</option>
@@ -488,9 +491,12 @@ export default function JobsListPage({
             {/* Right Column - Hero Graphic */}
             <div className="lg:col-span-4 flex justify-center lg:justify-end w-full">
               <div className="relative w-full max-w-[340px] lg:max-w-none rounded-[1.75rem] overflow-hidden border border-border shadow-xl animate-float">
-                <img
+                <Image
                   src="/Job.png"
                   alt="QuickUtils Jobs Illustration"
+                  width={343}
+                  height={196}
+                  sizes="(max-width: 1024px) 340px, 340px"
                   className="w-full h-auto object-contain bg-transparent"
                 />
               </div>
@@ -642,12 +648,12 @@ export default function JobsListPage({
                 <div className="space-y-3.5 text-sm text-muted-foreground">
                   <Link href="/tool/passport-size-photo-maker" className="flex items-start gap-2 hover:text-[#6366f1] transition-colors">
                     <span className="mt-1.5 h-2 w-2 rounded-full bg-[#6366f1] shrink-0" />
-                    <span>Passport Photo Resizer</span>
+                    <span>Photo Resizer</span>
                   </Link>
 
-                  <Link href="/workflow?q=compress%20pdf" className="flex items-start gap-2 hover:text-[#6366f1] transition-colors">
+                  <Link href="/tool/photo-kb-reducer" className="flex items-start gap-2 hover:text-[#6366f1] transition-colors">
                     <span className="mt-1.5 h-2 w-2 rounded-full bg-[#6366f1] shrink-0" />
-                    <span>Compress PDF Below 200KB</span>
+                    <span>Photo KB Reducer</span>
                   </Link>
 
                   <Link href="/tool/ssc-signature-resizer" className="flex items-start gap-2 hover:text-[#6366f1] transition-colors">
@@ -655,14 +661,19 @@ export default function JobsListPage({
                     <span>Signature Resize Tools</span>
                   </Link>
 
-                  <Link href="/tool/volumetric-weight-calculator" className="flex items-start gap-2 hover:text-[#6366f1] transition-colors">
+                  <Link href="/tool/compress-pdf" className="flex items-start gap-2 hover:text-[#6366f1] transition-colors">
                     <span className="mt-1.5 h-2 w-2 rounded-full bg-[#6366f1] shrink-0" />
-                    <span>Document Checklist</span>
+                    <span>PDF Compressor</span>
                   </Link>
 
-                  <Link href="/blog" className="flex items-start gap-2 hover:text-[#6366f1] transition-colors">
+                  <Link href="/tool/age-calculator" className="flex items-start gap-2 hover:text-[#6366f1] transition-colors">
                     <span className="mt-1.5 h-2 w-2 rounded-full bg-[#6366f1] shrink-0" />
-                    <span>Application Guide</span>
+                    <span>Age Calculator</span>
+                  </Link>
+
+                  <Link href="/tool/percentage-calculator" className="flex items-start gap-2 hover:text-[#6366f1] transition-colors">
+                    <span className="mt-1.5 h-2 w-2 rounded-full bg-[#6366f1] shrink-0" />
+                    <span>Percentage Calculator</span>
                   </Link>
                 </div>
                 

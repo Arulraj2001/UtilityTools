@@ -1,5 +1,5 @@
 import JobDetailPage from '@/components/pages/jobs/JobDetailPage';
-import PageNotFound from '@/lib/PageNotFound';
+import { notFound } from 'next/navigation';
 import { buildPageMetadata } from '@/lib/metadata';
 import {
   buildJobJsonLd,
@@ -39,14 +39,7 @@ export default async function Page({ params }) {
   const job = await getServerJobBySlug(slug);
 
   if (!job || job.status !== 'published') {
-    return (
-      <PageNotFound
-        title="Job not found"
-        message="The job listing you requested does not exist, has expired, or is not published."
-        primaryHref="/jobs"
-        primaryLabel="Browse jobs"
-      />
-    );
+    notFound();
   }
 
   const schemas = buildJobJsonLd(job);

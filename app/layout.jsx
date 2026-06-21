@@ -2,41 +2,10 @@ import "./globals.css";
 import Providers from "@/components/layout/Providers";
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from 'sonner';
-import { DEFAULT_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
+import { SITE_URL } from '@/config/site';
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {
-    default: "QuickUtils",
-    template: "%s | QuickUtils",
-  },
-  description: "Free online tools for everyday work",
-  alternates: {
-    canonical: SITE_URL,
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-image-preview': 'large',
-    },
-  },
-  openGraph: {
-    type: 'website',
-    siteName: SITE_NAME,
-    title: 'QuickUtils',
-    description: 'Free online tools for everyday work',
-    url: SITE_URL,
-    images: [DEFAULT_IMAGE],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'QuickUtils',
-    description: 'Free online tools for everyday work',
-    images: [DEFAULT_IMAGE],
-  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

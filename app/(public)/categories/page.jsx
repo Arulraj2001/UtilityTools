@@ -1,15 +1,40 @@
-import React, { Suspense } from 'react';
 import CategoriesList from '@/components/pages/CategoriesList';
+import { fetchSupabaseRows } from '@/lib/serverSupabaseData';
+import { getLocalCategories, getLocalTools } from '@/lib/localCatalogFallback';
 
-export const metadata = {
-  title: 'Categories - QuickUtils',
-  description: 'Browse all categories of online tools: PDF, image, calculation, logistics, development, and more.',
-};
+async function getCategoriesPageData() {
+  const [remoteTools, remoteCategories] = await Promise.all([
+    fetchSupabaseRows('tools', {
+      select: 'id,name,slug,description,category_id,category_slug,status',
+      status: 'eq.published',
+      order: 'created_at.desc',
+      limit: 500,
+    }),
+    fetchSupabaseRows('categories', {
+      select: '*',
+      order: 'sort_order.asc',
+      limit: 50,
+    }),
+  ]);
 
-export default function Page() {
+  const [localTools, localCategories] = await Promise.all([
+    remoteTools.length ? Promise.resolve([]) : getLocalTools({ limit: 500 }),
+    remoteCategories.length ? Promise.resolve([]) : getLocalCategories({ limit: 50 }),
+  ]);
+
+  return {
+    tools: remoteTools.length ? remoteTools : localTools,
+    categories: remoteCategories.length ? remoteCategories : localCategories,
+  };
+}
+
+export default async function Page() {
+  const { tools, categories } = await getCategoriesPageData();
+
   return (
-    
-      <CategoriesList />
-    
+    <CategoriesList
+      initialTools={tools}
+      initialCategories={categories}
+    />
   );
 }

@@ -36,10 +36,12 @@ const faqItems = [
 ]
 
 const reachUsItems = [
-  'Broken or inaccurate tools',
-  'Tool suggestions and new feature ideas',
-  'Feedback on content quality or instructions',
-  'General questions about QuickUtils',
+  'Tool issue or inaccurate output',
+  'Content correction or unclear instructions',
+  'Job listing correction or expired opportunity',
+  'Privacy request about forms, cookies, ads, or file handling',
+  'Accessibility issue on a page or tool',
+  'General query about QuickUtils',
 ]
 
 export default function Contact() {
@@ -90,7 +92,7 @@ export default function Contact() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16">
         <header className="mb-10">
           <p className="text-sm font-semibold text-primary mb-3">Contact</p>
-          <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
+          <h1 className="text-3xl font-bold mb-4">Contact QuickUtils</h1>
           <p className="text-muted-foreground leading-relaxed max-w-2xl">
             QuickUtils is a free online toolkit offering 150+ utilities — PDF tools, image
             editors, calculators, developer tools, SEO helpers, and more. If something is not

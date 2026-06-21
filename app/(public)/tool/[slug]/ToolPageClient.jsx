@@ -259,7 +259,7 @@ export default function ToolPageClient({ tool, categoryName }) {
               {tool.is_trending && <Badge className="bg-accent/10 text-accent border-0 text-xs">Trending</Badge>}
               {categoryName && <Badge variant="secondary" className="text-xs">{categoryName}</Badge>}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">{tool.name}</h1>
+            <div className="text-2xl sm:text-3xl font-bold mb-2">{tool.name}</div>
             <p className="text-muted-foreground">{tool.description}</p>
           </div>
         </div>
@@ -282,35 +282,35 @@ export default function ToolPageClient({ tool, categoryName }) {
 
       {/* Interactive Tool UI */}
       {isImageTool ? (
-        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading image tool…</div>}>
+        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing image workspace...</div>}>
           <ImageToolRouter tool={tool} />
         </Suspense>
       ) : isPDFTool ? (
-        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading PDF tool…</div>}>
+        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing PDF workspace...</div>}>
           <PDFTool tool={tool} />
         </Suspense>
       ) : isGovTool ? (
-        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading government tool…</div>}>
+        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing form workspace...</div>}>
           <GovToolRouter tool={tool} />
         </Suspense>
       ) : isLogisticsTool ? (
-        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading logistics tool…</div>}>
+        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing logistics workspace...</div>}>
           <LogisticsToolRouter tool={tool} />
         </Suspense>
       ) : isSellerTool ? (
-        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading seller tool…</div>}>
+        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing seller workspace...</div>}>
           <SellerToolRouter tool={tool} />
         </Suspense>
       ) : isSeoTool ? (
-        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading SEO tool…</div>}>
+        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing SEO workspace...</div>}>
           <SeoToolRouter tool={tool} />
         </Suspense>
       ) : isTextTool ? (
-        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading text tool…</div>}>
+        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing text workspace...</div>}>
           <TextToolRouter tool={tool} />
         </Suspense>
       ) : (
-        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading tool form…</div>}>
+        <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing calculator workspace...</div>}>
           <div className="space-y-6">
             <ToolInputForm
               tool={tool}
@@ -337,6 +337,5 @@ export default function ToolPageClient({ tool, categoryName }) {
 }
 
 const DynamicIcon = ({ name, ...props }) => {
-  const Icon = getIcon(name)
-  return <Icon {...props} />
+  return React.createElement(getIcon(name), props)
 }

@@ -10,13 +10,17 @@ import { buildCollectionPageSchema } from '@/lib/pageSchemas'
 const categoriesDescription =
   'Browse QuickUtils tool categories for PDF tools, image tools, finance calculators, education tools, developer utilities, SEO tools, and everyday workflows.'
 
-export default function CategoriesList() {
+export default function CategoriesList({
+  initialTools = [],
+  initialCategories = [],
+}) {
   const {
     data: tools = [],
     isLoading: isLoadingTools,
   } = useQuery({
     queryKey: ['tools-published'],
     queryFn: () => getTools({ published: true, orderBy: 'created_at', ascending: false, limit: 500 }),
+    initialData: initialTools,
     retry: false,
   })
 
@@ -26,10 +30,11 @@ export default function CategoriesList() {
   } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ orderBy: 'sort_order', ascending: true, limit: 50 }),
+    initialData: initialCategories,
     retry: false,
   })
 
-  if (isLoadingTools || isLoadingCategories) {
+  if ((isLoadingTools || isLoadingCategories) && tools.length === 0 && categories.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 min-h-[60vh] flex items-center justify-center">
         <p className="text-sm text-muted-foreground">Loading categories…</p>

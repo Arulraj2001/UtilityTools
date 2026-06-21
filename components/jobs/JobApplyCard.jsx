@@ -6,10 +6,12 @@ import {
   CalendarClock,
 } from 'lucide-react'
 
-import { formatDate } from '@/lib/jobs/jobHelpers'
+import { formatDate, isExpired } from '@/lib/jobs/jobHelpers'
 
 export default function JobApplyCard({ job }) {
   if (!job) return null
+  const applyUrl = job.apply_link || job.official_website
+  const closed = isExpired(job)
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-5">
@@ -35,16 +37,22 @@ export default function JobApplyCard({ job }) {
         </div>
 
         {/* APPLY BUTTON */}
-        <a
-          href={job.apply_link || job.official_website}
-          target="_blank"
-          rel="noreferrer"
-          className="group flex items-center justify-center gap-1.5 w-full h-10 rounded-lg bg-primary text-primary-foreground text-sm font-semibold transition-all hover:opacity-90 hover:scale-[1.01]"
-        >
-          Apply Now
+        {applyUrl && !closed ? (
+          <a
+            href={applyUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="group flex items-center justify-center gap-1.5 w-full h-10 rounded-lg bg-primary text-primary-foreground text-sm font-semibold transition-all hover:opacity-90 hover:scale-[1.01]"
+          >
+            Apply Now
 
-          <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-        </a>
+            <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </a>
+        ) : (
+          <div className="flex items-center justify-center w-full min-h-10 rounded-lg border border-border bg-background/70 px-3 text-center text-xs font-medium text-muted-foreground">
+            {closed ? 'Applications closed' : 'Official apply link not available'}
+          </div>
+        )}
 
         {/* META */}
         <div className="mt-4 space-y-2">

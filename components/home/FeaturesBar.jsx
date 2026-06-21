@@ -51,7 +51,7 @@ export default function FeaturesBar() {
                 <feature.icon className={`w-5 h-5 ${feature.iconColor}`} />
               </div>
               <div>
-                <h4 className="font-bold text-card-foreground text-sm leading-tight">{feature.title}</h4>
+                <p className="font-bold text-card-foreground text-sm leading-tight">{feature.title}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{feature.desc}</p>
               </div>
             </div>

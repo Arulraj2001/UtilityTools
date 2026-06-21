@@ -2,5 +2,23 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /api/
+Disallow: /login
+Disallow: /preview/
+Disallow: /draft/
+Disallow: /private/
+Disallow: /*?q=
+Disallow: /*?query=
+Disallow: /*?search=
+Disallow: /*?category=
+Disallow: /*?tag=
+Disallow: /*?sort=
+Disallow: /*?featured=
+Disallow: /*?recent=
+Disallow: /*?freshers=
+Disallow: /*?remote=
+Disallow: /*?government=
+Disallow: /*?private=
+Disallow: /*?tech=
+Disallow: /*?preview=
 
 Sitemap: https://www.quickutils.page/sitemap.xml

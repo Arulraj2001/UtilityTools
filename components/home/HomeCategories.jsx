@@ -11,7 +11,7 @@ const CATEGORY_CONFIGS = {
     iconColor: 'text-[#ef4444] dark:text-red-400',
     bgColor: 'bg-[#fef2f2] dark:bg-red-950/20',
     borderColor: 'border-[#fee2e2] dark:border-red-900/20 hover:border-[#fca5a5] dark:hover:border-red-800/40',
-    btnColor: 'bg-[#fef2f2] dark:bg-red-950/30 text-[#dc2626] dark:text-red-400 hover:bg-[#fee2e2] dark:hover:bg-red-900/30',
+    btnColor: 'bg-[#fef2f2] dark:bg-red-950/30 text-[#991b1b] dark:text-red-300 hover:bg-[#fee2e2] dark:hover:bg-red-900/30',
     icon: FileText,
   },
   'image-tools': {
@@ -41,7 +41,7 @@ const CATEGORY_CONFIGS = {
     iconColor: 'text-[#10b981] dark:text-emerald-400',
     bgColor: 'bg-[#f0fdf4] dark:bg-emerald-950/20',
     borderColor: 'border-[#dcfce7] dark:border-emerald-900/20 hover:border-[#6ee7b7] dark:hover:border-emerald-800/40',
-    btnColor: 'bg-[#f0fdf4] dark:bg-emerald-950/30 text-[#16a34a] dark:text-emerald-400 hover:bg-[#dcfce7] dark:hover:bg-emerald-900/30',
+    btnColor: 'bg-[#f0fdf4] dark:bg-emerald-950/30 text-[#166534] dark:text-emerald-300 hover:bg-[#dcfce7] dark:hover:bg-emerald-900/30',
     icon: Type,
   },
   'developer-tools': {

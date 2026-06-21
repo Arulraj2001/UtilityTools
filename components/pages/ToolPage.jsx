@@ -346,7 +346,7 @@ export default function ToolPage() {
                       {tool?.is_trending && <Badge className="bg-accent/10 text-accent border-0 text-xs">🔥 Trending</Badge>}
                       {category && <Badge variant="secondary" className="text-xs">{category.name}</Badge>}
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold mb-2">{tool?.name}</h1>
+                    <div className="text-2xl sm:text-3xl font-bold mb-2">{tool?.name}</div>
                     <p className="text-muted-foreground">{tool?.description}</p>
                   </div>
                 </div>
@@ -369,27 +369,27 @@ export default function ToolPage() {
 
             <div className="rounded-2xl border border-border/50 bg-card p-5 sm:p-6">
               {isImageTool ? (
-                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading image tool…</div>}>
+                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing image workspace...</div>}>
                   <ImageToolRouter tool={tool} />
                 </Suspense>
               ) : isPDFTool ? (
-                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading PDF tool…</div>}>
+                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing PDF workspace...</div>}>
                   <PDFTool tool={tool} />
                 </Suspense>
               ) : isGovTool ? (
-                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading government tool…</div>}>
+                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing form workspace...</div>}>
                   <GovToolRouter tool={tool} />
                 </Suspense>
               ) : isLogisticsTool ? (
-                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading logistics tool…</div>}>
+                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing logistics workspace...</div>}>
                   <LogisticsToolRouter tool={tool} />
                 </Suspense>
               ) : isSellerTool ? (
-                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading seller tool…</div>}>
+                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing seller workspace...</div>}>
                   <SellerToolRouter tool={tool} />
                 </Suspense>
               ) : (
-                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Loading tool form…</div>}>
+                <Suspense fallback={<div className="min-h-[260px] py-12 text-center text-sm text-muted-foreground">Preparing calculator workspace...</div>}>
                   <div className="space-y-6">
                     <ToolInputForm
                       tool={tool}

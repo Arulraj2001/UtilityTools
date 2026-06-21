@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/api/supabaseClient';
 import { getLocalToolBySlug, getLocalTools, getLocalCategories } from '@/lib/localCatalogFallback';
 import { getDefaultToolFeaturedImage } from '@/lib/toolFeaturedImages';
 import { isToolIndexable } from '@/lib/toolSeoCompleteness';
-import { buildWebApplicationSchema } from '@/lib/pageSchemas';
 import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import { countWords, getToolHowToSteps, getToolUseCases, buildToolFaqItems, shouldAddToolFallbackContent } from '@/lib/toolContentFallbacks';
 import { rankTools } from '@/lib/relevance';
@@ -119,7 +119,7 @@ async function fetchWorkflows() {
 function buildJsonLdWebApp(tool, description, canonical) {
   return {
     '@context': 'https://schema.org',
-    '@type': 'WebApplication',
+    '@type': 'SoftwareApplication',
     name: tool.name,
     description,
     url: canonical,
@@ -260,23 +260,19 @@ export default async function ToolPage({ params }) {
         />
       )}
 
-      {!indexable && (
-        <meta name="robots" content="noindex,nofollow" />
-      )}
-
       {/* Server-rendered SEO content (visible without JS) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Breadcrumb nav */}
         <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-6 flex-wrap">
-          <a href="/" className="hover:text-foreground">Home</a>
+          <Link href="/" className="hover:text-foreground">Home</Link>
           <span>/</span>
-          <a href="/tools" className="hover:text-foreground">Tools</a>
+          <Link href="/tools" className="hover:text-foreground">Tools</Link>
           {category && (
             <>
               <span>/</span>
-              <a href={`/category/${encodeURIComponent(category.slug)}`} className="hover:text-foreground">
+              <Link href={`/category/${encodeURIComponent(category.slug)}`} className="hover:text-foreground">
                 {category.name}
-              </a>
+              </Link>
             </>
           )}
           <span>/</span>
@@ -404,7 +400,15 @@ export default async function ToolPage({ params }) {
                   >
                     {rt.featured_image && (
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
-                        <img src={rt.featured_image} alt={rt.name} className="w-full h-full object-contain" />
+                        <img
+                          src={rt.featured_image}
+                          alt={rt.name}
+                          width="40"
+                          height="40"
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-contain"
+                        />
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
