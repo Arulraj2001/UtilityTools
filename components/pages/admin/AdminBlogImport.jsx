@@ -462,9 +462,9 @@ export default function AdminBlogImport() {
                 <div className="flex flex-wrap gap-1.5">
                   {[
                     'Title','Slug','Category','Excerpt','Content HTML',
-                    'Author Name','Author Title','Author Bio',
+                    'Author Name','Author Title','Author Bio','Author Image',
                     'SEO Title','SEO Description','SEO Keywords',
-                    'Open Graph Title','Open Graph Description',
+                    'Open Graph Title','Open Graph Description','OG Image',
                     'Twitter Title','Twitter Description',
                     'Canonical URL','Featured Image URL',
                     'Schema Type','Meta Robots','FAQ JSON',

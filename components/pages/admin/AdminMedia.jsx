@@ -96,11 +96,36 @@ export default function AdminMedia() {
   // Clipboard copy helper
   const handleCopyUrl = (fileName, id) => {
     const url = getPublicUrl(fileName);
-    navigator.clipboard.writeText(url).then(() => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        setCopiedId(id);
+        toast.success('Public URL copied to clipboard');
+        setTimeout(() => setCopiedId(null), 2000);
+      }).catch(() => {
+        fallbackCopy(url, id);
+      });
+    } else {
+      fallbackCopy(url, id);
+    }
+  };
+
+  // Fallback copy using a temporary textarea element
+  const fallbackCopy = (text, id) => {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
       setCopiedId(id);
       toast.success('Public URL copied to clipboard');
       setTimeout(() => setCopiedId(null), 2000);
-    });
+    } catch {
+      toast.error('Failed to copy URL. Please copy it manually.');
+    }
+    document.body.removeChild(textarea);
   };
 
   // Upload handler

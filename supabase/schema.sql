@@ -110,6 +110,10 @@ create table if not exists blog_posts (
   status text default 'draft',
   featured_image text,
   og_image text,
+  og_title text,
+  og_description text,
+  twitter_title text,
+  twitter_description text,
   canonical_url text,
   faq_items jsonb,
   schema_type text default 'BlogPosting',
@@ -119,6 +123,8 @@ create table if not exists blog_posts (
   author_title text,
   author_image text,
   author_bio text,
+  author_url text,
+  likes_count int default 0,
   reading_time int default 0,
   seo_title text,
   seo_description text,
@@ -130,6 +136,10 @@ create table if not exists blog_posts (
 
 alter table if exists blog_posts add column if not exists category_id uuid references blog_categories(id) on delete set null;
 alter table if exists blog_posts add column if not exists og_image text;
+alter table if exists blog_posts add column if not exists og_title text;
+alter table if exists blog_posts add column if not exists og_description text;
+alter table if exists blog_posts add column if not exists twitter_title text;
+alter table if exists blog_posts add column if not exists twitter_description text;
 alter table if exists blog_posts add column if not exists canonical_url text;
 alter table if exists blog_posts add column if not exists faq_items jsonb;
 alter table if exists blog_posts add column if not exists schema_type text default 'BlogPosting';
@@ -137,6 +147,8 @@ alter table if exists blog_posts add column if not exists featured boolean defau
 alter table if exists blog_posts add column if not exists views_count int default 0;
 alter table if exists blog_posts add column if not exists seo_keywords text;
 alter table if exists blog_posts add column if not exists meta_robots text default 'index,follow';
+alter table if exists blog_posts add column if not exists author_url text;
+alter table if exists blog_posts add column if not exists likes_count int default 0;
 
 -- =========================
 -- WORKFLOW PAGES

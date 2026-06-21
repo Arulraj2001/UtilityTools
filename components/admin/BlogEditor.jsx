@@ -410,10 +410,14 @@ export default function BlogEditor({ post, onSave, onCancel }) {
 
     try {
       const selectedCategory = categories.find((cat) => cat.id === form.category_id)
+      const featuredImage = String(form.featured_image || form.og_image || '').trim()
+      const ogImage = String(form.og_image || form.featured_image || '').trim()
       const data = {
         ...form,
         category: selectedCategory?.name || '',
         category_id: form.category_id || null,
+        featured_image: featuredImage,
+        og_image: ogImage,
         content: sanitizeHtml(cleanContent(form.content)),
         reading_time: estimateReadingTime(form.content),
         faq_items: form.faq_items,
@@ -1077,7 +1081,7 @@ export default function BlogEditor({ post, onSave, onCancel }) {
 
               {form.faq_items?.length === 0 && (
                 <div className="rounded-3xl border border-dashed border-border/60 bg-slate-50 p-6 text-sm text-muted-foreground">
-                  No FAQ items yet. Click "Add FAQ item" to create the first question and answer.
+                  No FAQ items yet. Click &quot;Add FAQ item&quot; to create the first question and answer.
                 </div>
               )}
             </div>

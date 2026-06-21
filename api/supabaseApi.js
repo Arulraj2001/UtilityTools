@@ -833,15 +833,61 @@ export const deleteBlogCategory = async (id) => {
   return handleResponse(result);
 };
 
-export const createBlogPost = async (post) => {
+const BLOG_POST_EXTENSION_FIELDS = [
+  'og_title',
+  'og_description',
+  'twitter_title',
+  'twitter_description',
+  'author_url',
+  'likes_count',
+];
+
+const normalizeBlogPostPayload = (post = {}) => {
   const payload = sanitizeHtmlFields(post, ['content']);
-  const result = await supabase.from('blog_posts').insert([{ ...payload }]);
+  const featuredImage = String(payload.featured_image || payload.og_image || '').trim();
+  const ogImage = String(payload.og_image || payload.featured_image || '').trim();
+
+  return {
+    ...payload,
+    featured_image: featuredImage || null,
+    og_image: ogImage || null,
+  };
+};
+
+const stripBlogPostExtensionFields = (post = {}) => {
+  const payload = { ...post };
+  BLOG_POST_EXTENSION_FIELDS.forEach((field) => {
+    delete payload[field];
+  });
+  return payload;
+};
+
+const isMissingBlogPostExtensionColumnError = (error) => {
+  const message = String(error?.message || error?.details || '').toLowerCase();
+  return BLOG_POST_EXTENSION_FIELDS.some((field) => (
+    message.includes(field.toLowerCase()) &&
+    (message.includes('schema cache') || message.includes('column') || message.includes('could not find'))
+  ));
+};
+
+export const createBlogPost = async (post) => {
+  const payload = normalizeBlogPostPayload(post);
+  let result = await supabase.from('blog_posts').insert([{ ...payload }]);
+  if (result.error && isMissingBlogPostExtensionColumnError(result.error)) {
+    result = await supabase.from('blog_posts').insert([stripBlogPostExtensionFields(payload)]);
+  }
   return handleResponse(result);
 };
 
 export const updateBlogPost = async (id, post) => {
-  const payload = sanitizeHtmlFields(post, ['content']);
-  const result = await supabase.from('blog_posts').update({ ...payload, updated_at: new Date() }).eq('id', id);
+  const payload = normalizeBlogPostPayload(post);
+  let result = await supabase.from('blog_posts').update({ ...payload, updated_at: new Date() }).eq('id', id);
+  if (result.error && isMissingBlogPostExtensionColumnError(result.error)) {
+    result = await supabase
+      .from('blog_posts')
+      .update({ ...stripBlogPostExtensionFields(payload), updated_at: new Date() })
+      .eq('id', id);
+  }
   return handleResponse(result);
 };
 
@@ -1173,13 +1219,26 @@ export const bulkCreateBlogPosts = async (posts, onProgress) => {
   const errors = [];
 
   for (let i = 0; i < posts.length; i += CHUNK) {
-    const chunk = posts.slice(i, i + CHUNK);
-    const res = await supabase.from('blog_posts').insert(chunk).select('id, title, slug');
+    const chunk = posts.slice(i, i + CHUNK).map(normalizeBlogPostPayload);
+    let res = await supabase.from('blog_posts').insert(chunk).select('id, title, slug');
+    if (res.error && isMissingBlogPostExtensionColumnError(res.error)) {
+      res = await supabase
+        .from('blog_posts')
+        .insert(chunk.map(stripBlogPostExtensionFields))
+        .select('id, title, slug');
+    }
 
     if (res.error) {
       // Batch rejected — try one-by-one so we isolate the bad row
       for (const post of chunk) {
-        const single = await supabase.from('blog_posts').insert([post]).select('id, title, slug').single();
+        let single = await supabase.from('blog_posts').insert([post]).select('id, title, slug').single();
+        if (single.error && isMissingBlogPostExtensionColumnError(single.error)) {
+          single = await supabase
+            .from('blog_posts')
+            .insert([stripBlogPostExtensionFields(post)])
+            .select('id, title, slug')
+            .single();
+        }
         if (single.error) {
           errors.push({ title: post.title, slug: post.slug, error: single.error.message });
         } else if (single.data) {

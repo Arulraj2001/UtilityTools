@@ -1,5 +1,5 @@
 'use client';
-import React, { useMemo, useState, useEffect, useSyncExternalStore } from 'react'
+import React, { useMemo, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query'
@@ -122,10 +122,6 @@ export default function BlogPostPage({
   const likedPosts = useMemo(() => parseLikedPosts(likedPostsSnapshot), [likedPostsSnapshot])
   const [likeDelta, setLikeDelta] = useState(0)
   const [email, setEmail] = useState('')
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
   const staticPost = useMemo(() => initialPost || getStaticBlogPostBySlug(slug), [initialPost, slug])
 
   const {
@@ -246,9 +242,11 @@ export default function BlogPostPage({
   const authorTitle = post?.author_title || authorProfile?.title
   const authorBio = post?.author_bio || authorProfile?.bio
   const authorImage = post?.author_image || authorProfile?.image
+  const featuredImage = post?.featured_image || post?.og_image
   const authorHref = getAuthorHref(post?.author_url || authorProfile?.url)
   const publishedDate = formatPostDate(post?.created_at)
   const updatedDate = formatPostDate(post?.updated_at || post?.created_at)
+  const sanitizedContent = useMemo(() => sanitizeHtml(post?.content || ''), [post?.content])
   const liked = post?.id ? !!likedPosts[post.id] : false
   const likeCount = Math.max(0, (post?.likes_count || 0) + likeDelta)
 
@@ -509,10 +507,10 @@ export default function BlogPostPage({
             </div>
 
             {/* Featured Image */}
-            {post.featured_image && (
+            {featuredImage && (
               <div className="rounded-2xl overflow-hidden border border-border/50 bg-card shadow-sm">
                 <img
-                  src={post.featured_image}
+                  src={featuredImage}
                   alt={post.title}
                   className="w-full object-cover max-h-[480px]"
                 />
@@ -539,7 +537,7 @@ export default function BlogPostPage({
                   prose-table:border prose-table:border-border/60 prose-table:rounded-xl prose-table:overflow-hidden
                   prose-th:bg-muted prose-th:p-3 prose-th:text-foreground prose-th:font-semibold
                   prose-td:p-3 prose-td:border-border/60"
-                dangerouslySetInnerHTML={{ __html: mounted ? sanitizeHtml(post.content || '') : (post.content || '') }}
+                dangerouslySetInnerHTML={{ __html: sanitizedContent }}
               />
             </div>
 
@@ -815,6 +813,5 @@ export default function BlogPostPage({
 }
 
 const DynamicIcon = ({ name, ...props }) => {
-  const Icon = getIcon(name)
-  return <Icon {...props} />
+  return React.createElement(getIcon(name), props)
 }
