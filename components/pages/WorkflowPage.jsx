@@ -1,5 +1,5 @@
 'use client';
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query'
@@ -38,6 +38,10 @@ const buildQuickGuide = (page) => {
 
 export default function WorkflowPage() {
   const { slug } = useParams()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const { data: page, isLoading: isLoadingPage, isError: isPageError } = useQuery({
     queryKey: ['workflow-page', slug],
@@ -193,10 +197,19 @@ export default function WorkflowPage() {
 
             {primaryTool && (
               <div className="rounded-3xl border border-border/70 bg-card/70 p-8">
-                <div className="flex items-center gap-3 text-sm text-muted-foreground mb-4">
-                  <Badge variant="secondary">Recommended tool</Badge>
+                <div className="flex items-start gap-4 mb-4">
+                  {primaryTool.featured_image && (
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                      <img src={primaryTool.featured_image} alt={primaryTool.name} className="w-full h-full object-contain" />
+                    </div>
+                  )}
+                  <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Badge variant="secondary">Recommended tool</Badge>
+                    </div>
+                    <h2 className="text-2xl font-semibold">{primaryTool.name}</h2>
+                  </div>
                 </div>
-                <h2 className="text-2xl font-semibold">{primaryTool.name}</h2>
                 <p className="mt-3 text-muted-foreground">{primaryTool.description}</p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Button asChild>
@@ -210,7 +223,7 @@ export default function WorkflowPage() {
             )}
 
             <article className="rounded-3xl border border-border/70 bg-white p-8 prose prose-slate max-w-none">
-              <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content) }} />
+              <div dangerouslySetInnerHTML={{ __html: mounted ? sanitizeHtml(page.content) : page.content }} />
             </article>
 
             {page.faq_items?.length > 0 && (

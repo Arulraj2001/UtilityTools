@@ -1,7 +1,7 @@
 'use client';
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect, useSyncExternalStore } from 'react'
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { 
@@ -21,10 +21,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
+import { getIcon } from '@/lib/iconMap'
 import AdBanner from '@/components/shared/AdBanner'
 import FAQAccordion from '@/components/shared/FAQAccordion'
 import { getBlogPostBySlug, getBlogPosts, getBlogCategories, getTools, getCategories } from '@/api/supabaseApi'
-import BlogSEO from '@/components/seo/BlogSEO'
 import { getStaticBlogPostBySlug, mergeBlogCategories, mergeBlogPosts } from '@/lib/staticBlogPosts'
 import { sanitizeHtml } from '@/lib/sanitizeHtml'
 import { getAuthorForPost } from '@/lib/authors'
@@ -58,14 +58,75 @@ const getCategoryIcon = (slug) => {
   }
 }
 
-export default function BlogPostPage() {
-  const { slug } = useParams()
-  const router = useRouter()
-  const [liked, setLiked] = useState(false)
-  const [likeCount, setLikeCount] = useState(0)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+const formatPostDate = (value, pattern = 'MMMM d, yyyy') => {
+  if (!value) return ''
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? '' : format(date, pattern)
+}
+
+const getAuthorHref = (url) => {
+  if (!url) return null
+  if (url.startsWith('/')) return url
+
+  try {
+    return new URL(url).pathname
+  } catch {
+    return null
+  }
+}
+
+const LIKED_POSTS_EVENT = 'quickutils-liked-posts'
+
+const getLikedPostsSnapshot = () => {
+  if (typeof window === 'undefined') return '{}'
+  return window.localStorage.getItem('liked_posts') || '{}'
+}
+
+const subscribeLikedPosts = (callback) => {
+  if (typeof window === 'undefined') return () => {}
+  window.addEventListener('storage', callback)
+  window.addEventListener(LIKED_POSTS_EVENT, callback)
+  return () => {
+    window.removeEventListener('storage', callback)
+    window.removeEventListener(LIKED_POSTS_EVENT, callback)
+  }
+}
+
+const parseLikedPosts = (snapshot) => {
+  try {
+    return JSON.parse(snapshot || '{}')
+  } catch {
+    return {}
+  }
+}
+
+const notifyLikedPostsChanged = () => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(LIKED_POSTS_EVENT))
+  }
+}
+
+export default function BlogPostPage({
+  slug,
+  initialPost = null,
+  initialPosts = [],
+  initialCategories = [],
+  initialTools = [],
+  initialToolCategories = [],
+}) {
+  const likedPostsSnapshot = useSyncExternalStore(
+    subscribeLikedPosts,
+    getLikedPostsSnapshot,
+    () => '{}'
+  )
+  const likedPosts = useMemo(() => parseLikedPosts(likedPostsSnapshot), [likedPostsSnapshot])
+  const [likeDelta, setLikeDelta] = useState(0)
   const [email, setEmail] = useState('')
-  const staticPost = useMemo(() => getStaticBlogPostBySlug(slug), [slug])
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  const staticPost = useMemo(() => initialPost || getStaticBlogPostBySlug(slug), [initialPost, slug])
 
   const {
     data: remotePost,
@@ -75,6 +136,7 @@ export default function BlogPostPage() {
     queryKey: ['blog-post', slug],
     queryFn: () => getBlogPostBySlug(slug),
     enabled: !!slug && !staticPost,
+    initialData: initialPost || undefined,
     retry: false,
   })
 
@@ -85,23 +147,27 @@ export default function BlogPostPage() {
   const { data: remotePosts = [], isLoading: isLoadingPosts } = useQuery({
     queryKey: ['blog-published'],
     queryFn: () => getBlogPosts({ published: true, orderBy: 'created_at', ascending: false, limit: 100 }),
+    initialData: initialPosts,
     retry: false,
   })
 
-  const { data: tools = [], isLoading: isLoadingTools } = useQuery({
+  const { data: tools = [] } = useQuery({
     queryKey: ['tools-published'],
     queryFn: () => getTools({ published: true, orderBy: 'sort_order', ascending: true, limit: 200 }),
+    initialData: initialTools,
   })
 
   const { data: remoteCategories = [] } = useQuery({
     queryKey: ['blog-categories'],
     queryFn: () => getBlogCategories({ orderBy: 'sort_order', ascending: true, limit: 100 }),
+    initialData: initialCategories,
     retry: false,
   })
 
   const { data: toolCategories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ orderBy: 'sort_order', ascending: true, limit: 200 }),
+    initialData: initialToolCategories,
   })
 
   const posts = useMemo(() => mergeBlogPosts(remotePosts), [remotePosts])
@@ -124,15 +190,6 @@ export default function BlogPostPage() {
       setEmail('')
     }
   }
-
-  // Load like status from localStorage
-  useEffect(() => {
-    if (post?.id) {
-      const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '{}')
-      setLiked(!!likedPosts[post.id])
-      setLikeCount(post.likes_count || 0)
-    }
-  }, [post])
 
   const currentPostIndex = useMemo(() => {
     if (!post || !posts.length) return -1
@@ -185,22 +242,31 @@ export default function BlogPostPage() {
     return Array.from(tagSet).sort()
   }, [posts])
 
+  const authorName = post?.author_name || authorProfile?.name || 'QuickUtils Editorial Team'
+  const authorTitle = post?.author_title || authorProfile?.title
+  const authorBio = post?.author_bio || authorProfile?.bio
+  const authorImage = post?.author_image || authorProfile?.image
+  const authorHref = getAuthorHref(post?.author_url || authorProfile?.url)
+  const publishedDate = formatPostDate(post?.created_at)
+  const updatedDate = formatPostDate(post?.updated_at || post?.created_at)
+  const liked = post?.id ? !!likedPosts[post.id] : false
+  const likeCount = Math.max(0, (post?.likes_count || 0) + likeDelta)
+
   const handleLike = async () => {
     if (!post?.id) return
     try {
       const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '{}')
       if (liked) {
         delete likedPosts[post.id]
-        setLikeCount(prev => prev - 1)
-        setLiked(false)
+        setLikeDelta(prev => prev - 1)
         toast.success('Removed like from this post')
       } else {
         likedPosts[post.id] = true
-        setLikeCount(prev => prev + 1)
-        setLiked(true)
+        setLikeDelta(prev => prev + 1)
         toast.success('You liked this post!')
       }
       localStorage.setItem('liked_posts', JSON.stringify(likedPosts))
+      notifyLikedPostsChanged()
     } catch {
       toast.error('Failed to update like')
     }
@@ -259,7 +325,6 @@ export default function BlogPostPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-20 text-center">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p className="mt-4 text-muted-foreground">Loading article...</p>
       </div>
     )
   }
@@ -275,7 +340,6 @@ export default function BlogPostPage() {
 
   return (
     <div className="bg-background min-h-screen">
-      {post && <BlogSEO post={post} />}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 lg:py-12">
         {/* Breadcrumb */}
         <nav className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground mb-8 pb-4 border-b border-border/40">
@@ -404,9 +468,20 @@ export default function BlogPostPage() {
                     </span>
                   )
                 )}
+                {authorName && (
+                  <span className="flex items-center gap-1">
+                    By {authorHref ? (
+                      <Link href={authorHref} className="hover:text-foreground transition-colors">
+                        {authorName}
+                      </Link>
+                    ) : (
+                      authorName
+                    )}
+                  </span>
+                )}
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5" />
-                  {format(new Date(post.created_at), 'MMMM d, yyyy')}
+                  Published {publishedDate}
                 </span>
                 {post.reading_time && (
                   <span className="flex items-center gap-1">
@@ -414,10 +489,10 @@ export default function BlogPostPage() {
                     {post.reading_time} min read
                   </span>
                 )}
-                {post.last_updated_label && (
+                {updatedDate && (
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
-                    Last updated: {post.last_updated_label}
+                    Updated {post.last_updated_label || updatedDate}
                   </span>
                 )}
               </div>
@@ -464,42 +539,40 @@ export default function BlogPostPage() {
                   prose-table:border prose-table:border-border/60 prose-table:rounded-xl prose-table:overflow-hidden
                   prose-th:bg-muted prose-th:p-3 prose-th:text-foreground prose-th:font-semibold
                   prose-td:p-3 prose-td:border-border/60"
-                dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content || '') }}
+                dangerouslySetInnerHTML={{ __html: mounted ? sanitizeHtml(post.content || '') : (post.content || '') }}
               />
             </div>
 
             {/* Author Profile */}
-            {(post.author_name || post.author_title || post.author_image || post.author_bio) && (
-              <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm flex flex-col sm:flex-row gap-5 items-start sm:items-center">
-                <Avatar className="h-16 w-16 border border-border ring-4 ring-primary/5">
-                  <AvatarImage src={post.author_image} alt={post.author_name || 'Author'} />
-                  <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
-                    {(post.author_name || 'A').charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="space-y-1 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {authorProfile?.url ? (
-                      <Link href={new URL(authorProfile.url).pathname} className="text-base font-bold text-foreground hover:text-primary transition-colors">
-                        {post.author_name}
-                      </Link>
-                    ) : (
-                      <span className="text-base font-bold text-foreground">{post.author_name}</span>
-                    )}
-                    {post.author_title && (
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                        {post.author_title}
-                      </span>
-                    )}
-                  </div>
-                  {post.author_bio && (
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {post.author_bio}
-                    </p>
+            <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+              <Avatar className="h-16 w-16 border border-border ring-4 ring-primary/5">
+                <AvatarImage src={authorImage} alt={authorName || 'Author'} />
+                <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
+                  {(authorName || 'A').charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="space-y-1 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  {authorHref ? (
+                    <Link href={authorHref} className="text-base font-bold text-foreground hover:text-primary transition-colors">
+                      {authorName}
+                    </Link>
+                  ) : (
+                    <span className="text-base font-bold text-foreground">{authorName}</span>
+                  )}
+                  {authorTitle && (
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                      {authorTitle}
+                    </span>
                   )}
                 </div>
+                {authorBio && (
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {authorBio}
+                  </p>
+                )}
               </div>
-            )}
+            </div>
 
             {/* FAQ Accordion */}
             {post.faq_items?.length > 0 && (
@@ -573,7 +646,7 @@ export default function BlogPostPage() {
                 </DropdownMenu>
 
                 {/* Native Share for Mobile */}
-                {navigator.share && (
+                {typeof navigator !== 'undefined' && navigator.share && (
                   <Button variant="outline" size="sm" className="rounded-full" onClick={handleNativeShare}>
                     <Share2 className="w-4 h-4 mr-2" />
                     Share via...
@@ -685,8 +758,12 @@ export default function BlogPostPage() {
                         href={`/tool/${encodeURIComponent(t.slug)}`}
                         className="group p-4 rounded-2xl border border-border/50 bg-card hover:border-primary/40 hover:shadow-md transition-all duration-300 flex items-start gap-4"
                       >
-                        <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10 group-hover:bg-primary/10 transition-colors">
-                          <img src={t.featured_image || t.icon} alt={t.name} className="w-8 h-8 object-contain" />
+                        <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10 group-hover:bg-primary/10 transition-colors overflow-hidden">
+                          {t.featured_image ? (
+                            <img src={t.featured_image} alt={t.name} className="w-8 h-8 object-contain" />
+                          ) : (
+                            <DynamicIcon name={t.icon} className="w-5 h-5 text-primary" />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0 space-y-1">
                           <h4 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors truncate">{t.name}</h4>
@@ -735,4 +812,9 @@ export default function BlogPostPage() {
       </div>
     </div>
   )
+}
+
+const DynamicIcon = ({ name, ...props }) => {
+  const Icon = getIcon(name)
+  return <Icon {...props} />
 }

@@ -1,10 +1,11 @@
 'use client';
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
+import { getIcon } from '@/lib/iconMap'
 import { getCategories, getTools, getBlogPosts, getWorkflowPages, getJobs } from '@/api/supabaseApi'
 import ToolCard from '@/components/shared/ToolCard'
 import CategorySEO from '@/components/seo/CategorySEO'
@@ -67,6 +68,10 @@ function CategoryGuideSection({ category, categoryHub, tools }) {
 
 export default function CategoryPage() {
   const { slug } = useParams()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -213,11 +218,11 @@ export default function CategoryPage() {
               {featuredTools.map(t => (
                   <Link key={t.id} href={`/tool/${encodeURIComponent(t.slug)}`} className="group block rounded-xl border border-border bg-card p-4 hover:shadow-md transition-all premium-card panel-highlight glow-border">
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0 overflow-hidden">
                       {t.featured_image ? (
                         <img src={t.featured_image} alt={t.name} loading="lazy" className="w-10 h-10 object-contain" />
                       ) : (
-                        <div className="text-xl">{t.icon || '🔧'}</div>
+                        <DynamicIcon name={t.icon || 'Wrench'} className="w-5 h-5 text-muted-foreground" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -237,7 +242,7 @@ export default function CategoryPage() {
         {/* SEO Content */}
         <section className="mb-8">
           {category.seo_content ? (
-            <div className="prose max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(category.seo_content) }} />
+             <div className="prose max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: mounted ? sanitizeHtml(category.seo_content) : category.seo_content }} />
           ) : (
             <div className="prose max-w-none dark:prose-invert">
               <h2>How to use {category.name}</h2>
@@ -372,4 +377,9 @@ export default function CategoryPage() {
       </motion.div>
     </div>
   )
+}
+
+const DynamicIcon = ({ name, ...props }) => {
+  const Icon = getIcon(name)
+  return <Icon {...props} />
 }

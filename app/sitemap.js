@@ -2,6 +2,7 @@ import { supabase } from '@/api/supabaseClient';
 import { STATIC_BLOG_POSTS } from '@/lib/staticBlogPosts';
 import { PREBUILT_TOOLS } from '@/lib/toolsData';
 import { isToolIndexable } from '@/lib/toolSeoCompleteness';
+import { isSitemapBlogPost } from '@/lib/blogPostSeo';
 
 const POLICY_LASTMOD = '2026-06-01T00:00:00Z';
 const RETIRED_TOOL_SLUGS = new Set(['pdf-to-word']);
@@ -45,7 +46,7 @@ export default async function sitemap() {
     const [toolsData, categoriesData, postsData, workflowsData, jobsData] = await Promise.all([
       fetchTable('tools', 'slug, updated_at, is_featured, status, seo_content, seo_title, seo_description, description, faq', (q) => q.eq('status', 'published')),
       fetchTable('categories', 'slug, updated_at'),
-      fetchTable('blog_posts', 'slug, updated_at, status', (q) => q.eq('status', 'published')),
+      fetchTable('blog_posts', 'slug, title, content, updated_at, status, meta_robots', (q) => q.eq('status', 'published')),
       fetchTable('workflow_pages', 'slug, updated_at', (q) => q.eq('status', 'published')),
       fetchTable('jobs', 'slug, updated_at, status, last_date, featured', (q) => q.eq('status', 'published'))
     ]);
@@ -145,7 +146,7 @@ export default async function sitemap() {
 
   // 4. Static Blog Posts (from staticBlogPosts.js)
   for (const p of STATIC_BLOG_POSTS) {
-    if (!p?.slug) continue;
+    if (!isSitemapBlogPost({ status: 'published', ...p })) continue;
 
     sitemapEntries.push({
       url: buildUrl(`/blog/${encodeURIComponent(p.slug)}`),
@@ -157,7 +158,7 @@ export default async function sitemap() {
 
   // 5. Supabase Blog Posts
   for (const p of posts) {
-    if (!p?.slug) continue;
+    if (!isSitemapBlogPost(p)) continue;
 
     sitemapEntries.push({
       url: buildUrl(`/blog/${encodeURIComponent(p.slug)}`),

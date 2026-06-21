@@ -41,8 +41,12 @@ export default function ToolCard({ tool, index = 0, categoryName, compact = fals
 
           <div className="relative">
             <div className={`flex items-start justify-between ${compact ? 'mb-3' : 'mb-4'}`}>
-              <div className={`${iconSize} bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center group-hover:scale-105 group-hover:shadow-md transition-all duration-300 shadow-sm`}>
-                <Icon className="w-5 h-5 text-primary" />
+              <div className={`${iconSize} bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center group-hover:scale-105 group-hover:shadow-md transition-all duration-300 shadow-sm overflow-hidden`}>
+                {tool.featured_image ? (
+                  <img src={tool.featured_image} alt={tool.name} className="w-full h-full object-contain" />
+                ) : (
+                  <Icon className="w-5 h-5 text-primary" />
+                )}
               </div>
               <div className="flex items-center gap-1.5">
                 {tool.is_trending && (

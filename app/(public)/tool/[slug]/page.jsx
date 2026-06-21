@@ -395,15 +395,22 @@ export default async function ToolPage({ params }) {
           {relatedTools.length > 0 && (
             <section className="rounded-2xl border border-border/50 bg-card p-5 sm:p-6">
               <h2 className="text-xl font-semibold mb-4">Related tools</h2>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {relatedTools.map(rt => (
                   <a
                     key={rt.id}
                     href={`/tool/${encodeURIComponent(rt.slug)}`}
-                    className="block rounded-lg border border-border/50 p-3 hover:border-primary/40 hover:shadow-sm transition-all"
+                    className="flex items-start gap-3.5 rounded-xl border border-border/50 p-3.5 hover:border-primary/40 hover:shadow-md transition-all duration-300 bg-card hover:-translate-y-0.5"
                   >
-                    <p className="font-medium text-sm">{rt.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{rt.description}</p>
+                    {rt.featured_image && (
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                        <img src={rt.featured_image} alt={rt.name} className="w-full h-full object-contain" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-sm group-hover:text-primary transition-colors truncate">{rt.name}</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">{rt.description}</p>
+                    </div>
                   </a>
                 ))}
               </div>
