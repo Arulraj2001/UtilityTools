@@ -1,5 +1,5 @@
 'use client';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -54,6 +54,10 @@ export default function JobsListPage({
   const [pageSize, setPageSize] = useState(20);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [location, setLocation] = useState('');
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const queryString = initialSearchParams.queryString || '';
   const searchParams = useMemo(() => new URLSearchParams(queryString), [queryString]);
 
@@ -103,7 +107,7 @@ export default function JobsListPage({
   const results = useMemo(() => {
     const filters = {
       featured: searchParams.has('featured'),
-      recent: searchParams.has('recent'),
+      recent: mounted && searchParams.has('recent'),
       freshers: searchParams.has('freshers'),
       remote: searchParams.has('remote'),
       government: searchParams.has('government'),
@@ -209,7 +213,7 @@ export default function JobsListPage({
 
       return true;
     });
-  }, [jobs, searchParams, location]);
+  }, [jobs, searchParams, location, mounted]);
 
   const internshipCount = useMemo(
     () =>

@@ -1,4 +1,5 @@
-import React from 'react'
+'use client';
+import React, { useState, useEffect } from 'react'
 import {
   ArrowUpRight,
   FileText,
@@ -9,9 +10,14 @@ import {
 import { formatDate, isExpired } from '@/lib/jobs/jobHelpers'
 
 export default function JobApplyCard({ job }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   if (!job) return null
   const applyUrl = job.apply_link || job.official_website
-  const closed = isExpired(job)
+  const closed = mounted ? isExpired(job) : false
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-5">

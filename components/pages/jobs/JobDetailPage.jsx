@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -58,7 +58,7 @@ const formatDateValue = (value) => {
   if (!value) return ''
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return String(value)
-  return date.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
+  return date.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })
 }
 
 const normalizeStructuredEntries = (value) => {
@@ -100,6 +100,11 @@ function StructuredDetails({ title, value }) {
 export default function JobDetailPage({ slug: initialSlug, initialJob = null }) {
   const slug = initialSlug || initialJob?.slug
 
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const { value: jobsEnabled = true } = useSiteBooleanSetting('jobs_enabled', true)
 
   const {
@@ -118,8 +123,11 @@ export default function JobDetailPage({ slug: initialSlug, initialJob = null }) 
 
   // Application status
   const appStatus = useMemo(
-    () => getApplicationStatus(job?.last_date),
-    [job?.last_date]
+    () => {
+      if (!mounted) return { open: true, label: 'Applications Open', days: null }
+      return getApplicationStatus(job?.last_date)
+    },
+    [job?.last_date, mounted]
   )
 
   const publishedDate = formatDateValue(job?.published_at || job?.created_at)

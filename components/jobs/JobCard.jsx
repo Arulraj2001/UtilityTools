@@ -1,3 +1,5 @@
+'use client';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ArrowUpRight,
@@ -13,6 +15,11 @@ import { formatDate, isExpired } from '@/lib/jobs/jobHelpers'
 
 /** @param {{ job: Record<string, any> }} props */
 export default function JobCard({ job }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   if (!job) return null
 
   const slug = job.slug || ''
@@ -21,7 +28,7 @@ export default function JobCard({ job }) {
     ? `/jobs/${encodeURIComponent(slug)}`
     : '/jobs'
 
-  const expired = isExpired(job)
+  const expired = mounted ? isExpired(job) : false
 
   return (
     <article className="group relative overflow-hidden rounded-3xl border border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-primary/30 focus-within:ring-offset-2">
