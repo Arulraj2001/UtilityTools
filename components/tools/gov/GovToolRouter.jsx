@@ -1,6 +1,7 @@
 import React from 'react';
 import SscPhotoResizer from './SscPhotoResizer';
 import SscSignatureResizer from './SscSignatureResizer';
+import BankSignatureResizer from './BankSignatureResizer';
 import RailwayPhotoResizer from './RailwayPhotoResizer';
 import BankExamPhotoTool from './BankExamPhotoTool';
 import PassportSizePhotoMaker from './PassportSizePhotoMaker';
@@ -18,6 +19,7 @@ import DocumentScanner from './DocumentScanner';
 const GOV_TOOL_MAP = {
   'ssc-photo-resizer': SscPhotoResizer,
   'ssc-signature-resizer': SscSignatureResizer,
+  'bank-signature-resizer': BankSignatureResizer,
   'railway-photo-resizer': RailwayPhotoResizer,
   'bank-exam-photo-tool': BankExamPhotoTool,
   'passport-size-photo-maker': PassportSizePhotoMaker,

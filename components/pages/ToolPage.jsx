@@ -56,6 +56,7 @@ const PDF_TOOLS = ['merge-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-jpg', 'jpg-
 const GOV_TOOLS = [
   'ssc-photo-resizer',
   'ssc-signature-resizer',
+  'bank-signature-resizer',
   'railway-photo-resizer',
   'bank-exam-photo-tool',
   'passport-size-photo-maker',
@@ -171,7 +172,6 @@ export default function ToolPage() {
       c.slug === tool?.category_slug
     ))
   ), [categories, tool])
-
   const relatedTools = useMemo(() => {
     return rankTools(tool, tools, 4)
   }, [tools, tool])

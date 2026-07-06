@@ -21,6 +21,11 @@ export const EXAM_PRESETS = {
     { id: 'tnpsc-sig', label: 'TNPSC Signature', width: 140, height: 60, maxKB: 20, minKB: 5, format: 'jpg', note: '140×60 px, 5-20 KB' },
     { id: 'custom', label: 'Custom', width: null, height: null, maxKB: null, minKB: null, format: 'jpg', note: 'Set your own dimensions' },
   ],
+  bankSignature: [
+    { id: 'bank-default', label: 'Bank Signature', width: 140, height: 60, maxKB: 20, minKB: 8, format: 'jpg', note: '140×60 px, up to 20 KB' },
+    { id: 'bank-clear', label: 'Clear Scan', width: 140, height: 60, maxKB: 15, minKB: 6, format: 'jpg', note: '140×60 px, up to 15 KB' },
+    { id: 'custom', label: 'Custom', width: null, height: null, maxKB: null, minKB: null, format: 'jpg', note: 'Set your own dimensions' },
+  ],
 };
 
 export function formatFileSize(bytes) {
