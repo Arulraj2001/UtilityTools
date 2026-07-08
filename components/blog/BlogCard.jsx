@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import Link from 'next/link';
 import { motion } from 'framer-motion'
 import { Clock, Calendar, ArrowRight, Star, ZoomIn, Tag } from 'lucide-react'
@@ -11,6 +11,22 @@ const formatDate = (value, pattern = 'MMM d, yyyy') => {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return null
   return format(date, pattern)
+}
+
+const FALLBACK_BLOG_IMAGE = '/blog_illustration.png'
+
+function BlogImage({ src, alt, className, ...props }) {
+  const [imageSrc, setImageSrc] = useState(src || FALLBACK_BLOG_IMAGE)
+
+  useEffect(() => {
+    setImageSrc(src || FALLBACK_BLOG_IMAGE)
+  }, [src])
+
+  const handleError = () => {
+    setImageSrc((current) => (current === FALLBACK_BLOG_IMAGE ? current : FALLBACK_BLOG_IMAGE))
+  }
+
+  return <img src={imageSrc} alt={alt} onError={handleError} className={className} {...props} />
 }
 
 function BlogCard({ post, index = 0, compact = false }) {
@@ -51,7 +67,7 @@ function BlogCard({ post, index = 0, compact = false }) {
               {/* Featured Image */}
               {imageUrl ? (
                 <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-border/40 shrink-0 flex items-center justify-center">
-                  <img
+                  <BlogImage
                     src={imageUrl}
                     alt={post.title || 'Blog featured image'}
                     loading="lazy"
@@ -95,7 +111,7 @@ function BlogCard({ post, index = 0, compact = false }) {
               <div className="relative w-full md:w-56 h-40 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-border/40 shrink-0 flex items-center justify-center">
                 {imageUrl ? (
                   <>
-                    <img
+                    <BlogImage
                       src={imageUrl}
                       alt={post.title || 'Blog featured image'}
                       loading="lazy"
@@ -199,7 +215,7 @@ function BlogCard({ post, index = 0, compact = false }) {
             Opens a larger preview of the blog post image in a modal overlay.
           </DialogDescription>
           <div className="relative rounded-[32px] overflow-hidden bg-background shadow-2xl ring-1 ring-border/20">
-            <img
+            <BlogImage
               src={imageUrl}
               alt={post.title || 'Blog featured image'}
               className="w-full h-auto max-h-[85vh] object-contain"

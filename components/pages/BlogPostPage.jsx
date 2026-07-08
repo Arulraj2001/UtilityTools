@@ -1,5 +1,5 @@
 'use client';
-import React, { useMemo, useState, useSyncExternalStore } from 'react'
+import React, { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query'
@@ -62,6 +62,22 @@ const formatPostDate = (value, pattern = 'MMMM d, yyyy') => {
   if (!value) return ''
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? '' : format(date, pattern)
+}
+
+const FALLBACK_BLOG_IMAGE = '/blog_illustration.png'
+
+function BlogImage({ src, alt, className, ...props }) {
+  const [imageSrc, setImageSrc] = useState(src || FALLBACK_BLOG_IMAGE)
+
+  useEffect(() => {
+    setImageSrc(src || FALLBACK_BLOG_IMAGE)
+  }, [src])
+
+  const handleError = () => {
+    setImageSrc((current) => (current === FALLBACK_BLOG_IMAGE ? current : FALLBACK_BLOG_IMAGE))
+  }
+
+  return <img src={imageSrc} alt={alt} onError={handleError} className={className} {...props} />
 }
 
 const getAuthorHref = (url) => {
@@ -509,7 +525,7 @@ export default function BlogPostPage({
             {/* Featured Image */}
             {featuredImage && (
               <div className="rounded-2xl overflow-hidden border border-border/50 bg-card shadow-sm">
-                <img
+                <BlogImage
                   src={featuredImage}
                   alt={post.title}
                   className="w-full object-cover max-h-[480px]"
